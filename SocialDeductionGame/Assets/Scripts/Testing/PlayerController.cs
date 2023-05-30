@@ -2,10 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using TMPro;
 
 public class PlayerController : NetworkBehaviour
 {
     private CardDatabase cardDB;
+    private Transform cardSlot;
+    private TextMeshProUGUI cardPlay;
+    [SerializeField] private GameObject cardText;
 
     [SerializeField] private List<CardData> playerDeck = new List<CardData>();
 
@@ -17,6 +21,8 @@ public class PlayerController : NetworkBehaviour
     private void Start()
     {
         cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
+        cardSlot = GameObject.FindGameObjectWithTag("cardSlot").transform;
+        cardPlay = GameObject.FindGameObjectWithTag("cardPlays").GetComponent<TextMeshProUGUI>();
     }
 
     private void Update()
@@ -37,8 +43,20 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.P))
-            Debug.Log($"{NetworkManager.Singleton.LocalClientId} played a card");
+        if (Input.GetKeyDown(KeyCode.P) && playerDeck.Count > 0)
+        {
+            if (IsHost) // Host has no need to call server RPC as it is the server
+            {
+                Debug.Log("Host call play card");
+                PlayCardServerRPC(playerDeck[0].CardID);
+                //RemoveCardFromPlayerDeck(playerDeck[0].CardID);
+            }
+            else // If not the host, request server for a card
+            {
+                Debug.Log("Client call play card");
+                PlayCardServerRPC(playerDeck[0].CardID);
+            }
+        }
     }
 
     // ================ CARD DRAW ================
@@ -58,6 +76,8 @@ public class PlayerController : NetworkBehaviour
         };
 
         GiveCardClientRpc(cardDB.DrawCard(), clientRpcParams);
+        
+        // For the server to own all the decks, Call this instead. But then will need a new client RPC to update it with what it has
         //AddCardToPlayerDeck(cardDB.DrawCard());
     }
 
@@ -72,14 +92,65 @@ public class PlayerController : NetworkBehaviour
     private void AddCardToPlayerDeck(int cardID)
     {
         Debug.Log($"Adding a card with ID {cardID} to client {NetworkManager.Singleton.LocalClientId}");
+        var newCard = cardDB.GetCard(cardID);
+        playerDeck.Add(newCard);
 
-        playerDeck.Add(cardDB.GetCard(cardID));
+        var cardTxt = Instantiate(cardText, cardSlot);
+        cardTxt.GetComponent<TextMeshProUGUI>().text = newCard.CardName;
+    }
+    #endregion
 
-        Debug.Log("Deck now contains:");
+
+    // ================ CARD Play ================
+    #region Card Play
+    [ServerRpc]
+    private void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
+    {
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        Debug.Log($"{clientId} played a card with id {cardID}");
+
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        RemoveCardClientRpc(cardID, clientRpcParams);
+
+        AnnounceCardPlayClientRpc(cardID, clientId);
+    }
+
+    [ClientRpc]
+    private void RemoveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
+    {
+        Debug.Log($"{NetworkManager.Singleton.LocalClientId} removing card with ID {cardID}");
+
+        RemoveCardFromPlayerDeck(cardID);
+    }
+
+    private void RemoveCardFromPlayerDeck(int cardID)
+    {
+        Debug.Log($"Removing card with ID {cardID} from client {NetworkManager.Singleton.LocalClientId}");
+
         foreach (CardData card in playerDeck)
         {
-            Debug.Log(card.CardName);
+            if (card.CardID == cardID)
+            {
+                playerDeck.Remove(card);
+                break;
+            }
         }
+
+        Destroy(cardSlot.GetChild(0).gameObject);
     }
+
+    [ClientRpc]
+    private void AnnounceCardPlayClientRpc(int cardID, ulong clientID, ClientRpcParams clientRpcParams = default)
+    {
+        cardPlay.text = $"Player {clientID} Played card: {cardDB.GetCard(cardID).CardName}";
+    }
+
     #endregion
 }
