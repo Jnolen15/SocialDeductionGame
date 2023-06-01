@@ -6,9 +6,9 @@ using TMPro;
 
 public class GameManager : NetworkBehaviour
 {
-    private NetworkVariable<int> _numPlayers = new(writePerm: NetworkVariableWritePermission.Server);
+    private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
 
-    [SerializeField] private TextMeshProUGUI playersConnected;
+    [SerializeField] private TextMeshProUGUI _playersConnected;
 
     public override void OnNetworkSpawn()
     {
@@ -22,18 +22,18 @@ public class GameManager : NetworkBehaviour
 
     private void Awake()
     {
-        _numPlayers.OnValueChanged += UpdatePlayerList;
+        _netNumPlayers.OnValueChanged += UpdatePlayerList;
     }
 
     private void UpdatePlayerList(int prev, int next)
     {
-        playersConnected.text = "Connected Players: " + next;
+        _playersConnected.text = "Connected Players: " + next;
     }
 
     private void ClientConnected(ulong clientID)
     {
         Debug.Log($"SERVER: Client {clientID} connected");
-        _numPlayers.Value++;
+        _netNumPlayers.Value++;
 
         //playersConnected.text = "Connected Players: " + _numPlayers.Value;
     }
@@ -41,7 +41,7 @@ public class GameManager : NetworkBehaviour
     private void ClientDisconnected(ulong clientID)
     {
         Debug.Log($"SERVER: Client {clientID} disconnected");
-        _numPlayers.Value--;
+        _netNumPlayers.Value--;
 
         //playersConnected.text = "Connected Players: " + _numPlayers.Value;
     }

@@ -1417,7 +1417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2f3d9555b5d68842a4faea9cce72773, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playersConnected: {fileID: 1895162210}
+  _playersConnected: {fileID: 1895162210}
 --- !u!1 &1438996119
 GameObject:
   m_ObjectHideFlags: 0
@@ -1462,10 +1462,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1911c92003a83d34abc599b9f39fe78f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  globalCardList:
-  - {fileID: 11400000, guid: cbddfc50a8f44e24a85c4d119207a481, type: 2}
-  - {fileID: 11400000, guid: 93db70c9e4261ef40850dd17b1791186, type: 2}
+  _globalCardList:
   - {fileID: 11400000, guid: efd14f5fcd5bcba48b2677a96a9b6c7b, type: 2}
+  - {fileID: 11400000, guid: 93db70c9e4261ef40850dd17b1791186, type: 2}
+  - {fileID: 11400000, guid: cbddfc50a8f44e24a85c4d119207a481, type: 2}
 --- !u!1 &1470070634
 GameObject:
   m_ObjectHideFlags: 0

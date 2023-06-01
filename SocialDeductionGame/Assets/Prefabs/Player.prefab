@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 4243072215522289232}
   - component: {fileID: 4956720329936504368}
   - component: {fileID: 5564791811519579911}
-  - component: {fileID: 268831843319999939}
+  - component: {fileID: 8931273003781174580}
+  - component: {fileID: 1915992937275457368}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -104,7 +105,7 @@ MonoBehaviour:
   SceneMigrationSynchronization: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &268831843319999939
+--- !u!114 &8931273003781174580
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -113,8 +114,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 5564791811519579912}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3215e9c17a1e736478a63765dcc47950, type: 3}
+  m_Script: {fileID: 11500000, guid: f071c4203d6e9364d8dce7ec262b645f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardText: {fileID: 4909923657231202657, guid: 61f6d79d7d050b146bfdfc164079ed5b, type: 3}
-  playerDeck: []
+--- !u!114 &1915992937275457368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5564791811519579912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d84554be27e1354e876e8d3c67e9caf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cardText: {fileID: 4909923657231202657, guid: 61f6d79d7d050b146bfdfc164079ed5b, type: 3}
+  _playerDeck: []

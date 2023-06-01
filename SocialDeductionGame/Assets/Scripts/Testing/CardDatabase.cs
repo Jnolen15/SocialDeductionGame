@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class CardDatabase : MonoBehaviour
 {
-    [SerializeField] private List<CardData> globalCardList = new List<CardData>();
+    [SerializeField] private List<CardData> _globalCardList = new List<CardData>();
 
     public CardData GetCard(int cardID)
     {
-        foreach(CardData card in globalCardList)
+        foreach(CardData card in _globalCardList)
         {
             if (card.CardID == cardID)
                 return card;
@@ -20,6 +20,6 @@ public class CardDatabase : MonoBehaviour
 
     public int DrawCard()
     {
-        return globalCardList[Random.Range(0, globalCardList.Count)].CardID;
+        return _globalCardList[Random.Range(0, _globalCardList.Count)].CardID;
     }
 }
