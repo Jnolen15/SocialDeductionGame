@@ -6,18 +6,26 @@ using TMPro;
 
 public class HandManager : NetworkBehaviour
 {
+    // Refrences
     private ServerSidePlayerData _pData;
     private CardDatabase _cardDB;
+    [SerializeField] private GameObject _playerCanvas;
+    [SerializeField] private Transform _cardSlot;
 
-    private Transform _cardSlot;
-
+    // Data
     [SerializeField] private List<Card> _playerDeck = new();
 
     private void Start()
     {
         _pData = gameObject.GetComponent<ServerSidePlayerData>();
         _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
-        _cardSlot = GameObject.FindGameObjectWithTag("cardSlot").transform;
+
+        if (!IsOwner)
+        {
+            Destroy(_playerCanvas);
+            _playerCanvas = null;
+            _cardSlot = null;
+        }
     }
 
     private void Update()

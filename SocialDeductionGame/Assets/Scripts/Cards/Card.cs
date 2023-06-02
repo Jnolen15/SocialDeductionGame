@@ -34,6 +34,11 @@ public abstract class Card : MonoBehaviour
         return _cardName;
     }
 
+    public CardType GetCardType()
+    {
+        return _cardType;
+    }
+
 
     // ========== Card Functionality ==========
     public void Setup()
@@ -44,5 +49,5 @@ public abstract class Card : MonoBehaviour
 
 
     // ========== OVERRIDE CLASSES ==========
-    public abstract void OnPlay();
+    public abstract void OnPlay(GameObject playLocation);
 }

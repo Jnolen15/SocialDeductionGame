@@ -6,14 +6,19 @@ using TMPro;
 
 public class ServerSidePlayerData : NetworkBehaviour
 {
+    // Refrences
     private HandManager _handManager;
+    private PlayerController _playerController;
     private CardDatabase _cardDB;
     private TextMeshProUGUI _cardPlay;
+
+    // Data
     [SerializeField] private List<int> _playerDeckIDs = new();
 
     private void Start()
     {
         _handManager = gameObject.GetComponent<HandManager>();
+        _playerController = gameObject.GetComponent<PlayerController>();
         _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
         _cardPlay = GameObject.FindGameObjectWithTag("cardPlays").GetComponent<TextMeshProUGUI>();
     }
@@ -101,11 +106,12 @@ public class ServerSidePlayerData : NetworkBehaviour
     }
     #endregion
 
-
     // ================ CARD Play ================
     #region Card Play
+    
+    // Test if card is in deck and can be played
     [ServerRpc]
-    private void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
+    public void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
     {
         // Get client data
         var clientId = serverRpcParams.Receive.SenderClientId;
@@ -117,16 +123,17 @@ public class ServerSidePlayerData : NetworkBehaviour
             }
         };
 
+        // Test if networked deck contains the card that is being played
         if (_playerDeckIDs.Contains(cardID))
         {
             // Remove from player's networked deck
             _playerDeckIDs.Remove(cardID);
 
-            // Update player hand
+            // Update player client hand
             RemoveCardClientRpc(cardID, clientRpcParams);
 
-            // Display card play to all players
-            AnnounceCardPlayClientRpc(cardID, clientId);
+            // Play card
+            _playerController.ExecutePlayedCardClientRpc(cardID, clientRpcParams);
         }
         else
             Debug.LogError($"{cardID} not found in player's networked deck!");

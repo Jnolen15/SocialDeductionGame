@@ -13,11 +13,18 @@ public class ResourceCard : Card
     [Header("Resource Details")]
     [SerializeField] private ResourceType _resourceType;
 
-
-    public override void OnPlay()
+    public override void OnPlay(GameObject playLocation)
     {
-        Debug.Log("Playng resource card: " + _resourceType);
+        ResourcePile resourcePile = playLocation.GetComponent<ResourcePile>();
 
-        throw new System.NotImplementedException();
+        if (resourcePile != null)
+        {
+            Debug.Log("Playng resource card: " + _resourceType);
+            resourcePile.AddResources(_resourceType);
+        }
+        else
+        {
+            Debug.LogError("Card was played on a location it can't do anything with");
+        }
     }
 }
