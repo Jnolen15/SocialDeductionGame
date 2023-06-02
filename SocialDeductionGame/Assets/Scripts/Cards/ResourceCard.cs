@@ -26,5 +26,7 @@ public class ResourceCard : Card
         {
             Debug.LogError("Card was played on a location it can't do anything with");
         }
+
+        Destroy(gameObject);
     }
 }

@@ -2,11 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using TMPro;
 
 public class Campfire : NetworkBehaviour, ICardPlayable
 {
     [SerializeField] private Card.CardType _cardTypeAccepted;
 
+    [SerializeField] private TextMeshPro _servingsText;
+
+    [SerializeField] private NetworkVariable<float> _netServingsStored = new(writePerm: NetworkVariableWritePermission.Server);
+
+    private void Awake()
+    {
+        _netServingsStored.OnValueChanged += UpdateServingsText;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        _servingsText.text = "Servings: " + _netServingsStored.Value;
+    }
+
+    // ================== Text ==================
+    private void UpdateServingsText(float prev, float next)
+    {
+        _servingsText.text = "Servings: " + next;
+    }
+
+    // ================== Interface ==================
     public bool CanPlayCardHere(Card cardToPlay)
     {
         if (cardToPlay.GetCardType() == _cardTypeAccepted)
@@ -15,14 +37,15 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         return false;
     }
 
-    public void PlayCardHere(Card cardToPlay)
+    // ================== Functions ==================
+    public void AddFood(float servings)
     {
-        PlayCardServerRPC(cardToPlay.GetCardID());
+        AddFoodServerRpc(servings);
     }
 
-    [ServerRpc]
-    private void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
+    [ServerRpc(RequireOwnership = false)]
+    public void AddFoodServerRpc(float servings)
     {
-
+        _netServingsStored.Value += servings;
     }
 }
