@@ -143,7 +143,7 @@ public class ServerSidePlayerData : NetworkBehaviour
     [ClientRpc]
     private void AnnounceCardPlayClientRpc(int cardID, ulong clientID, ClientRpcParams clientRpcParams = default)
     {
-        _cardPlay.text = $"Player {clientID} Played card: {_cardDB.GetCard(cardID).CardName}";
+        _cardPlay.text = $"Player {clientID} Played card: {_cardDB.GetCard(cardID).GetComponent<Card>().GetCardName()}";
     }
 
     #endregion

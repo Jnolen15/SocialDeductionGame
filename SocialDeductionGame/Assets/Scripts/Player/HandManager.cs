@@ -10,9 +10,8 @@ public class HandManager : NetworkBehaviour
     private CardDatabase _cardDB;
 
     private Transform _cardSlot;
-    [SerializeField] private GameObject _cardText;
 
-    [SerializeField] private List<CardData> _playerDeck = new List<CardData>();
+    [SerializeField] private List<Card> _playerDeck = new();
 
     private void Start()
     {
@@ -34,7 +33,7 @@ public class HandManager : NetworkBehaviour
         // TEST Play top card
         if (Input.GetKeyDown(KeyCode.P) && _playerDeck.Count > 0)
         {
-            _pData.PlayCard(_playerDeck[0].CardID);
+            _pData.PlayCard(_playerDeck[0].GetCardID());
         }
     }
 
@@ -43,28 +42,41 @@ public class HandManager : NetworkBehaviour
 
     public void AddCard(int cardID)
     {
-        Debug.Log($"Adding a card {_cardDB.GetCard(cardID).CardName} to client {NetworkManager.Singleton.LocalClientId}");
+        GameObject newCard = Instantiate(_cardDB.GetCard(cardID), _cardSlot);
+        Card newCardScript = newCard.GetComponent<Card>();
 
-        CardData newCard = _cardDB.GetCard(cardID);
+        _playerDeck.Add(newCardScript);
 
-        _playerDeck.Add(newCard);
+        newCardScript.Setup();
 
-        var cardTxt = Instantiate(_cardText, _cardSlot);
-        cardTxt.GetComponent<TextMeshProUGUI>().text = newCard.CardName;
+        Debug.Log($"Adding a card {newCardScript.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
     }
 
     public void RemoveCard(int cardID)
     {
-        Debug.Log($"Removing card {_cardDB.GetCard(cardID).CardName} from client {NetworkManager.Singleton.LocalClientId}");
+        Debug.Log($"Removing card with ID {cardID} from client {NetworkManager.Singleton.LocalClientId}");
 
-        if (_playerDeck.Contains(_cardDB.GetCard(cardID)))
+        Card cardToRemove = GetCardInDeck(cardID);
+
+        if (cardToRemove != null)
         {
-            _playerDeck.Remove(_cardDB.GetCard(cardID));
+            _playerDeck.Remove(cardToRemove);
 
-            Destroy(_cardSlot.GetChild(0).gameObject);
+            Destroy(cardToRemove.gameObject);
         }
         else
             Debug.LogError($"{cardID} not found in player's local hand!");
+    }
+
+    public Card GetCardInDeck(int cardID)
+    {
+        foreach (Card card in _playerDeck)
+        {
+            if (card.GetCardID() == cardID)
+                return card;
+        }
+
+        return null;
     }
 
     #endregion
