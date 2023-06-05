@@ -7,7 +7,7 @@ public class PlayerController : NetworkBehaviour
 {
     // Refrences
     private HandManager _handManager;
-    private ServerSidePlayerData _pData;
+    private PlayerData _pData;
     private CardDatabase _cardDB;
     [SerializeField] private LayerMask _cardPlayableLayerMask;
 
@@ -18,7 +18,7 @@ public class PlayerController : NetworkBehaviour
     void Start()
     {
         _handManager = gameObject.GetComponent<HandManager>();
-        _pData = gameObject.GetComponent<ServerSidePlayerData>();
+        _pData = gameObject.GetComponent<PlayerData>();
         _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
     }
 

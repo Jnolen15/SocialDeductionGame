@@ -25,7 +25,7 @@ public class GameManager : NetworkBehaviour
     }
     private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
     [Header("Other")]
-    [SerializeField] private ServerSidePlayerData _thisPlayer;
+    [SerializeField] private PlayerData _thisPlayer;
     private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
     private bool playerReady;
     private PlayerConnectionManager _pcMan;
@@ -60,7 +60,7 @@ public class GameManager : NetworkBehaviour
 
     // ====================== Player Functions ======================
     #region Player Functions
-    public void SetThisPlayer(ServerSidePlayerData player)
+    public void SetThisPlayer(PlayerData player)
     {
         _thisPlayer = player;
     }
@@ -70,20 +70,20 @@ public class GameManager : NetworkBehaviour
         switch (locationName)
         {
             case "Camp":
-                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Camp);
+                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Camp);
                 return;
             case "Beach":
-                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Beach);
+                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Beach);
                 return;
             case "Forest":
-                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Forest);
+                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Forest);
                 return;
             case "Plateau":
-                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Plateau);
+                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Plateau);
                 return;
             default:
                 Debug.LogError("Set Player Location set default case");
-                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Camp);
+                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Camp);
                 return;
         }
     }

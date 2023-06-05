@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 
-public class ServerSidePlayerData : NetworkBehaviour
+public class PlayerData : NetworkBehaviour
 {
     // Refrences
     private HandManager _handManager;
