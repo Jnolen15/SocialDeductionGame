@@ -10,7 +10,18 @@ public class ServerSidePlayerData : NetworkBehaviour
     private HandManager _handManager;
     private PlayerController _playerController;
     private CardDatabase _cardDB;
-    private TextMeshProUGUI _cardPlay;
+    private GameManager _gameManager;
+    [SerializeField] private TextMeshProUGUI _locationText;
+
+    // Location
+    public enum Location
+    {
+        Camp,
+        Beach,
+        Forest,
+        Plateau
+    }
+    [SerializeField] private NetworkVariable<Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
 
     // Data
     [SerializeField] private List<int> _playerDeckIDs = new();
@@ -20,7 +31,10 @@ public class ServerSidePlayerData : NetworkBehaviour
         _handManager = gameObject.GetComponent<HandManager>();
         _playerController = gameObject.GetComponent<PlayerController>();
         _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
-        _cardPlay = GameObject.FindGameObjectWithTag("cardPlays").GetComponent<TextMeshProUGUI>();
+        _gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+
+        if (IsOwner)
+            _gameManager.SetThisPlayer(this);
     }
 
     // ================ Player Deck ================
@@ -72,7 +86,7 @@ public class ServerSidePlayerData : NetworkBehaviour
 
     #endregion
 
-    // ================ CARD DRAW ================
+    // ================ Card DRAW ================
     #region Card Draw
     [ServerRpc]
     private void DrawCardServerRPC(ServerRpcParams serverRpcParams = default)
@@ -106,9 +120,9 @@ public class ServerSidePlayerData : NetworkBehaviour
     }
     #endregion
 
-    // ================ CARD Play ================
+    // ================ Card Play ================
     #region Card Play
-    
+
     // Test if card is in deck and can be played
     [ServerRpc]
     public void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
@@ -147,11 +161,31 @@ public class ServerSidePlayerData : NetworkBehaviour
         _handManager.RemoveCard(cardID);
     }
 
-    [ClientRpc]
-    private void AnnounceCardPlayClientRpc(int cardID, ulong clientID, ClientRpcParams clientRpcParams = default)
+    #endregion
+
+    // ================ Location ================
+    #region Location
+    [ServerRpc]
+    public void ChangeLocationServerRpc(Location location, ServerRpcParams serverRpcParams = default)
     {
-        _cardPlay.text = $"Player {clientID} Played card: {_cardDB.GetCard(cardID).GetComponent<Card>().GetCardName()}";
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        ChangeLocationClientRpc(location, clientRpcParams);
     }
 
+    [ClientRpc]
+    public void ChangeLocationClientRpc(Location location, ClientRpcParams clientRpcParams = default)
+    {
+        _netCurrentLocation.Value = location;
+        _locationText.text = location.ToString();
+    }
     #endregion
 }

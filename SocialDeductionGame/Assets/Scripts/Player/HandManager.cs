@@ -28,23 +28,6 @@ public class HandManager : NetworkBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (!IsOwner) return;
-
-        // TEST Draw a card
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            _pData.DrawCard();
-        }
-
-        // TEST Play top card
-        if (Input.GetKeyDown(KeyCode.P) && _playerDeck.Count > 0)
-        {
-            _pData.PlayCard(_playerDeck[0].GetCardID());
-        }
-    }
-
     // ================ Deck Management ================
     #region Deck Management
 

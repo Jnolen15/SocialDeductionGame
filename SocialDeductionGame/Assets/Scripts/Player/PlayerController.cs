@@ -22,6 +22,17 @@ public class PlayerController : NetworkBehaviour
         _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
     }
 
+    private void Update()
+    {
+        if (!IsOwner) return;
+
+        // TEST Draw a card
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            _pData.DrawCard();
+        }
+    }
+
     // ================ Deck Interaction ================
     #region Deck Interaction
     public void SetHeldCard(Card card)

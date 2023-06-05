@@ -6,27 +6,29 @@ using TMPro;
 
 public class GameManager : NetworkBehaviour
 {
+    [Header("Basics")]
     [SerializeField] private TextMeshProUGUI _gameStateText;
     [SerializeField] private GameObject _readyButton;
 
+    [Header("Pick Location")]
+    [SerializeField] private GameObject _locationChoiceMenu;
+
+    [Header("Forage")]
+    [SerializeField] private GameObject _forageMenu;
+
     public enum GameState
     {
-        Morning,
+        M_PickLocation,
+        M_Forage,
         Afternoon,
         Night
     }
     private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
-
-    [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private bool playerReady;
+    [Header("Other")]
+    [SerializeField] private ServerSidePlayerData _thisPlayer;
+    private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
+    private bool playerReady;
     private PlayerConnectionManager _pcMan;
-
-    public override void OnNetworkSpawn()
-    {
-        if (!IsServer) return;
-
-        // Something here?
-    }
 
     private void Awake()
     {
@@ -36,12 +38,10 @@ public class GameManager : NetworkBehaviour
     private void Start()
     {
         _pcMan = this.GetComponent<PlayerConnectionManager>();
-    }
 
-    public void UpdateGameState(GameState prev, GameState next)
-    {
-        if(_gameStateText != null)
-            _gameStateText.text = next.ToString();
+        UpdateGameState(GameState.M_Forage, _netCurrentGameState.Value);
+
+        _readyButton.SetActive(false);
     }
 
     private void Update()
@@ -58,7 +58,39 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    // ====================== Player Functions ======================
+    #region Player Functions
+    public void SetThisPlayer(ServerSidePlayerData player)
+    {
+        _thisPlayer = player;
+    }
+
+    public void SetPlayerLocation(string locationName)
+    {
+        switch (locationName)
+        {
+            case "Camp":
+                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Camp);
+                return;
+            case "Beach":
+                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Beach);
+                return;
+            case "Forest":
+                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Forest);
+                return;
+            case "Plateau":
+                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Plateau);
+                return;
+            default:
+                Debug.LogError("Set Player Location set default case");
+                _thisPlayer.ChangeLocationServerRpc(ServerSidePlayerData.Location.Camp);
+                return;
+        }
+    }
+    #endregion
+
     // ====================== Player Readying ======================
+    #region Player Readying
     public void ReadyPlayer()
     {
         if(!playerReady)
@@ -111,7 +143,42 @@ public class GameManager : NetworkBehaviour
     public void UnReadyPlayerClientRpc()
     {
         playerReady = false;
-        _readyButton.SetActive(true);
         Debug.Log("Unready!");
     }
+    #endregion
+
+    // ====================== State Management ======================
+    #region State Management
+    public void UpdateGameState(GameState prev, GameState next)
+    {
+        if (_gameStateText != null)
+            _gameStateText.text = next.ToString();
+
+        CloseAllStateMenus();
+
+        switch (next)
+        {
+            case GameState.M_PickLocation:
+                _locationChoiceMenu.SetActive(true);
+                break;
+            case GameState.M_Forage:
+                _forageMenu.SetActive(true);
+                _readyButton.SetActive(true);
+                break;
+            case GameState.Afternoon:
+                SetPlayerLocation("Camp");
+                _readyButton.SetActive(true);
+                break;
+            case GameState.Night:
+                _readyButton.SetActive(true);
+                break;
+        }
+    }
+
+    private void CloseAllStateMenus()
+    {
+        _locationChoiceMenu.SetActive(false);
+        _forageMenu.SetActive(false);
+    }
+    #endregion
 }
