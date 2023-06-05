@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 
-public class GameManager : NetworkBehaviour
+public class PlayerConnectionManager : NetworkBehaviour
 {
     private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
 
@@ -34,15 +34,16 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log($"SERVER: Client {clientID} connected");
         _netNumPlayers.Value++;
-
-        //playersConnected.text = "Connected Players: " + _numPlayers.Value;
     }
 
     private void ClientDisconnected(ulong clientID)
     {
         Debug.Log($"SERVER: Client {clientID} disconnected");
         _netNumPlayers.Value--;
+    }
 
-        //playersConnected.text = "Connected Players: " + _numPlayers.Value;
+    public int GetNumConnectedPlayers()
+    {
+        return _netNumPlayers.Value;
     }
 }
