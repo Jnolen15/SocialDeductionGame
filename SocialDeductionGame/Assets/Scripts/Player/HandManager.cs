@@ -38,7 +38,7 @@ public class HandManager : NetworkBehaviour
 
         _playerDeck.Add(newCardScript);
 
-        newCardScript.Setup();
+        newCardScript.SetupPlayable();
 
         Debug.Log($"Adding a card {newCardScript.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
     }

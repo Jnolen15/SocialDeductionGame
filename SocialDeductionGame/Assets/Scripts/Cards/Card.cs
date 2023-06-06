@@ -20,8 +20,9 @@ public abstract class Card : MonoBehaviour
     }
     [SerializeField] private CardType _cardType;
 
-    [Header("Card Visual Prefab")]
-    [SerializeField] private GameObject _cardPrefab;
+    [Header("Card Prefabs")]
+    [SerializeField] private GameObject _cardPlayablePrefab;
+    [SerializeField] private GameObject _cardUIPrefab;
 
     // ========== Getters ==========
     public int GetCardID()
@@ -41,12 +42,17 @@ public abstract class Card : MonoBehaviour
 
 
     // ========== Card Functionality ==========
-    public void Setup()
+    public void SetupPlayable()
     {
-        GameObject cardVisual = Instantiate(_cardPrefab, transform);
+        GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription);
     }
 
+    public void SetupUI()
+    {
+        GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription);
+    }
 
     // ========== OVERRIDE CLASSES ==========
     public abstract void OnPlay(GameObject playLocation);

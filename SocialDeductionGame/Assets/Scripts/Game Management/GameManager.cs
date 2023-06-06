@@ -14,7 +14,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private GameObject _locationChoiceMenu;
 
     [Header("Forage")]
-    [SerializeField] private GameObject _forageMenu;
+    [SerializeField] private GameObject _forage;
 
     public enum GameState
     {
@@ -24,8 +24,6 @@ public class GameManager : NetworkBehaviour
         Night
     }
     private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
-    [Header("Other")]
-    [SerializeField] private PlayerData _thisPlayer;
     private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
     private bool playerReady;
     private PlayerConnectionManager _pcMan;
@@ -33,6 +31,11 @@ public class GameManager : NetworkBehaviour
     private void Awake()
     {
         _netCurrentGameState.OnValueChanged += UpdateGameState;
+    }
+
+    private void OnDisable()
+    {
+        _netCurrentGameState.OnValueChanged -= UpdateGameState;
     }
 
     private void Start()
@@ -57,37 +60,6 @@ public class GameManager : NetworkBehaviour
                 _netCurrentGameState.Value = 0;
         }
     }
-
-    // ====================== Player Functions ======================
-    #region Player Functions
-    public void SetThisPlayer(PlayerData player)
-    {
-        _thisPlayer = player;
-    }
-
-    public void SetPlayerLocation(string locationName)
-    {
-        switch (locationName)
-        {
-            case "Camp":
-                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Camp);
-                return;
-            case "Beach":
-                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Beach);
-                return;
-            case "Forest":
-                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Forest);
-                return;
-            case "Plateau":
-                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Plateau);
-                return;
-            default:
-                Debug.LogError("Set Player Location set default case");
-                _thisPlayer.ChangeLocationServerRpc(PlayerData.Location.Camp);
-                return;
-        }
-    }
-    #endregion
 
     // ====================== Player Readying ======================
     #region Player Readying
@@ -162,11 +134,11 @@ public class GameManager : NetworkBehaviour
                 _locationChoiceMenu.SetActive(true);
                 break;
             case GameState.M_Forage:
-                _forageMenu.SetActive(true);
+                _forage.SetActive(true);
                 _readyButton.SetActive(true);
                 break;
             case GameState.Afternoon:
-                SetPlayerLocation("Camp");
+                this.GetComponent<LocationManager>().SetLocation("Camp");
                 _readyButton.SetActive(true);
                 break;
             case GameState.Night:
@@ -178,7 +150,7 @@ public class GameManager : NetworkBehaviour
     private void CloseAllStateMenus()
     {
         _locationChoiceMenu.SetActive(false);
-        _forageMenu.SetActive(false);
+        _forage.SetActive(false);
     }
     #endregion
 }

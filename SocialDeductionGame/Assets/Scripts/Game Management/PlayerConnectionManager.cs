@@ -14,8 +14,6 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        Debug.Log("SERVER: Game Manger Server Spawn");
-
         NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
     }

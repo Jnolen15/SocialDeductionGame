@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class FoodCard : Card
 {
+    [Header("Food Details")]
     [SerializeField] private float _servings;
 
     public override void OnPlay(GameObject playLocation)

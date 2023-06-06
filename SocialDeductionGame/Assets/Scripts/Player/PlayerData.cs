@@ -10,7 +10,6 @@ public class PlayerData : NetworkBehaviour
     private HandManager _handManager;
     private PlayerController _playerController;
     private CardDatabase _cardDB;
-    private GameManager _gameManager;
     [SerializeField] private TextMeshProUGUI _locationText;
 
     // Location
@@ -26,15 +25,21 @@ public class PlayerData : NetworkBehaviour
     // Data
     [SerializeField] private List<int> _playerDeckIDs = new();
 
+    private void OnEnable()
+    {
+        LocationManager.OnLocationChanged += ChangeLocation;
+    }
+
+    private void OnDisable()
+    {
+        LocationManager.OnLocationChanged -= ChangeLocation;
+    }
+
     private void Start()
     {
         _handManager = gameObject.GetComponent<HandManager>();
         _playerController = gameObject.GetComponent<PlayerController>();
         _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
-        _gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
-
-        if (IsOwner)
-            _gameManager.SetThisPlayer(this);
     }
 
     // ================ Player Deck ================
@@ -165,6 +170,29 @@ public class PlayerData : NetworkBehaviour
 
     // ================ Location ================
     #region Location
+    private void ChangeLocation(string locationName)
+    {
+        switch (locationName)
+        {
+            case "Camp":
+               ChangeLocationServerRpc(PlayerData.Location.Camp);
+                return;
+            case "Beach":
+                ChangeLocationServerRpc(PlayerData.Location.Beach);
+                return;
+            case "Forest":
+                ChangeLocationServerRpc(PlayerData.Location.Forest);
+                return;
+            case "Plateau":
+                ChangeLocationServerRpc(PlayerData.Location.Plateau);
+                return;
+            default:
+                Debug.LogError("Set Player Location set default case");
+                ChangeLocationServerRpc(PlayerData.Location.Camp);
+                return;
+        }
+    }
+    
     [ServerRpc]
     public void ChangeLocationServerRpc(Location location, ServerRpcParams serverRpcParams = default)
     {

@@ -10,11 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 2725594566549353}
   - component: {fileID: 2725594566549354}
+  - component: {fileID: 2015759759535445228}
   - component: {fileID: -5926946001561960543}
   - component: {fileID: 4616960773335701274}
-  - component: {fileID: 2015759759535445228}
   m_Layer: 0
-  m_Name: TempCardVisual
+  m_Name: PlayableCardVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -50,34 +50,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2725594566549352}
   m_CullTransparentMesh: 1
---- !u!114 &-5926946001561960543
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2725594566549352}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25d3575eb6b2ea04fbd57919b812d07f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _cardName: {fileID: 7821726985311373724}
-  _cardDescription: {fileID: 768477109178482405}
---- !u!114 &4616960773335701274
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2725594566549352}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b634ec11164fd024ca4219e58a4919bb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _card: {fileID: 0}
-  _handManager: {fileID: 0}
 --- !u!114 &2015759759535445228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,6 +80,35 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &-5926946001561960543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2725594566549352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25d3575eb6b2ea04fbd57919b812d07f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cardName: {fileID: 7821726985311373724}
+  _cardDescription: {fileID: 768477109178482405}
+--- !u!114 &4616960773335701274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2725594566549352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b634ec11164fd024ca4219e58a4919bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _card: {fileID: 0}
+  _handManager: {fileID: 0}
+  _playerController: {fileID: 0}
 --- !u!1 &4344081062776502201
 GameObject:
   m_ObjectHideFlags: 0
