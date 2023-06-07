@@ -12,14 +12,26 @@ public class CardPicker : MonoBehaviour
     // Refrences
     [Header("Refrences")]
     private CardDatabase _cardDB;
+    private CardManager _cardManager;
     [SerializeField] private Transform _cardCanvas;
     // Variables
     [Header("Variables")]
-    [SerializeField] private List<GameObject> _chosenCards = new();
+    [SerializeField] private List<Card> _chosenCards = new();
 
     private void OnEnable()
     {
         _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
+        _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
+    }
+
+    private void OnDisable()
+    {
+        // Clear lists
+        _chosenCards.Clear();
+        foreach(Transform child in _cardCanvas)
+        {
+            Destroy(child.gameObject);
+        }
     }
 
     public void DealCards()
@@ -36,7 +48,7 @@ public class CardPicker : MonoBehaviour
         }
     }
 
-    public bool SelectCard(GameObject card)
+    public bool SelectCard(Card card)
     {
         if(_chosenCards.Count < _cardsChosen)
         {
@@ -47,7 +59,7 @@ public class CardPicker : MonoBehaviour
             return false;
     }
 
-    public void DeselectCard(GameObject card)
+    public void DeselectCard(Card card)
     {
         if (_chosenCards.Contains(card))
             _chosenCards.Remove(card);
@@ -55,6 +67,13 @@ public class CardPicker : MonoBehaviour
 
     public void TakeCards()
     {
-        // Give cards to player
+        int[] cardIDs = new int[_cardsChosen];
+        for (int i = 0; i < _chosenCards.Count; i++)
+        {
+            cardIDs[i] = _chosenCards[i].GetCardID();
+        }
+
+        // Give cards to Card Manager
+        _cardManager.GiveCards(cardIDs);
     }
 }

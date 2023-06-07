@@ -21,14 +21,14 @@ public class CardSelectable : MonoBehaviour
     {
         if (!_cardSelected)
         {
-            _cardSelected = _cardPicker.SelectCard(gameObject);
+            _cardSelected = _cardPicker.SelectCard(_card);
 
             if (_cardSelected)
                 transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
         }
         else
         {
-            _cardPicker.DeselectCard(gameObject);
+            _cardPicker.DeselectCard(_card);
             _cardSelected = false;
             transform.localScale = Vector3.one;
         }

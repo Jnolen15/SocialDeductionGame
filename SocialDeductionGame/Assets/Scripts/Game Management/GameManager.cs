@@ -132,10 +132,11 @@ public class GameManager : NetworkBehaviour
         {
             case GameState.M_PickLocation:
                 _locationChoiceMenu.SetActive(true);
+                _readyButton.SetActive(false);
                 break;
             case GameState.M_Forage:
                 _forage.SetActive(true);
-                _readyButton.SetActive(true);
+                _readyButton.SetActive(false);
                 break;
             case GameState.Afternoon:
                 this.GetComponent<LocationManager>().SetLocation("Camp");

@@ -1,18 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class CardManager : MonoBehaviour
+public class CardManager : NetworkBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    // Events
+    public delegate void GainCards(int[] cardIDs);
+    public static event GainCards OnCardsGained;
 
-    // Update is called once per frame
-    void Update()
+    public void GiveCards(int[] cardIDs)
     {
-        
+        Debug.Log("Cards Given");
+        OnCardsGained(cardIDs);
     }
 }

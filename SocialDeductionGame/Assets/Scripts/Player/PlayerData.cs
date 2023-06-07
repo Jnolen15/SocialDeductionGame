@@ -28,11 +28,13 @@ public class PlayerData : NetworkBehaviour
     private void OnEnable()
     {
         LocationManager.OnLocationChanged += ChangeLocation;
+        CardManager.OnCardsGained += GainCards;
     }
 
     private void OnDisable()
     {
         LocationManager.OnLocationChanged -= ChangeLocation;
+        CardManager.OnCardsGained -= GainCards;
     }
 
     private void Start()
@@ -44,40 +46,17 @@ public class PlayerData : NetworkBehaviour
 
     // ================ Player Deck ================
     #region Player Deck Functions
+    public void GainCards(int[] cardIDs)
+    {
+        DrawCardsServerRPC(cardIDs);
+    }
 
     // TESTING: Gets a random card from DB
     public void DrawCard()
     {
-        DrawCardServerRPC();
+        int[] ranCard = { (_cardDB.DrawCard()) };
 
-        /*if (IsHost) // Host has no need to call server RPC as it is the server
-        {
-            Debug.Log("Host call draw card");
-            AddCardToPlayerDeck(_cardDB.DrawCard());
-        }
-        else // If not the host, request server for a card
-        {
-            Debug.Log("Client call draw card");
-            DrawCardServerRPC();
-        }*/
-    }
-
-    // Plays card with given ID if its in the player deck
-    public void PlayCard(int cardID)
-    {
-        PlayCardServerRPC(cardID);
-
-        /*if (IsHost) // Host has no need to call server RPC as it is the server
-        {
-            Debug.Log("Host call play card");
-            PlayCardServerRPC(playerDeck[0].CardID);
-            //RemoveCardFromPlayerDeck(playerDeck[0].CardID);
-        }
-        else // If not the host, request server for a card
-        {
-            Debug.Log("Client call play card");
-            PlayCardServerRPC(playerDeck[0].CardID);
-        }*/
+        DrawCardsServerRPC(ranCard);
     }
 
     #endregion
@@ -94,7 +73,7 @@ public class PlayerData : NetworkBehaviour
     // ================ Card DRAW ================
     #region Card Draw
     [ServerRpc]
-    private void DrawCardServerRPC(ServerRpcParams serverRpcParams = default)
+    private void DrawCardsServerRPC(int[] cardIDs, ServerRpcParams serverRpcParams = default)
     {
         // Get client data
         var clientId = serverRpcParams.Receive.SenderClientId;
@@ -106,14 +85,14 @@ public class PlayerData : NetworkBehaviour
             }
         };
 
-        // Get new random card
-        int newCardID = _cardDB.DrawCard();
+        foreach (int id in cardIDs)
+        {
+            // Add to player networked deck
+            _playerDeckIDs.Add(id);
 
-        // Add to player networked deck
-        _playerDeckIDs.Add(newCardID);
-
-        // Update player hand
-        GiveCardClientRpc(newCardID, clientRpcParams);
+            // Update player hand
+            GiveCardClientRpc(id, clientRpcParams);
+        }
     }
 
     [ClientRpc]
