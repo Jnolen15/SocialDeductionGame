@@ -15,6 +15,11 @@ public class HandManager : NetworkBehaviour
     // Data
     [SerializeField] private List<Card> _playerDeck = new();
 
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner && !IsServer) enabled = false;
+    }
+
     private void Start()
     {
         _pData = gameObject.GetComponent<PlayerData>();

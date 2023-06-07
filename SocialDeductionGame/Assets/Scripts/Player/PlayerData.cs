@@ -25,14 +25,22 @@ public class PlayerData : NetworkBehaviour
     // Data
     [SerializeField] private List<int> _playerDeckIDs = new();
 
-    private void OnEnable()
+    public override void OnNetworkSpawn()
     {
-        LocationManager.OnLocationChanged += ChangeLocation;
-        CardManager.OnCardsGained += GainCards;
+        if (!IsOwner && !IsServer)
+            enabled = false;
+
+        if (IsOwner)
+        {
+            LocationManager.OnLocationChanged += ChangeLocation;
+            CardManager.OnCardsGained += GainCards;
+        }
     }
 
     private void OnDisable()
     {
+        if (!IsOwner) return;
+
         LocationManager.OnLocationChanged -= ChangeLocation;
         CardManager.OnCardsGained -= GainCards;
     }

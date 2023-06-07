@@ -15,6 +15,11 @@ public class PlayerController : NetworkBehaviour
     //[SerializeField] private Card _heldCard;
     [SerializeField] private GameObject _cardPlayLocation;
 
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner && !IsServer) enabled = false;
+    }
+
     void Start()
     {
         _handManager = gameObject.GetComponent<HandManager>();

@@ -24,16 +24,6 @@ public class CardPicker : MonoBehaviour
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
     }
 
-    private void OnDisable()
-    {
-        // Clear lists
-        _chosenCards.Clear();
-        foreach(Transform child in _cardCanvas)
-        {
-            Destroy(child.gameObject);
-        }
-    }
-
     public void DealCards()
     {
         Debug.Log("dealing cards");
@@ -75,5 +65,12 @@ public class CardPicker : MonoBehaviour
 
         // Give cards to Card Manager
         _cardManager.GiveCards(cardIDs);
+
+        // Clear lists
+        _chosenCards.Clear();
+        foreach (Transform child in _cardCanvas)
+        {
+            Destroy(child.gameObject);
+        }
     }
 }
