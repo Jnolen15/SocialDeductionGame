@@ -8,7 +8,6 @@ public class HandManager : NetworkBehaviour
 {
     // Refrences
     private PlayerData _pData;
-    private CardDatabase _cardDB;
     [SerializeField] private GameObject _playerCanvas;
     [SerializeField] private Transform _cardSlot;
 
@@ -17,20 +16,19 @@ public class HandManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (!IsOwner && !IsServer) enabled = false;
-    }
-
-    private void Start()
-    {
-        _pData = gameObject.GetComponent<PlayerData>();
-        _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
-
         if (!IsOwner)
         {
             Destroy(_playerCanvas);
             _playerCanvas = null;
             _cardSlot = null;
         }
+
+        if (!IsOwner && !IsServer) enabled = false;
+    }
+
+    private void Start()
+    {
+        _pData = gameObject.GetComponent<PlayerData>();
     }
 
     // ================ Deck Management ================
@@ -38,7 +36,7 @@ public class HandManager : NetworkBehaviour
 
     public void AddCard(int cardID)
     {
-        GameObject newCard = Instantiate(_cardDB.GetCard(cardID), _cardSlot);
+        GameObject newCard = Instantiate(CardDatabase.GetCard(cardID), _cardSlot);
         Card newCardScript = newCard.GetComponent<Card>();
 
         _playerDeck.Add(newCardScript);

@@ -30,8 +30,6 @@ public class CardInteraction : MonoBehaviour,
     #region Card Drag
     public void OnBeginDrag(PointerEventData eventData)
     {
-        _playerController.SetHeldCard(_card);
-
         Debug.Log($"Card {_card.GetCardName()} begin drag");
     }
 

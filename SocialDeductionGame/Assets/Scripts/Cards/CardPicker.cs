@@ -11,7 +11,6 @@ public class CardPicker : MonoBehaviour
     [SerializeField] private int _cardsChosen;
     // Refrences
     [Header("Refrences")]
-    private CardDatabase _cardDB;
     private CardManager _cardManager;
     [SerializeField] private Transform _cardCanvas;
     // Variables
@@ -20,7 +19,6 @@ public class CardPicker : MonoBehaviour
 
     private void OnEnable()
     {
-        _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
     }
 
@@ -33,7 +31,7 @@ public class CardPicker : MonoBehaviour
             int cardID = _lootPoolList[Random.Range(0, _lootPoolList.Count)];
 
             // Put card on screen
-            Card newCard = Instantiate(_cardDB.GetCard(cardID), _cardCanvas).GetComponent<Card>();
+            Card newCard = Instantiate(CardDatabase.GetCard(cardID), _cardCanvas).GetComponent<Card>();
             newCard.SetupUI();
         }
     }

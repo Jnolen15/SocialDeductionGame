@@ -22,7 +22,7 @@ public class PlayerData : NetworkBehaviour
     }
     [SerializeField] private NetworkVariable<Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
 
-    // Data
+    // Deck Data
     [SerializeField] private List<int> _playerDeckIDs = new();
 
     public override void OnNetworkSpawn()
@@ -54,6 +54,7 @@ public class PlayerData : NetworkBehaviour
 
     // ================ Player Deck ================
     #region Player Deck Functions
+    // Triggered by CardManager's On Card Gained event, adds cards to players hand (server and client)
     public void GainCards(int[] cardIDs)
     {
         DrawCardsServerRPC(cardIDs);
@@ -62,7 +63,7 @@ public class PlayerData : NetworkBehaviour
     // TESTING: Gets a random card from DB
     public void DrawCard()
     {
-        int[] ranCard = { (_cardDB.DrawCard()) };
+        int[] ranCard = { (CardDatabase.DrawCard()) };
 
         DrawCardsServerRPC(ranCard);
     }
@@ -115,7 +116,7 @@ public class PlayerData : NetworkBehaviour
     // ================ Card Play ================
     #region Card Play
 
-    // Test if card is in deck and can be played
+    // Test if card is in deck, then removes it and calls player controller to play it
     [ServerRpc]
     public void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
     {
@@ -145,6 +146,7 @@ public class PlayerData : NetworkBehaviour
             Debug.LogError($"{cardID} not found in player's networked deck!");
     }
 
+    // Removes cards from the clients hand
     [ClientRpc]
     private void RemoveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
     {
@@ -157,6 +159,7 @@ public class PlayerData : NetworkBehaviour
 
     // ================ Location ================
     #region Location
+    // Triggered by Location Manager's On Location Changed event
     private void ChangeLocation(string locationName)
     {
         switch (locationName)

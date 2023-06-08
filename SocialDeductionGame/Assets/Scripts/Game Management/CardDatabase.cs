@@ -4,6 +4,19 @@ using UnityEngine;
 
 public class CardDatabase : MonoBehaviour
 {
+    // Singleton pattern
+    #region Singleton
+    public static CardDatabase Instance { get; private set; }
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+            Destroy(this);
+        else
+            Instance = this;
+    }
+    #endregion
+
+    // Variables
     [SerializeField] private List<CardEntry> _globalCardList = new List<CardEntry>();
 
     [System.Serializable]
@@ -11,14 +24,12 @@ public class CardDatabase : MonoBehaviour
     {
         public int cardID = 0;
         public GameObject cardObj = null;
-
-        //public int GetCardID() { return cardID; }
-        //public GameObject GetCardObj() { return cardObj; }
     }
 
-    public GameObject GetCard(int cardID)
+    // Functions
+    public static GameObject GetCard(int cardID)
     {
-        foreach(CardEntry card in _globalCardList)
+        foreach(CardEntry card in Instance._globalCardList)
         {
             if (card.cardID == cardID)
                 return card.cardObj;
@@ -28,8 +39,9 @@ public class CardDatabase : MonoBehaviour
         return null;
     }
 
-    public int DrawCard()
+    // FOR TESTING: Get a random card from all cards in the DB
+    public static int DrawCard()
     {
-        return _globalCardList[Random.Range(0, _globalCardList.Count)].cardID;
+        return Instance._globalCardList[Random.Range(0, Instance._globalCardList.Count)].cardID;
     }
 }

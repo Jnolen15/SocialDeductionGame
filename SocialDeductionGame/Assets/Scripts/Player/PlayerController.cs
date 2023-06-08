@@ -8,11 +8,9 @@ public class PlayerController : NetworkBehaviour
     // Refrences
     private HandManager _handManager;
     private PlayerData _pData;
-    private CardDatabase _cardDB;
     [SerializeField] private LayerMask _cardPlayableLayerMask;
 
     // Card playing
-    //[SerializeField] private Card _heldCard;
     [SerializeField] private GameObject _cardPlayLocation;
 
     public override void OnNetworkSpawn()
@@ -24,7 +22,6 @@ public class PlayerController : NetworkBehaviour
     {
         _handManager = gameObject.GetComponent<HandManager>();
         _pData = gameObject.GetComponent<PlayerData>();
-        _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
     }
 
     private void Update()
@@ -40,23 +37,14 @@ public class PlayerController : NetworkBehaviour
 
     // ================ Deck Interaction ================
     #region Deck Interaction
-    public void SetHeldCard(Card card)
-    {
-        //_heldCard = card;
-    }
-
-    public void ClearHeldCard()
-    {
-        //_heldCard = null;
-    }
-
+    // Tests if card is played onto a card playable object then calls player data server RPC to play the card
     public void TryCardPlay(Card playedCard)
     {
         // Raycast test if card is played on playable object
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 999f, _cardPlayableLayerMask))
         {
-            // Verufy object has script with correct interface
+            // Verify object has script with correct interface
             _cardPlayLocation = hit.collider.gameObject;
             ICardPlayable cardPlayable = _cardPlayLocation.GetComponent<ICardPlayable>();
             if (cardPlayable != null)
@@ -76,16 +64,14 @@ public class PlayerController : NetworkBehaviour
         }
         else
             Debug.Log("Card not played on playable object");
-
-
-        ClearHeldCard();
     }
 
+    // Instantiates the card prefab then calls its OnPlay function at the played location
     [ClientRpc]
     public void ExecutePlayedCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
     {
         // Instantiate the prefab to play it
-        Card playedCard = Instantiate(_cardDB.GetCard(cardID), transform).GetComponent<Card>();
+        Card playedCard = Instantiate(CardDatabase.GetCard(cardID), transform).GetComponent<Card>();
 
         Debug.Log($"{playedCard.GetCardName()} played on {_cardPlayLocation}");
 
