@@ -18,15 +18,15 @@ public class PlayerConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
     }
 
-    private void Awake()
-    {
-        _netNumPlayers.OnValueChanged += UpdatePlayerList;
-    }
-
-    private void OnDisable()
+    public override void OnNetworkDespawn()
     {
         NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
+    }
+
+    private void Awake()
+    {
+        _netNumPlayers.OnValueChanged += UpdatePlayerList;
     }
 
     // Functions

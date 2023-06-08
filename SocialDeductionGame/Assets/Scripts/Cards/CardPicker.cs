@@ -6,7 +6,7 @@ public class CardPicker : MonoBehaviour
 {
     // Parameters
     [Header("Parameters")]
-    [SerializeField] private List<int> _lootPoolList = new();
+    [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
     [SerializeField] private int _cardsDelt;
     [SerializeField] private int _cardsChosen;
     // Refrences
@@ -16,6 +16,11 @@ public class CardPicker : MonoBehaviour
     // Variables
     [Header("Variables")]
     [SerializeField] private List<Card> _chosenCards = new();
+
+    void OnValidate()
+    {
+        _cardDropTable.ValidateTable();
+    }
 
     private void OnEnable()
     {
@@ -28,7 +33,7 @@ public class CardPicker : MonoBehaviour
         for(int i = 0; i < _cardsDelt; i++)
         {
             // Pick card
-            int cardID = _lootPoolList[Random.Range(0, _lootPoolList.Count)];
+            int cardID = _cardDropTable.PickCardDrop();
 
             // Put card on screen
             Card newCard = Instantiate(CardDatabase.GetCard(cardID), _cardCanvas).GetComponent<Card>();

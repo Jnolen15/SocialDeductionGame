@@ -563,7 +563,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d41df6fad44ad841883a2b6e6e6e1bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lootPoolList: e9030000eb030000d1070000d2070000
+  _cardDropTable:
+    CardDrops:
+    - CardID: 1001
+      ProbabilityWeight: 60
+      ProbabilityPercent: 60
+      ProbabilityRangeFrom: 0
+      ProbabilityRangeTo: 60
+    - CardID: 1002
+      ProbabilityWeight: 25
+      ProbabilityPercent: 25
+      ProbabilityRangeFrom: 60
+      ProbabilityRangeTo: 85
+    - CardID: 1003
+      ProbabilityWeight: 15
+      ProbabilityPercent: 15
+      ProbabilityRangeFrom: 85
+      ProbabilityRangeTo: 100
   _cardsDelt: 3
   _cardsChosen: 2
   _cardCanvas: {fileID: 1508482406}
