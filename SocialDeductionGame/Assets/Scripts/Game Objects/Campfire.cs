@@ -22,6 +22,11 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         _servingsText.text = "Servings: " + _netServingsStored.Value;
     }
 
+    private void OnDisable()
+    {
+        _netServingsStored.OnValueChanged -= UpdateServingsText;
+    }
+
     // ================== Text ==================
     private void UpdateServingsText(float prev, float next)
     {

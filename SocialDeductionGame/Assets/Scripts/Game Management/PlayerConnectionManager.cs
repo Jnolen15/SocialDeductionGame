@@ -23,6 +23,13 @@ public class PlayerConnectionManager : NetworkBehaviour
         _netNumPlayers.OnValueChanged += UpdatePlayerList;
     }
 
+    private void OnDisable()
+    {
+        NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
+    }
+
+    // Functions
     private void UpdatePlayerList(int prev, int next)
     {
         _playersConnected.text = "Connected Players: " + next;

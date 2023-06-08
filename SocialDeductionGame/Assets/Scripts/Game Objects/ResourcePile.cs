@@ -30,6 +30,13 @@ public class ResourcePile : NetworkBehaviour, ICardPlayable
         _plantNumText.text = "Plant: " + _netNumPlant.Value;
     }
 
+    private void OnDisable()
+    {
+        _netNumWood.OnValueChanged -= UpdateWoodText;
+        _netNumStone.OnValueChanged -= UpdateStoneText;
+        _netNumPlant.OnValueChanged -= UpdatePlantsText;
+    }
+
     // ================== Text ==================
     private void UpdateWoodText(int prev, int next)
     {
