@@ -9,20 +9,12 @@ public class PlayerData : NetworkBehaviour
     // Refrences
     private HandManager _handManager;
     private PlayerController _playerController;
-    private CardDatabase _cardDB;
-    [SerializeField] private TextMeshProUGUI _locationText;
+    private PlayerUI _playerUI;
+    private LocationManager _locationManager;
 
-    // Location
-    public enum Location
-    {
-        Camp,
-        Beach,
-        Forest,
-        Plateau
-    }
-    [SerializeField] private NetworkVariable<Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
 
-    // Deck Data
+    // Data
+    [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private List<int> _playerDeckIDs = new();
 
     public override void OnNetworkSpawn()
@@ -32,7 +24,7 @@ public class PlayerData : NetworkBehaviour
 
         if (IsOwner)
         {
-            LocationManager.OnLocationChanged += ChangeLocation;
+            LocationManager.OnForceLocationChange += ChangeLocation;
             CardManager.OnCardsGained += GainCards;
         }
     }
@@ -41,7 +33,7 @@ public class PlayerData : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        LocationManager.OnLocationChanged -= ChangeLocation;
+        LocationManager.OnForceLocationChange -= ChangeLocation;
         CardManager.OnCardsGained -= GainCards;
     }
 
@@ -49,7 +41,8 @@ public class PlayerData : NetworkBehaviour
     {
         _handManager = gameObject.GetComponent<HandManager>();
         _playerController = gameObject.GetComponent<PlayerController>();
-        _cardDB = GameObject.FindGameObjectWithTag("cardDB").GetComponent<CardDatabase>();
+        _playerUI = gameObject.GetComponentInChildren<PlayerUI>();
+        _locationManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<LocationManager>();
     }
 
     // ================ Player Deck ================
@@ -159,32 +152,43 @@ public class PlayerData : NetworkBehaviour
 
     // ================ Location ================
     #region Location
-    // Triggered by Location Manager's On Location Changed event
-    private void ChangeLocation(string locationName)
+    // Called when the player chooses a location on their map
+    // Or when location change is forced by game manager / location manager
+    // Called by button
+    public void ChangeLocation(string locationName)
     {
+        LocationManager.Location newLocation;
+
         switch (locationName)
         {
             case "Camp":
-               ChangeLocationServerRpc(PlayerData.Location.Camp);
-                return;
+                newLocation = LocationManager.Location.Camp;
+                break;
             case "Beach":
-                ChangeLocationServerRpc(PlayerData.Location.Beach);
-                return;
+                newLocation = LocationManager.Location.Beach;
+                break;
             case "Forest":
-                ChangeLocationServerRpc(PlayerData.Location.Forest);
-                return;
+                newLocation = LocationManager.Location.Forest;
+                break;
             case "Plateau":
-                ChangeLocationServerRpc(PlayerData.Location.Plateau);
-                return;
+                newLocation = LocationManager.Location.Plateau;
+                break;
             default:
-                Debug.LogError("Set Player Location set default case");
-                ChangeLocationServerRpc(PlayerData.Location.Camp);
-                return;
+                Debug.LogError("MoveToLocation picked default case, setting camp");
+                newLocation = LocationManager.Location.Camp;
+                break;
         }
+
+        ChangeLocationServerRpc(newLocation);
+    }
+    // Called by event
+    private void ChangeLocation(LocationManager.Location newLocation)
+    {
+        ChangeLocationServerRpc(newLocation);
     }
     
     [ServerRpc]
-    public void ChangeLocationServerRpc(Location location, ServerRpcParams serverRpcParams = default)
+    public void ChangeLocationServerRpc(LocationManager.Location location, ServerRpcParams serverRpcParams = default)
     {
         // Get client data
         var clientId = serverRpcParams.Receive.SenderClientId;
@@ -200,10 +204,14 @@ public class PlayerData : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void ChangeLocationClientRpc(Location location, ClientRpcParams clientRpcParams = default)
+    public void ChangeLocationClientRpc(LocationManager.Location location, ClientRpcParams clientRpcParams = default)
     {
+        Debug.Log("Changing player location to " + location.ToString());
+
         _netCurrentLocation.Value = location;
-        _locationText.text = location.ToString();
+        _playerUI.UpdateLocationText(location.ToString());
+
+        _locationManager.SetLocation(location);
     }
     #endregion
 }
