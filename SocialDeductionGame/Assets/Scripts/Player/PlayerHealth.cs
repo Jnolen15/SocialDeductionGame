@@ -9,9 +9,9 @@ public class PlayerHealth : NetworkBehaviour
 
     // Data
     [SerializeField] private int _maxHP = 6;
-    [SerializeField] private NetworkVariable<int> _netCurrentHP = new();
+    [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private int _maxHunger = 3;
-    [SerializeField] private NetworkVariable<float> _netCurrentHunger = new();
+    [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Owner);
 
     // Events
     public delegate void ValueModified(float ModifiedAmmount, float newTotal);
@@ -33,8 +33,11 @@ public class PlayerHealth : NetworkBehaviour
 
     void Start()
     {
-        _netCurrentHP.Value = 3;
-        _netCurrentHunger.Value = 1.5f;
+        if (IsOwner)
+        {
+            _netCurrentHP.Value = 3;
+            _netCurrentHunger.Value = 1.5f;
+        }
     }
 
     private void OnDisable()

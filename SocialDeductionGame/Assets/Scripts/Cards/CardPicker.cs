@@ -13,6 +13,8 @@ public class CardPicker : MonoBehaviour
     [Header("Refrences")]
     private CardManager _cardManager;
     [SerializeField] private Transform _cardCanvas;
+    [SerializeField] private GameObject _takeButton;
+    [SerializeField] private GameObject _requirementText;
     // Variables
     [Header("Variables")]
     [SerializeField] private List<Card> _chosenCards = new();
@@ -43,9 +45,10 @@ public class CardPicker : MonoBehaviour
 
     public bool SelectCard(Card card)
     {
-        if(_chosenCards.Count < _cardsChosen)
+        if (_chosenCards.Count < _cardsChosen)
         {
             _chosenCards.Add(card);
+            UpdateUI();
             return true;
         }
         else
@@ -56,6 +59,8 @@ public class CardPicker : MonoBehaviour
     {
         if (_chosenCards.Contains(card))
             _chosenCards.Remove(card);
+
+        UpdateUI();
     }
 
     public void TakeCards()
@@ -74,6 +79,19 @@ public class CardPicker : MonoBehaviour
         foreach (Transform child in _cardCanvas)
         {
             Destroy(child.gameObject);
+        }
+    }
+
+    private void UpdateUI()
+    {
+        if (_chosenCards.Count != 2)
+        {
+            _takeButton.SetActive(false);
+            _requirementText.SetActive(true);
+        } else
+        {
+            _takeButton.SetActive(true);
+            _requirementText.SetActive(false);
         }
     }
 }
