@@ -23,14 +23,14 @@ public class CardInteraction : MonoBehaviour,
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log($"Mouse entered card {_card.GetCardName()}");
+        //Debug.Log($"Mouse entered card {_card.GetCardName()}");
     }
 
     // =============== Drag ===============
     #region Card Drag
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Debug.Log($"Card {_card.GetCardName()} begin drag");
+        //Debug.Log($"Card {_card.GetCardName()} begin drag");
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -42,7 +42,7 @@ public class CardInteraction : MonoBehaviour,
     {
         _playerController.TryCardPlay(_card);
 
-        Debug.Log($"Card {_card.GetCardName()} end drag");
+        //Debug.Log($"Card {_card.GetCardName()} end drag");
     }
     #endregion
 }

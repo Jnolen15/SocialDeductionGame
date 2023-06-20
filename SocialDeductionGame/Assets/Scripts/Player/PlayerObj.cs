@@ -8,7 +8,7 @@ public class PlayerObj : MonoBehaviour, ICardPlayable
     private PlayerHealth _playerHealth;
 
     // Variables
-    [SerializeField] private Card.CardType _cardTypeAccepted;
+    [SerializeField] private List<Card.CardType> _cardTypesAccepted = new();
 
     void OnEnable()
     {
@@ -19,7 +19,7 @@ public class PlayerObj : MonoBehaviour, ICardPlayable
     // ================== Interface ==================
     public bool CanPlayCardHere(Card cardToPlay)
     {
-        if (cardToPlay.GetCardType() == _cardTypeAccepted)
+        if (_cardTypesAccepted.Contains(cardToPlay.GetCardType()))
             return true;
 
         return false;

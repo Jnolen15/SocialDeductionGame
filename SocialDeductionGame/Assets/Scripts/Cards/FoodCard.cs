@@ -23,18 +23,17 @@ public class FoodCard : Card
         {
             if (!_edible)
             {
-                Debug.Log("This food is inedible, cannot be eaten");
-                return;
+                Debug.Log("This food is inedible, nothing happens");
             }
-
-            Debug.Log($"Player eating {_servings} servings, healed for {_hpGain}");
-            player.Eat(_servings, _hpGain);
+            else
+            {
+                Debug.Log($"Player eating {_servings} servings, healed for {_hpGain}");
+                player.Eat(_servings, _hpGain);
+            }
         }
         else
         {
             Debug.LogError("Card was played on a location it can't do anything with");
         }
-
-        Destroy(gameObject);
     }
 }
