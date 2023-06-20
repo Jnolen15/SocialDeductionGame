@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4431660846251608710
+--- !u!1 &8127116550430777070
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4431660846251608704}
-  - component: {fileID: 4431660846251608705}
+  - component: {fileID: 8127116550430777071}
+  - component: {fileID: 8127116550430777069}
   m_Layer: 5
-  m_Name: TestFoodLargeCard
+  m_Name: T_MealSmall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &4431660846251608704
+--- !u!224 &8127116550430777071
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4431660846251608710}
+  m_GameObject: {fileID: 8127116550430777070}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -37,23 +37,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 300, y: 420}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &4431660846251608705
+--- !u!114 &8127116550430777069
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4431660846251608710}
+  m_GameObject: {fileID: 8127116550430777070}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ca346ab0050c74646b36c2977bc918aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cardID: 2003
-  _cardName: Large Food
-  _cardDescription: A good bit of food. +2 portions.
+  _cardID: 2004
+  _cardName: Small Meal
+  _cardDescription: A small meal. +0.5 portions.
   _cardArt: {fileID: 0}
-  _cardType: 1
+  _cardType: 2
   _cardPlayablePrefab: {fileID: 2725594566549352, guid: fdcb24bf7498b17479ba55a4d4d657d0, type: 3}
   _cardUIPrefab: {fileID: 3074157740314622580, guid: b3b052e5019f1184c98158087390303b, type: 3}
-  _servings: 2
+  _edible: 1
+  _servings: 0.5

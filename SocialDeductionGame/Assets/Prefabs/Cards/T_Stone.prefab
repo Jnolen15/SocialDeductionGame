@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2180218720445251677
+--- !u!1 &7000249256201084715
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2180218720445251676}
-  - component: {fileID: 2180218720445251679}
+  - component: {fileID: 7000249256201084714}
+  - component: {fileID: 7000249256201084713}
   m_Layer: 5
-  m_Name: TestWoodCard
+  m_Name: T_Stone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &2180218720445251676
+--- !u!224 &7000249256201084714
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2180218720445251677}
+  m_GameObject: {fileID: 7000249256201084715}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -37,23 +37,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 300, y: 420}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2180218720445251679
+--- !u!114 &7000249256201084713
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2180218720445251677}
+  m_GameObject: {fileID: 7000249256201084715}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd7ab9aa8727caa40bfeb17b11f9373e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cardID: 1001
-  _cardName: Wood
-  _cardDescription: A piece of wood.
+  _cardID: 1002
+  _cardName: Stone
+  _cardDescription: A stone.
   _cardArt: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   _cardType: 0
   _cardPlayablePrefab: {fileID: 2725594566549352, guid: fdcb24bf7498b17479ba55a4d4d657d0, type: 3}
   _cardUIPrefab: {fileID: 3074157740314622580, guid: b3b052e5019f1184c98158087390303b, type: 3}
-  _resourceType: 0
+  _resourceType: 1

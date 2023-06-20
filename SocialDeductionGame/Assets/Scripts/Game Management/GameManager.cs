@@ -17,7 +17,7 @@ public class GameManager : NetworkBehaviour
     // State
     public enum GameState
     {
-        Pre,
+        Morning,
         M_Forage,
         Afternoon,
         Night
@@ -27,7 +27,10 @@ public class GameManager : NetworkBehaviour
 
     // State Events
     public delegate void ChangeStateAction();
+    public static event ChangeStateAction OnStateMorning;
     public static event ChangeStateAction OnStateForage;
+    public static event ChangeStateAction OnStateAfternoon;
+    public static event ChangeStateAction OnStateNight;
 
 
     private void Awake()
@@ -128,7 +131,8 @@ public class GameManager : NetworkBehaviour
 
         switch (next)
         {
-            case GameState.Pre:
+            case GameState.Morning:
+                OnStateMorning();
                 _readyButton.SetActive(true);
                 break;
             case GameState.M_Forage:
@@ -137,9 +141,11 @@ public class GameManager : NetworkBehaviour
                 break;
             case GameState.Afternoon:
                 this.GetComponent<LocationManager>().ForceLocation(LocationManager.Location.Camp);
+                OnStateAfternoon();
                 _readyButton.SetActive(true);
                 break;
             case GameState.Night:
+                OnStateNight();
                 _readyButton.SetActive(true);
                 break;
         }

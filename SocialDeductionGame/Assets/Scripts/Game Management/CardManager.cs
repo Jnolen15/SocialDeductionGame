@@ -14,4 +14,11 @@ public class CardManager : NetworkBehaviour
         Debug.Log("Cards Given");
         OnCardsGained(cardIDs);
     }
+
+    public void GiveCard(int cardID)
+    {
+        int[] card = { cardID };
+
+        OnCardsGained(card);
+    }
 }

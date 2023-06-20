@@ -16,7 +16,8 @@ public abstract class Card : MonoBehaviour
     public enum CardType
     {
         Resource,
-        Food
+        RawFood,
+        CookedFood
     }
     [SerializeField] private CardType _cardType;
 
