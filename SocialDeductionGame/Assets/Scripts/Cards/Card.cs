@@ -16,10 +16,19 @@ public abstract class Card : MonoBehaviour
     public enum CardType
     {
         Resource,
-        RawFood,
-        CookedFood
+        Food,
+        Meal
     }
     [SerializeField] private CardType _cardType;
+
+    public enum CardSubType
+    {
+        None,
+        Wood,
+        Stone,
+        Plant
+    }
+    [SerializeField] private CardSubType _cardSubType;
 
     [Header("Card Prefabs")]
     [SerializeField] private GameObject _cardPlayablePrefab;
@@ -41,6 +50,11 @@ public abstract class Card : MonoBehaviour
         return _cardType;
     }
 
+    public CardSubType GetCardSubType()
+    {
+        return _cardSubType;
+    }
+
 
     // ========== Card Functionality ==========
     public void SetupPlayable()
@@ -53,6 +67,19 @@ public abstract class Card : MonoBehaviour
     {
         GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription);
+    }
+
+    // Adding a card to the Stockpile which contributes to night events
+    // All cards can be played to stockpile with same functionality, so doing it here.
+    public void PlayToStockpile(Stockpile stockpile)
+    {
+        if (stockpile != null)
+        {
+            Debug.Log("Playng card to stockpile: " + GetCardSubType());
+            stockpile.AddCard(GetCardID());
+        }
+        else
+            Debug.LogError("Card was played on a location it can't do anything with");
     }
 
     // ========== OVERRIDE CLASSES ==========

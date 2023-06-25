@@ -30,7 +30,8 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         _netServingsStored.OnValueChanged += UpdateServingsText;
         GameManager.OnStateMorning += SetStateExtingushed;
         GameManager.OnStateAfternoon += SetStateCooking;
-        GameManager.OnStateNight += SetStateFoodReady;
+        GameManager.OnStateEvening += SetStateFoodReady;
+        GameManager.OnStateNight += SetStateExtingushed;
     }
 
     public override void OnNetworkSpawn()
@@ -48,7 +49,8 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         _netServingsStored.OnValueChanged -= UpdateServingsText;
         GameManager.OnStateMorning -= SetStateExtingushed;
         GameManager.OnStateAfternoon -= SetStateCooking;
-        GameManager.OnStateNight -= SetStateFoodReady;
+        GameManager.OnStateEvening -= SetStateFoodReady;
+        GameManager.OnStateNight -= SetStateExtingushed;
     }
 
     // ================== Text ==================

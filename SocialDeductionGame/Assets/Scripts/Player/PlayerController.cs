@@ -79,8 +79,17 @@ public class PlayerController : NetworkBehaviour
 
         Debug.Log($"{playedCard.GetCardName()} played on {_cardPlayLocation}");
 
+        // Play card to stockpile
+        if (_cardPlayLocation.CompareTag("Stockpile"))
+        {
+            Stockpile stockpile = _cardPlayLocation.GetComponent<Stockpile>();
+            playedCard.PlayToStockpile(stockpile);
+        }
         // Play the card to location
-        playedCard.OnPlay(_cardPlayLocation);
+        else
+        {
+            playedCard.OnPlay(_cardPlayLocation);
+        }
     }
     #endregion
 }

@@ -20,6 +20,7 @@ public class GameManager : NetworkBehaviour
         Morning,
         M_Forage,
         Afternoon,
+        Evening,
         Night
     }
     private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
@@ -30,6 +31,7 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateAction OnStateMorning;
     public static event ChangeStateAction OnStateForage;
     public static event ChangeStateAction OnStateAfternoon;
+    public static event ChangeStateAction OnStateEvening;
     public static event ChangeStateAction OnStateNight;
 
 
@@ -47,7 +49,7 @@ public class GameManager : NetworkBehaviour
     {
         _pcMan = this.GetComponent<PlayerConnectionManager>();
 
-        UpdateGameState(GameState.M_Forage, _netCurrentGameState.Value);
+        UpdateGameState(GameState.Morning, _netCurrentGameState.Value);
     }
 
     private void Update()
@@ -111,14 +113,14 @@ public class GameManager : NetworkBehaviour
     {
         playerReady = true;
         _readyButton.SetActive(false);
-        Debug.Log("Ready!");
+        //Debug.Log("Ready!");
     }
 
     [ClientRpc]
     public void UnReadyPlayerClientRpc()
     {
         playerReady = false;
-        Debug.Log("Unready!");
+        //Debug.Log("Unready!");
     }
     #endregion
 
@@ -142,6 +144,10 @@ public class GameManager : NetworkBehaviour
             case GameState.Afternoon:
                 this.GetComponent<LocationManager>().ForceLocation(LocationManager.Location.Camp);
                 OnStateAfternoon();
+                _readyButton.SetActive(true);
+                break;
+            case GameState.Evening:
+                OnStateEvening();
                 _readyButton.SetActive(true);
                 break;
             case GameState.Night:
