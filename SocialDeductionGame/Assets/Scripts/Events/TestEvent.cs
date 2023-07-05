@@ -9,6 +9,11 @@ public class TestEvent : NightEvent
     [SerializeField] private string _message;
 
     // ========== METHOD OVERRIDES ==========
+    public override int SPCalculation(int numPlayers)
+    {
+        return numPlayers;
+    }
+
     public override void InvokeEvent()
     {
         Debug.Log("<color=red>EVENT: </color>" + _message);

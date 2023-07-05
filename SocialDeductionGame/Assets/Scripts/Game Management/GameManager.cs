@@ -6,15 +6,14 @@ using TMPro;
 
 public class GameManager : NetworkBehaviour
 {
-    // Refrences
+    // ================== Refrences ==================
     [Header("Basics")]
     [SerializeField] private TextMeshProUGUI _gameStateText;
     [SerializeField] private GameObject _readyButton;
     
     private bool playerReady;
-    private PlayerConnectionManager _pcMan;
 
-    // State
+    // ================== State ==================
     public enum GameState
     {
         Morning,
@@ -34,6 +33,7 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateAction OnStateEvening;
     public static event ChangeStateAction OnStateNight;
 
+    // ================== Setup ==================
 
     private void Awake()
     {
@@ -47,8 +47,6 @@ public class GameManager : NetworkBehaviour
 
     private void Start()
     {
-        _pcMan = this.GetComponent<PlayerConnectionManager>();
-
         UpdateGameState(GameState.Morning, _netCurrentGameState.Value);
     }
 
@@ -94,7 +92,7 @@ public class GameManager : NetworkBehaviour
         PlayerReadyClientRpc(clientRpcParams);
 
         // Check if all players are ready
-        if (_netPlayersReadied.Value >= _pcMan.GetNumConnectedPlayers())
+        if (_netPlayersReadied.Value >= PlayerConnectionManager.GetNumConnectedPlayers())
         {
             Debug.Log("All Players ready, progressing state");
 

@@ -14,7 +14,6 @@ public abstract class NightEvent : ScriptableObject
     [SerializeField] private Sprite _eventArt;
 
     [Header("Required Resources")]
-    [SerializeField] private int _successPointsRequired;
     [SerializeField] private List<Card.CardSubType> _requiredCardTypes = new();
 
 
@@ -29,9 +28,14 @@ public abstract class NightEvent : ScriptableObject
         return _eventName;
     }
 
-    public int GetSuccessPoints()
+    public string GetEventDescription()
     {
-        return _successPointsRequired;
+        return _eventDescription;
+    }
+
+    public int GetSuccessPoints(int numPlayers)
+    {
+        return SPCalculation(numPlayers);
     }
 
     public List<Card.CardSubType> GetCardTypes()
@@ -40,5 +44,9 @@ public abstract class NightEvent : ScriptableObject
     }
 
     // ========== OVERRIDE CLASSES ==========
+    // Calculates the SuccessPoints needed to prevent the event consequences
+    public abstract int SPCalculation(int numPlayers);
+
+    // The gameplay consecqunces of the event
     public abstract void InvokeEvent();
 }
