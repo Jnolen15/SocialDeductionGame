@@ -27,6 +27,8 @@ public class CardPicker : MonoBehaviour
     private void OnEnable()
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
+
+        DealCards();
     }
 
     public void DealCards()

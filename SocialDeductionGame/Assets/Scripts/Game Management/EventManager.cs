@@ -7,10 +7,10 @@ using TMPro;
 public class EventManager : NetworkBehaviour
 {
     // ================== Refrences ==================
-    [SerializeField] private TextMeshProUGUI _eventTitle;
-    [SerializeField] private TextMeshProUGUI _eventRequiredNum;
-    [SerializeField] private TextMeshProUGUI _eventRequiredTypes;
-    [SerializeField] private TextMeshProUGUI _eventDescription;
+    [SerializeField] private NightEventCardVisual _eventCardSmall;
+    [SerializeField] private NightEventCardVisual _eventCardLarge;
+    [SerializeField] private GameObject _eventFailText;
+    [SerializeField] private GameObject _eventPassText;
     [SerializeField] private Stockpile _stockpile;
     [SerializeField] private NetworkVariable<int> _netCurrentNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
@@ -20,19 +20,19 @@ public class EventManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         GameManager.OnStateNight += DoEvent;
+        GameManager.OnStateForage += HideLargeCard;
 
         if (IsServer)
         {
             GameManager.OnStateMorning += PickEvent;
             GameManager.OnStateEvening += TestEvent;
         }
-
-        PickEvent();
     }
 
     private void OnDisable()
     {
         GameManager.OnStateNight -= DoEvent;
+        GameManager.OnStateForage -= HideLargeCard;
 
         if (IsServer)
         {
@@ -52,15 +52,31 @@ public class EventManager : NetworkBehaviour
     [ClientRpc]
     private void UpdateEventUIClientRpc(int eventID)
     {
-        _eventTitle.text = CardDatabase.GetEvent(eventID).GetEventName();
-        _eventRequiredNum.text = "At least " + CardDatabase.GetEvent(eventID).GetSuccessPoints(PlayerConnectionManager.GetNumConnectedPlayers());
-        string cardTypes = "";
-        foreach(Card.CardSubType cardType in CardDatabase.GetEvent(eventID).GetCardTypes())
-        {
-            cardTypes += cardType + " ";
-        }
-        _eventRequiredTypes.text = cardTypes;
-        _eventDescription.text = CardDatabase.GetEvent(eventID).GetEventDescription();
+        _eventFailText.SetActive(false);
+        _eventPassText.SetActive(false);
+
+        _eventCardSmall.gameObject.SetActive(true);
+        _eventCardLarge.gameObject.SetActive(true);
+
+        _eventCardSmall.Setup(eventID);
+        _eventCardLarge.Setup(eventID);
+    }
+
+    // Updates night event card UI elements
+    [ClientRpc]
+    private void UpdateEventUIClientRpc(bool passed)
+    {
+        if(passed)
+            _eventPassText.SetActive(true);
+        else
+            _eventFailText.SetActive(true);
+
+    }
+
+    // Hides large event card from morning phase
+    private void HideLargeCard()
+    {
+        _eventCardLarge.gameObject.SetActive(false);
     }
     #endregion
 
@@ -147,8 +163,6 @@ public class EventManager : NetworkBehaviour
             }
         }
 
-        // Send card to all players for visibility
-
         // If number of points >= number of required points, success
         if (successPoints >= nEvent.GetSuccessPoints(PlayerConnectionManager.GetNumConnectedPlayers()))
         {
@@ -161,6 +175,8 @@ public class EventManager : NetworkBehaviour
             _netPassedNightEvent.Value = false;
         }
 
+        // Update all clients visually
+        UpdateEventUIClientRpc(_netPassedNightEvent.Value);
     }
     #endregion
 }

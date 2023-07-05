@@ -6,19 +6,29 @@ using TMPro;
 
 public class Stockpile : NetworkBehaviour, ICardPlayable
 {
+    // ================== Refrences ==================
     [SerializeField] private TextMeshPro _numCards;
 
+    // ================== Variables ==================
+    [SerializeField] private bool _acceptingCards;
     [SerializeField] private List<int> _stockpileCardIDs = new();
     [SerializeField] private NetworkVariable<int> _netCardsInStockpile = new(writePerm: NetworkVariableWritePermission.Server);
 
+    // ================== Setup ==================
     public override void OnNetworkSpawn()
     {
         _netCardsInStockpile.OnValueChanged += UpdateCardsText;
+
+        GameManager.OnStateAfternoon += ToggleAcceptingCards;
+        GameManager.OnStateEvening += ToggleAcceptingCards;
     }
 
     private void OnDisable()
     {
         _netCardsInStockpile.OnValueChanged -= UpdateCardsText;
+
+        GameManager.OnStateAfternoon -= ToggleAcceptingCards;
+        GameManager.OnStateEvening -= ToggleAcceptingCards;
     }
 
     // ================== Text ==================
@@ -32,11 +42,17 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     // Stockpile accepts any card types ATM
     public bool CanPlayCardHere(Card cardToPlay)
     {
-        return true;
+        return _acceptingCards;
     }
 
 
     // ================== Functions ==================
+    // only accepts cards during afternoon phase
+    private void ToggleAcceptingCards()
+    {
+        _acceptingCards = !_acceptingCards;
+    }
+
     public void AddCard(int cardID)
     {
         AddCardsServerRpc(cardID);

@@ -16,6 +16,7 @@ public class GameManager : NetworkBehaviour
     // ================== State ==================
     public enum GameState
     {
+        Pregame,
         Morning,
         M_Forage,
         Afternoon,
@@ -34,7 +35,7 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateAction OnStateNight;
 
     // ================== Setup ==================
-
+    #region Setup
     private void Awake()
     {
         _netCurrentGameState.OnValueChanged += UpdateGameState;
@@ -49,12 +50,14 @@ public class GameManager : NetworkBehaviour
     {
         UpdateGameState(GameState.Morning, _netCurrentGameState.Value);
     }
+    #endregion
 
+    // FOR TESSTING
     private void Update()
     {
         if (!IsServer) return;
 
-        // For Testing
+        // Skip to next state
         if (Input.GetKeyDown(KeyCode.T))
         {
             _netCurrentGameState.Value++;
@@ -66,6 +69,11 @@ public class GameManager : NetworkBehaviour
 
     // ====================== Player Readying ======================
     #region Player Readying
+    private void EnableReadyButton()
+    {
+        _readyButton.SetActive(true);
+    }
+
     public void ReadyPlayer()
     {
         if(!playerReady)
@@ -96,9 +104,10 @@ public class GameManager : NetworkBehaviour
         {
             Debug.Log("All Players ready, progressing state");
 
+            // Progress to next state, looping back to morning if day over
             _netCurrentGameState.Value++;
             if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
-                _netCurrentGameState.Value = 0;
+                _netCurrentGameState.Value = GameState.Morning;
 
             _netPlayersReadied.Value = 0;
 
@@ -111,14 +120,12 @@ public class GameManager : NetworkBehaviour
     {
         playerReady = true;
         _readyButton.SetActive(false);
-        //Debug.Log("Ready!");
     }
 
     [ClientRpc]
     public void UnReadyPlayerClientRpc()
     {
         playerReady = false;
-        //Debug.Log("Unready!");
     }
     #endregion
 
@@ -133,26 +140,33 @@ public class GameManager : NetworkBehaviour
         {
             case GameState.Morning:
                 OnStateMorning();
-                _readyButton.SetActive(true);
+                StartCoroutine(MorningTransition());
                 break;
             case GameState.M_Forage:
                 OnStateForage();
-                _readyButton.SetActive(false);
+                //_readyButton.SetActive(true);
                 break;
             case GameState.Afternoon:
                 this.GetComponent<LocationManager>().ForceLocation(LocationManager.Location.Camp);
                 OnStateAfternoon();
-                _readyButton.SetActive(true);
+                EnableReadyButton();
                 break;
             case GameState.Evening:
                 OnStateEvening();
-                _readyButton.SetActive(true);
+                EnableReadyButton();
                 break;
             case GameState.Night:
                 OnStateNight();
-                _readyButton.SetActive(true);
+                EnableReadyButton();
                 break;
         }
+    }
+
+    // Morning Transition
+    private IEnumerator MorningTransition()
+    {
+        yield return new WaitForSeconds(0.2f);
+        EnableReadyButton();
     }
     #endregion
 }

@@ -6,17 +6,18 @@ using TMPro;
 
 public class PlayerData : NetworkBehaviour
 {
-    // Refrences
+    // ================== Refrences ==================
     private HandManager _handManager;
     private PlayerController _playerController;
     private PlayerUI _playerUI;
     private LocationManager _locationManager;
 
 
-    // Data
+    // ================== Variables ==================
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private List<int> _playerDeckIDs = new();
 
+    // ================== Setup ==================
     public override void OnNetworkSpawn()
     {
         if (!IsOwner && !IsServer)
@@ -181,6 +182,7 @@ public class PlayerData : NetworkBehaviour
 
         ChangeLocationServerRpc(newLocation);
     }
+
     // Called by event
     private void ChangeLocation(LocationManager.Location newLocation)
     {
