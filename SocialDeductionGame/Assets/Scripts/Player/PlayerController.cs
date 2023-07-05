@@ -19,7 +19,10 @@ public class PlayerController : NetworkBehaviour
         if (!IsOwner && !IsServer) enabled = false;
 
         if (IsOwner)
+        {
             Instantiate(_playerObjPref, transform);
+            gameObject.tag = "Player";
+        }
     }
 
     void Start()

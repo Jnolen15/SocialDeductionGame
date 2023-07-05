@@ -45,15 +45,13 @@ public class EventManager : NetworkBehaviour
     private void PickEvent()
     {
         Debug.Log("PICKING EVENT");
-        SetNightEventServerRpc(1001);
+        SetNightEventServerRpc(CardDatabase.GetRandEvent());
     }
 
     // Updates night event card UI elements
     [ClientRpc]
     private void UpdateEventUIClientRpc(int eventID)
     {
-        Debug.Log("Updating UI Card ~~~~~~~~~~~~~~~");
-
         _eventTitle.text = CardDatabase.GetEvent(eventID).GetEventName();
         _eventRequiredNum.text = "At least " + CardDatabase.GetEvent(eventID).GetSuccessPoints(PlayerConnectionManager.GetNumConnectedPlayers());
         string cardTypes = "";
@@ -76,7 +74,7 @@ public class EventManager : NetworkBehaviour
             return;
 
         _netCurrentNightEventID.Value = eventID;
-        UpdateEventUIClientRpc(1001);
+        UpdateEventUIClientRpc(eventID);
     }
 
     // Calls InvokeNightEvent if event test failed

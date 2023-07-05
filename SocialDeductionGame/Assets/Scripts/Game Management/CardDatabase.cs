@@ -32,10 +32,14 @@ public class CardDatabase : MonoBehaviour
     [Button("Fill IDs in card list")]
     private void FillCardIDs()
     {
+        Debug.Log("Filling Card IDs");
+        Instance = this;
         foreach (CardEntry entry in Instance._globalCardList)
         {
             entry.CardID = entry.CardObj.GetComponent<Card>().GetCardID();
+            Debug.Log("Setting Card ID " + entry.CardObj.GetComponent<Card>().GetCardID());
         }
+        Instance = null;
     }
 
     // ===== Card Functions =====
@@ -74,10 +78,14 @@ public class CardDatabase : MonoBehaviour
     [Button("Fill IDs in event list")]
     private void FillEventIDs()
     {
+        Debug.Log("Filling Event IDs");
+        Instance = this;
         foreach (EventEntry entry in Instance._globalEventList)
         {
             entry.EventID = entry.EventSO.GetEventID();
+            Debug.Log("Setting Event ID " + entry.EventSO.GetEventID());
         }
+        Instance = null;
     }
 
     //  ===== Event Functions =====
@@ -102,6 +110,12 @@ public class CardDatabase : MonoBehaviour
 
         Debug.LogError($"Night Event with ID:{eventID} not found in global event list.");
         return null;
+    }
+
+    // FOR TESTING: Get a random event from all events in the DB
+    public static int GetRandEvent()
+    {
+        return Instance._globalEventList[Random.Range(0, Instance._globalEventList.Count)].EventID;
     }
     #endregion
 }

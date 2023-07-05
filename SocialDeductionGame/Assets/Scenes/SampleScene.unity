@@ -1593,6 +1593,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51cc216f3bf542f4194b471b240fa504, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _netNumPlayers:
+    m_InternalValue: 0
   _playersConnected: {fileID: 1895162210}
 --- !u!1 &452258622
 GameObject:
@@ -3492,6 +3494,8 @@ MonoBehaviour:
   _globalEventList:
   - EventID: 1001
     EventSO: {fileID: 11400000, guid: 92ab440ea2f1fcd459a4660bc27185f9, type: 2}
+  - EventID: 1002
+    EventSO: {fileID: 11400000, guid: 41192688983b876499cc0d6e7d9e3238, type: 2}
 --- !u!1 &1470070634
 GameObject:
   m_ObjectHideFlags: 0
