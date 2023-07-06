@@ -36,6 +36,11 @@ public abstract class Card : MonoBehaviour
         return _subTags.Contains(t);
     }
 
+    public bool HasTag(string tagName)
+    {
+        return _subTags.Exists(t => t.Name.Equals(tagName, System.StringComparison.CurrentCultureIgnoreCase));
+    }
+
     public CardTag GetPrimaryTag()
     {
         return _primaryTag;

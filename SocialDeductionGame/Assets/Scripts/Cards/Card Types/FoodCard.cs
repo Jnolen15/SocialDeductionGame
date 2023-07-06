@@ -5,7 +5,6 @@ using UnityEngine;
 public class FoodCard : Card
 {
     [Header("Food Details")]
-    [SerializeField] private bool _edible;
     [SerializeField] private float _servings;
     [SerializeField] private int _hpGain;
 
@@ -16,20 +15,18 @@ public class FoodCard : Card
 
         if (campfire != null)
         {
-            Debug.Log("Playng food card. Servings: " + _servings);
+            Debug.Log("Cooking food card. Adding " + _servings + " Servings");
             campfire.AddFood(_servings);
         }
         else if (player != null)
         {
-            if (!_edible)
-            {
-                Debug.Log("This food is inedible, nothing happens");
-            }
-            else
+            if (this.HasTag("Edible"))
             {
                 Debug.Log($"Player eating {_servings} servings, healed for {_hpGain}");
                 player.Eat(_servings, _hpGain);
             }
+            else
+                Debug.Log("This food is inedible, nothing happens");
         }
         else
         {
