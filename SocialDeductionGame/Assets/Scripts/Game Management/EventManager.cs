@@ -143,13 +143,15 @@ public class EventManager : NetworkBehaviour
             bool matched = false;
 
             // Test if card subtype matches Night event subtipe requirement list
-            foreach (Card.CardSubType type in nEvent.GetCardTypes())
+            foreach (CardTag tag in nEvent.GetRequiredCardTags())
             {
-                if (card.GetComponent<Card>().GetCardSubType() == type)
+                if (card.GetComponent<Card>().GetSubTags().Contains(tag))
+                {
                     matched = true;
+                    Debug.Log($"Card Tested: {card.GetComponent<Card>().GetCardName()}, contained subtag {tag}");
+                    break;
+                }
             }
-
-            Debug.Log($"Card Tested: {card.GetComponent<Card>().GetCardName()}, subtype {card.GetComponent<Card>().GetCardSubType()}");
 
             if (matched) // If it does +1 SP    
             {

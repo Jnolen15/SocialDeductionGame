@@ -14,7 +14,7 @@ public abstract class NightEvent : ScriptableObject
     [SerializeField] private Sprite _eventArt;
 
     [Header("Required Resources")]
-    [SerializeField] private List<Card.CardSubType> _requiredCardTypes = new();
+    [SerializeField] private List<CardTag> _requiredCardTags = new();
 
 
     // ========== Getters ==========
@@ -38,9 +38,9 @@ public abstract class NightEvent : ScriptableObject
         return SPCalculation(numPlayers);
     }
 
-    public List<Card.CardSubType> GetCardTypes()
+    public List<CardTag> GetRequiredCardTags()
     {
-        return _requiredCardTypes;
+        return _requiredCardTags;
     }
 
     // ========== OVERRIDE CLASSES ==========

@@ -12,23 +12,8 @@ public abstract class Card : MonoBehaviour
     [TextArea]
     [SerializeField] private string _cardDescription;
     [SerializeField] private Sprite _cardArt;
-
-    public enum CardType
-    {
-        Resource,
-        Food,
-        Meal
-    }
-    [SerializeField] private CardType _cardType;
-
-    public enum CardSubType
-    {
-        None,
-        Wood,
-        Stone,
-        Plant
-    }
-    [SerializeField] private CardSubType _cardSubType;
+    [SerializeField] private CardTag _primaryTag;
+    [SerializeField] private List<CardTag> _subTags;
 
     [Header("Card Prefabs")]
     [SerializeField] private GameObject _cardPlayablePrefab;
@@ -45,14 +30,20 @@ public abstract class Card : MonoBehaviour
         return _cardName;
     }
 
-    public CardType GetCardType()
+    // ========== Tags ==========
+    public bool HasTag(CardTag t)
     {
-        return _cardType;
+        return _subTags.Contains(t);
     }
 
-    public CardSubType GetCardSubType()
+    public CardTag GetPrimaryTag()
     {
-        return _cardSubType;
+        return _primaryTag;
+    }
+
+    public List<CardTag> GetSubTags()
+    {
+        return _subTags;
     }
 
 
@@ -75,7 +66,7 @@ public abstract class Card : MonoBehaviour
     {
         if (stockpile != null)
         {
-            Debug.Log("Playng card to stockpile: " + GetCardSubType());
+            Debug.Log("Playng card to stockpile: " + _cardName);
             stockpile.AddCard(GetCardID());
         }
         else

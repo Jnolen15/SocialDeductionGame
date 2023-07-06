@@ -53,8 +53,11 @@ MonoBehaviour:
   _cardName: Medium Meal
   _cardDescription: An average meal. +1 portions.
   _cardArt: {fileID: 0}
-  _cardType: 2
+  _primaryTag: {fileID: 11400000, guid: a5ced97b2788927488950ea2b641c351, type: 2}
+  _subTags:
+  - {fileID: 11400000, guid: f05c3c047e5aecf4b94c16213f92b0f1, type: 2}
   _cardPlayablePrefab: {fileID: 2725594566549352, guid: fdcb24bf7498b17479ba55a4d4d657d0, type: 3}
   _cardUIPrefab: {fileID: 3074157740314622580, guid: b3b052e5019f1184c98158087390303b, type: 3}
   _edible: 1
   _servings: 1
+  _hpGain: 0

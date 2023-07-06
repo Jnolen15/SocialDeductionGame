@@ -16,5 +16,8 @@ MonoBehaviour:
   _eventName: Damage Event
   _eventDescription: Damage player for 1 on fail.
   _eventArt: {fileID: 0}
-  _requiredCardTypes: 010000000200000003000000
+  _requiredCardTags:
+  - {fileID: 11400000, guid: 01e058a6dca65be4488268497b70f7e2, type: 2}
+  - {fileID: 11400000, guid: d8840eeb267ff96478f01bc3637f76e5, type: 2}
+  - {fileID: 11400000, guid: 9758eb457d72f0e45809461842f5ee5c, type: 2}
   _dmg: 1

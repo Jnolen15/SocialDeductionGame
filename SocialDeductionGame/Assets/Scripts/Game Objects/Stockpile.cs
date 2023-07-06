@@ -80,7 +80,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         _stockpileCardIDs.RemoveAt(0);
         _netCardsInStockpile.Value--;
 
-        Debug.Log("Pop: " + topCard);
+        //Debug.Log("Pop: " + topCard);
 
         return topCard;
     }

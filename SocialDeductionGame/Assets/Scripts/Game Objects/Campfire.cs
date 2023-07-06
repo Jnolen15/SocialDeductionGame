@@ -7,7 +7,7 @@ using TMPro;
 public class Campfire : NetworkBehaviour, ICardPlayable
 {
     // Variables
-    [SerializeField] private Card.CardType _cardTypeAccepted;
+    [SerializeField] private CardTag _cardTagAccepted;
     [SerializeField] private NetworkVariable<float> _netServingsStored = new(writePerm: NetworkVariableWritePermission.Server);
     public enum State
     {
@@ -62,7 +62,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     // ================== Interface ==================
     public bool CanPlayCardHere(Card cardToPlay)
     {
-        if (cardToPlay.GetCardType() == _cardTypeAccepted && _state == State.Cooking)
+        if (cardToPlay.GetPrimaryTag() == _cardTagAccepted && _state == State.Cooking)
             return true;
 
         return false;

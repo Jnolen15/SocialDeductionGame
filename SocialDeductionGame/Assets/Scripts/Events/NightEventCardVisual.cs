@@ -16,12 +16,10 @@ public class NightEventCardVisual : MonoBehaviour
     {
         _eventTitle.text = CardDatabase.GetEvent(eventID).GetEventName();
         _eventRequiredNum.text = "At least " + CardDatabase.GetEvent(eventID).GetSuccessPoints(PlayerConnectionManager.GetNumConnectedPlayers());
-        string cardTypes = "";
-        foreach (Card.CardSubType cardType in CardDatabase.GetEvent(eventID).GetCardTypes())
-        {
-            cardTypes += cardType + " ";
-        }
-        _eventRequiredTypes.text = cardTypes;
         _eventDescription.text = CardDatabase.GetEvent(eventID).GetEventDescription();
+        List<string> reqTags = new();
+        foreach (CardTag t in CardDatabase.GetEvent(eventID).GetRequiredCardTags())
+            reqTags.Add(t.Name);
+        _eventRequiredTypes.text = string.Join(", ", reqTags);
     }
 }
