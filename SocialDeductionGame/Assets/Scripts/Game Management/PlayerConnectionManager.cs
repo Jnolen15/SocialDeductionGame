@@ -20,11 +20,24 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     [SerializeField] private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private List<PlayerEntry> _playerList = new();
+    public class PlayerEntry
+    {
+        public ulong ID;
+        public GameObject PlayerObject;
+
+        public PlayerEntry(ulong id, GameObject playerObj)
+        {
+            ID = id;
+            PlayerObject = playerObj;
+        }
+    }
 
     // ============== Refrences ==============
     [SerializeField] private TextMeshProUGUI _playersConnected;
 
-    // ============== Setup ==============
+    // ============== Setup =============
+    #region Setup
     public override void OnNetworkSpawn()
     {
         Instance._netNumPlayers.OnValueChanged += UpdatePlayerList;
@@ -33,6 +46,8 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
+
+        GameManager.OnStateIntro += AssignRoles;
     }
 
     public override void OnNetworkDespawn()
@@ -43,9 +58,13 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
-    }
 
-    // ============== Functions ==============
+        GameManager.OnStateIntro -= AssignRoles;
+    }
+    #endregion
+
+    // ============== Client Connection ==============
+    #region Client Connection
     private void UpdatePlayerList(int prev, int next)
     {
         Instance._playersConnected.text = "Connected Players: " + next;
@@ -55,12 +74,14 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         Debug.Log($"SERVER: Client {clientID} connected");
         Instance._netNumPlayers.Value++;
+        Instance._playerList.Add(new PlayerEntry(clientID, NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject));
     }
 
     private void ClientDisconnected(ulong clientID)
     {
         Debug.Log($"SERVER: Client {clientID} disconnected");
         Instance._netNumPlayers.Value--;
+        Instance._playerList.Remove(new PlayerEntry(clientID, NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject));
     }
 
     public static int GetNumConnectedPlayers()
@@ -68,4 +89,26 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log("GetNumConnectedPlayers " + Instance._netNumPlayers.Value);
         return Instance._netNumPlayers.Value;
     }
+    #endregion
+
+    // ============== Roles ==============
+    #region Roles
+    private void AssignRoles()
+    {
+        if (!IsServer)
+            return;
+
+        AssignRolesServerRpc();
+    }
+
+    [ServerRpc]
+    public void AssignRolesServerRpc(ServerRpcParams serverRpcParams = default)
+    {
+        Debug.Log("Assigning Roles");
+
+        // Pick one random player and assign them to team Saboteurs
+        int rand = Random.Range(0, Instance._playerList.Count);
+        Instance._playerList[rand].PlayerObject.GetComponent<PlayerData>().SetTeam(PlayerData.Team.Saboteurs);
+    }
+    #endregion
 }

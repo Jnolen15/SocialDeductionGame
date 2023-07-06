@@ -11,11 +11,17 @@ public class PlayerData : NetworkBehaviour
     private PlayerController _playerController;
     private PlayerUI _playerUI;
     private LocationManager _locationManager;
-
+    [SerializeField] private TextMeshProUGUI _teamText;
 
     // ================== Variables ==================
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private List<int> _playerDeckIDs = new();
+    public enum Team
+    {
+        Survivors,
+        Saboteurs
+    }
+    private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
 
     // ================== Setup ==================
     public override void OnNetworkSpawn()
@@ -27,6 +33,7 @@ public class PlayerData : NetworkBehaviour
         {
             LocationManager.OnForceLocationChange += ChangeLocation;
             CardManager.OnCardsGained += GainCards;
+            _netTeam.OnValueChanged += UpdateTeamText;
         }
     }
 
@@ -36,6 +43,7 @@ public class PlayerData : NetworkBehaviour
 
         LocationManager.OnForceLocationChange -= ChangeLocation;
         CardManager.OnCardsGained -= GainCards;
+        _netTeam.OnValueChanged -= UpdateTeamText;
     }
 
     private void Start()
@@ -44,7 +52,27 @@ public class PlayerData : NetworkBehaviour
         _playerController = gameObject.GetComponent<PlayerController>();
         _playerUI = gameObject.GetComponentInChildren<PlayerUI>();
         _locationManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<LocationManager>();
+
+        UpdateTeamText(Team.Survivors, _netTeam.Value);
     }
+
+    // ================ Team Asssignemnt ================
+    #region Teams
+    public void SetTeam(Team team)
+    {
+        _netTeam.Value = team;
+    }
+
+    private void UpdateTeamText(Team prev, Team current)
+    {
+        _teamText.text = current.ToString();
+
+        if (current == Team.Survivors)
+            _teamText.color = Color.green;
+        else if (current == Team.Saboteurs)
+            _teamText.color = Color.red;
+    }
+    #endregion
 
     // ================ Player Deck ================
     #region Player Deck Functions

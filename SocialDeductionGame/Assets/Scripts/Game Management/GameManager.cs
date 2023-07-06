@@ -17,6 +17,7 @@ public class GameManager : NetworkBehaviour
     public enum GameState
     {
         Pregame,
+        Intro,
         Morning,
         M_Forage,
         Afternoon,
@@ -28,6 +29,7 @@ public class GameManager : NetworkBehaviour
 
     // State Events
     public delegate void ChangeStateAction();
+    public static event ChangeStateAction OnStateIntro;
     public static event ChangeStateAction OnStateMorning;
     public static event ChangeStateAction OnStateForage;
     public static event ChangeStateAction OnStateAfternoon;
@@ -138,13 +140,17 @@ public class GameManager : NetworkBehaviour
 
         switch (next)
         {
+            case GameState.Intro:
+                if (IsServer)
+                    OnStateIntro();
+                EnableReadyButton();
+                break;
             case GameState.Morning:
                 OnStateMorning();
                 StartCoroutine(MorningTransition());
                 break;
             case GameState.M_Forage:
                 OnStateForage();
-                //_readyButton.SetActive(true);
                 break;
             case GameState.Afternoon:
                 this.GetComponent<LocationManager>().ForceLocation(LocationManager.Location.Camp);
