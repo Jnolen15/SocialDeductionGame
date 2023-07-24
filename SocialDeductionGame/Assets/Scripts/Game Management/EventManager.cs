@@ -21,8 +21,9 @@ public class EventManager : NetworkBehaviour
     #region Setup
     public override void OnNetworkSpawn()
     {
-        GameManager.OnStateNight += DoEvent;
+        GameManager.OnStateMorning += UpdateEventUI;
         GameManager.OnStateForage += HideLargeCard;
+        GameManager.OnStateNight += DoEvent;
 
         if (IsServer)
         {
@@ -33,8 +34,9 @@ public class EventManager : NetworkBehaviour
 
     private void OnDisable()
     {
-        GameManager.OnStateNight -= DoEvent;
+        GameManager.OnStateMorning -= UpdateEventUI;
         GameManager.OnStateForage -= HideLargeCard;
+        GameManager.OnStateNight -= DoEvent;
 
         if (IsServer)
         {
@@ -54,8 +56,7 @@ public class EventManager : NetworkBehaviour
     // ================== UI ELEMENTS ==================
     #region UI Elementss
     // Updates night event card UI elements
-    [ClientRpc]
-    private void UpdateEventUIClientRpc(int eventID)
+    private void UpdateEventUI()
     {
         _eventFailText.SetActive(false);
         _eventPassText.SetActive(false);
@@ -63,11 +64,11 @@ public class EventManager : NetworkBehaviour
         _eventCardSmall.gameObject.SetActive(true);
         _eventCardLarge.gameObject.SetActive(true);
 
-        _eventCardSmall.Setup(eventID);
-        _eventCardLarge.Setup(eventID);
+        _eventCardSmall.Setup(_netCurrentNightEventID.Value);
+        _eventCardLarge.Setup(_netCurrentNightEventID.Value);
     }
 
-    // Updates night event card UI elements
+    // Updates small event card with pass / fail text
     [ClientRpc]
     private void UpdateEventUIClientRpc(bool passed)
     {
@@ -110,7 +111,6 @@ public class EventManager : NetworkBehaviour
             return;
 
         _netCurrentNightEventID.Value = eventID;
-        UpdateEventUIClientRpc(eventID);
     }
 
     // Calls InvokeNightEvent if event test failed
