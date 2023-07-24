@@ -7,11 +7,13 @@ using TMPro;
 public class EventManager : NetworkBehaviour
 {
     // ================== Refrences ==================
+    [SerializeField] private NightEventPicker _nightEventPickerMenu;
     [SerializeField] private NightEventCardVisual _eventCardSmall;
     [SerializeField] private NightEventCardVisual _eventCardLarge;
     [SerializeField] private GameObject _eventFailText;
     [SerializeField] private GameObject _eventPassText;
     [SerializeField] private Stockpile _stockpile;
+
     [SerializeField] private NetworkVariable<int> _netCurrentNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
 
@@ -24,7 +26,7 @@ public class EventManager : NetworkBehaviour
 
         if (IsServer)
         {
-            GameManager.OnStateMorning += PickEvent;
+            GameManager.OnStateIntro += PickEvent;
             GameManager.OnStateEvening += TestEvent;
         }
     }
@@ -36,7 +38,7 @@ public class EventManager : NetworkBehaviour
 
         if (IsServer)
         {
-            GameManager.OnStateMorning -= PickEvent;
+            GameManager.OnStateIntro -= PickEvent;
             GameManager.OnStateEvening -= TestEvent;
         }
     }
@@ -47,7 +49,10 @@ public class EventManager : NetworkBehaviour
         Debug.Log("PICKING EVENT");
         SetNightEventServerRpc(CardDatabase.GetRandEvent());
     }
+    #endregion
 
+    // ================== UI ELEMENTS ==================
+    #region UI Elementss
     // Updates night event card UI elements
     [ClientRpc]
     private void UpdateEventUIClientRpc(int eventID)
@@ -77,6 +82,21 @@ public class EventManager : NetworkBehaviour
     private void HideLargeCard()
     {
         _eventCardLarge.gameObject.SetActive(false);
+    }
+    #endregion
+
+    // ================== Player Night Event Picking Menu ==================
+    #region Player Night Event Choice Menu
+    public void OpenNightEventPicker()
+    {
+        _nightEventPickerMenu.gameObject.SetActive(true);
+        _nightEventPickerMenu.DealOptions();
+    }
+
+    public void CloseNightEventPicker()
+    {
+        _nightEventPickerMenu.ClearOptions();
+        _nightEventPickerMenu.gameObject.SetActive(false);
     }
     #endregion
 

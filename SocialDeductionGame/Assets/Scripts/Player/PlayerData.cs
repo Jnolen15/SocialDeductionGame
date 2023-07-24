@@ -12,6 +12,7 @@ public class PlayerData : NetworkBehaviour
     private PlayerUI _playerUI;
     private LocationManager _locationManager;
     [SerializeField] private TextMeshProUGUI _teamText;
+    private EventManager _nightEventManger;
 
     // ================== Variables ==================
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
@@ -24,6 +25,7 @@ public class PlayerData : NetworkBehaviour
     private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
 
     // ================== Setup ==================
+    #region Setup
     public override void OnNetworkSpawn()
     {
         if (!IsOwner && !IsServer)
@@ -34,6 +36,7 @@ public class PlayerData : NetworkBehaviour
             LocationManager.OnForceLocationChange += ChangeLocation;
             CardManager.OnCardsGained += GainCards;
             _netTeam.OnValueChanged += UpdateTeamText;
+            GameManager.OnStateNight += ShowEventChoices;
         }
     }
 
@@ -44,6 +47,7 @@ public class PlayerData : NetworkBehaviour
         LocationManager.OnForceLocationChange -= ChangeLocation;
         CardManager.OnCardsGained -= GainCards;
         _netTeam.OnValueChanged -= UpdateTeamText;
+        GameManager.OnStateNight -= ShowEventChoices;
     }
 
     private void Start()
@@ -52,11 +56,13 @@ public class PlayerData : NetworkBehaviour
         _playerController = gameObject.GetComponent<PlayerController>();
         _playerUI = gameObject.GetComponentInChildren<PlayerUI>();
         _locationManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<LocationManager>();
+        _nightEventManger = GameObject.FindGameObjectWithTag("GameManager").GetComponent<EventManager>();
 
         UpdateTeamText(Team.Survivors, _netTeam.Value);
     }
+    #endregion
 
-    // ================ Team Asssignemnt ================
+    // ================ Teams ================
     #region Teams
     public void SetTeam(Team team)
     {
@@ -71,6 +77,12 @@ public class PlayerData : NetworkBehaviour
             _teamText.color = Color.green;
         else if (current == Team.Saboteurs)
             _teamText.color = Color.red;
+    }
+
+    private void ShowEventChoices()
+    {
+        if (_netTeam.Value == Team.Saboteurs)
+            _nightEventManger.OpenNightEventPicker();
     }
     #endregion
 
