@@ -5,6 +5,8 @@ using TMPro;
 
 public class PlayerUI : MonoBehaviour
 {
+    private PlayerHealth _playerHealth;
+
     [Header("UI Refrences")]
     [SerializeField] private GameObject _readyButton;
     [SerializeField] private GameObject _readyIndicator;
@@ -16,6 +18,8 @@ public class PlayerUI : MonoBehaviour
 
     public void OnEnable()
     {
+        _playerHealth = this.GetComponentInParent<PlayerHealth>();
+
         GameManager.OnStateChange += EnableReadyButton;
         GameManager.OnStateForage += ToggleMap;
         PlayerHealth.OnHealthModified += UpdateHealth;
@@ -34,6 +38,9 @@ public class PlayerUI : MonoBehaviour
 
     private void EnableReadyButton()
     {
+        if (!_playerHealth.IsLiving())
+            return;
+
         _readyButton.SetActive(true);
     }
 
@@ -44,6 +51,9 @@ public class PlayerUI : MonoBehaviour
 
     private void ToggleMap()
     {
+        if (!_playerHealth.IsLiving())
+            return;
+
         _islandMap.SetActive(!_islandMap.activeSelf);
     }
 

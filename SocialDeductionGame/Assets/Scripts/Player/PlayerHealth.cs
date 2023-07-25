@@ -5,6 +5,9 @@ using Unity.Netcode;
 
 public class PlayerHealth : NetworkBehaviour
 {
+    // Refrences
+    private PlayerData _playerData;
+
     // Data
     [SerializeField] private int _maxHP = 6;
     [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Owner);
@@ -38,6 +41,8 @@ public class PlayerHealth : NetworkBehaviour
 
     void Start()
     {
+        _playerData = gameObject.GetComponent<PlayerData>();
+
         if (IsOwner)
         {
             _netCurrentHP.Value = 3;
@@ -67,6 +72,9 @@ public class PlayerHealth : NetworkBehaviour
     // Calls server then client to increase or decrease player health
     public void ModifyHealth(int ammount)
     {
+        if (!IsLiving())
+            return;
+
         ModifyHealthServerRPC(ammount);
     }
 
@@ -113,6 +121,7 @@ public class PlayerHealth : NetworkBehaviour
         Debug.Log($"<color=#FF0000>Player {NetworkManager.Singleton.LocalClientId} has died!</color>");
         _netIsLiving.Value = false;
         OnDeath();
+        _playerData.OnPlayerDeath();
     }
 
     public bool IsLiving()
@@ -126,6 +135,9 @@ public class PlayerHealth : NetworkBehaviour
     // Calls server then client to increase or decrease player health
     public void ModifyHunger(float ammount)
     {
+        if (!IsLiving())
+            return;
+
         _netCurrentHunger.Value += ammount;
 
         if (_netCurrentHunger.Value < 0)

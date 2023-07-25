@@ -92,6 +92,9 @@ public class PlayerData : NetworkBehaviour
 
     private void ShowEventChoices()
     {
+        if (!_playerHealth.IsLiving())
+            return;
+
         if (_netTeam.Value == Team.Saboteurs)
             _nightEventManger.OpenNightEventPicker();
     }
@@ -175,15 +178,6 @@ public class PlayerData : NetworkBehaviour
     {
         DrawCardsServerRPC(cardIDs);
     }
-
-    // TESTING: Gets a random card from DB
-    public void DrawCard()
-    {
-        int[] ranCard = { (CardDatabase.DrawCard()) };
-
-        DrawCardsServerRPC(ranCard);
-    }
-
     #endregion
 
     #region Player Deck Helpers
@@ -195,7 +189,7 @@ public class PlayerData : NetworkBehaviour
 
     #endregion
 
-    // ================ Card DRAW ================
+    // ================ Card Add / Remove ================
     #region Card Draw
     [ServerRpc]
     private void DrawCardsServerRPC(int[] cardIDs, ServerRpcParams serverRpcParams = default)
@@ -226,6 +220,36 @@ public class PlayerData : NetworkBehaviour
         Debug.Log($"{NetworkManager.Singleton.LocalClientId} recieved a card with id {cardID}");
 
         _handManager.AddCard(cardID);
+    }
+    #endregion
+
+    #region Card Discard
+    // Discards all cards in players netwworked deck, and Hand Manager local deck
+    [ServerRpc]
+    public void DiscardHandServerRPC(ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        // Remove all cards from hand
+        _playerDeckIDs.Clear();
+
+        // Update player client hand
+        DiscardHandClientRpc(clientRpcParams);
+    }
+
+    // Removes all cards from the clients hand locally
+    [ClientRpc]
+    private void DiscardHandClientRpc(ClientRpcParams clientRpcParams = default)
+    {
+        _handManager.DiscardHand();
     }
     #endregion
 
@@ -338,4 +362,11 @@ public class PlayerData : NetworkBehaviour
         _locationManager.SetLocation(location);
     }
     #endregion
+
+    // ================ Player Death ================
+    public void OnPlayerDeath()
+    {
+        DiscardHandServerRPC();
+        ReadyPlayer();
+    }
 }
