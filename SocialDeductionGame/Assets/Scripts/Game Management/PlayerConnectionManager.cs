@@ -34,13 +34,13 @@ public class PlayerConnectionManager : NetworkBehaviour
     }
 
     // ============== Refrences ==============
-    [SerializeField] private TextMeshProUGUI _playersConnected;
+    [SerializeField] private TextMeshProUGUI _playersConnectedText;
 
     // ============== Setup =============
     #region Setup
     public override void OnNetworkSpawn()
     {
-        Instance._netNumPlayers.OnValueChanged += UpdatePlayerList;
+        Instance._netNumPlayers.OnValueChanged += UpdatePlayerConnectedText;
 
         if (!IsServer) return;
 
@@ -52,7 +52,7 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
-        Instance._netNumPlayers.OnValueChanged -= UpdatePlayerList;
+        Instance._netNumPlayers.OnValueChanged -= UpdatePlayerConnectedText;
 
         if (!IsServer) return;
 
@@ -65,9 +65,9 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Client Connection ==============
     #region Client Connection
-    private void UpdatePlayerList(int prev, int next)
+    private void UpdatePlayerConnectedText(int prev, int next)
     {
-        Instance._playersConnected.text = "Connected Players: " + next;
+        Instance._playersConnectedText.text = "Connected Players: " + next;
     }
 
     private void ClientConnected(ulong clientID)
@@ -88,6 +88,21 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         Debug.Log("GetNumConnectedPlayers " + Instance._netNumPlayers.Value);
         return Instance._netNumPlayers.Value;
+    }
+    #endregion
+
+    #region Living Players Tracking
+    public static int GetNumLivingPlayers()
+    {
+        int numAlive = 0;
+
+        foreach(PlayerEntry playa in Instance._playerList)
+        {
+            if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving())
+                numAlive++;
+        }
+        Debug.Log("GetNumLivingPlayers " + numAlive);
+        return numAlive;
     }
     #endregion
 
