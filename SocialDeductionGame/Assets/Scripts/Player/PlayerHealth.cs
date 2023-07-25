@@ -6,18 +6,24 @@ using Unity.Netcode;
 public class PlayerHealth : NetworkBehaviour
 {
     // Refrences
+    private PlayerData _playerData;
 
     // Data
     [SerializeField] private int _maxHP = 6;
     [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private int _maxHunger = 3;
     [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Owner);
+    [SerializeField] private NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Owner);
 
     // Events
     public delegate void ValueModified(float ModifiedAmmount, float newTotal);
     public static event ValueModified OnHealthModified;
     public static event ValueModified OnHungerModified;
+    public delegate void Death();
+    public static event Death OnDeath;
 
+    // ===================== SETUP =====================
+    #region Setup
     public override void OnNetworkSpawn()
     {
         if (!IsOwner && !IsServer)
@@ -25,6 +31,8 @@ public class PlayerHealth : NetworkBehaviour
 
         if (IsOwner)
         {
+            _netIsLiving.Value = true;
+
             GameManager.OnStateMorning += HungerDrain;
             _netCurrentHP.OnValueChanged += HealthChanged;
             _netCurrentHunger.OnValueChanged += HungerChanged;
@@ -33,6 +41,8 @@ public class PlayerHealth : NetworkBehaviour
 
     void Start()
     {
+        _playerData = gameObject.GetComponent<PlayerData>();
+
         if (IsOwner)
         {
             _netCurrentHP.Value = 3;
@@ -48,12 +58,23 @@ public class PlayerHealth : NetworkBehaviour
         _netCurrentHP.OnValueChanged -= HealthChanged;
         _netCurrentHunger.OnValueChanged -= HungerChanged;
     }
+    #endregion
+
+    // FOR TESTING
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+            ModifyHealth(-1);
+    }
 
     // ==================== Health ====================
     #region Health
     // Calls server then client to increase or decrease player health
     public void ModifyHealth(int ammount)
     {
+        if (!IsLiving())
+            return;
+
         ModifyHealthServerRPC(ammount);
     }
 
@@ -83,18 +104,40 @@ public class PlayerHealth : NetworkBehaviour
 
         _netCurrentHP.Value += ammount;
 
+        // Clamp HP within bounds
         if (_netCurrentHP.Value < 0)
             _netCurrentHP.Value = 0;
         else if (_netCurrentHP.Value > _maxHP)
             _netCurrentHP.Value = _maxHP;
+
+        // Death Check
+        if (_netCurrentHP.Value == 0)
+            Die();
+    }
+
+    // sets networked bool to false and triggers OnDeath event
+    private void Die()
+    {
+        Debug.Log($"<color=#FF0000>Player {NetworkManager.Singleton.LocalClientId} has died!</color>");
+        _netIsLiving.Value = false;
+        OnDeath();
+        _playerData.OnPlayerDeath();
+    }
+
+    public bool IsLiving()
+    {
+        return _netIsLiving.Value;
     }
     #endregion
 
     // ==================== Hunger ====================
-    #region Health
+    #region Hunger
     // Calls server then client to increase or decrease player health
     public void ModifyHunger(float ammount)
     {
+        if (!IsLiving())
+            return;
+
         _netCurrentHunger.Value += ammount;
 
         if (_netCurrentHunger.Value < 0)

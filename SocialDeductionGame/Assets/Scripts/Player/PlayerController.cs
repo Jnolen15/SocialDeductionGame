@@ -14,6 +14,7 @@ public class PlayerController : NetworkBehaviour
     // Card playing
     [SerializeField] private GameObject _cardPlayLocation;
 
+    // ================ Setup ================
     public override void OnNetworkSpawn()
     {
         if (!IsOwner && !IsServer) enabled = false;
@@ -29,17 +30,6 @@ public class PlayerController : NetworkBehaviour
     {
         _handManager = gameObject.GetComponent<HandManager>();
         _pData = gameObject.GetComponent<PlayerData>();
-    }
-
-    private void Update()
-    {
-        if (!IsOwner) return;
-
-        // TEST Draw a card
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            _pData.DrawCard();
-        }
     }
 
     // ================ Deck Interaction ================

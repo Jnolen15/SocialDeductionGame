@@ -14,6 +14,7 @@ public class HandManager : NetworkBehaviour
     // Data
     [SerializeField] private List<Card> _playerDeck = new();
 
+    // ================ Setup ================
     public override void OnNetworkSpawn()
     {
         if (!IsOwner)
@@ -71,6 +72,18 @@ public class HandManager : NetworkBehaviour
         }
 
         return null;
+    }
+
+    public void DiscardHand()
+    {
+        // Clear list
+        _playerDeck.Clear();
+
+        // Destroy card objects
+        foreach (Transform child in _cardSlot)
+        {
+            Destroy(child.gameObject);
+        }
     }
 
     #endregion

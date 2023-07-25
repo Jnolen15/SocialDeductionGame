@@ -186,7 +186,7 @@ public class EventManager : NetworkBehaviour
         }
 
         // If number of points >= number of required points, success
-        if (successPoints >= nEvent.GetSuccessPoints(PlayerConnectionManager.GetNumConnectedPlayers()))
+        if (successPoints >= nEvent.GetSuccessPoints(PlayerConnectionManager.GetNumLivingPlayers()))
         {
             Debug.Log("Event Pass!");
             _netPassedNightEvent.Value = true;

@@ -9,12 +9,17 @@ public class PlayerData : NetworkBehaviour
     // ================== Refrences ==================
     private HandManager _handManager;
     private PlayerController _playerController;
+    private PlayerHealth _playerHealth;
     private PlayerUI _playerUI;
+
     private LocationManager _locationManager;
-    [SerializeField] private TextMeshProUGUI _teamText;
     private EventManager _nightEventManger;
+    private GameManager _gameManager;
+
+    [SerializeField] private TextMeshProUGUI _teamText;
 
     // ================== Variables ==================
+    [SerializeField] private NetworkVariable<bool> _netPlayerReady = new();
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private List<int> _playerDeckIDs = new();
     public enum Team
@@ -36,6 +41,7 @@ public class PlayerData : NetworkBehaviour
             LocationManager.OnForceLocationChange += ChangeLocation;
             CardManager.OnCardsGained += GainCards;
             _netTeam.OnValueChanged += UpdateTeamText;
+            GameManager.OnStateChange += UnReadyPlayer;
             GameManager.OnStateNight += ShowEventChoices;
         }
     }
@@ -47,6 +53,7 @@ public class PlayerData : NetworkBehaviour
         LocationManager.OnForceLocationChange -= ChangeLocation;
         CardManager.OnCardsGained -= GainCards;
         _netTeam.OnValueChanged -= UpdateTeamText;
+        GameManager.OnStateChange -= UnReadyPlayer;
         GameManager.OnStateNight -= ShowEventChoices;
     }
 
@@ -54,9 +61,13 @@ public class PlayerData : NetworkBehaviour
     {
         _handManager = gameObject.GetComponent<HandManager>();
         _playerController = gameObject.GetComponent<PlayerController>();
+        _playerHealth = gameObject.GetComponent<PlayerHealth>();
         _playerUI = gameObject.GetComponentInChildren<PlayerUI>();
-        _locationManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<LocationManager>();
-        _nightEventManger = GameObject.FindGameObjectWithTag("GameManager").GetComponent<EventManager>();
+
+        GameObject gameMan = GameObject.FindGameObjectWithTag("GameManager");
+        _locationManager = gameMan.GetComponent<LocationManager>();
+        _nightEventManger = gameMan.GetComponent<EventManager>();
+        _gameManager = gameMan.GetComponent<GameManager>();
 
         UpdateTeamText(Team.Survivors, _netTeam.Value);
     }
@@ -81,8 +92,82 @@ public class PlayerData : NetworkBehaviour
 
     private void ShowEventChoices()
     {
+        if (!_playerHealth.IsLiving())
+            return;
+
         if (_netTeam.Value == Team.Saboteurs)
             _nightEventManger.OpenNightEventPicker();
+    }
+    #endregion
+
+    // ====================== Player Readying ======================
+    #region Player Readying
+    // ====== Readying ======
+    public void ReadyPlayer()
+    {
+        if (!_netPlayerReady.Value)
+            PlayerReadyServerRpc();
+    }
+
+    [ServerRpc]
+    public void PlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        // Set player readied
+        _netPlayerReady.Value = true;
+
+        // Record ready player on client
+        PlayerReadyClientRpc(clientRpcParams);
+
+        // Record ready player on server
+        _gameManager.PlayerReadyServerRpc();
+    }
+
+    [ClientRpc]
+    public void PlayerReadyClientRpc(ClientRpcParams clientRpcParams = default)
+    {
+        Debug.Log(gameObject.name + " Ready!", gameObject);
+        _playerUI.ToggleReady(true);
+    }
+
+    // ====== UnReadying ======
+    public void UnReadyPlayer()
+    {
+        PlayerUnReadyServerRpc();
+    }
+
+    [ServerRpc]
+    public void PlayerUnReadyServerRpc(ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        // Set player unreadied
+        _netPlayerReady.Value = false;
+
+        PlayerUnReadyClientRpc(clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void PlayerUnReadyClientRpc(ClientRpcParams clientRpcParams = default)
+    {
+        _playerUI.ToggleReady(false);
     }
     #endregion
 
@@ -93,15 +178,6 @@ public class PlayerData : NetworkBehaviour
     {
         DrawCardsServerRPC(cardIDs);
     }
-
-    // TESTING: Gets a random card from DB
-    public void DrawCard()
-    {
-        int[] ranCard = { (CardDatabase.DrawCard()) };
-
-        DrawCardsServerRPC(ranCard);
-    }
-
     #endregion
 
     #region Player Deck Helpers
@@ -113,7 +189,7 @@ public class PlayerData : NetworkBehaviour
 
     #endregion
 
-    // ================ Card DRAW ================
+    // ================ Card Add / Remove ================
     #region Card Draw
     [ServerRpc]
     private void DrawCardsServerRPC(int[] cardIDs, ServerRpcParams serverRpcParams = default)
@@ -144,6 +220,36 @@ public class PlayerData : NetworkBehaviour
         Debug.Log($"{NetworkManager.Singleton.LocalClientId} recieved a card with id {cardID}");
 
         _handManager.AddCard(cardID);
+    }
+    #endregion
+
+    #region Card Discard
+    // Discards all cards in players netwworked deck, and Hand Manager local deck
+    [ServerRpc]
+    public void DiscardHandServerRPC(ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        // Remove all cards from hand
+        _playerDeckIDs.Clear();
+
+        // Update player client hand
+        DiscardHandClientRpc(clientRpcParams);
+    }
+
+    // Removes all cards from the clients hand locally
+    [ClientRpc]
+    private void DiscardHandClientRpc(ClientRpcParams clientRpcParams = default)
+    {
+        _handManager.DiscardHand();
     }
     #endregion
 
@@ -256,4 +362,11 @@ public class PlayerData : NetworkBehaviour
         _locationManager.SetLocation(location);
     }
     #endregion
+
+    // ================ Player Death ================
+    public void OnPlayerDeath()
+    {
+        DiscardHandServerRPC();
+        ReadyPlayer();
+    }
 }

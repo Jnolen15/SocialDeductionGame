@@ -9,9 +9,6 @@ public class GameManager : NetworkBehaviour
     // ================== Refrences ==================
     [Header("Basics")]
     [SerializeField] private TextMeshProUGUI _gameStateText;
-    [SerializeField] private GameObject _readyButton;
-    
-    private bool playerReady;
 
     // ================== State ==================
     public enum GameState
@@ -25,10 +22,11 @@ public class GameManager : NetworkBehaviour
         Night
     }
     private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
-    private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
 
     // State Events
     public delegate void ChangeStateAction();
+    public static event ChangeStateAction OnStateChange;
     public static event ChangeStateAction OnStateIntro;
     public static event ChangeStateAction OnStateMorning;
     public static event ChangeStateAction OnStateForage;
@@ -71,17 +69,6 @@ public class GameManager : NetworkBehaviour
 
     // ====================== Player Readying ======================
     #region Player Readying
-    private void EnableReadyButton()
-    {
-        _readyButton.SetActive(true);
-    }
-
-    public void ReadyPlayer()
-    {
-        if(!playerReady)
-            PlayerReadyServerRpc();
-    }
-
     [ServerRpc(RequireOwnership = false)]
     public void PlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
     {
@@ -97,37 +84,18 @@ public class GameManager : NetworkBehaviour
 
         // Record ready player on server
         _netPlayersReadied.Value++;
-        
-        // Record ready player on client
-        PlayerReadyClientRpc(clientRpcParams);
 
         // Check if all players are ready
-        if (_netPlayersReadied.Value >= PlayerConnectionManager.GetNumConnectedPlayers())
+        if (_netPlayersReadied.Value >= PlayerConnectionManager.GetNumLivingPlayers())
         {
-            Debug.Log("All Players ready, progressing state");
+            _netPlayersReadied.Value = 0;
 
             // Progress to next state, looping back to morning if day over
+            Debug.Log("All Players ready, progressing state");
             _netCurrentGameState.Value++;
             if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
                 _netCurrentGameState.Value = GameState.Morning;
-
-            _netPlayersReadied.Value = 0;
-
-            UnReadyPlayerClientRpc();
         }
-    }
-
-    [ClientRpc]
-    public void PlayerReadyClientRpc(ClientRpcParams clientRpcParams = default)
-    {
-        playerReady = true;
-        _readyButton.SetActive(false);
-    }
-
-    [ClientRpc]
-    public void UnReadyPlayerClientRpc()
-    {
-        playerReady = false;
     }
     #endregion
 
@@ -138,16 +106,17 @@ public class GameManager : NetworkBehaviour
         if (_gameStateText != null)
             _gameStateText.text = next.ToString();
 
+        if(next != GameState.Pregame)
+            OnStateChange();
+
         switch (next)
         {
             case GameState.Intro:
                 if (IsServer)
                     OnStateIntro();
-                EnableReadyButton();
                 break;
             case GameState.Morning:
                 OnStateMorning();
-                StartCoroutine(MorningTransition());
                 break;
             case GameState.M_Forage:
                 OnStateForage();
@@ -155,24 +124,14 @@ public class GameManager : NetworkBehaviour
             case GameState.Afternoon:
                 this.GetComponent<LocationManager>().ForceLocation(LocationManager.Location.Camp);
                 OnStateAfternoon();
-                EnableReadyButton();
                 break;
             case GameState.Evening:
                 OnStateEvening();
-                EnableReadyButton();
                 break;
             case GameState.Night:
                 OnStateNight();
-                EnableReadyButton();
                 break;
         }
-    }
-
-    // Morning Transition
-    private IEnumerator MorningTransition()
-    {
-        yield return new WaitForSeconds(0.2f);
-        EnableReadyButton();
     }
     #endregion
 }
