@@ -16,9 +16,12 @@ public class PlayerData : NetworkBehaviour
     private EventManager _nightEventManger;
     private GameManager _gameManager;
 
+    [SerializeField] private GameObject _playerObjPref;
+    [SerializeField] private GameObject _dummyObjPref;
     [SerializeField] private TextMeshProUGUI _teamText;
 
     // ================== Variables ==================
+    [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
     [SerializeField] private NetworkVariable<bool> _netPlayerReady = new();
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private List<int> _playerDeckIDs = new();
@@ -33,9 +36,6 @@ public class PlayerData : NetworkBehaviour
     #region Setup
     public override void OnNetworkSpawn()
     {
-        if (!IsOwner && !IsServer)
-            enabled = false;
-
         if (IsOwner)
         {
             LocationManager.OnForceLocationChange += ChangeLocation;
@@ -43,7 +43,16 @@ public class PlayerData : NetworkBehaviour
             _netTeam.OnValueChanged += UpdateTeamText;
             GameManager.OnStateChange += UnReadyPlayer;
             GameManager.OnStateNight += ShowEventChoices;
+
+            Instantiate(_playerObjPref, transform);
+            SetPlayerIDServerRpc();
+        } else
+        {
+            Instantiate(_dummyObjPref, transform);
         }
+
+        if (!IsOwner && !IsServer)
+            enabled = false;
     }
 
     private void OnDisable()
@@ -71,7 +80,18 @@ public class PlayerData : NetworkBehaviour
 
         UpdateTeamText(Team.Survivors, _netTeam.Value);
     }
+
+    [ServerRpc]
+    private void SetPlayerIDServerRpc(ServerRpcParams serverRpcParams = default)
+    {
+        _netPlayerID.Value = serverRpcParams.Receive.SenderClientId;
+    }
     #endregion
+
+    public ulong GetPlayerID()
+    {
+        return _netPlayerID.Value;
+    }
 
     // ================ Teams ================
     #region Teams

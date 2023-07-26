@@ -47,7 +47,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
 
-        GameManager.OnStateIntro += AssignRoles;
+        GameManager.OnSetup += AssignRoles;
     }
 
     public override void OnNetworkDespawn()
@@ -59,7 +59,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
 
-        GameManager.OnStateIntro -= AssignRoles;
+        GameManager.OnSetup -= AssignRoles;
     }
     #endregion
 

@@ -9,7 +9,6 @@ public class PlayerController : NetworkBehaviour
     private HandManager _handManager;
     private PlayerData _pData;
     [SerializeField] private LayerMask _cardPlayableLayerMask;
-    [SerializeField] private GameObject _playerObjPref;
 
     // Card playing
     [SerializeField] private GameObject _cardPlayLocation;
@@ -21,7 +20,6 @@ public class PlayerController : NetworkBehaviour
 
         if (IsOwner)
         {
-            Instantiate(_playerObjPref, transform);
             gameObject.tag = "Player";
         }
     }

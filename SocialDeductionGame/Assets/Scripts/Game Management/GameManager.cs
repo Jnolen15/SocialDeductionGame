@@ -9,6 +9,7 @@ public class GameManager : NetworkBehaviour
     // ================== Refrences ==================
     [Header("Basics")]
     [SerializeField] private TextMeshProUGUI _gameStateText;
+    [SerializeField] private List<Transform> playerPositions = new();
 
     // ================== State ==================
     public enum GameState
@@ -27,6 +28,7 @@ public class GameManager : NetworkBehaviour
     // State Events
     public delegate void ChangeStateAction();
     public static event ChangeStateAction OnStateChange;
+    public static event ChangeStateAction OnSetup;
     public static event ChangeStateAction OnStateIntro;
     public static event ChangeStateAction OnStateMorning;
     public static event ChangeStateAction OnStateForage;
@@ -66,6 +68,16 @@ public class GameManager : NetworkBehaviour
                 _netCurrentGameState.Value = 0;
         }
     }
+
+    // ================== Player Positions ==================
+    #region Player Positions
+    public void GetSeat(Transform playerTrans, ulong playerID)
+    {
+        Debug.Log("Getting Seat for player " + playerID);
+
+        playerTrans.position = playerPositions[(int)playerID].position;
+    }
+    #endregion
 
     // ====================== Player Readying ======================
     #region Player Readying
@@ -113,7 +125,8 @@ public class GameManager : NetworkBehaviour
         {
             case GameState.Intro:
                 if (IsServer)
-                    OnStateIntro();
+                    OnSetup();
+                OnStateIntro();
                 break;
             case GameState.Morning:
                 OnStateMorning();

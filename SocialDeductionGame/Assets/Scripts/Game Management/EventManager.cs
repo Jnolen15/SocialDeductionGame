@@ -27,7 +27,7 @@ public class EventManager : NetworkBehaviour
 
         if (IsServer)
         {
-            GameManager.OnStateIntro += PickEvent;
+            GameManager.OnSetup += PickEvent;
             GameManager.OnStateEvening += TestEvent;
         }
     }
@@ -40,7 +40,7 @@ public class EventManager : NetworkBehaviour
 
         if (IsServer)
         {
-            GameManager.OnStateIntro -= PickEvent;
+            GameManager.OnSetup -= PickEvent;
             GameManager.OnStateEvening -= TestEvent;
         }
     }
