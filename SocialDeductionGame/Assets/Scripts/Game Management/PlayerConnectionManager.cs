@@ -83,15 +83,15 @@ public class PlayerConnectionManager : NetworkBehaviour
         Instance._netNumPlayers.Value--;
         Instance._playerList.Remove(new PlayerEntry(clientID, NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject));
     }
+    #endregion
 
+    #region Helpers
     public static int GetNumConnectedPlayers()
     {
         Debug.Log("GetNumConnectedPlayers " + Instance._netNumPlayers.Value);
         return Instance._netNumPlayers.Value;
     }
-    #endregion
 
-    #region Living Players Tracking
     public static int GetNumLivingPlayers()
     {
         int numAlive = 0;
@@ -103,6 +103,19 @@ public class PlayerConnectionManager : NetworkBehaviour
         }
         Debug.Log("GetNumLivingPlayers " + numAlive);
         return numAlive;
+    }
+
+    public static List<GameObject> GetLivingPlayerGameObjects()
+    {
+        List<GameObject> players = new();
+
+        foreach (PlayerEntry playa in Instance._playerList)
+        {
+            if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving())
+                players.Add(playa.PlayerObject);
+        }
+
+        return players;
     }
     #endregion
 

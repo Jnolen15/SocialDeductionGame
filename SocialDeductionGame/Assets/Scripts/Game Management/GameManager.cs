@@ -60,7 +60,7 @@ public class GameManager : NetworkBehaviour
         if (!IsServer) return;
 
         // Skip to next state
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.S))
         {
             _netCurrentGameState.Value++;
 

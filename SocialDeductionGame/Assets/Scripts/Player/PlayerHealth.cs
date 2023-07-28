@@ -10,10 +10,10 @@ public class PlayerHealth : NetworkBehaviour
 
     // Data
     [SerializeField] private int _maxHP = 6;
-    [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Owner);
+    [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _maxHunger = 3;
     [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Owner);
-    [SerializeField] private NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Owner);
+    [SerializeField] private NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
 
     // Events
     public delegate void ValueModified(float ModifiedAmmount, float newTotal);
@@ -31,11 +31,15 @@ public class PlayerHealth : NetworkBehaviour
 
         if (IsOwner)
         {
-            _netIsLiving.Value = true;
-
             GameManager.OnStateMorning += HungerDrain;
             _netCurrentHP.OnValueChanged += HealthChanged;
             _netCurrentHunger.OnValueChanged += HungerChanged;
+            _netIsLiving.OnValueChanged += Die;
+        }
+
+        if (IsServer)
+        {
+            _netIsLiving.Value = true;
         }
     }
 
@@ -45,7 +49,7 @@ public class PlayerHealth : NetworkBehaviour
 
         if (IsOwner)
         {
-            _netCurrentHP.Value = 3;
+            ModifyHealthServerRPC(3, false);
             _netCurrentHunger.Value = 1.5f;
         }
     }
@@ -57,6 +61,7 @@ public class PlayerHealth : NetworkBehaviour
         GameManager.OnStateMorning -= HungerDrain;
         _netCurrentHP.OnValueChanged -= HealthChanged;
         _netCurrentHunger.OnValueChanged -= HungerChanged;
+        _netIsLiving.OnValueChanged -= Die;
     }
     #endregion
 
@@ -75,34 +80,18 @@ public class PlayerHealth : NetworkBehaviour
         if (!IsLiving())
             return;
 
-        ModifyHealthServerRPC(ammount);
+        ModifyHealthServerRPC(ammount, true);
     }
 
-    [ServerRpc]
-    private void ModifyHealthServerRPC(int ammount, ServerRpcParams serverRpcParams = default)
-    {
-        // Get client data
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientId }
-            }
-        };
-
-        // TODO - Check if health augment is viable currently
-        // Note: If no checks take place, no RPCs are needed just adjust the _netCurrentHP in the base function
-
-        ModifyHealthClientRpc(ammount, clientRpcParams);
-    }
-
-    [ClientRpc]
-    private void ModifyHealthClientRpc(int ammount, ClientRpcParams clientRpcParams = default)
+    [ServerRpc(RequireOwnership = false)]
+    private void ModifyHealthServerRPC(int ammount, bool add, ServerRpcParams serverRpcParams = default)
     {
         Debug.Log($"{NetworkManager.Singleton.LocalClientId} had its health incremented by {ammount}");
 
-        _netCurrentHP.Value += ammount;
+        if(add)
+            _netCurrentHP.Value += ammount;
+        else
+            _netCurrentHP.Value = ammount;
 
         // Clamp HP within bounds
         if (_netCurrentHP.Value < 0)
@@ -112,14 +101,16 @@ public class PlayerHealth : NetworkBehaviour
 
         // Death Check
         if (_netCurrentHP.Value == 0)
-            Die();
+            _netIsLiving.Value = false;
     }
 
-    // sets networked bool to false and triggers OnDeath event
-    private void Die()
+    // called when _netIsLiving changes, triggers OnDeath event
+    private void Die(bool prev, bool next)
     {
+        if (next == true)
+            return;
+
         Debug.Log($"<color=#FF0000>Player {NetworkManager.Singleton.LocalClientId} has died!</color>");
-        _netIsLiving.Value = false;
         OnDeath();
         _playerData.OnPlayerDeath();
     }
