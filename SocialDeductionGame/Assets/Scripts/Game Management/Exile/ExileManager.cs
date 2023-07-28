@@ -6,7 +6,6 @@ using Unity.Netcode;
 public class ExileManager : NetworkBehaviour
 {
     // ================== Refrences / Variables ==================
-    [SerializeField] private GameObject _nobodyVotePrefab;
     [SerializeField] private GameObject _votePrefab;
     [SerializeField] private Transform _voteArea;
     [SerializeField] private GameObject _exileButton;
@@ -125,7 +124,7 @@ public class ExileManager : NetworkBehaviour
         _exileUI.SetActive(true);
 
         // Add nobody vote
-        ExileVote nobodyVote = Instantiate(_nobodyVotePrefab, _voteArea).GetComponent<ExileVote>();
+        ExileVote nobodyVote = Instantiate(_votePrefab, _voteArea).GetComponent<ExileVote>();
         nobodyVote.Setup(999, "Nobody", this);
 
         // Add entry for each player
@@ -205,6 +204,11 @@ public class ExileManager : NetworkBehaviour
     public void ShowResultsClientRpc(int[] results)
     {
         _closeUIButton.SetActive(true);
+
+        // NOTE: MAYBE IN FUTURE MOVE THIS TO A PLAYER UI, that way its in a place where I dont have to get component
+        // Dont let dead players vote
+        if (!GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>().IsLiving())
+            return;
 
         int i = 0;
 

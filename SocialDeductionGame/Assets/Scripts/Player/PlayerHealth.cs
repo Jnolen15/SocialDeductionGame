@@ -12,7 +12,7 @@ public class PlayerHealth : NetworkBehaviour
     [SerializeField] private int _maxHP = 6;
     [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _maxHunger = 3;
-    [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Owner);
+    [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
 
     // Events
@@ -50,7 +50,7 @@ public class PlayerHealth : NetworkBehaviour
         if (IsOwner)
         {
             ModifyHealthServerRPC(3, false);
-            _netCurrentHunger.Value = 1.5f;
+            ModifyHungerServerRPC(1.5f, false);
         }
     }
 
@@ -74,7 +74,7 @@ public class PlayerHealth : NetworkBehaviour
 
     // ==================== Health ====================
     #region Health
-    // Calls server then client to increase or decrease player health
+    // Calls server to increase or decrease player health
     public void ModifyHealth(int ammount)
     {
         if (!IsLiving())
@@ -123,14 +123,26 @@ public class PlayerHealth : NetworkBehaviour
 
     // ==================== Hunger ====================
     #region Hunger
-    // Calls server then client to increase or decrease player health
+    // Calls server to increase or decrease player hunger
     public void ModifyHunger(float ammount)
     {
         if (!IsLiving())
             return;
 
-        _netCurrentHunger.Value += ammount;
+        ModifyHungerServerRPC(ammount, true);
+    }
 
+    [ServerRpc(RequireOwnership = false)]
+    private void ModifyHungerServerRPC(float ammount, bool add, ServerRpcParams serverRpcParams = default)
+    {
+        Debug.Log($"{NetworkManager.Singleton.LocalClientId} had its hunger incremented by {ammount}");
+
+        if (add)
+            _netCurrentHunger.Value += ammount;
+        else
+            _netCurrentHunger.Value = ammount;
+
+        // Clamp Hunger within bounds
         if (_netCurrentHunger.Value < 0)
             _netCurrentHunger.Value = 0;
         else if (_netCurrentHunger.Value > _maxHunger)
