@@ -9,16 +9,33 @@ public class ExileVote : NetworkBehaviour
     // ================== Refrences / Variables ==================
     [SerializeField] private GameObject _voteStage;
     [SerializeField] private GameObject _resultsStage;
+    [SerializeField] private GameObject _confirmationButton;
     [SerializeField] private TextMeshProUGUI _buttonName;
     [SerializeField] private TextMeshProUGUI _textName;
     [SerializeField] private TextMeshProUGUI _resultsNum;
-
+    private PlayerUI _playerUI;
     private ulong _playerID;
     private ExileManager _exileManager;
 
+    // Event
+    public delegate void HitNameButton();
+    public static event HitNameButton OnHitNameButton;
+
     // ================== Setup ==================
+    private void OnEnable()
+    {
+        OnHitNameButton += CloseConfirmation;
+    }
+
+    private void OnDisable()
+    {
+        OnHitNameButton -= CloseConfirmation;
+    }
+
     public void Setup(ulong playerID, string pName, ExileManager eManager)
     {
+        _playerUI = gameObject.GetComponentInParent<PlayerUI>();
+
         _playerID = playerID;
         _exileManager = eManager;
 
@@ -37,11 +54,27 @@ public class ExileVote : NetworkBehaviour
         _resultsStage.SetActive(true);
     }
 
+    public void SelectNameButton()
+    {
+        OnHitNameButton();
+
+        if (!_playerUI.HasVoted())
+            _confirmationButton.SetActive(true);
+    }
+
+    public void CloseConfirmation()
+    {
+        _confirmationButton.SetActive(false);
+    }
+
     // ================== Exile ==================
     public void SubmitVote()
     {
-        _exileManager.SubmitPlayerVoteServerRpc(_playerID);
+        // Don't submit vote if already submitted
+        if (_playerUI.HasVoted())
+            return;
 
-        // Lock player out of voting more
+        _exileManager.SubmitPlayerVoteServerRpc(_playerID);
+        _playerUI.Vote();
     }
 }

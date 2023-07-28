@@ -6,17 +6,14 @@ using Unity.Netcode;
 public class ExileManager : NetworkBehaviour
 {
     // ================== Refrences / Variables ==================
-    [SerializeField] private GameObject _votePrefab;
-    [SerializeField] private Transform _voteArea;
     [SerializeField] private GameObject _exileButton;
-    [SerializeField] private GameObject _exileUI;
-    [SerializeField] private ExileVote _nobodyVote;
-    [SerializeField] private GameObject _closeUIButton;
 
-    [SerializeField] private List<ExileVoteEntry> _voteList = new();
+    private PlayerUI _playerUI;
 
+    private List<ExileVoteEntry> _voteList = new();
     [SerializeField] private NetworkVariable<int> _netPlayersVoted = new();
 
+    #region ExileVoteEntry
     public class ExileVoteEntry
     {
         public ulong PlayerID;
@@ -42,8 +39,10 @@ public class ExileManager : NetworkBehaviour
 
         return null;
     }
+    #endregion
 
     // ================== Setup ==================
+    #region Setup
     private void OnEnable()
     {
         GameManager.OnStateEvening += EnableExileButton;
@@ -55,8 +54,10 @@ public class ExileManager : NetworkBehaviour
         GameManager.OnStateEvening -= EnableExileButton;
         GameManager.OnStateNight -= DisableExileButton;
     }
+    #endregion
 
     // ================== Exile ==================
+    #region Exile
     private void EnableExileButton()
     {
         _exileButton.SetActive(true);
@@ -110,37 +111,12 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     public void StartExileClientRpc(ulong[] playerIDList)
     {
-        // NOTE: MAYBE IN FUTURE MOVE THIS TO A PLAYER UI, that way its in a place where I dont have to get component
-        // Dont let dead players vote
-        if (!GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>().IsLiving())
-            return;
-
-        // Clear old stuff
-        foreach (Transform child in _voteArea)
-            Destroy(child.gameObject);
-
         _exileButton.SetActive(false);
-        _closeUIButton.SetActive(false);
-        _exileUI.SetActive(true);
 
-        // Add nobody vote
-        ExileVote nobodyVote = Instantiate(_votePrefab, _voteArea).GetComponent<ExileVote>();
-        nobodyVote.Setup(999, "Nobody", this);
+        if (_playerUI == null)
+            _playerUI = GameObject.FindGameObjectWithTag("Player").GetComponentInChildren<PlayerUI>();
 
-        // Add entry for each player
-        foreach (ulong id in playerIDList)
-        {
-            if(id != 999)
-            {
-                // Instantiate a vote box
-                var curVote = Instantiate(_votePrefab, _voteArea).GetComponent<ExileVote>();
-
-                // Setup Vote
-                ulong pID = id;
-                string pName = "Player " + pID.ToString();
-                curVote.Setup(pID, pName, this);
-            }
-        }
+        _playerUI.StartExile(playerIDList, this);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -203,19 +179,10 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     public void ShowResultsClientRpc(int[] results)
     {
-        _closeUIButton.SetActive(true);
+        if (_playerUI == null)
+            _playerUI = GameObject.FindGameObjectWithTag("Player").GetComponentInChildren<PlayerUI>();
 
-        // NOTE: MAYBE IN FUTURE MOVE THIS TO A PLAYER UI, that way its in a place where I dont have to get component
-        // Dont let dead players vote
-        if (!GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>().IsLiving())
-            return;
-
-        int i = 0;
-
-        foreach (Transform child in _voteArea)
-        {
-            child.GetComponent<ExileVote>().DisplayResults(results[i]);
-            i++;
-        }
+        _playerUI.ShowResults(results);
     }
+    #endregion
 }

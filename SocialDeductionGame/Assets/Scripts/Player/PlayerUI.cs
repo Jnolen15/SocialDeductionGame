@@ -16,6 +16,16 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _hungerText;
     [SerializeField] private GameObject _deathMessage;
 
+    [Header("Exile Vote UI Refrences")]
+    [SerializeField] private GameObject _votePrefab;
+    [SerializeField] private Transform _voteArea;
+    [SerializeField] private GameObject _exileUI;
+    [SerializeField] private GameObject _closeUIButton;
+
+    private bool hasVoted;
+
+    // ================== Setup ==================
+    #region Setup
     public void OnEnable()
     {
         _playerHealth = this.GetComponentInParent<PlayerHealth>();
@@ -35,7 +45,10 @@ public class PlayerUI : MonoBehaviour
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= DisplayDeathMessage;
     }
+    #endregion
 
+    // ================== Misc UI ==================
+    #region Misc UI
     private void EnableReadyButton()
     {
         if (!_playerHealth.IsLiving())
@@ -76,4 +89,69 @@ public class PlayerUI : MonoBehaviour
     {
         _deathMessage.SetActive(true);
     }
+    #endregion
+
+    // ================== Exile UI ==================
+    #region Exile UI
+    public void Vote()
+    {
+        hasVoted = true;
+    }
+
+    public bool HasVoted()
+    {
+        return hasVoted;
+    }
+
+    public void StartExile(ulong[] playerIDList, ExileManager exileManager)
+    {
+        // Dont let dead players vote
+        if (!_playerHealth.IsLiving())
+            return;
+
+        // Clear old stuff
+        foreach (Transform child in _voteArea)
+            Destroy(child.gameObject);
+
+        _closeUIButton.SetActive(false);
+        _exileUI.SetActive(true);
+        hasVoted = false;
+
+        // Add nobody vote
+        ExileVote nobodyVote = Instantiate(_votePrefab, _voteArea).GetComponent<ExileVote>();
+        nobodyVote.Setup(999, "Nobody", exileManager);
+
+        // Add entry for each player
+        foreach (ulong id in playerIDList)
+        {
+            if (id != 999)
+            {
+                // Instantiate a vote box
+                var curVote = Instantiate(_votePrefab, _voteArea).GetComponent<ExileVote>();
+
+                // Setup Vote
+                ulong pID = id;
+                string pName = "Player " + pID.ToString();
+                curVote.Setup(pID, pName, exileManager);
+            }
+        }
+    }
+
+    public void ShowResults(int[] results)
+    {
+        // Dont show dead players (Unless they just died)
+        if (!_exileUI.activeInHierarchy)
+            return;
+
+        _closeUIButton.SetActive(true);
+
+        int i = 0;
+
+        foreach (Transform child in _voteArea)
+        {
+            child.GetComponent<ExileVote>().DisplayResults(results[i]);
+            i++;
+        }
+    }
+    #endregion
 }

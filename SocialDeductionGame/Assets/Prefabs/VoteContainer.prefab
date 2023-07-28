@@ -492,17 +492,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3068717396315135535}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 3991373037302423509}
+        m_TargetAssemblyTypeName: ExileVote, Assembly-CSharp
+        m_MethodName: SelectNameButton
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 1
+          m_BoolArgument: 0
         m_CallState: 2
 --- !u!1 &5041042436349606570
 GameObject:
@@ -617,6 +617,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _voteStage: {fileID: 3875501225571863715}
   _resultsStage: {fileID: 1270135996827713983}
+  _confirmationButton: {fileID: 3068717396315135535}
   _buttonName: {fileID: 5781055676974894539}
   _textName: {fileID: 6752228354934978652}
   _resultsNum: {fileID: 8172621455753731990}
