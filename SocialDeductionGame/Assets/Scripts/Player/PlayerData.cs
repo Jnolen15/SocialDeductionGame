@@ -21,6 +21,7 @@ public class PlayerData : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI _teamText;
 
     // ================== Variables ==================
+    [SerializeField] private string _playerName;
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
     [SerializeField] private NetworkVariable<bool> _netPlayerReady = new();
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
@@ -31,6 +32,10 @@ public class PlayerData : NetworkBehaviour
         Saboteurs
     }
     private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
+
+    // Events
+    public delegate void ChangeName(ulong id, string pName);
+    public static event ChangeName OnChangeName;
 
     // ================== Setup ==================
     #region Setup
@@ -80,18 +85,28 @@ public class PlayerData : NetworkBehaviour
 
         UpdateTeamText(Team.Survivors, _netTeam.Value);
     }
+    #endregion
 
+    // ================ Player Name / ID ================
+    #region Player Name / ID
     [ServerRpc]
     private void SetPlayerIDServerRpc(ServerRpcParams serverRpcParams = default)
     {
         _netPlayerID.Value = serverRpcParams.Receive.SenderClientId;
     }
-    #endregion
 
     public ulong GetPlayerID()
     {
         return _netPlayerID.Value;
     }
+
+    public void SetPlayerName(string pName)
+    {
+        _playerName = pName;
+        Debug.Log("Change Name " + _netPlayerID.Value + " to " + pName);
+        OnChangeName(_netPlayerID.Value, pName);
+    }
+    #endregion
 
     // ================ Teams ================
     #region Teams

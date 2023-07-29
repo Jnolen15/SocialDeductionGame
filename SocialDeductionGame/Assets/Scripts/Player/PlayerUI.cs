@@ -5,6 +5,7 @@ using TMPro;
 
 public class PlayerUI : MonoBehaviour
 {
+    private PlayerData _playerData;
     private PlayerHealth _playerHealth;
 
     [Header("UI Refrences")]
@@ -14,7 +15,9 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _locationText;
     [SerializeField] private TextMeshProUGUI _healthText;
     [SerializeField] private TextMeshProUGUI _hungerText;
+    [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private GameObject _deathMessage;
+    [SerializeField] private GameObject _playerNameSubmission;
 
     [Header("Exile Vote UI Refrences")]
     [SerializeField] private GameObject _votePrefab;
@@ -28,9 +31,12 @@ public class PlayerUI : MonoBehaviour
     #region Setup
     public void OnEnable()
     {
+        _playerData = this.GetComponentInParent<PlayerData>();
         _playerHealth = this.GetComponentInParent<PlayerHealth>();
 
         GameManager.OnStateChange += EnableReadyButton;
+        GameManager.OnStateIntro += EnablePlayerNaming;
+        GameManager.OnStateMorning += DisablePlayerNaming;
         GameManager.OnStateForage += ToggleMap;
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
@@ -40,6 +46,8 @@ public class PlayerUI : MonoBehaviour
     private void OnDisable()
     {
         GameManager.OnStateChange -= EnableReadyButton;
+        GameManager.OnStateIntro -= EnablePlayerNaming;
+        GameManager.OnStateMorning -= DisablePlayerNaming;
         GameManager.OnStateForage -= ToggleMap;
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
@@ -49,6 +57,22 @@ public class PlayerUI : MonoBehaviour
 
     // ================== Misc UI ==================
     #region Misc UI
+    private void EnablePlayerNaming()
+    {
+        _playerNameSubmission.SetActive(true);
+    }
+
+    private void DisablePlayerNaming()
+    {
+        _playerNameSubmission.SetActive(false);
+    }
+
+    public void SetPlayerName(string name)
+    {
+        _nameText.text = name;
+        _playerData.SetPlayerName(name);
+    }
+
     private void EnableReadyButton()
     {
         if (!_playerHealth.IsLiving())
