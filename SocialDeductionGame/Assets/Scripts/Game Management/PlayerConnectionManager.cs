@@ -22,15 +22,28 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     [SerializeField] private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private Dictionary<ulong, PlayerEntry> _playerDict = new();
-    [System.Serializable]
-    public class PlayerEntry
+    private Dictionary<ulong, PlayerEntry> _playerDict = new();
+    public class PlayerEntry : INetworkSerializable
     {
         public string PlayerName;
         public GameObject PlayerObject;
 
-        public PlayerEntry(GameObject playerObj)
+        // INetworkSerializable
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
+            serializer.SerializeValue(ref PlayerName);
+        }
+
+        // ConstructorS
+        public PlayerEntry()
+        {
+            PlayerName = string.Empty;
+            PlayerObject = null;
+        }
+
+        public PlayerEntry(string playerName, GameObject playerObj)
+        {
+            PlayerName = playerName;
             PlayerObject = playerObj;
         }
 
@@ -55,6 +68,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
         GameManager.OnSetup += AssignRoles;
+        GameManager.OnStateMorning += SyncClientPlayerDictServerRpc;
     }
 
     public override void OnNetworkDespawn()
@@ -67,6 +81,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
         GameManager.OnSetup -= AssignRoles;
+        GameManager.OnStateMorning -= SyncClientPlayerDictServerRpc;
     }
     #endregion
 
@@ -81,7 +96,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         Debug.Log($"SERVER: Client {clientID} connected");
         Instance._netNumPlayers.Value++;
-        Instance._playerDict.Add(clientID, new PlayerEntry(NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject));
+        Instance._playerDict.Add(clientID, new PlayerEntry("Player " + clientID, NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject));
     }
 
     private void ClientDisconnected(ulong clientID)
@@ -89,6 +104,33 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log($"SERVER: Client {clientID} disconnected");
         Instance._netNumPlayers.Value--;
         Instance._playerDict.Remove(clientID);
+    }
+    #endregion
+
+    // ============== Client Sync ==============
+    #region Client Syncs
+    // Updates local client dictionaries to (mostly) match server one
+    // Currently only updates with IDs and Names
+    // Each morning it is synced. On clients the dict is cleared and then re-added
+    [ServerRpc]
+    private void SyncClientPlayerDictServerRpc()
+    {
+        SyncClientPlayerDictClientRpc(Instance._playerDict.Keys.ToArray(), Instance._playerDict.Values.ToArray());
+    }
+
+    [ClientRpc]
+    private void SyncClientPlayerDictClientRpc(ulong[] iDArry, PlayerEntry[] playerEntyArry)
+    {
+        if (IsServer)
+            return;
+
+        Instance._playerDict.Clear();
+
+        for (int i = 0; i < iDArry.Length; i++)
+        {
+            Debug.Log("<color=blue>CLIENT: </color> Recieved Id: " + iDArry[i] + " Name: " + playerEntyArry[i].PlayerName);
+            Instance._playerDict.Add(iDArry[i], new PlayerEntry(playerEntyArry[i].PlayerName, null));
+        }
     }
     #endregion
 
@@ -171,7 +213,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log("Assigning Roles");
 
         // Pick one random player and assign them to team Saboteurs
-        ulong rand = Instance._playerDict.Keys.ToArray()[(int)Random.Range(0, Instance._playerDict.Keys.Count - 1)];
+        ulong rand = Instance._playerDict.Keys.ToArray()[(int)Random.Range(0, Instance._playerDict.Keys.Count)];
         Instance._playerDict[rand].PlayerObject.GetComponent<PlayerData>().SetTeam(PlayerData.Team.Saboteurs);
     }
     #endregion

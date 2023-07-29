@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 
-public class ExileVote : NetworkBehaviour
+public class ExileVote : MonoBehaviour
 {
     // ================== Refrences / Variables ==================
     [SerializeField] private GameObject _voteStage;
@@ -39,8 +39,8 @@ public class ExileVote : NetworkBehaviour
         _playerID = playerID;
         _exileManager = eManager;
 
-        _buttonName.text = pName;
-        _textName.text = pName;
+        _buttonName.text = PlayerConnectionManager.GetPlayerNameByID(playerID) ?? pName;
+        _textName.text = PlayerConnectionManager.GetPlayerNameByID(playerID) ?? pName;
 
         _voteStage.SetActive(true);
         _resultsStage.SetActive(false);
