@@ -20,7 +20,7 @@ public class PlayerData : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI _teamText;
 
     // ================== Variables ==================
-    public NetworkVariable<FixedString32Bytes> _playerName = new(writePerm: NetworkVariableWritePermission.Owner);
+    public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
     [SerializeField] private NetworkVariable<bool> _netPlayerReady = new();
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
@@ -45,6 +45,7 @@ public class PlayerData : NetworkBehaviour
             LocationManager.OnForceLocationChange += ChangeLocation;
             CardManager.OnCardsGained += GainCards;
             _netTeam.OnValueChanged += UpdateTeamText;
+            GameManager.OnStateIntro += SetPlayerDefaultName;
             GameManager.OnStateChange += UnReadyPlayer;
             GameManager.OnStateNight += ShowEventChoices;
 
@@ -52,6 +53,7 @@ public class PlayerData : NetworkBehaviour
         } else
         {
             Destroy(_playerUI.gameObject);
+            _playerUI = null;
         }
 
         if (!IsOwner && !IsServer)
@@ -65,6 +67,7 @@ public class PlayerData : NetworkBehaviour
         LocationManager.OnForceLocationChange -= ChangeLocation;
         CardManager.OnCardsGained -= GainCards;
         _netTeam.OnValueChanged -= UpdateTeamText;
+        GameManager.OnStateIntro -= SetPlayerDefaultName;
         GameManager.OnStateChange -= UnReadyPlayer;
         GameManager.OnStateNight -= ShowEventChoices;
     }
@@ -97,10 +100,19 @@ public class PlayerData : NetworkBehaviour
         return _netPlayerID.Value;
     }
 
+    private void SetPlayerDefaultName()
+    {
+        _netPlayerName.Value = "Player " + _netPlayerID.Value;
+
+        if(_playerUI != null)
+            _playerUI.UpdatePlayerNameText(_netPlayerName.Value.ToString());
+    }
+
     public void SetPlayerName(string pName)
     {
-        _playerName.Value = pName;
         Debug.Log("Change Name " + _netPlayerID.Value + " to " + pName);
+        _netPlayerName.Value = pName;
+        _playerUI.UpdatePlayerNameText(_netPlayerName.Value.ToString());
         OnChangeName(_netPlayerID.Value, pName.ToString());
     }
     #endregion
@@ -399,6 +411,9 @@ public class PlayerData : NetworkBehaviour
     public void OnPlayerDeath()
     {
         DiscardHandServerRPC();
-        ReadyPlayer();
+
+        // Deal with ready for this round
+        //ReadyPlayer();
+        _playerUI.DisableReadyButton();
     }
 }

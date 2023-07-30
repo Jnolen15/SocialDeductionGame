@@ -11,6 +11,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private PlayerData _playerData;
     private PlayerHealth _playerHealth;
     [SerializeField] private TextMeshPro _namePlate;
+    [SerializeField] private GameObject _deathIndicator;
 
     // Variables
     [SerializeField] private List<CardTag> _cardTagsAccepted = new();
@@ -20,17 +21,25 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _playerHealth = GetComponentInParent<PlayerHealth>();
         _playerData = GetComponentInParent<PlayerData>();
 
-        _playerData._playerName.OnValueChanged += UpdateNamePlate;
+        _playerData._netPlayerName.OnValueChanged += UpdateNamePlate;
+        _playerHealth._netIsLiving.OnValueChanged += UpdateDeathIndicator;
     }
 
     private void OnDisable()
     {
-        _playerData._playerName.OnValueChanged -= UpdateNamePlate;
+        _playerData._netPlayerName.OnValueChanged -= UpdateNamePlate;
+        _playerHealth._netIsLiving.OnValueChanged -= UpdateDeathIndicator;
     }
 
+    // ================== Info ==================
     private void UpdateNamePlate(FixedString32Bytes prev, FixedString32Bytes next)
     {
         _namePlate.text = next.ToString();
+    }
+
+    private void UpdateDeathIndicator(bool prev, bool next)
+    {
+        _deathIndicator.SetActive(!next);
     }
 
     // ================== Interface ==================

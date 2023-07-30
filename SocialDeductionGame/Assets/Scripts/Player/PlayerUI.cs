@@ -69,8 +69,12 @@ public class PlayerUI : MonoBehaviour
 
     public void SetPlayerName(string name)
     {
-        _nameText.text = name;
         _playerData.SetPlayerName(name);
+    }
+
+    public void UpdatePlayerNameText(string name)
+    {
+        _nameText.text = name;
     }
 
     private void EnableReadyButton()
@@ -79,6 +83,11 @@ public class PlayerUI : MonoBehaviour
             return;
 
         _readyButton.SetActive(true);
+    }
+
+    public void DisableReadyButton()
+    {
+        _readyButton.SetActive(false);
     }
 
     public void ToggleReady(bool toggle)

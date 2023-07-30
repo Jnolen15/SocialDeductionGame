@@ -13,7 +13,7 @@ public class PlayerHealth : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _maxHunger = 3;
     [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
+    public NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
 
     // Events
     public delegate void ValueModified(float ModifiedAmmount, float newTotal);
