@@ -41,7 +41,7 @@ public class CardPicker : MonoBehaviour
 
             // Put card on screen
             Card newCard = Instantiate(CardDatabase.GetCard(cardID), _cardCanvas).GetComponent<Card>();
-            newCard.SetupUI();
+            newCard.SetupSelectable();
         }
     }
 

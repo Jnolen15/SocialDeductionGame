@@ -8,6 +8,7 @@ public class EventManager : NetworkBehaviour
 {
     // ================== Refrences ==================
     [SerializeField] private NightEventPicker _nightEventPickerMenu;
+    [SerializeField] private NightEventResults _nightEventResults;
     [SerializeField] private NightEventCardVisual _eventCardSmall;
     [SerializeField] private NightEventCardVisual _eventCardLarge;
     [SerializeField] private GameObject _eventFailText;
@@ -70,13 +71,16 @@ public class EventManager : NetworkBehaviour
 
     // Updates small event card with pass / fail text
     [ClientRpc]
-    private void UpdateEventUIClientRpc(bool passed)
+    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed)
     {
         if(passed)
             _eventPassText.SetActive(true);
         else
             _eventFailText.SetActive(true);
 
+        // Show ressults
+        _nightEventResults.gameObject.SetActive(true);
+        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, passed);
     }
 
     // Hides large event card from morning phase
@@ -103,7 +107,7 @@ public class EventManager : NetworkBehaviour
 
     // ================== Night Events ==================
     #region Night Events
-    // Checks if evnt ID is correct then updates the networked night event id
+    // Checks if event ID is correct then updates the networked night event id
     [ServerRpc(RequireOwnership = false)]
     public void SetNightEventServerRpc(int eventID)
     {
@@ -113,9 +117,9 @@ public class EventManager : NetworkBehaviour
         _netCurrentNightEventID.Value = eventID;
     }
 
-    // Calls InvokeNightEvent if event test failed
     private void DoEvent()
     {
+        // Calls InvokeNightEvent if event test failed
         if (_netPassedNightEvent.Value)
             Debug.Log("Event passed, no suffering");
         else
@@ -134,9 +138,10 @@ public class EventManager : NetworkBehaviour
     }
 
     // Tests if event was successfully prevented via correct resourcess in pile
+    // Only the server runs this
     private void TestEvent()
     {
-        Debug.Log("Testing Event");
+        Debug.Log("<color=yellow>SERVER: </color> Testing Event");
 
         // IF SERVER then Run tests
         if (!IsServer)
@@ -151,16 +156,19 @@ public class EventManager : NetworkBehaviour
         int successPoints = 0;
         // In a loop, get each card in the stockpile
         int totCards = _stockpile.GetNumCards();
+        int[] cardIDS = new int[totCards]; // For pass to results screen
         for (int i = 0; i <= totCards; i++)
         {
             int cardID = _stockpile.GetTopCard();
             if (cardID == -1)
             {
-                Debug.Log("No cards in stockpile");
+                Debug.Log("<color=yellow>SERVER: </color>No cards in stockpile");
                 break;
             }
             GameObject card = CardDatabase.GetCard(cardID);
             bool matched = false;
+
+            cardIDS[i] = cardID;
 
             // Test if card subtype matches Night event subtipe requirement list
             foreach (CardTag tag in nEvent.GetRequiredCardTags())
@@ -168,7 +176,7 @@ public class EventManager : NetworkBehaviour
                 if (card.GetComponent<Card>().GetSubTags().Contains(tag))
                 {
                     matched = true;
-                    Debug.Log($"Card Tested: {card.GetComponent<Card>().GetCardName()}, contained subtag {tag}");
+                    Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, contained subtag {tag}");
                     break;
                 }
             }
@@ -176,29 +184,29 @@ public class EventManager : NetworkBehaviour
             if (matched) // If it does +1 SP    
             {
                 successPoints++;
-                Debug.Log("Card Matched! " + successPoints);
+                Debug.Log("<color=yellow>SERVER: </color>Card Matched! " + successPoints);
             }
             else        // If not -1 SP
             {
                 successPoints--;
-                Debug.Log("Card did not Match! " + successPoints);
+                Debug.Log("<color=yellow>SERVER: </color>Card did not Match! " + successPoints);
             }
         }
 
         // If number of points >= number of required points, success
         if (successPoints >= nEvent.GetSuccessPoints(PlayerConnectionManager.GetNumLivingPlayers()))
         {
-            Debug.Log("Event Pass!");
+            Debug.Log("<color=yellow>SERVER: </color>Event Pass!");
             _netPassedNightEvent.Value = true;
         }
         else
         {
-            Debug.Log("Event Fail!");
+            Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
             _netPassedNightEvent.Value = false;
         }
 
         // Update all clients visually
-        UpdateEventUIClientRpc(_netPassedNightEvent.Value);
+        UpdateEventUIClientRpc(cardIDS, _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, _netPassedNightEvent.Value);
     }
     #endregion
 }

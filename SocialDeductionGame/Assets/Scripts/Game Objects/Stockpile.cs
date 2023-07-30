@@ -12,6 +12,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     // ================== Variables ==================
     [SerializeField] private bool _acceptingCards;
     [SerializeField] private List<int> _stockpileCardIDs = new();
+    [SerializeField] private List<ulong> _contributorIDs = new();
     [SerializeField] private NetworkVariable<int> _netCardsInStockpile = new(writePerm: NetworkVariableWritePermission.Server);
 
     // ================== Setup ==================
@@ -19,6 +20,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     {
         _netCardsInStockpile.OnValueChanged += UpdateCardsText;
 
+        GameManager.OnStateMorning += ClearAll;
         GameManager.OnStateAfternoon += ToggleAcceptingCards;
         GameManager.OnStateEvening += ToggleAcceptingCards;
     }
@@ -27,6 +29,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     {
         _netCardsInStockpile.OnValueChanged -= UpdateCardsText;
 
+        GameManager.OnStateMorning -= ClearAll;
         GameManager.OnStateAfternoon -= ToggleAcceptingCards;
         GameManager.OnStateEvening -= ToggleAcceptingCards;
     }
@@ -53,15 +56,24 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         _acceptingCards = !_acceptingCards;
     }
 
-    public void AddCard(int cardID)
+    private void ClearAll()
     {
-        AddCardsServerRpc(cardID);
+        _stockpileCardIDs.Clear();
+        _contributorIDs.Clear();
+        //_netCardsInStockpile.Value = 0;
+    }
+
+    public void AddCard(int cardID, ulong playerID)
+    {
+        AddCardsServerRpc(cardID, playerID);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void AddCardsServerRpc(int cardID)
+    public void AddCardsServerRpc(int cardID, ulong playerID)
     {
         _stockpileCardIDs.Add(cardID);
+        if(!_contributorIDs.Contains(playerID))
+            _contributorIDs.Add(playerID);
         _netCardsInStockpile.Value++;
     }
 
@@ -70,7 +82,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         return _netCardsInStockpile.Value;
     }
 
-    // Gets and removes the top card of teh stockpile
+    // Gets and removes the top card of thes stockpile
     public int GetTopCard()
     {
         if (_stockpileCardIDs.Count <= 0)
@@ -83,5 +95,11 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         //Debug.Log("Pop: " + topCard);
 
         return topCard;
+    }
+
+    public ulong[] GetContributorIDs()
+    {
+        _contributorIDs.Sort(); // Sorts list so it isnt in order of who contributed first
+        return _contributorIDs.ToArray();
     }
 }

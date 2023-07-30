@@ -94,14 +94,14 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     private void ClientConnected(ulong clientID)
     {
-        Debug.Log($"SERVER: Client {clientID} connected");
+        Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} connected");
         Instance._netNumPlayers.Value++;
         Instance._playerDict.Add(clientID, new PlayerEntry("Player " + clientID, NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject));
     }
 
     private void ClientDisconnected(ulong clientID)
     {
-        Debug.Log($"SERVER: Client {clientID} disconnected");
+        Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} disconnected");
         Instance._netNumPlayers.Value--;
         Instance._playerDict.Remove(clientID);
     }
@@ -175,6 +175,17 @@ public class PlayerConnectionManager : NetworkBehaviour
         }
 
         return players;
+    }
+
+    // BETTER WAY TO DO THIS BY JUST GETTING IT FROM NETWORK SINGLETON?
+    public static ulong GetThisPlayersID()
+    {
+        PlayerData player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>();
+        if (player != null)
+            return player.GetComponent<PlayerData>().GetPlayerID();
+        else
+            return 999;
+
     }
     #endregion
 

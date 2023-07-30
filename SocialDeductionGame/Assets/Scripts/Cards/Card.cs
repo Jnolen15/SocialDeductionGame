@@ -17,6 +17,7 @@ public abstract class Card : MonoBehaviour
 
     [Header("Card Prefabs")]
     [SerializeField] private GameObject _cardPlayablePrefab;
+    [SerializeField] private GameObject _cardSelectablePrefab;
     [SerializeField] private GameObject _cardUIPrefab;
 
     // ========== Getters ==========
@@ -53,12 +54,21 @@ public abstract class Card : MonoBehaviour
 
 
     // ========== Card Functionality ==========
+    // Playable card for in the playerss hand
     public void SetupPlayable()
     {
         GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription);
     }
 
+    // Selectable card for foraging
+    public void SetupSelectable()
+    {
+        GameObject cardVisual = Instantiate(_cardSelectablePrefab, transform);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription);
+    }
+
+    // Visual card for non-interactable UI
     public void SetupUI()
     {
         GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
@@ -72,7 +82,10 @@ public abstract class Card : MonoBehaviour
         if (stockpile != null)
         {
             Debug.Log("Playng card to stockpile: " + _cardName);
-            stockpile.AddCard(GetCardID());
+            if (PlayerConnectionManager.GetThisPlayersID() != 999)
+                stockpile.AddCard(GetCardID(), PlayerConnectionManager.GetThisPlayersID());
+            else
+                Debug.LogError("Player ID was 999 when playing to stockpile");
         }
         else
             Debug.LogError("Card was played on a location it can't do anything with");
