@@ -82,10 +82,7 @@ public abstract class Card : MonoBehaviour
         if (stockpile != null)
         {
             Debug.Log("Playng card to stockpile: " + _cardName);
-            if (PlayerConnectionManager.GetThisPlayersID() != 999)
-                stockpile.AddCard(GetCardID(), PlayerConnectionManager.GetThisPlayersID());
-            else
-                Debug.LogError("Player ID was 999 when playing to stockpile");
+            stockpile.AddCard(GetCardID(), PlayerConnectionManager.GetThisPlayersID());
         }
         else
             Debug.LogError("Card was played on a location it can't do anything with");

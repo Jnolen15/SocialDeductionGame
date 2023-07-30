@@ -180,12 +180,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     // BETTER WAY TO DO THIS BY JUST GETTING IT FROM NETWORK SINGLETON?
     public static ulong GetThisPlayersID()
     {
-        PlayerData player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>();
-        if (player != null)
-            return player.GetComponent<PlayerData>().GetPlayerID();
-        else
-            return 999;
-
+        return NetworkManager.Singleton.LocalClientId;
     }
     #endregion
 
