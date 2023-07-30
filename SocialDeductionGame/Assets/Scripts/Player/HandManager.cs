@@ -8,7 +8,6 @@ public class HandManager : NetworkBehaviour
 {
     // Refrences
     private PlayerData _pData;
-    [SerializeField] private GameObject _playerCanvas;
     [SerializeField] private Transform _cardSlot;
 
     // Data
@@ -17,13 +16,6 @@ public class HandManager : NetworkBehaviour
     // ================ Setup ================
     public override void OnNetworkSpawn()
     {
-        if (!IsOwner)
-        {
-            Destroy(_playerCanvas);
-            _playerCanvas = null;
-            _cardSlot = null;
-        }
-
         if (!IsOwner && !IsServer) enabled = false;
     }
 

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Collections;
 using TMPro;
 
 public class PlayerData : NetworkBehaviour
@@ -10,18 +11,16 @@ public class PlayerData : NetworkBehaviour
     private HandManager _handManager;
     private PlayerController _playerController;
     private PlayerHealth _playerHealth;
-    private PlayerUI _playerUI;
+    [SerializeField] private PlayerUI _playerUI;
 
     private LocationManager _locationManager;
     private EventManager _nightEventManger;
     private GameManager _gameManager;
 
-    [SerializeField] private GameObject _playerObjPref;
-    [SerializeField] private GameObject _dummyObjPref;
     [SerializeField] private TextMeshProUGUI _teamText;
 
     // ================== Variables ==================
-    [SerializeField] private string _playerName;
+    public NetworkVariable<FixedString32Bytes> _playerName = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
     [SerializeField] private NetworkVariable<bool> _netPlayerReady = new();
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
@@ -49,11 +48,10 @@ public class PlayerData : NetworkBehaviour
             GameManager.OnStateChange += UnReadyPlayer;
             GameManager.OnStateNight += ShowEventChoices;
 
-            Instantiate(_playerObjPref, transform);
             SetPlayerIDServerRpc();
         } else
         {
-            Instantiate(_dummyObjPref, transform);
+            Destroy(_playerUI.gameObject);
         }
 
         if (!IsOwner && !IsServer)
@@ -76,7 +74,6 @@ public class PlayerData : NetworkBehaviour
         _handManager = gameObject.GetComponent<HandManager>();
         _playerController = gameObject.GetComponent<PlayerController>();
         _playerHealth = gameObject.GetComponent<PlayerHealth>();
-        _playerUI = gameObject.GetComponentInChildren<PlayerUI>();
 
         GameObject gameMan = GameObject.FindGameObjectWithTag("GameManager");
         _locationManager = gameMan.GetComponent<LocationManager>();
@@ -102,9 +99,9 @@ public class PlayerData : NetworkBehaviour
 
     public void SetPlayerName(string pName)
     {
-        _playerName = pName;
+        _playerName.Value = pName;
         Debug.Log("Change Name " + _netPlayerID.Value + " to " + pName);
-        OnChangeName(_netPlayerID.Value, pName);
+        OnChangeName(_netPlayerID.Value, pName.ToString());
     }
     #endregion
 

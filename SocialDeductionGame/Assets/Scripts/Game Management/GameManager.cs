@@ -9,6 +9,7 @@ public class GameManager : NetworkBehaviour
     // ================== Refrences ==================
     [Header("Basics")]
     [SerializeField] private TextMeshProUGUI _gameStateText;
+    [SerializeField] private TextMeshProUGUI _dayText;
     [SerializeField] private List<Transform> playerPositions = new();
 
     // ================== State ==================
@@ -23,6 +24,7 @@ public class GameManager : NetworkBehaviour
         Night
     }
     private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netDay = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
 
     // State Events
@@ -41,11 +43,13 @@ public class GameManager : NetworkBehaviour
     private void Awake()
     {
         _netCurrentGameState.OnValueChanged += UpdateGameState;
+        _netDay.OnValueChanged += UpdateDayText;
     }
 
     private void OnDisable()
     {
         _netCurrentGameState.OnValueChanged -= UpdateGameState;
+        _netDay.OnValueChanged -= UpdateDayText;
     }
 
     private void Start()
@@ -129,6 +133,7 @@ public class GameManager : NetworkBehaviour
                 OnStateIntro();
                 break;
             case GameState.Morning:
+                IncrementDay();
                 OnStateMorning();
                 break;
             case GameState.M_Forage:
@@ -145,6 +150,21 @@ public class GameManager : NetworkBehaviour
                 OnStateNight();
                 break;
         }
+    }
+
+    private void IncrementDay()
+    {
+        if (!IsServer)
+            return;
+
+        Debug.Log("<color=yellow>SERVER: </color> Incrementing Day");
+        _netDay.Value++;
+    }
+
+    private void UpdateDayText(int prev, int next)
+    {
+        if (_dayText != null)
+            _dayText.text = "Day: " + next.ToString();
     }
     #endregion
 }
