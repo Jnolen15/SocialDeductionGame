@@ -16,7 +16,9 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private List<Transform> playerPositions = new();
     [Header("Win Settings")]
     [SerializeField] private int _numDaysTillRescue;
+    [Header("Cheats")]
     [SerializeField] private bool _testForWin;
+    [SerializeField] private bool _doCheats;
 
     // ================== State ==================
     public enum GameState
@@ -69,6 +71,8 @@ public class GameManager : NetworkBehaviour
     private void Update()
     {
         if (!IsServer) return;
+
+        if (!_doCheats) return;
 
         // Skip to next state
         if (Input.GetKeyDown(KeyCode.S))

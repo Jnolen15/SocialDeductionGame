@@ -66,11 +66,11 @@ public class PlayerHealth : NetworkBehaviour
     #endregion
 
     // FOR TESTING
-    private void Update()
+    /*private void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
             ModifyHealth(-1);
-    }
+    }*/
 
     // ==================== Health ====================
     #region Health
