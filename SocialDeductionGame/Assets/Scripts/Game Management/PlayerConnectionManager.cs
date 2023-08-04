@@ -27,6 +27,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         public string PlayerName;
         public GameObject PlayerObject;
+        public PlayerData.Team PlayerTeam;
 
         // INetworkSerializable
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -34,22 +35,30 @@ public class PlayerConnectionManager : NetworkBehaviour
             serializer.SerializeValue(ref PlayerName);
         }
 
-        // ConstructorS
+        // Constructors
         public PlayerEntry()
         {
             PlayerName = string.Empty;
             PlayerObject = null;
         }
 
-        public PlayerEntry(string playerName, GameObject playerObj)
+        public PlayerEntry(string playerName, GameObject playerObj = null)
         {
             PlayerName = playerName;
             PlayerObject = playerObj;
         }
 
+
+        // Functions
         public void SetName(string name)
         {
             PlayerName = name.ToString();
+        }
+
+        public void SetTeam(PlayerData.Team team)
+        {
+            PlayerTeam = team;
+            PlayerObject.GetComponent<PlayerData>().SetTeam(PlayerData.Team.Saboteurs);
         }
     }
 
@@ -164,6 +173,19 @@ public class PlayerConnectionManager : NetworkBehaviour
         return numAlive;
     }
 
+    public static int GetNumLivingOnTeam(PlayerData.Team team)
+    {
+        int numAlive = 0;
+
+        foreach (PlayerEntry playa in Instance._playerDict.Values)
+        {
+            if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving() && playa.PlayerTeam == team)
+                numAlive++;
+        }
+        Debug.Log(team.ToString() + numAlive);
+        return numAlive;
+    }
+
     public static List<GameObject> GetLivingPlayerGameObjects()
     {
         List<GameObject> players = new();
@@ -177,7 +199,6 @@ public class PlayerConnectionManager : NetworkBehaviour
         return players;
     }
 
-    // BETTER WAY TO DO THIS BY JUST GETTING IT FROM NETWORK SINGLETON?
     public static ulong GetThisPlayersID()
     {
         return NetworkManager.Singleton.LocalClientId;
@@ -220,7 +241,7 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         // Pick one random player and assign them to team Saboteurs
         ulong rand = Instance._playerDict.Keys.ToArray()[(int)Random.Range(0, Instance._playerDict.Keys.Count)];
-        Instance._playerDict[rand].PlayerObject.GetComponent<PlayerData>().SetTeam(PlayerData.Team.Saboteurs);
+        Instance._playerDict[rand].SetTeam(PlayerData.Team.Saboteurs);
     }
     #endregion
 }

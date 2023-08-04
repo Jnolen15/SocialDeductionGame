@@ -7,10 +7,15 @@ using TMPro;
 public class GameManager : NetworkBehaviour
 {
     // ================== Refrences ==================
-    [Header("Basics")]
+    [Header("UI Refrences")]
     [SerializeField] private TextMeshProUGUI _gameStateText;
     [SerializeField] private TextMeshProUGUI _dayText;
+    [SerializeField] private GameObject _endScreen;
+    [SerializeField] private TextMeshProUGUI _endScreenText;
+    [Header("Player Seating Positions")]
     [SerializeField] private List<Transform> playerPositions = new();
+    [Header("Win Settings")]
+    [SerializeField] private int _numDaysTillRescue;
 
     // ================== State ==================
     public enum GameState
@@ -24,6 +29,7 @@ public class GameManager : NetworkBehaviour
         Night
     }
     private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
+    [Header("Net Variables (For Viewing)")]
     [SerializeField] private NetworkVariable<int> _netDay = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
 
@@ -125,6 +131,9 @@ public class GameManager : NetworkBehaviour
         if(next != GameState.Pregame)
             OnStateChange();
 
+        if (IsServer && next != GameState.Pregame && next != GameState.Intro)
+            CheckSaboteurWin();
+
         switch (next)
         {
             case GameState.Intro:
@@ -133,7 +142,11 @@ public class GameManager : NetworkBehaviour
                 OnStateIntro();
                 break;
             case GameState.Morning:
-                IncrementDay();
+                if (IsServer)
+                {
+                    IncrementDay();
+                    CheckSurvivorWin();
+                }
                 OnStateMorning();
                 break;
             case GameState.M_Forage:
@@ -166,5 +179,55 @@ public class GameManager : NetworkBehaviour
         if (_dayText != null)
             _dayText.text = "Day: " + next.ToString();
     }
+    #endregion
+
+    // ====================== Game Win / Loss Conditions ======================
+    #region Win Loss
+
+    // Check for game end via survivor win
+    private void CheckSurvivorWin()
+    {
+        Debug.Log("<color=yellow>SERVER: </color> Checking Survivor Win");
+
+        if (_netDay.Value >= _numDaysTillRescue)
+        {
+            if (PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Survivors) > PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Saboteurs))
+                SetSurvivorWinClientRpc();
+        }
+    }
+
+    [ClientRpc]
+    private void SetSurvivorWinClientRpc()
+    {
+        Debug.Log("<color=blue>CLIENT: </color> Survivors Win!");
+
+        // Show end screens
+        _endScreen.SetActive(true);
+        _endScreenText.text = "Survivors Win";
+        _endScreenText.color = Color.green;
+    }
+
+    // Check for game end via Saboteur win
+    private void CheckSaboteurWin()
+    {
+        Debug.Log("<color=yellow>SERVER: </color> Checking Saboteur Win");
+
+        if (PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Saboteurs) >= PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Survivors))
+        {
+            SetSaboteurWinClientRpc();
+        }
+    }
+
+    [ClientRpc]
+    private void SetSaboteurWinClientRpc()
+    {
+        Debug.Log("<color=blue>CLIENT: </color> Saboteur Wins!");
+
+        // Show end screens
+        _endScreen.SetActive(true);
+        _endScreenText.text = "Saboteur Wins";
+        _endScreenText.color = Color.red;
+    }
+
     #endregion
 }
