@@ -16,6 +16,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private List<Transform> playerPositions = new();
     [Header("Win Settings")]
     [SerializeField] private int _numDaysTillRescue;
+    [SerializeField] private bool _testForWin;
 
     // ================== State ==================
     public enum GameState
@@ -187,6 +188,9 @@ public class GameManager : NetworkBehaviour
     // Check for game end via survivor win
     private void CheckSurvivorWin()
     {
+        if (!_testForWin)
+            return;
+
         Debug.Log("<color=yellow>SERVER: </color> Checking Survivor Win");
 
         if (_netDay.Value >= _numDaysTillRescue)
@@ -210,6 +214,9 @@ public class GameManager : NetworkBehaviour
     // Check for game end via Saboteur win
     private void CheckSaboteurWin()
     {
+        if (!_testForWin)
+            return;
+
         Debug.Log("<color=yellow>SERVER: </color> Checking Saboteur Win");
 
         if (PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Saboteurs) >= PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Survivors))

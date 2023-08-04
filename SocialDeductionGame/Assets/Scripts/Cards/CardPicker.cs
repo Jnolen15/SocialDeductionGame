@@ -27,13 +27,16 @@ public class CardPicker : MonoBehaviour
     private void OnEnable()
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
-
+        _cardDropTable.ValidateTable();
         DealCards();
     }
 
     public void DealCards()
     {
-        Debug.Log("dealing cards");
+        if(_cardManager == null)
+            _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
+
+        Debug.Log("Dealing cards");
         for(int i = 0; i < _cardsDelt; i++)
         {
             // Pick card
