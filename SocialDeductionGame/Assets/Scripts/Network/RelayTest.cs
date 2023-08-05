@@ -67,4 +67,12 @@ public class RelayTest : MonoBehaviour
             return;
         }
     }
+
+    public void CopyCodeText()
+    {
+        TextEditor texteditor = new();
+        texteditor.text = _joinCodeText.text;
+        texteditor.SelectAll();
+        texteditor.Copy();
+    }
 }
