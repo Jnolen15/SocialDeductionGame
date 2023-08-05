@@ -91,6 +91,7 @@ public class GameManager : NetworkBehaviour
         Debug.Log("Getting Seat for player " + playerID);
 
         playerTrans.position = playerPositions[(int)playerID].position;
+        playerTrans.rotation = playerPositions[(int)playerID].rotation;
     }
     #endregion
 

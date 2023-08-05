@@ -44,15 +44,24 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public override void OnNetworkSpawn()
     {
-        if (!IsOwner)
-            return;
-
-        _netCharacterIndex.Value = Random.Range(0, _character.childCount);
-        _netCharacterMatIndex.Value = Random.Range(0, _characterMatList.Count);
+        if (IsOwner)
+        {
+            Debug.Log("Randomizing Character");
+            _netCharacterIndex.Value = Random.Range(0, _character.childCount - 1);
+            _netCharacterMatIndex.Value = Random.Range(0, _characterMatList.Count);
+        }
+        else
+        {
+            Debug.Log("initial Character Setup");
+            UpdateCharacterModel(0, _netCharacterIndex.Value);
+            UpdateCharacterMat(0, _netCharacterMatIndex.Value);
+        }
     }
 
     private void UpdateCharacterModel(int prev, int next)
     {
+        Debug.Log("Updating Character");
+
         // Set initial inactive
         _character.GetChild(0).gameObject.SetActive(false);
 
