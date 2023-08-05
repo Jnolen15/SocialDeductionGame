@@ -7,15 +7,20 @@ using TMPro;
 
 public class PlayerObj : NetworkBehaviour, ICardPlayable
 {
-    // Refrences
+    // ================== Refrences ==================
     private PlayerData _playerData;
     private PlayerHealth _playerHealth;
     [SerializeField] private TextMeshPro _namePlate;
     [SerializeField] private GameObject _deathIndicator;
+    [SerializeField] private Transform _character;
+    [SerializeField] private List<Material> _characterMatList = new();
 
-    // Variables
+    // ================== Variables ==================
     [SerializeField] private List<CardTag> _cardTagsAccepted = new();
+    private NetworkVariable<int> _netCharacterIndex = new(writePerm: NetworkVariableWritePermission.Owner);
+    private NetworkVariable<int> _netCharacterMatIndex = new(writePerm: NetworkVariableWritePermission.Owner);
 
+    // ================== Setup ==================
     private void OnEnable()
     {
         _playerHealth = GetComponentInParent<PlayerHealth>();
@@ -23,12 +28,41 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
         _playerData._netPlayerName.OnValueChanged += UpdateNamePlate;
         _playerHealth._netIsLiving.OnValueChanged += UpdateDeathIndicator;
+
+        _netCharacterIndex.OnValueChanged += UpdateCharacterModel;
+        _netCharacterMatIndex.OnValueChanged += UpdateCharacterMat;
     }
 
     private void OnDisable()
     {
         _playerData._netPlayerName.OnValueChanged -= UpdateNamePlate;
         _playerHealth._netIsLiving.OnValueChanged -= UpdateDeathIndicator;
+
+        _netCharacterIndex.OnValueChanged -= UpdateCharacterModel;
+        _netCharacterMatIndex.OnValueChanged -= UpdateCharacterMat;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner)
+            return;
+
+        _netCharacterIndex.Value = Random.Range(0, _character.childCount);
+        _netCharacterMatIndex.Value = Random.Range(0, _characterMatList.Count);
+    }
+
+    private void UpdateCharacterModel(int prev, int next)
+    {
+        // Set initial inactive
+        _character.GetChild(0).gameObject.SetActive(false);
+
+        // Set correct model active
+        _character.GetChild(next).gameObject.SetActive(true);
+    }
+
+    private void UpdateCharacterMat(int prev, int next)
+    {
+        _character.GetChild(_netCharacterIndex.Value).gameObject.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[next];
     }
 
     // ================== Info ==================
