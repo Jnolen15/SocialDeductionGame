@@ -89,7 +89,7 @@ public class CardPicker : MonoBehaviour
 
     private void UpdateUI()
     {
-        if (_chosenCards.Count != 2)
+        if (_chosenCards.Count != _cardsChosen)
         {
             _takeButton.SetActive(false);
             _requirementText.SetActive(true);
