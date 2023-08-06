@@ -49,8 +49,8 @@ public class PlayerHealth : NetworkBehaviour
 
         if (IsOwner)
         {
-            ModifyHealthServerRPC(3, false);
-            ModifyHungerServerRPC(1.5f, false);
+            ModifyHealthServerRPC(4, false);
+            ModifyHungerServerRPC(2f, false);
         }
     }
 
@@ -152,8 +152,8 @@ public class PlayerHealth : NetworkBehaviour
     // Loose hunger each day
     private void HungerDrain()
     {
-        // loose HP if less than 1 hunger
-        if (_netCurrentHunger.Value < 1)
+        // loose HP if at 0 hunger
+        if (_netCurrentHunger.Value <= 0)
             ModifyHealth(-1);
 
         ModifyHunger(-1);
