@@ -11,8 +11,15 @@ public class DamageEvent : NightEvent
     // ========== METHOD OVERRIDES ==========
     public override void InvokeEvent()
     {
-        PlayerHealth pHealth = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>();
-        pHealth.ModifyHealth(-_dmg);
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+        if (player == null)
+        {
+            Debug.LogError("Cannot enact night event. Player object not found!");
+            return;
+        }
+
+        player.GetComponent<PlayerHealth>().ModifyHealth(-_dmg);
     }
 
     public override int SPCalculation(int numPlayers)

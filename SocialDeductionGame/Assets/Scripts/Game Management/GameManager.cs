@@ -90,6 +90,12 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log("Getting Seat for player " + playerID);
 
+        if((int)playerID > playerPositions.Count - 1)
+        {
+            Debug.LogError("Not Enough Seats!");
+            return;
+        }
+
         playerTrans.position = playerPositions[(int)playerID].position;
         playerTrans.rotation = playerPositions[(int)playerID].rotation;
     }

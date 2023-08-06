@@ -129,6 +129,18 @@ public class EventManager : NetworkBehaviour
     // Gets event from database and invokes it
     private void InvokeNightEvent(int eventID)
     {
+        // Saboteurs not effected by night events
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            Debug.LogError("Cannot enact night event. Player object not found!");
+            return;
+        }
+
+        if (player.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+            return;
+
+        // Invoke Night Event
         NightEvent nEvent = CardDatabase.GetEvent(eventID);
 
         if (nEvent)

@@ -142,6 +142,11 @@ public class PlayerData : NetworkBehaviour
         if (_netTeam.Value == Team.Saboteurs)
             _nightEventManger.OpenNightEventPicker();
     }
+
+    public Team GetPlayerTeam()
+    {
+        return _netTeam.Value;
+    }
     #endregion
 
     // ====================== Player Readying ======================
