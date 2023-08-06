@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e72f1ae1f2c2b74db098be57c3cac79, type: 3}
+  m_Name: Storm
+  m_EditorClassIdentifier: 
+  _eventID: 1002
+  _eventName: Storm Clouds
+  _eventDescription: 'A storm is fast approaching. We need to build shelter for the
+    night. (On Fail: -1 HP)'
+  _eventArt: {fileID: 0}
+  _requiredCardTags:
+  - {fileID: 11400000, guid: 01e058a6dca65be4488268497b70f7e2, type: 2}
+  - {fileID: 11400000, guid: 9758eb457d72f0e45809461842f5ee5c, type: 2}
+  _dmg: 1
+  _requirementCalculation: 1

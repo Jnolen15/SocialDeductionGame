@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d978bfe2928985e47a8a4ee651ffab54, type: 3}
+  m_Name: A Test Event
+  m_EditorClassIdentifier: 
+  _eventID: 9999
+  _eventName: Strange Roars
+  _eventDescription: Something in the woods is coming for us, we should build defences.
+  _eventArt: {fileID: 0}
+  _requiredCardTags:
+  - {fileID: 11400000, guid: 01e058a6dca65be4488268497b70f7e2, type: 2}
+  - {fileID: 11400000, guid: d8840eeb267ff96478f01bc3637f76e5, type: 2}
+  _message: '"AHH A BEAR"'

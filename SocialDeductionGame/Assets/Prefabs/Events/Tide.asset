@@ -9,14 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d978bfe2928985e47a8a4ee651ffab54, type: 3}
-  m_Name: Test Event
+  m_Script: {fileID: 11500000, guid: 5e72f1ae1f2c2b74db098be57c3cac79, type: 3}
+  m_Name: Tide
   m_EditorClassIdentifier: 
-  _eventID: 1001
-  _eventName: Strange Roars
-  _eventDescription: Something in the woods is coming for us, we should build defences.
+  _eventID: 1003
+  _eventName: High Tide
+  _eventDescription: 'An unusually high tide is coming in. We need to shore up camp,
+    the sea is cold at night. (On Fail: -1 HP)'
   _eventArt: {fileID: 0}
   _requiredCardTags:
-  - {fileID: 11400000, guid: 01e058a6dca65be4488268497b70f7e2, type: 2}
+  - {fileID: 11400000, guid: 9758eb457d72f0e45809461842f5ee5c, type: 2}
   - {fileID: 11400000, guid: d8840eeb267ff96478f01bc3637f76e5, type: 2}
-  _message: '"AHH A BEAR"'
+  _dmg: 1
+  _requirementCalculation: 1
