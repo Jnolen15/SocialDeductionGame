@@ -12,6 +12,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private PlayerHealth _playerHealth;
     [SerializeField] private TextMeshPro _namePlate;
     [SerializeField] private GameObject _deathIndicator;
+    [SerializeField] private GameObject _campfireIcon;
     [SerializeField] private Transform _character;
     [SerializeField] private List<Material> _characterMatList = new();
 
@@ -19,6 +20,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private List<CardTag> _cardTagsAccepted = new();
     private NetworkVariable<int> _netCharacterIndex = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> _netCharacterMatIndex = new(writePerm: NetworkVariableWritePermission.Owner);
+    private NetworkVariable<bool> _netTookFromFire = new(writePerm: NetworkVariableWritePermission.Owner);
 
     // ================== Setup ==================
     private void OnEnable()
@@ -31,6 +33,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
         _netCharacterIndex.OnValueChanged += UpdateCharacterModel;
         _netCharacterMatIndex.OnValueChanged += UpdateCharacterMat;
+        _netTookFromFire.OnValueChanged += UpdateCampfireIcon;
     }
 
     private void OnDisable()
@@ -40,6 +43,10 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
         _netCharacterIndex.OnValueChanged -= UpdateCharacterModel;
         _netCharacterMatIndex.OnValueChanged -= UpdateCharacterMat;
+        _netTookFromFire.OnValueChanged -= UpdateCampfireIcon;
+        
+        if (IsOwner)
+            GameManager.OnStateMorning -= ToggleCampfireIconOff;
     }
 
     public override void OnNetworkSpawn()
@@ -49,6 +56,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
             Debug.Log("Randomizing Character");
             _netCharacterIndex.Value = Random.Range(0, _character.childCount - 1);
             _netCharacterMatIndex.Value = Random.Range(0, _characterMatList.Count);
+
+            GameManager.OnStateMorning += ToggleCampfireIconOff;
         }
         else
         {
@@ -110,5 +119,22 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
         if (hpGain > 0)
             _playerHealth.ModifyHealth(hpGain);
+    }
+
+    // These two campfire toggle functions are a quick and dirty bandaid solution. Fix later.
+    public void ToggleCampfireIconActive()
+    {
+        _netTookFromFire.Value = true;
+    }
+
+    public void ToggleCampfireIconOff()
+    {
+        Debug.Log("Toggling campfire icon off");
+        _netTookFromFire.Value = false;
+    }
+
+    private void UpdateCampfireIcon(bool prev, bool next)
+    {
+        _campfireIcon.SetActive(next);
     }
 }

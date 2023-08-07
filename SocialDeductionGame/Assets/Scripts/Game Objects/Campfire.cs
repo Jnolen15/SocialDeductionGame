@@ -105,31 +105,31 @@ public class Campfire : NetworkBehaviour, ICardPlayable
 
     // ================== Take Food ==================
     #region Take Food
-    public void TakeHalf()
+    public void TakeFood(float ammount)
     {
-        if (_netServingsStored.Value < 0.5f)
+        // Quick and dirty way to prevent dead players from taking food (Change later)
+        GameObject playa = GameObject.FindGameObjectWithTag("Player");
+        if (!playa.GetComponent<PlayerHealth>().IsLiving())
             return;
 
-        AddFoodServerRpc(-0.5f);
-        _cardManager.GiveCard(2004);
-    }
-
-    public void TakeOne()
-    {
-        if (_netServingsStored.Value < 1)
+        if (_netServingsStored.Value < ammount)
             return;
 
-        AddFoodServerRpc(-1);
-        _cardManager.GiveCard(2005);
-    }
+        Debug.Log("<color=blue>CLIENT: </color>Taking food from fire. Servings: " + ammount);
 
-    public void TakeTwo()
-    {
-        if (_netServingsStored.Value < 2)
-            return;
+        AddFoodServerRpc(-ammount);
 
-        AddFoodServerRpc(-2);
-        _cardManager.GiveCard(2006);
+        // Quick and dirty, fix later
+        playa.GetComponentInChildren<PlayerObj>().ToggleCampfireIconActive();
+
+        if (ammount == 0.5f)
+            _cardManager.GiveCard(2004);
+        else if (ammount == 1)
+            _cardManager.GiveCard(2005);
+        else if (ammount == 2)
+            _cardManager.GiveCard(2006);
+        else
+            Debug.LogError("AMMOUNT TAKEN FROM FIRE NOT 0.5, 1 or 2 " + ammount);
     }
     #endregion
 }
