@@ -152,8 +152,8 @@ public class PlayerHealth : NetworkBehaviour
     // Loose hunger each day
     private void HungerDrain()
     {
-        // loose HP if at 0 hunger
-        if (_netCurrentHunger.Value <= 0)
+        // loose HP if hunger is less than 1
+        if (_netCurrentHunger.Value < 1)
             ModifyHealth(-1);
 
         ModifyHunger(-1);

@@ -110,6 +110,9 @@ public class PlayerData : NetworkBehaviour
 
     public void SetPlayerName(string pName)
     {
+        if (pName == "")
+            return;
+
         Debug.Log("Change Name " + _netPlayerID.Value + " to " + pName);
         _netPlayerName.Value = pName;
         _playerUI.UpdatePlayerNameText(_netPlayerName.Value.ToString());
@@ -136,9 +139,6 @@ public class PlayerData : NetworkBehaviour
 
     private void ShowEventChoices()
     {
-        if (!_playerHealth.IsLiving())
-            return;
-
         if (_netTeam.Value == Team.Saboteurs)
             _nightEventManger.OpenNightEventPicker();
     }

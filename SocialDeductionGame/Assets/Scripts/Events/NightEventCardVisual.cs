@@ -18,7 +18,7 @@ public class NightEventCardVisual : MonoBehaviour
         _heldEventID = eventID;
 
         _eventTitle.text = CardDatabase.GetEvent(eventID).GetEventName();
-        _eventRequiredNum.text = "At least " + CardDatabase.GetEvent(eventID).GetSuccessPoints(PlayerConnectionManager.GetNumConnectedPlayers());
+        _eventRequiredNum.text = "At least " + CardDatabase.GetEvent(eventID).GetSuccessPoints(PlayerConnectionManager.GetNumLivingPlayers());
         _eventDescription.text = CardDatabase.GetEvent(eventID).GetEventDescription();
         List<string> reqTags = new();
         foreach (CardTag t in CardDatabase.GetEvent(eventID).GetRequiredCardTags())

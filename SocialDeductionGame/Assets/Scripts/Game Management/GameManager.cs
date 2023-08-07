@@ -120,7 +120,7 @@ public class GameManager : NetworkBehaviour
         _netPlayersReadied.Value++;
 
         // Check if all players are ready
-        if (_netPlayersReadied.Value >= PlayerConnectionManager.GetNumLivingPlayers())
+        if (_netPlayersReadied.Value >= PlayerConnectionManager.CheckNumLivingPlayers())
         {
             _netPlayersReadied.Value = 0;
 
@@ -230,8 +230,17 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color> Checking Saboteur Win");
 
+        // If number of Saboteurs >= survivors
         if (PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Saboteurs) >= PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Survivors))
         {
+            Debug.Log("<color=yellow>SERVER: </color> # of Saboteurs >= # of survivors, WIN!");
+            SetSaboteurWinClientRpc();
+        }
+
+        // If all players are dead
+        if (PlayerConnectionManager.CheckNumLivingPlayers() == 0)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> All players have died, WIN!");
             SetSaboteurWinClientRpc();
         }
     }

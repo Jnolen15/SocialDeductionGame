@@ -22,6 +22,7 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     [SerializeField] private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netNumLivingPlayers = new(writePerm: NetworkVariableWritePermission.Server);
     private Dictionary<ulong, PlayerEntry> _playerDict = new();
     public class PlayerEntry : INetworkSerializable
     {
@@ -78,6 +79,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
         GameManager.OnSetup += AssignRoles;
         GameManager.OnStateMorning += SyncClientPlayerDictServerRpc;
+        GameManager.OnStateChange += UpdateNumLivingPlayersServerRpc;
     }
 
     public override void OnNetworkDespawn()
@@ -91,6 +93,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
         GameManager.OnSetup -= AssignRoles;
         GameManager.OnStateMorning -= SyncClientPlayerDictServerRpc;
+        GameManager.OnStateChange -= UpdateNumLivingPlayersServerRpc;
     }
     #endregion
 
@@ -160,17 +163,39 @@ public class PlayerConnectionManager : NetworkBehaviour
         return Instance._netNumPlayers.Value;
     }
 
+    // Returns the network variable, which only updates at the begenning of each state
     public static int GetNumLivingPlayers()
+    {
+        Debug.Log("GetNumLivingPlayers " + Instance._netNumLivingPlayers.Value);
+        return Instance._netNumLivingPlayers.Value;
+    }
+
+    // Calculates and returns number of living players
+    public static int CheckNumLivingPlayers()
     {
         int numAlive = 0;
 
-        foreach(PlayerEntry playa in Instance._playerDict.Values)
+        foreach (PlayerEntry playa in Instance._playerDict.Values)
         {
             if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving())
                 numAlive++;
         }
-        Debug.Log("GetNumLivingPlayers " + numAlive);
+
         return numAlive;
+    }
+
+    [ServerRpc]
+    public void UpdateNumLivingPlayersServerRpc()
+    {
+        int numAlive = 0;
+
+        foreach (PlayerEntry playa in Instance._playerDict.Values)
+        {
+            if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving())
+                numAlive++;
+        }
+
+        Instance._netNumLivingPlayers.Value = numAlive;
     }
 
     public static int GetNumLivingOnTeam(PlayerData.Team team)

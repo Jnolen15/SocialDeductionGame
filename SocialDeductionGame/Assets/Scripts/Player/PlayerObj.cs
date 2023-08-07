@@ -78,6 +78,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private void UpdateNamePlate(FixedString32Bytes prev, FixedString32Bytes next)
     {
         _namePlate.text = next.ToString();
+
+        if (IsOwner)
+            _namePlate.color = Color.green;
     }
 
     private void UpdateDeathIndicator(bool prev, bool next)

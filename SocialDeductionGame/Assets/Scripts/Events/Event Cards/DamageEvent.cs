@@ -29,7 +29,7 @@ public class DamageEvent : NightEvent
 
     public override int SPCalculation(int numPlayers)
     {
-        int num = (int)((float)numPlayers * _requirementCalculation);
+        int num = Mathf.CeilToInt(numPlayers * _requirementCalculation);
 
         if (num <= 1)
             num = 1;

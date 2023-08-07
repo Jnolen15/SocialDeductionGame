@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class PlayerUI : MonoBehaviour
@@ -93,6 +94,11 @@ public class PlayerUI : MonoBehaviour
     public void ToggleReady(bool toggle)
     {
         _readyIndicator.SetActive(toggle);
+
+        if (toggle)
+            _readyButton.GetComponent<Image>().color = Color.green;
+        else
+            _readyButton.GetComponent<Image>().color = Color.red;
     }
 
     private void ToggleMap()
@@ -115,7 +121,7 @@ public class PlayerUI : MonoBehaviour
 
     private void UpdateHunger(float ModifiedAmmount, float newTotal)
     {
-        _hungerText.text = $"Hunger: {newTotal}/3";
+        _hungerText.text = $"Hunger: {newTotal}";
     }
 
     private void DisplayDeathMessage()
