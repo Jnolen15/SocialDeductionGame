@@ -10,10 +10,14 @@ public class CardInteraction : MonoBehaviour,
     IBeginDragHandler,
     IEndDragHandler
 {
+    // ================== Events / Refrences ==================
+    [SerializeField] private GameObject _dragIcon;
     [SerializeField] private Card _card;
     [SerializeField] private HandManager _handManager;
     [SerializeField] private PlayerController _playerController;
+    private GameObject _indicator;
 
+    // =============== Setup ===============
     void Start()
     {
         _card = this.GetComponentInParent<Card>();
@@ -21,6 +25,7 @@ public class CardInteraction : MonoBehaviour,
         _playerController = this.GetComponentInParent<PlayerController>();
     }
 
+    // =============== Interaction ===============
     public void OnPointerEnter(PointerEventData eventData)
     {
         //Debug.Log($"Mouse entered card {_card.GetCardName()}");
@@ -30,19 +35,21 @@ public class CardInteraction : MonoBehaviour,
     #region Card Drag
     public void OnBeginDrag(PointerEventData eventData)
     {
-        //Debug.Log($"Card {_card.GetCardName()} begin drag");
+        Canvas parentCanvas = gameObject.GetComponentInParent<Canvas>();
+        _indicator = Instantiate(_dragIcon, parentCanvas.transform);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        //Debug.Log("Dragging");
+        _indicator.transform.position = eventData.position;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         _playerController.TryCardPlay(_card);
 
-        //Debug.Log($"Card {_card.GetCardName()} end drag");
+        Destroy(_indicator);
+        _indicator = null;
     }
     #endregion
 }
