@@ -46,7 +46,6 @@ public class EventManager : NetworkBehaviour
         }
     }
 
-    // FOR TESTING
     private void PickEvent()
     {
         Debug.Log("PICKING EVENT");
@@ -124,6 +123,9 @@ public class EventManager : NetworkBehaviour
             Debug.Log("Event passed, no suffering");
         else
             InvokeNightEvent(_netCurrentNightEventID.Value);
+
+        // Sets a random event (In case sabature is dead)
+        PickEvent();
     }
 
     // Gets event from database and invokes it

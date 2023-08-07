@@ -139,6 +139,9 @@ public class PlayerData : NetworkBehaviour
 
     private void ShowEventChoices()
     {
+        if (!_playerHealth.IsLiving())
+            return;
+
         if (_netTeam.Value == Team.Saboteurs)
             _nightEventManger.OpenNightEventPicker();
     }
