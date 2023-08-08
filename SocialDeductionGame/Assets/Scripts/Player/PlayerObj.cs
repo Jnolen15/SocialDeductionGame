@@ -103,7 +103,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         if (!IsOwner)
             return false;
 
-        if (_cardTagsAccepted.Contains(cardToPlay.GetPrimaryTag()))
+        if (cardToPlay.HasAnyTag(_cardTagsAccepted))
             return true;
 
         return false;

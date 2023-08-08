@@ -62,7 +62,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     // ================== Interface ==================
     public bool CanPlayCardHere(Card cardToPlay)
     {
-        if (cardToPlay.GetPrimaryTag() == _cardTagAccepted && _state == State.Cooking)
+        if (cardToPlay.HasTag(_cardTagAccepted) && _state == State.Cooking)
             return true;
 
         return false;

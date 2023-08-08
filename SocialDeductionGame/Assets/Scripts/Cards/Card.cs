@@ -12,8 +12,7 @@ public abstract class Card : MonoBehaviour
     [TextArea]
     [SerializeField] private string _cardDescription;
     [SerializeField] private Sprite _cardArt;
-    [SerializeField] private CardTag _primaryTag;
-    [SerializeField] private List<CardTag> _subTags;
+    [SerializeField] private List<CardTag> _tags;
 
     [Header("Card Prefabs")]
     [SerializeField] private GameObject _cardPlayablePrefab;
@@ -34,22 +33,32 @@ public abstract class Card : MonoBehaviour
     // ========== Tags ==========
     public bool HasTag(CardTag t)
     {
-        return _subTags.Contains(t);
+        return _tags.Contains(t);
     }
 
     public bool HasTag(string tagName)
     {
-        return _subTags.Exists(t => t.Name.Equals(tagName, System.StringComparison.CurrentCultureIgnoreCase));
+        return _tags.Exists(t => t.Name.Equals(tagName, System.StringComparison.CurrentCultureIgnoreCase));
     }
 
-    public CardTag GetPrimaryTag()
+    // Returns true if any tag in the given list matches any tag in this cards tags
+    public bool HasAnyTag(List<CardTag> tags)
     {
-        return _primaryTag;
+        foreach(CardTag localTag in _tags)
+        {
+            foreach (CardTag givenTag in tags)
+            {
+                if (givenTag == localTag)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     public List<CardTag> GetSubTags()
     {
-        return _subTags;
+        return _tags;
     }
 
 
