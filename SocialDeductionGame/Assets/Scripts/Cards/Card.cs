@@ -67,21 +67,21 @@ public abstract class Card : MonoBehaviour
     public void SetupPlayable()
     {
         GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
     }
 
     // Selectable card for foraging
     public void SetupSelectable()
     {
         GameObject cardVisual = Instantiate(_cardSelectablePrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
     }
 
     // Visual card for non-interactable UI
     public void SetupUI()
     {
         GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
     }
 
     // Adding a card to the Stockpile which contributes to night events

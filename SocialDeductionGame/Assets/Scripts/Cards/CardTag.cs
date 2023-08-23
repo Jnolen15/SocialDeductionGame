@@ -6,4 +6,6 @@ using UnityEngine;
 public class CardTag : ScriptableObject
 {
     public string Name => name;
+
+    public Sprite visual;
 }
