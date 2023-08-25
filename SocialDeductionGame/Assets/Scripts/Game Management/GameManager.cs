@@ -21,11 +21,13 @@ public class GameManager : NetworkBehaviour
     #endregion
 
     // ================== Refrences ==================
-    [Header("UI Refrences")]
-    [SerializeField] private TextMeshProUGUI _gameStateText;
-    [SerializeField] private TextMeshProUGUI _dayText;
-    [SerializeField] private GameObject _endScreen;
-    [SerializeField] private TextMeshProUGUI _endScreenText;
+    [Header("State Timers")]
+    [SerializeField] private float _morningTimerMax;
+    [SerializeField] private float _afternoonTimerMax;
+    [SerializeField] private float _eveningTimerMax;
+    [SerializeField] private NetworkVariable<float> _netMorningTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [Header("Player Seating Positions")]
     [SerializeField] private List<Transform> playerPositions = new();
     [Header("Win Settings")]
@@ -63,19 +65,18 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateAction OnStateNight;
 
     public static event Action<bool> OnPlayerReadyToggled;
+    public static event Action<bool> OnGameEnd;
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
         Instance._netCurrentGameState.OnValueChanged += UpdateGameState;
-        Instance._netDay.OnValueChanged += UpdateDayText;
     }
 
     private void OnDisable()
     {
         Instance._netCurrentGameState.OnValueChanged -= UpdateGameState;
-        Instance._netDay.OnValueChanged -= UpdateDayText;
     }
 
     private void Start()
@@ -84,15 +85,45 @@ public class GameManager : NetworkBehaviour
     }
     #endregion
 
-    // FOR TESTING
+    // ================== Update ==================
+    #region Update
     private void Update()
     {
         if (!IsServer) return;
 
-        if (!_doCheats) return;
+        // State Timers
+        switch (Instance._netCurrentGameState.Value)
+        {
+            case 0:
+                break;
+            case GameState.Morning:
+                Instance._netMorningTimer.Value -= Time.deltaTime;
+                if (Instance._netMorningTimer.Value <= 0)
+                {
+                    Debug.Log($"<color=yellow>SERVER: </color> Morning Timer up, Progressing");
+                    ProgressState();
+                }
+                break;
+            case GameState.Afternoon:
+                Instance._netAfternoonTimer.Value -= Time.deltaTime;
+                if (Instance._netAfternoonTimer.Value <= 0)
+                {
+                    Debug.Log($"<color=yellow>SERVER: </color> Afternoon Timer up, Progressing");
+                    ProgressState();
+                }
+                break;
+            case GameState.Evening:
+                Instance._netEveningTimer.Value -= Time.deltaTime;
+                if (Instance._netEveningTimer.Value <= 0)
+                {
+                    Debug.Log($"<color=yellow>SERVER: </color> Night Timer up, Progressing");
+                    ProgressState();
+                }
+                break;
+        }
 
-        // Skip to next state
-        if (Input.GetKeyDown(KeyCode.S))
+        // FOR TESTING Skip to next state
+        if (_doCheats && Input.GetKeyDown(KeyCode.S))
         {
             Instance._netCurrentGameState.Value++;
 
@@ -100,6 +131,7 @@ public class GameManager : NetworkBehaviour
                 Instance._netCurrentGameState.Value = 0;
         }
     }
+    #endregion
 
     // ================== Player Positions ==================
     #region Player Positions
@@ -151,21 +183,28 @@ public class GameManager : NetworkBehaviour
         // Check if all players ready
         if (Instance._netPlayersReadied.Value >= PlayerConnectionManager.CheckNumLivingPlayers())
         {
-            Debug.Log($"<color=yellow>SERVER: </color> All players ready");
-
-            // Unready
-            Instance._netPlayersReadied.Value = 0;
-            foreach(ulong key in Instance._playerReadyDictionary.Keys.ToList())
-            {
-                Instance._playerReadyDictionary[key] = false;
-            }
-            PlayerUnreadyClientRpc();
-
-            // Progress to next state, looping back to morning if day over
-            Instance._netCurrentGameState.Value++;
-            if (((int)Instance._netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
-                Instance._netCurrentGameState.Value = GameState.Morning;
+            ProgressState();
         }
+    }
+
+    private void ProgressState()
+    {
+        if (!IsServer) return;
+
+        Debug.Log($"<color=yellow>SERVER: </color> All players ready");
+
+        // Unready
+        Instance._netPlayersReadied.Value = 0;
+        foreach (ulong key in Instance._playerReadyDictionary.Keys.ToList())
+        {
+            Instance._playerReadyDictionary[key] = false;
+        }
+        PlayerUnreadyClientRpc();
+
+        // Progress to next state, looping back to morning if day over
+        Instance._netCurrentGameState.Value++;
+        if (((int)Instance._netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
+            Instance._netCurrentGameState.Value = GameState.Morning;
     }
 
     [ClientRpc]
@@ -185,9 +224,6 @@ public class GameManager : NetworkBehaviour
     #region State Management
     public void UpdateGameState(GameState prev, GameState next)
     {
-        if (Instance._gameStateText != null)
-            Instance._gameStateText.text = next.ToString();
-
         if (next != GameState.Pregame)
             OnStateChange?.Invoke();
 
@@ -204,6 +240,7 @@ public class GameManager : NetworkBehaviour
             case GameState.Morning:
                 if (IsServer)
                 {
+                    Instance._netMorningTimer.Value = Instance._morningTimerMax;
                     IncrementDay();
                     CheckSurvivorWin();
                 }
@@ -213,10 +250,12 @@ public class GameManager : NetworkBehaviour
                 OnStateForage?.Invoke();
                 break;
             case GameState.Afternoon:
+                if(IsServer) Instance._netAfternoonTimer.Value = Instance._afternoonTimerMax;
                 this.GetComponent<LocationManager>().ForceLocation(LocationManager.Location.Camp);
                 OnStateAfternoon?.Invoke();
                 break;
             case GameState.Evening:
+                if (IsServer) Instance._netEveningTimer.Value = Instance._eveningTimerMax;
                 OnStateEvening?.Invoke();
                 break;
             case GameState.Night:
@@ -232,12 +271,6 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color> Incrementing Day");
         Instance._netDay.Value++;
-    }
-
-    private void UpdateDayText(int prev, int next)
-    {
-        if (Instance._dayText != null)
-            Instance._dayText.text = "Day: " + next.ToString();
     }
     #endregion
 
@@ -265,9 +298,7 @@ public class GameManager : NetworkBehaviour
         Debug.Log("<color=blue>CLIENT: </color> Survivors Win!");
 
         // Show end screens
-        Instance._endScreen.SetActive(true);
-        Instance._endScreenText.text = "Survivors Win";
-        Instance._endScreenText.color = Color.green;
+        OnGameEnd?.Invoke(true);
     }
 
     // Check for game end via Saboteur win
@@ -299,10 +330,38 @@ public class GameManager : NetworkBehaviour
         Debug.Log("<color=blue>CLIENT: </color> Saboteur Wins!");
 
         // Show end screens
-        Instance._endScreen.SetActive(true);
-        Instance._endScreenText.text = "Saboteur Wins";
-        Instance._endScreenText.color = Color.red;
+        OnGameEnd?.Invoke(false);
     }
 
+    #endregion
+
+    // ====================== Helpers ======================
+    #region Helpers
+    public static GameManager.GameState GetCurrentGameState()
+    {
+        return Instance._netCurrentGameState.Value;
+    }
+
+    public static int GetCurrentDay()
+    {
+        return Instance._netDay.Value;
+    }
+
+    public static float GetStateTimer()
+    {
+        switch (Instance._netCurrentGameState.Value)
+        {
+            case 0:
+                return 1;
+            case GameState.Morning:
+                return 1 - (Instance._netMorningTimer.Value / Instance._morningTimerMax);
+            case GameState.Afternoon:
+                return 1 - (Instance._netAfternoonTimer.Value / Instance._afternoonTimerMax);
+            case GameState.Evening:
+                return 1 - (Instance._netEveningTimer.Value / Instance._eveningTimerMax);
+        }
+
+        return 1;
+    }
     #endregion
 }
