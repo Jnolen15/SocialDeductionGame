@@ -48,6 +48,7 @@ public class GameManager : NetworkBehaviour
         Night
     }
     private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private AnimationCurve _playerReadyTimerModCurve;
     [Header("Net Variables (For Viewing)")]
     [SerializeField] private NetworkVariable<int> _netDay = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
@@ -91,13 +92,17 @@ public class GameManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
+        // Calculate timer speed up modifier based on number of players ready
+        float percentReady = ((float)Instance._netPlayersReadied.Value / (float)PlayerConnectionManager.CheckNumLivingPlayers());
+        float modVal = (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
+
         // State Timers
         switch (Instance._netCurrentGameState.Value)
         {
             case 0:
                 break;
             case GameState.Morning:
-                Instance._netMorningTimer.Value -= Time.deltaTime;
+                Instance._netMorningTimer.Value -= (Time.deltaTime * modVal);
                 if (Instance._netMorningTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Morning Timer up, Progressing");
@@ -105,7 +110,7 @@ public class GameManager : NetworkBehaviour
                 }
                 break;
             case GameState.Afternoon:
-                Instance._netAfternoonTimer.Value -= Time.deltaTime;
+                Instance._netAfternoonTimer.Value -= (Time.deltaTime * modVal);
                 if (Instance._netAfternoonTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Afternoon Timer up, Progressing");
@@ -113,7 +118,8 @@ public class GameManager : NetworkBehaviour
                 }
                 break;
             case GameState.Evening:
-                Instance._netEveningTimer.Value -= Time.deltaTime;
+                Instance._netEveningTimer.Value -= (Time.deltaTime * modVal);
+                //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
                 if (Instance._netEveningTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Night Timer up, Progressing");

@@ -8233,6 +8233,30 @@ MonoBehaviour:
   _numDaysTillRescue: 7
   _testForWin: 0
   _doCheats: 0
+  _playerReadyTimerModCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 2
+      inSlope: 3.9854445
+      outSlope: 3.9854445
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.05093378
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   _netDay:
     m_InternalValue: 0
   _netPlayersReadied:
