@@ -36,6 +36,7 @@ public class PlayerUI : MonoBehaviour
         _playerHealth = this.GetComponentInParent<PlayerHealth>();
 
         GameManager.OnStateChange += EnableReadyButton;
+        GameManager.OnPlayerReadyToggled += ToggleReady;
         GameManager.OnStateIntro += EnablePlayerNaming;
         GameManager.OnStateMorning += DisablePlayerNaming;
         GameManager.OnStateForage += ToggleMap;
@@ -47,6 +48,7 @@ public class PlayerUI : MonoBehaviour
     private void OnDisable()
     {
         GameManager.OnStateChange -= EnableReadyButton;
+        GameManager.OnPlayerReadyToggled -= ToggleReady;
         GameManager.OnStateIntro -= EnablePlayerNaming;
         GameManager.OnStateMorning -= DisablePlayerNaming;
         GameManager.OnStateForage -= ToggleMap;

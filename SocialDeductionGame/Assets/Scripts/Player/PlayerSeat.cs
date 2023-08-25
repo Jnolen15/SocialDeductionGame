@@ -5,7 +5,6 @@ using UnityEngine;
 public class PlayerSeat : MonoBehaviour
 {
     // ================== Refrences ==================
-    private GameManager _gameManager;
     private PlayerData _playerData;
 
     // ================== Setup ==================
@@ -16,7 +15,6 @@ public class PlayerSeat : MonoBehaviour
         GameManager.OnStateIntro += AssignSeat;
 
         _playerData = gameObject.GetComponent<PlayerData>();
-        _gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     private void OnDisable()
@@ -29,6 +27,6 @@ public class PlayerSeat : MonoBehaviour
     {
         Debug.Log("Assigning Seat");
 
-        _gameManager.GetSeat(transform, _playerData.GetPlayerID());
+        GameManager.GetSeat(transform, _playerData.GetPlayerID());
     }
 }
