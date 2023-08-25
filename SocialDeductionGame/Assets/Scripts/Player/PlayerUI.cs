@@ -40,6 +40,7 @@ public class PlayerUI : MonoBehaviour
         GameManager.OnStateIntro += EnablePlayerNaming;
         GameManager.OnStateMorning += DisablePlayerNaming;
         GameManager.OnStateForage += ToggleMap;
+        GameManager.OnStateNight += CloseExileVote;
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
         PlayerHealth.OnDeath += DisplayDeathMessage;
@@ -52,6 +53,7 @@ public class PlayerUI : MonoBehaviour
         GameManager.OnStateIntro -= EnablePlayerNaming;
         GameManager.OnStateMorning -= DisablePlayerNaming;
         GameManager.OnStateForage -= ToggleMap;
+        GameManager.OnStateNight -= CloseExileVote;
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= DisplayDeathMessage;
@@ -193,6 +195,13 @@ public class PlayerUI : MonoBehaviour
             child.GetComponent<ExileVote>().DisplayResults(results[i]);
             i++;
         }
+    }
+
+    // Called when the state transitions.
+    // This matters if the timer ends but players are not done voting.
+    private void CloseExileVote()
+    {
+        _exileUI.SetActive(false);
     }
     #endregion
 }
