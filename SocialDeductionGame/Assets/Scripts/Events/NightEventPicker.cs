@@ -9,9 +9,6 @@ public class NightEventPicker : MonoBehaviour
     [SerializeField] private GameObject _eventSelectable;
     [SerializeField] private Transform _eventCardArea;
 
-    // ================== Variables ==================
-    [SerializeField] private List<NightEvent> _eventList;
-
     // ================== Setup ==================
     void OnEnable()
     {
@@ -20,18 +17,16 @@ public class NightEventPicker : MonoBehaviour
     }
 
     // ================== Function ==================
-    public void DealOptions()
+    public void DealOptions(int prevDayEvent = 0)
     {
-        Debug.Log("DEALING");
+        List<int> randEvents = CardDatabase.GetRandEvents(3, prevDayEvent);
 
-        for(int i = 0; i < 3; i++)
+        foreach (int eventNum in randEvents)
         {
-            int randEvent = _eventList[Random.Range(0, _eventList.Count)].GetEventID();
-
             GameObject eventCard = Instantiate(_eventSelectable, _eventCardArea);
-            eventCard.GetComponent<NightEventCardVisual>().Setup(randEvent);
+            eventCard.GetComponent<NightEventCardVisual>().Setup(eventNum);
 
-            Debug.Log("made new event card " + eventCard.name);
+            Debug.Log("<color=blue>CLIENT: </color>Made new event card " + eventCard.name);
         }
     }
 

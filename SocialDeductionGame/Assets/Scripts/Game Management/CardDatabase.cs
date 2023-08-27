@@ -65,7 +65,7 @@ public class CardDatabase : MonoBehaviour
 
     // ============== Night Events ==============
     #region Night Events
-    //  ===== Global Card List =====
+    //  ===== Global Event List =====
     [SerializeField] private List<EventEntry> _globalEventList = new List<EventEntry>();
     [System.Serializable]
     public class EventEntry
@@ -112,10 +112,64 @@ public class CardDatabase : MonoBehaviour
         return null;
     }
 
-    // FOR TESTING: Get a random event from all events in the DB
-    public static int GetRandEvent()
+    // Gets 1 random event
+    public static int GetRandEvent(int prevEvent = 0)
     {
-        return Instance._globalEventList[Random.Range(0, Instance._globalEventList.Count)].EventID;
+        int newEvent = Instance._globalEventList[Random.Range(0, Instance._globalEventList.Count)].EventID;
+        int breakoutNum = 0;
+        while (newEvent == prevEvent)
+        {
+            newEvent = Instance._globalEventList[Random.Range(0, Instance._globalEventList.Count)].EventID;
+
+            // Emergency breakout
+            breakoutNum++;
+            if (breakoutNum > 100)
+            {
+                Debug.Log("Breakout of While triggered");
+                break;
+            }
+        }
+
+        return newEvent;
+    }
+
+    // Returns multiple random events, avoiding duplicates
+    public static List<int> GetRandEvents(int num, int prevEvent = 0)
+    {
+        if (num > Instance._globalEventList.Count)
+        {
+            Debug.LogError("GetRandEvents: Number of entries to pick exceeds the size of the list");
+            return null;
+        }
+
+        List<int> pickedEvents = new();
+        List<EventEntry> eventListCopy = new();
+        eventListCopy.AddRange(Instance._globalEventList);
+
+        for (int i = 0; i < num; i++)
+        {
+            // Pick entry from copy list
+            EventEntry randEvent = eventListCopy[Random.Range(0, eventListCopy.Count)];
+
+            // Test if matches prevEvent
+            Debug.Log($"Testing to see if picked matches previous Rand: {randEvent.EventID} Prev: {prevEvent}");
+            if(randEvent.EventID != prevEvent)
+            {
+                Debug.Log("Did not match, adding");
+                // Then add that to return list
+                pickedEvents.Add(randEvent.EventID);
+            }
+            else
+            {
+                Debug.Log("Did match, i--");
+                i--;
+            }
+
+            // Then remove that entry from the copy list
+            eventListCopy.Remove(randEvent);
+        }
+
+        return pickedEvents;
     }
     #endregion
 }

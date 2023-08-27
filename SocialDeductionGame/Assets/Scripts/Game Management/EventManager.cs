@@ -16,45 +16,40 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private Stockpile _stockpile;
 
     [SerializeField] private NetworkVariable<int> _netCurrentNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netPreviousNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
-        GameManager.OnStateMorning += UpdateEventUI;
         GameManager.OnStateForage += HideLargeCard;
         GameManager.OnStateNight += DoEvent;
 
         if (IsServer)
         {
-            GameManager.OnSetup += PickEvent;
+            GameManager.OnStateMorning += SetupNewEventServerRpc;
+            GameManager.OnSetup += PickRandomEvent;
             GameManager.OnStateEvening += TestEvent;
         }
     }
 
     private void OnDisable()
     {
-        GameManager.OnStateMorning -= UpdateEventUI;
         GameManager.OnStateForage -= HideLargeCard;
         GameManager.OnStateNight -= DoEvent;
 
         if (IsServer)
         {
-            GameManager.OnSetup -= PickEvent;
+            GameManager.OnStateMorning -= SetupNewEventServerRpc;
+            GameManager.OnSetup -= PickRandomEvent;
             GameManager.OnStateEvening -= TestEvent;
         }
-    }
-
-    private void PickEvent()
-    {
-        Debug.Log("PICKING EVENT");
-        SetNightEventServerRpc(CardDatabase.GetRandEvent());
     }
     #endregion
 
     // ================== UI ELEMENTS ==================
-    #region UI Elementss
+    #region UI Elements
     // Updates night event card UI elements
     private void UpdateEventUI()
     {
@@ -94,7 +89,7 @@ public class EventManager : NetworkBehaviour
     public void OpenNightEventPicker()
     {
         _nightEventPickerMenu.gameObject.SetActive(true);
-        _nightEventPickerMenu.DealOptions();
+        _nightEventPickerMenu.DealOptions(_netPreviousNightEventID.Value);
     }
 
     public void CloseNightEventPicker()
@@ -116,6 +111,36 @@ public class EventManager : NetworkBehaviour
         _netCurrentNightEventID.Value = eventID;
     }
 
+    private void PickRandomEvent()
+    {
+        Debug.Log($"<color=yellow>SERVER: </color>PICKING RANDOM EVENT");
+        SetNightEventServerRpc(CardDatabase.GetRandEvent(_netPreviousNightEventID.Value));
+    }
+
+    [ServerRpc]
+    private void SetupNewEventServerRpc()
+    {
+        // Check to see current event is not the same as previous event
+        if(_netPreviousNightEventID.Value == _netCurrentNightEventID.Value)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Prev and current events are the same, picking random");
+            _netCurrentNightEventID.Value = CardDatabase.GetRandEvent(_netPreviousNightEventID.Value);
+        }
+
+        // Set previous event to current event
+        _netPreviousNightEventID.Value = _netCurrentNightEventID.Value;
+
+        // Update the event UI on clients
+        SetupNewEventClientRpc();
+    }
+
+    [ClientRpc]
+    private void SetupNewEventClientRpc()
+    {
+        // Update the event UI
+        UpdateEventUI();
+    }
+
     private void DoEvent()
     {
         // Calls InvokeNightEvent if event test failed
@@ -123,9 +148,6 @@ public class EventManager : NetworkBehaviour
             Debug.Log("Event passed, no suffering");
         else
             InvokeNightEvent(_netCurrentNightEventID.Value);
-
-        // Sets a random event (In case sabature is dead)
-        PickEvent();
     }
 
     // Gets event from database and invokes it
