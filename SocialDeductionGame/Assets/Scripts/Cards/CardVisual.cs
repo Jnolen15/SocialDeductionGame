@@ -5,12 +5,14 @@ using TMPro;
 
 public class CardVisual : MonoBehaviour
 {
+    // ================== Refrences ==================
     [SerializeField] private GameObject _tagIconPref;
 
     [SerializeField] private TextMeshProUGUI _cardName;
     [SerializeField] private TextMeshProUGUI _cardDescription;
     [SerializeField] private Transform _tagIconSlot;
 
+    // ================== Setup ==================
     public void Setup(string name, string description, List<CardTag> tags)
     {
         _cardName.text = name;

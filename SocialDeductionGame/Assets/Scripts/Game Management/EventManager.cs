@@ -18,6 +18,7 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netCurrentNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netPreviousNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netEarnedBonusNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
 
     // ================== Setup ==================
     #region Setup
@@ -65,7 +66,7 @@ public class EventManager : NetworkBehaviour
 
     // Updates small event card with pass / fail text
     [ClientRpc]
-    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed)
+    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus)
     {
         if(passed)
             _eventPassText.SetActive(true);
@@ -74,7 +75,7 @@ public class EventManager : NetworkBehaviour
 
         // Show ressults
         _nightEventResults.gameObject.SetActive(true);
-        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, passed);
+        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, passed, bonus);
     }
 
     // Hides large event card from morning phase
@@ -145,7 +146,15 @@ public class EventManager : NetworkBehaviour
     {
         // Calls InvokeNightEvent if event test failed
         if (_netPassedNightEvent.Value)
-            Debug.Log("Event passed, no suffering");
+        {
+            Debug.Log("<color=blue>CLIENT: </color>Event passed, no suffering");
+            if (_netEarnedBonusNightEvent.Value)
+            {
+                Debug.Log("<color=blue>CLIENT: </color>Event Bonus Earned!");
+                InvokeNightEventBonus(_netCurrentNightEventID.Value);
+            }
+        }
+            
         else
             InvokeNightEvent(_netCurrentNightEventID.Value);
     }
@@ -170,7 +179,30 @@ public class EventManager : NetworkBehaviour
         if (nEvent)
             nEvent.InvokeEvent();
         else
-            Debug.LogError("No Night Event found");
+            Debug.LogError("<color=blue>CLIENT: </color>No Night Event found");
+    }
+
+    // Gets event from database and invokes bonus
+    private void InvokeNightEventBonus(int eventID)
+    {
+        // Saboteurs not effected by night event Bonuses
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            Debug.LogError("Cannot enact night event bonus. Player object not found!");
+            return;
+        }
+
+        if (player.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+            return;
+
+        // Invoke Night Event Bonus
+        NightEvent nEvent = CardDatabase.GetEvent(eventID);
+
+        if (nEvent)
+            nEvent.InvokeBonus();
+        else
+            Debug.LogError("<color=blue>CLIENT: </color>No Night Event found");
     }
 
     // Tests if event was successfully prevented via correct resourcess in pile
@@ -187,6 +219,10 @@ public class EventManager : NetworkBehaviour
         NightEvent nEvent = CardDatabase.GetEvent(_netCurrentNightEventID.Value);
         if (!nEvent)
             return;
+
+        // Reset bools
+        _netPassedNightEvent.Value = false;
+        _netEarnedBonusNightEvent.Value = false;
 
         // Keep track of success points locally
         int successPoints = 0;
@@ -229,20 +265,26 @@ public class EventManager : NetworkBehaviour
             }
         }
 
+        int spRequirement = nEvent.GetSuccessPoints(PlayerConnectionManager.GetNumLivingPlayers());
         // If number of points >= number of required points, success
-        if (successPoints >= nEvent.GetSuccessPoints(PlayerConnectionManager.GetNumLivingPlayers()))
+        if (successPoints >= spRequirement)
         {
             Debug.Log("<color=yellow>SERVER: </color>Event Pass!");
             _netPassedNightEvent.Value = true;
+
+            // If number of points >= extra bonus
+            // Extra bonus calculated with number of connected players not living players
+            if ((successPoints - spRequirement) >= nEvent.SPBonusCalculation(PlayerConnectionManager.GetNumConnectedPlayers()))
+            {
+                Debug.Log("<color=yellow>SERVER: </color>Earned Bonus!");
+                _netEarnedBonusNightEvent.Value = true;
+            }
         }
         else
-        {
             Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
-            _netPassedNightEvent.Value = false;
-        }
 
         // Update all clients visually
-        UpdateEventUIClientRpc(cardIDS, _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, _netPassedNightEvent.Value);
+        UpdateEventUIClientRpc(cardIDS, _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
     }
     #endregion
 }

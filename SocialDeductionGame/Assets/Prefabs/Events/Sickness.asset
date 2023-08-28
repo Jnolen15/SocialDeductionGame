@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _eventID: 1005
   _eventName: Spreading Sickness
-  _eventDescription: 'A sickness has started to spread around camp. If not treated
-    soon, we will all suffer. (On Fail: -1 HP, -1 Hunger)'
+  _eventConsequences: All players -1 Health and -1 Hunger
+  _eventBonuses: NOT YET IMPLEMENTED
   _eventArt: {fileID: 0}
   _requiredCardTags:
   - {fileID: 11400000, guid: 8de9f809fa6797b45bff5075b451562e, type: 2}
+  _requirementMod: 0.333
+  _bonusMod: 3
   _dmg: 1
   _hunger: 1
-  _requirementCalculation: 0.333

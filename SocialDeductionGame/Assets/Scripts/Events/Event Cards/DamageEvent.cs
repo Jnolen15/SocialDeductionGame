@@ -9,8 +9,6 @@ public class DamageEvent : NightEvent
     [SerializeField] private int _dmg;
     [Header("Hunger Loss Ammount")]
     [SerializeField] private int _hunger;
-    [Header("Requirement = this * number of players")]
-    [SerializeField] private float _requirementCalculation;
 
     // ========== METHOD OVERRIDES ==========
     public override void InvokeEvent()
@@ -27,13 +25,8 @@ public class DamageEvent : NightEvent
         player.GetComponent<PlayerHealth>().ModifyHunger(-_hunger);
     }
 
-    public override int SPCalculation(int numPlayers)
+    public override void InvokeBonus()
     {
-        int num = Mathf.CeilToInt(numPlayers * _requirementCalculation);
-
-        if (num <= 1)
-            num = 1;
-
-        return num;
+        Debug.Log("DAMAGE EVENT BONUS HERE!");
     }
 }

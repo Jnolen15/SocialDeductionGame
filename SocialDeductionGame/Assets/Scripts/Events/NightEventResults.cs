@@ -10,6 +10,7 @@ public class NightEventResults : MonoBehaviour
     [SerializeField] private NightEventCardVisual _nightEventCard;
     [SerializeField] private GameObject _eventFailText;
     [SerializeField] private GameObject _eventPassText;
+    [SerializeField] private GameObject _eventBonusText;
     [SerializeField] private Transform _contributorsArea;
     [SerializeField] private Transform _cardArea;
 
@@ -17,7 +18,7 @@ public class NightEventResults : MonoBehaviour
     [SerializeField] private GameObject _playerNamePref;
 
     // ================== Setup ==================
-    public void DisplayResults(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed)
+    public void DisplayResults(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus)
     {
         ClearBoard();
 
@@ -27,13 +28,16 @@ public class NightEventResults : MonoBehaviour
         // Pass / Fail Text
         _eventPassText.SetActive(false);
         _eventFailText.SetActive(false);
+        _eventBonusText.SetActive(false);
         if (passed)
             _eventPassText.SetActive(true);
         else
             _eventFailText.SetActive(true);
+        if(bonus)
+            _eventBonusText.SetActive(true);
 
         // Contributors list
-        foreach(ulong id in contributorIDS)
+        foreach (ulong id in contributorIDS)
         {
             TextMeshProUGUI namePlate = Instantiate(_playerNamePref, _contributorsArea).GetComponent<TextMeshProUGUI>();
             namePlate.text = PlayerConnectionManager.GetPlayerNameByID(id);

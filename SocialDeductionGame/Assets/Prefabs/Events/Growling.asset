@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _eventID: 1001
   _eventName: Growling from the Forest
-  _eventDescription: 'Creatures lurk on the edge of the forest. We need to defend
-    ourselves. (On Fail: -1 HP)'
+  _eventConsequences: All players -1 Health
+  _eventBonuses: NOT YET IMPLEMENTED
   _eventArt: {fileID: 0}
   _requiredCardTags:
   - {fileID: 11400000, guid: 01e058a6dca65be4488268497b70f7e2, type: 2}
   - {fileID: 11400000, guid: d8840eeb267ff96478f01bc3637f76e5, type: 2}
+  _requirementMod: 1
+  _bonusMod: 3
   _dmg: 1
-  _requirementCalculation: 1
+  _hunger: 0

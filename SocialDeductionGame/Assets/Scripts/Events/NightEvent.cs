@@ -10,11 +10,17 @@ public abstract class NightEvent : ScriptableObject
     [Header("Night Event Details")]
     [SerializeField] private string _eventName;
     [TextArea]
-    [SerializeField] private string _eventDescription;
+    [SerializeField] private string _eventConsequences;
+    [TextArea]
+    [SerializeField] private string _eventBonuses;
     [SerializeField] private Sprite _eventArt;
 
     [Header("Required Resources")]
     [SerializeField] private List<CardTag> _requiredCardTags = new();
+    [Header("Requirement = Celing(#players*this)")]
+    [SerializeField] private float _requirementMod;
+    [Header("Requirement =  Celing(#players/this)")]
+    [SerializeField] private float _bonusMod;
 
 
     // ========== Getters ==========
@@ -28,9 +34,14 @@ public abstract class NightEvent : ScriptableObject
         return _eventName;
     }
 
-    public string GetEventDescription()
+    public string GetEventConsequences()
     {
-        return _eventDescription;
+        return _eventConsequences;
+    }
+
+    public string GetEventBonuses()
+    {
+        return _eventBonuses;
     }
 
     public int GetSuccessPoints(int numPlayers)
@@ -45,8 +56,30 @@ public abstract class NightEvent : ScriptableObject
 
     // ========== OVERRIDE CLASSES ==========
     // Calculates the SuccessPoints needed to prevent the event consequences
-    public abstract int SPCalculation(int numPlayers);
+    public virtual int SPCalculation(int numPlayers)
+    {
+        int num = Mathf.CeilToInt(numPlayers * _requirementMod);
+
+        if (num <= 1)
+            num = 1;
+
+        return num;
+    }
+
+    // Calculates the SuccessPoints needed to achive the event bonus
+    public virtual int SPBonusCalculation(int numPlayers)
+    {
+        int num = Mathf.CeilToInt(numPlayers / _bonusMod);
+
+        if (num <= 1)
+            num = 1;
+
+        return num;
+    }
 
     // The gameplay consecqunces of the event
     public abstract void InvokeEvent();
+
+    // The gameplay Bonuses of the event
+    public abstract void InvokeBonus();
 }
