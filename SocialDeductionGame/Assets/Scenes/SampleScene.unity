@@ -8298,6 +8298,8 @@ MonoBehaviour:
   _stockpile: {fileID: 71632897}
   _netCurrentNightEventID:
     m_InternalValue: 1001
+  _netPreviousNightEventID:
+    m_InternalValue: 0
   _netPassedNightEvent:
     m_InternalValue: 0
 --- !u!114 &1316379724
@@ -8623,6 +8625,8 @@ MonoBehaviour:
     CardObj: {fileID: 8127116550430777070, guid: 0c2da1ebdf2c0e046a1d62a018723ba5, type: 3}
   - CardID: 2007
     CardObj: {fileID: 8127116550430777070, guid: 813591c53f6966a43bdb4b788deabc89, type: 3}
+  - CardID: 2008
+    CardObj: {fileID: 8127116550430777070, guid: 11fb6824c327c294488542d034006ff4, type: 3}
   - CardID: 3001
     CardObj: {fileID: 8127116550430777070, guid: f2f1f518331c6104f8a98f937957c9b8, type: 3}
   _globalEventList:
@@ -9281,7 +9285,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1557034110}
   m_HandleRect: {fileID: 1557034109}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -12068,12 +12072,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _eventSelectable: {fileID: 4214484714181847542, guid: 3706c0cf9e28eea459a00504b77953ea, type: 3}
   _eventCardArea: {fileID: 147894035}
-  _eventList:
-  - {fileID: 11400000, guid: 7ab8ada28df80f24a8578185ad19188e, type: 2}
-  - {fileID: 11400000, guid: 233856c9bafc04c42a279b49d98edb5b, type: 2}
-  - {fileID: 11400000, guid: 46fd6eaed0198e04eaaa2470489ef73e, type: 2}
-  - {fileID: 11400000, guid: eacce7d5d5ee5ba44bb36575152829d3, type: 2}
-  - {fileID: 11400000, guid: d4e46f696d2c41243beca7d8c2310dec, type: 2}
 --- !u!114 &1911939246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13653,7 +13651,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].CardID
-      value: 2007
+      value: 2008
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].CardID
