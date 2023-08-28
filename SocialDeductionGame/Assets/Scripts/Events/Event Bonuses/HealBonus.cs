@@ -2,16 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Night Event/Damage Event")]
-public class DamageEvent : NightEvent
+[CreateAssetMenu(menuName = "Night Event/Heal Bonus")]
+public class HealBonus : EventBonus
 {
-    [Header("Damage Ammount")]
-    [SerializeField] private int _dmg;
-    [Header("Hunger Loss Ammount")]
+    [Header("Heal Ammount")]
+    [SerializeField] private int _heal;
+    [Header("Hunger Gain Ammount")]
     [SerializeField] private int _hunger;
 
     // ========== METHOD OVERRIDES ==========
-    public override void InvokeEvent()
+    public override void InvokeBonus()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
 
@@ -21,7 +21,7 @@ public class DamageEvent : NightEvent
             return;
         }
 
-        player.GetComponent<PlayerHealth>().ModifyHealth(-_dmg);
-        player.GetComponent<PlayerHealth>().ModifyHunger(-_hunger);
+        player.GetComponent<PlayerHealth>().ModifyHealth(+_heal);
+        player.GetComponent<PlayerHealth>().ModifyHunger(+_hunger);
     }
 }

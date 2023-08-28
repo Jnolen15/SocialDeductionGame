@@ -22,6 +22,9 @@ public abstract class NightEvent : ScriptableObject
     [Header("Requirement =  Celing(#players/this)")]
     [SerializeField] private float _bonusMod;
 
+    [Header("Bonus")]
+    [SerializeField] private EventBonus _eventBonus;
+
 
     // ========== Getters ==========
     public int GetEventID()
@@ -81,5 +84,9 @@ public abstract class NightEvent : ScriptableObject
     public abstract void InvokeEvent();
 
     // The gameplay Bonuses of the event
-    public abstract void InvokeBonus();
+    public virtual void InvokeBonus()
+    {
+        Debug.Log("Invoking Event Bonus");
+        _eventBonus.InvokeBonus();
+    }
 }

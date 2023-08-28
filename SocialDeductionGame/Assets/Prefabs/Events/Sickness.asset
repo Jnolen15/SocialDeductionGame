@@ -15,11 +15,12 @@ MonoBehaviour:
   _eventID: 1005
   _eventName: Spreading Sickness
   _eventConsequences: All players -1 Health and -1 Hunger
-  _eventBonuses: NOT YET IMPLEMENTED
+  _eventBonuses: to heal 1
   _eventArt: {fileID: 0}
   _requiredCardTags:
   - {fileID: 11400000, guid: 8de9f809fa6797b45bff5075b451562e, type: 2}
   _requirementMod: 0.333
   _bonusMod: 3
+  _eventBonus: {fileID: 11400000, guid: f48a4a831cb4c084f84b29774197a7b6, type: 2}
   _dmg: 1
   _hunger: 1
