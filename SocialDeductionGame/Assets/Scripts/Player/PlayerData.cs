@@ -133,13 +133,13 @@ public class PlayerData : NetworkBehaviour
             _teamText.color = Color.red;
     }
 
-    // Show night event choices if Saboteur, else auto-ready
+    // Show night event choices if Saboteur, else show Recap
     private void ShowEventChoices()
     {
         if (_netTeam.Value == Team.Saboteurs)
             _nightEventManger.OpenNightEventPicker();
-        else if (!_playerHealth.IsLiving())
-            ReadyPlayer();
+        else if (_playerHealth.IsLiving())
+            _nightEventManger.ShowRecap();
     }
 
     public Team GetPlayerTeam()

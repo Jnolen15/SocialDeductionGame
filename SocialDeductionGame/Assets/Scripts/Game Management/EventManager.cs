@@ -9,6 +9,7 @@ public class EventManager : NetworkBehaviour
     // ================== Refrences ==================
     [SerializeField] private NightEventPicker _nightEventPickerMenu;
     [SerializeField] private NightEventResults _nightEventResults;
+    [SerializeField] private NightEventRecapUI _nightEventRecap;
     [SerializeField] private NightEventCardVisual _eventCardSmall;
     [SerializeField] private NightEventCardVisual _eventCardLarge;
     [SerializeField] private GameObject _eventFailText;
@@ -91,6 +92,12 @@ public class EventManager : NetworkBehaviour
     {
         _nightEventPickerMenu.gameObject.SetActive(true);
         _nightEventPickerMenu.DealOptions(_netPreviousNightEventID.Value);
+    }
+
+    public void ShowRecap()
+    {
+        _nightEventRecap.gameObject.SetActive(true);
+        _nightEventRecap.Setup(_netPreviousNightEventID.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
     }
     #endregion
 

@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class NightEventSelectable : MonoBehaviour
 {
-    // Refrences
+    // ================== Refrences ==================
     private NightEventCardVisual _event;
     private NightEventPicker _eventPicker;
-    // Variables
+    // ================== Variables ==================
     private bool _eventSelected;
 
+    // ================== Setup ==================
     private void OnEnable()
     {
         Setup();
@@ -21,6 +22,7 @@ public class NightEventSelectable : MonoBehaviour
         _eventPicker = GetComponentInParent<NightEventPicker>();
     }
 
+    // ================== Function ==================
     public void OnSelect()
     {
         if (_eventPicker == null)
