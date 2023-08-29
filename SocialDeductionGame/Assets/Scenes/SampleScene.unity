@@ -823,7 +823,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 995, y: 100}
+  m_SizeDelta: {x: 1200, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &147894036
 MonoBehaviour:
@@ -843,7 +843,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 20
+  m_Spacing: 75
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
@@ -6002,7 +6002,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 265.5}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 240, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1033116974
 MonoBehaviour:
@@ -6024,7 +6024,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Must select a card.
+  m_text: Select a card then hit ready
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7860,11 +7860,14 @@ MonoBehaviour:
   _morningTimerMax: 10
   _afternoonTimerMax: 60
   _eveningTimerMax: 140
+  _nightTimerMax: 15
   _netMorningTimer:
     m_InternalValue: 0
   _netAfternoonTimer:
     m_InternalValue: 0
   _netEveningTimer:
+    m_InternalValue: 0
+  _netNightTimer:
     m_InternalValue: 0
   playerPositions:
   - {fileID: 1988965272}
@@ -11442,8 +11445,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1000, y: 850}
+  m_AnchoredPosition: {x: 0, y: -50}
+  m_SizeDelta: {x: 1200, y: 800}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1911939245
 MonoBehaviour:
@@ -11459,6 +11462,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _eventSelectable: {fileID: 8884292500251330960, guid: 7ce101aedfa7cb94987e3f8f52814c32, type: 3}
   _eventCardArea: {fileID: 147894035}
+  _selectableEventList: []
 --- !u!114 &1911939246
 MonoBehaviour:
   m_ObjectHideFlags: 0

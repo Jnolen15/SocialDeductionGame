@@ -25,9 +25,11 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private float _morningTimerMax;
     [SerializeField] private float _afternoonTimerMax;
     [SerializeField] private float _eveningTimerMax;
+    [SerializeField] private float _nightTimerMax;
     [SerializeField] private NetworkVariable<float> _netMorningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [Header("Player Seating Positions")]
     [SerializeField] private List<Transform> playerPositions = new();
     [Header("Win Settings")]
@@ -121,6 +123,15 @@ public class GameManager : NetworkBehaviour
                 Instance._netEveningTimer.Value -= (Time.deltaTime * modVal);
                 //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
                 if (Instance._netEveningTimer.Value <= 0)
+                {
+                    Debug.Log($"<color=yellow>SERVER: </color> Night Timer up, Progressing");
+                    ProgressState();
+                }
+                break;
+            case GameState.Night:
+                Instance._netNightTimer.Value -= (Time.deltaTime * modVal);
+                //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
+                if (Instance._netNightTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Night Timer up, Progressing");
                     ProgressState();
@@ -265,6 +276,7 @@ public class GameManager : NetworkBehaviour
                 OnStateEvening?.Invoke();
                 break;
             case GameState.Night:
+                if (IsServer) Instance._netNightTimer.Value = Instance._nightTimerMax;
                 OnStateNight?.Invoke();
                 break;
         }
@@ -365,6 +377,8 @@ public class GameManager : NetworkBehaviour
                 return 1 - (Instance._netAfternoonTimer.Value / Instance._afternoonTimerMax);
             case GameState.Evening:
                 return 1 - (Instance._netEveningTimer.Value / Instance._eveningTimerMax);
+            case GameState.Night:
+                return 1 - (Instance._netNightTimer.Value / Instance._nightTimerMax);
         }
 
         return 1;

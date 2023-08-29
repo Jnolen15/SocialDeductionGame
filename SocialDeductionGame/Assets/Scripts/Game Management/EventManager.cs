@@ -92,12 +92,6 @@ public class EventManager : NetworkBehaviour
         _nightEventPickerMenu.gameObject.SetActive(true);
         _nightEventPickerMenu.DealOptions(_netPreviousNightEventID.Value);
     }
-
-    public void CloseNightEventPicker()
-    {
-        _nightEventPickerMenu.ClearOptions();
-        _nightEventPickerMenu.gameObject.SetActive(false);
-    }
     #endregion
 
     // ================== Night Events ==================

@@ -10,7 +10,12 @@ public class NightEventSelectable : MonoBehaviour
     // Variables
     private bool _eventSelected;
 
-    void Start()
+    private void OnEnable()
+    {
+        Setup();
+    }
+
+    void Setup()
     {
         _event = GetComponent<NightEventCardVisual>();
         _eventPicker = GetComponentInParent<NightEventPicker>();
@@ -18,20 +23,20 @@ public class NightEventSelectable : MonoBehaviour
 
     public void OnSelect()
     {
-        _eventPicker.SelectEvent(_event.GetEventID());
+        if (_eventPicker == null)
+            Setup();
 
-        /*if (!_eventSelected)
+        if (!_eventSelected)
         {
-            _eventSelected = _eventPicker.SelectEvent(_event);
-
-            if (_eventSelected)
-                transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+            _eventSelected = true;
+            _eventPicker.SelectEvent(_event.GetEventID());
+            transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
         }
-        else
-        {
-            _eventPicker.DeselectCard(_card);
-            _eventSelected = false;
-            transform.localScale = Vector3.one;
-        }*/
+    }
+
+    public void Deselect()
+    {
+        _eventSelected = false;
+        transform.localScale = Vector3.one;
     }
 }

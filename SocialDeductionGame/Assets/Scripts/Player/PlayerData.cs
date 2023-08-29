@@ -136,12 +136,9 @@ public class PlayerData : NetworkBehaviour
     // Show night event choices if Saboteur, else auto-ready
     private void ShowEventChoices()
     {
-        if (!_playerHealth.IsLiving())
-            return;
-
         if (_netTeam.Value == Team.Saboteurs)
             _nightEventManger.OpenNightEventPicker();
-        else
+        else if (!_playerHealth.IsLiving())
             ReadyPlayer();
     }
 
