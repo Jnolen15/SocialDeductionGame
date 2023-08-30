@@ -25,7 +25,7 @@ public class RelayTest : MonoBehaviour
 
         _buttons.SetActive(false);
 
-        await Authenticate();
+        await SignInCachedUserAsync();
 
         _buttons.SetActive(true);
     }
@@ -34,6 +34,42 @@ public class RelayTest : MonoBehaviour
     {
         await UnityServices.InitializeAsync();
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
+    }
+
+    // Shou
+    async static Task SignInCachedUserAsync()
+    {
+        await UnityServices.InitializeAsync();
+
+        // Check if a cached player already exists by checking if the session token exists
+        if (!AuthenticationService.Instance.SessionTokenExists)
+        {
+            Debug.Log("Cached Player re-join");
+            return;
+        }
+
+        // Sign in Anonymously
+        // This call will sign in the cached player.
+        try
+        {
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            Debug.Log("Sign in anonymously succeeded!");
+
+            // Shows how to get the playerID
+            Debug.Log($"PlayerID: {AuthenticationService.Instance.PlayerId}");
+        }
+        catch (AuthenticationException ex)
+        {
+            // Compare error code to AuthenticationErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
+        {
+            // Compare error code to CommonErrorCodes
+            // Notify the player with the proper error message
+            Debug.LogException(ex);
+        }
     }
 
     public async void CreateGame()
