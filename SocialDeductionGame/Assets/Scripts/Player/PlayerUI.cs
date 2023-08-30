@@ -120,12 +120,12 @@ public class PlayerUI : MonoBehaviour
 
     private void UpdateHealth(float ModifiedAmmount, float newTotal)
     {
-        _healthText.text = "Health: " + newTotal;
+        _healthText.text = newTotal.ToString();
     }
 
     private void UpdateHunger(float ModifiedAmmount, float newTotal)
     {
-        _hungerText.text = $"Hunger: {newTotal}";
+        _hungerText.text = newTotal.ToString();
     }
 
     private void DisplayDeathMessage()

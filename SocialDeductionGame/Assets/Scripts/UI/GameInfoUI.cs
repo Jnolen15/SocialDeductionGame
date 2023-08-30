@@ -10,18 +10,25 @@ public class GameInfoUI : MonoBehaviour
     [Header("UI Refrences")]
     [SerializeField] private TextMeshProUGUI _gameStateText;
     [SerializeField] private TextMeshProUGUI _dayText;
+    [SerializeField] private Image _stateTimerBackground;
     [SerializeField] private Image _stateTimerFill;
     private bool _updatedDay;
+
+    [Header("Timer Images")]
+    [SerializeField] private Sprite _morningTimerSprite;
+    [SerializeField] private Sprite _afternoonTimerSprite;
+    [SerializeField] private Sprite _eveningTimerSprite;
+    [SerializeField] private Sprite _nightTimerSprite;
 
     // =================== Setup ===================
     private void Awake()
     {
-        GameManager.OnStateChange += UpdateStateText;
+        GameManager.OnStateChange += UpdateStateUI;
     }
 
     private void OnDisable()
     {
-        GameManager.OnStateChange -= UpdateStateText;
+        GameManager.OnStateChange -= UpdateStateUI;
     }
 
     // =================== Update ===================
@@ -41,13 +48,33 @@ public class GameInfoUI : MonoBehaviour
     }
 
     // =================== UI Functions ===================
-    private void UpdateStateText()
+    private void UpdateStateUI()
     {
         _gameStateText.text = GameManager.GetCurrentGameState().ToString();
+
+        switch (GameManager.GetCurrentGameState())
+        {
+            case GameManager.GameState.Morning:
+                _stateTimerBackground.sprite = _morningTimerSprite;
+                _stateTimerFill.sprite = _morningTimerSprite;
+                break;
+            case GameManager.GameState.Afternoon:
+                _stateTimerBackground.sprite = _afternoonTimerSprite;
+                _stateTimerFill.sprite = _afternoonTimerSprite;
+                break;
+            case GameManager.GameState.Evening:
+                _stateTimerBackground.sprite = _eveningTimerSprite;
+                _stateTimerFill.sprite = _eveningTimerSprite;
+                break;
+            case GameManager.GameState.Night:
+                _stateTimerBackground.sprite = _nightTimerSprite;
+                _stateTimerFill.sprite = _nightTimerSprite;
+                break;
+        }
     }
 
     private void UpdateDayText()
     {
-        _dayText.text = GameManager.GetCurrentDay().ToString();
+        _dayText.text = "Day: " + GameManager.GetCurrentDay().ToString();
     }
 }
