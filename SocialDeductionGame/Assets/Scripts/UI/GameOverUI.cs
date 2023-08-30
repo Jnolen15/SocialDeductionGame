@@ -6,12 +6,16 @@ using TMPro;
 public class GameOverUI : MonoBehaviour
 {
     // =================== Refrences ===================
+    [SerializeField] private GameObject _panel;
     [SerializeField] private TextMeshProUGUI _endScreenText;
 
     // =================== Setup ===================
     private void Awake()
     {
         GameManager.OnGameEnd += OnGameEnd;
+
+        // unpause Game
+        Time.timeScale = 1;
     }
 
     private void OnDisable()
@@ -22,6 +26,7 @@ public class GameOverUI : MonoBehaviour
     // =================== UI Functions ===================
     private void OnGameEnd(bool survivorWin)
     {
+        Debug.Log("<color=yellow>SERVER: </color>SHOWING GAME OVER SCREEN");
         Show();
 
         if (survivorWin)
@@ -33,15 +38,18 @@ public class GameOverUI : MonoBehaviour
             _endScreenText.text = "Saboteur Wins";
             _endScreenText.color = Color.red;
         }
+
+        // Pause Game
+        Time.timeScale = 0;
     }
 
     private void Show()
     {
-        gameObject.SetActive(true);
+        _panel.SetActive(true);
     }
 
     private void Hide()
     {
-        gameObject.SetActive(false);
+        _panel.SetActive(false);
     }
 }
