@@ -741,7 +741,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8207045817720434557
 RectTransform:
   m_ObjectHideFlags: 0
@@ -783,7 +783,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -9399,6 +9399,8 @@ MonoBehaviour:
   _nameText: {fileID: 6754881362344115707}
   _deathMessage: {fileID: 7101682214179588156}
   _playerNameSubmission: {fileID: 8302624716499441378}
+  _healthFlashSprite: {fileID: 8866477229886470411}
+  _hungerFlashSprite: {fileID: 8647933608707032835}
   _votePrefab: {fileID: 5041042436349606570, guid: 9e39a40515dcb574385c0718fbfb9b29, type: 3}
   _voteArea: {fileID: 5249951673684808859}
   _exileUI: {fileID: 394334665687406094}
@@ -9420,7 +9422,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1068638108987450316
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9462,7 +9464,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

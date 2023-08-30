@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class PlayerUI : MonoBehaviour
 {
@@ -19,6 +20,8 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private GameObject _deathMessage;
     [SerializeField] private GameObject _playerNameSubmission;
+    [SerializeField] private Image _healthFlashSprite;
+    [SerializeField] private Image _hungerFlashSprite;
 
     [Header("Exile Vote UI Refrences")]
     [SerializeField] private GameObject _votePrefab;
@@ -120,11 +123,31 @@ public class PlayerUI : MonoBehaviour
 
     private void UpdateHealth(float ModifiedAmmount, float newTotal)
     {
+        if (ModifiedAmmount == 0)
+            return;
+
+        if (ModifiedAmmount > 0)
+            _healthFlashSprite.color = Color.green;
+        else if (ModifiedAmmount < 0)
+            _healthFlashSprite.color = Color.red;
+
+        _healthFlashSprite.DOFade(0.8f, 0.25f).SetEase(Ease.Flash).OnComplete(() => { _healthFlashSprite.DOFade(0, 0.25f).SetEase(Ease.Flash); });
+
         _healthText.text = newTotal.ToString();
     }
 
     private void UpdateHunger(float ModifiedAmmount, float newTotal)
     {
+        if (ModifiedAmmount == 0)
+            return;
+
+        if (ModifiedAmmount > 0)
+            _hungerFlashSprite.color = Color.green;
+        else if (ModifiedAmmount < 0)
+            _hungerFlashSprite.color = Color.red;
+
+        _hungerFlashSprite.DOFade(0.8f, 0.25f).OnComplete(() => { _hungerFlashSprite.DOFade(0, 0.25f); });
+
         _hungerText.text = newTotal.ToString();
     }
 

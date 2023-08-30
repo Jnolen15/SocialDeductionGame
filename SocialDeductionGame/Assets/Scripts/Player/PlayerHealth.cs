@@ -50,7 +50,7 @@ public class PlayerHealth : NetworkBehaviour
         if (IsOwner)
         {
             ModifyHealthServerRPC(4, false);
-            ModifyHungerServerRPC(2f, false);
+            ModifyHungerServerRPC(3f, false);
         }
     }
 
@@ -69,7 +69,16 @@ public class PlayerHealth : NetworkBehaviour
     /*private void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
+            ModifyHealth(1);
+
+        if (Input.GetKeyDown(KeyCode.Y))
+            ModifyHunger(1);
+
+        if (Input.GetKeyDown(KeyCode.G))
             ModifyHealth(-1);
+
+        if (Input.GetKeyDown(KeyCode.H))
+            ModifyHunger(-1);
     }*/
 
     // ==================== Health ====================
@@ -88,16 +97,21 @@ public class PlayerHealth : NetworkBehaviour
     {
         Debug.Log($"{NetworkManager.Singleton.LocalClientId} had its health incremented by {ammount}");
 
-        if(add)
-            _netCurrentHP.Value += ammount;
+        // temp for calculations
+        int tempHP = _netCurrentHP.Value;
+
+        if (add)
+            tempHP += ammount;
         else
-            _netCurrentHP.Value = ammount;
+            tempHP = ammount;
 
         // Clamp HP within bounds
-        if (_netCurrentHP.Value < 0)
-            _netCurrentHP.Value = 0;
-        else if (_netCurrentHP.Value > _maxHP)
-            _netCurrentHP.Value = _maxHP;
+        if (tempHP < 0)
+            tempHP = 0;
+        else if (tempHP > _maxHP)
+            tempHP = _maxHP;
+
+        _netCurrentHP.Value = tempHP;
 
         // Death Check
         if (_netCurrentHP.Value == 0)
@@ -137,16 +151,21 @@ public class PlayerHealth : NetworkBehaviour
     {
         Debug.Log($"{NetworkManager.Singleton.LocalClientId} had its hunger incremented by {ammount}");
 
+        // temp for calculations
+        float tempHunger = _netCurrentHunger.Value;
+
         if (add)
-            _netCurrentHunger.Value += ammount;
+            tempHunger += ammount;
         else
-            _netCurrentHunger.Value = ammount;
+            tempHunger = ammount;
 
         // Clamp Hunger within bounds
-        if (_netCurrentHunger.Value < 0)
-            _netCurrentHunger.Value = 0;
-        else if (_netCurrentHunger.Value > _maxHunger)
-            _netCurrentHunger.Value = _maxHunger;
+        if (tempHunger < 0)
+            tempHunger = 0;
+        else if (tempHunger > _maxHunger)
+            tempHunger = _maxHunger;
+
+        _netCurrentHunger.Value = tempHunger;
     }
 
     // Loose hunger each day
