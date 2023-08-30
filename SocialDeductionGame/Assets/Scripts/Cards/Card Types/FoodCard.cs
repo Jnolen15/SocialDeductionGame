@@ -20,7 +20,7 @@ public class FoodCard : Card
         }
         else if (player != null)
         {
-            if (this.HasTag("Edible"))
+            if (this.HasTag("Edible") || this.HasTag("Medicinal"))
             {
                 Debug.Log($"Player eating {_servings} servings, healed for {_hpGain}");
                 player.Eat(_servings, _hpGain);
