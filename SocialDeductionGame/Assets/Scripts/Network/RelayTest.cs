@@ -42,11 +42,11 @@ public class RelayTest : MonoBehaviour
         await UnityServices.InitializeAsync();
 
         // Check if a cached player already exists by checking if the session token exists
-        if (!AuthenticationService.Instance.SessionTokenExists)
+        /*if (!AuthenticationService.Instance.SessionTokenExists)
         {
             Debug.Log("Cached Player re-join");
             return;
-        }
+        }*/
 
         // Sign in Anonymously
         // This call will sign in the cached player.
