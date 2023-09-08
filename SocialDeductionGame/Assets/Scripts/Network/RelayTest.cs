@@ -36,7 +36,6 @@ public class RelayTest : MonoBehaviour
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
     }
 
-    // Shou
     async static Task SignInCachedUserAsync()
     {
         await UnityServices.InitializeAsync();
@@ -82,6 +81,24 @@ public class RelayTest : MonoBehaviour
         _transport.SetHostRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData);
 
         NetworkManager.Singleton.StartHost();
+
+        SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
+    }
+
+    public void CreateGameTest()
+    {
+        _buttons.SetActive(false);
+
+        NetworkManager.Singleton.StartHost();
+
+        SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
+    }
+
+    public void JoinGameTest()
+    {
+        _buttons.SetActive(false);
+
+        NetworkManager.Singleton.StartClient();
     }
 
     public async void JoinGame()

@@ -53,8 +53,6 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private AnimationCurve _playerReadyTimerModCurve;
     [Header("Net Variables (For Viewing)")]
     [SerializeField] private NetworkVariable<int> _netDay = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
-    private Dictionary<ulong, bool> _playerReadyDictionary = new();
 
     // ================== Events ==================
     public delegate void ChangeStateAction();
@@ -67,24 +65,25 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateAction OnStateEvening;
     public static event ChangeStateAction OnStateNight;
 
-    public static event Action<bool> OnPlayerReadyToggled;
     public static event Action<bool> OnGameEnd;
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
-        Instance._netCurrentGameState.OnValueChanged += UpdateGameState;
+        _netCurrentGameState.OnValueChanged += UpdateGameState;
+        PlayerConnectionManager.OnAllPlayersReady += ProgressState;
     }
 
     private void OnDisable()
     {
-        Instance._netCurrentGameState.OnValueChanged -= UpdateGameState;
+        _netCurrentGameState.OnValueChanged -= UpdateGameState;
+        PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
     }
 
     private void Start()
     {
-        UpdateGameState(GameState.Morning, Instance._netCurrentGameState.Value);
+        UpdateGameState(GameState.Morning, _netCurrentGameState.Value);
     }
     #endregion
 
@@ -95,43 +94,43 @@ public class GameManager : NetworkBehaviour
         if (!IsServer) return;
 
         // Calculate timer speed up modifier based on number of players ready
-        float percentReady = ((float)Instance._netPlayersReadied.Value / (float)PlayerConnectionManager.CheckNumLivingPlayers());
+        float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.CheckNumLivingPlayers());
         float modVal = (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
 
         // State Timers
-        switch (Instance._netCurrentGameState.Value)
+        switch (_netCurrentGameState.Value)
         {
             case 0:
                 break;
             case GameState.Morning:
-                Instance._netMorningTimer.Value -= (Time.deltaTime * modVal);
-                if (Instance._netMorningTimer.Value <= 0)
+                _netMorningTimer.Value -= (Time.deltaTime * modVal);
+                if (_netMorningTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Morning Timer up, Progressing");
                     ProgressState();
                 }
                 break;
             case GameState.Afternoon:
-                Instance._netAfternoonTimer.Value -= (Time.deltaTime * modVal);
-                if (Instance._netAfternoonTimer.Value <= 0)
+                _netAfternoonTimer.Value -= (Time.deltaTime * modVal);
+                if (_netAfternoonTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Afternoon Timer up, Progressing");
                     ProgressState();
                 }
                 break;
             case GameState.Evening:
-                Instance._netEveningTimer.Value -= (Time.deltaTime * modVal);
+                _netEveningTimer.Value -= (Time.deltaTime * modVal);
                 //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
-                if (Instance._netEveningTimer.Value <= 0)
+                if (_netEveningTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Night Timer up, Progressing");
                     ProgressState();
                 }
                 break;
             case GameState.Night:
-                Instance._netNightTimer.Value -= (Time.deltaTime * modVal);
+                _netNightTimer.Value -= (Time.deltaTime * modVal);
                 //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
-                if (Instance._netNightTimer.Value <= 0)
+                if (_netNightTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Night Timer up, Progressing");
                     ProgressState();
@@ -142,103 +141,45 @@ public class GameManager : NetworkBehaviour
         // FOR TESTING Skip to next state
         if (_doCheats && Input.GetKeyDown(KeyCode.S))
         {
-            Instance._netCurrentGameState.Value++;
+            _netCurrentGameState.Value++;
 
-            if (((int)Instance._netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
-                Instance._netCurrentGameState.Value = 0;
+            if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
+                _netCurrentGameState.Value = 0;
         }
     }
     #endregion
 
     // ================== Player Positions ==================
     #region Player Positions
-    public static void GetSeat(Transform playerTrans, ulong playerID)
+    public void GetSeat(Transform playerTrans, ulong playerID)
     {
         Debug.Log("Getting Seat for player " + playerID);
 
-        if((int)playerID > Instance.playerPositions.Count - 1)
+        if((int)playerID > playerPositions.Count - 1)
         {
             Debug.LogError("Not Enough Seats!");
             return;
         }
 
-        playerTrans.position = Instance.playerPositions[(int)playerID].position;
-        playerTrans.rotation = Instance.playerPositions[(int)playerID].rotation;
-    }
-    #endregion
-
-    // ====================== Player Readying ======================
-    #region Player Readying
-    public static void ReadyPlayer()
-    {
-        Instance.PlayerReadyServerRpc();
-    }
-    
-    [ServerRpc(RequireOwnership = false)]
-    public void PlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
-    {
-        ulong clientID = serverRpcParams.Receive.SenderClientId;
-
-        // Check if player is already Readied
-        if (Instance._playerReadyDictionary.ContainsKey(clientID) && Instance._playerReadyDictionary[clientID] == true)
-            return;
-
-        // Get client data
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientID }
-            }
-        };
-
-        // Record ready player on server
-        Instance._netPlayersReadied.Value++;
-        Instance._playerReadyDictionary[clientID] = true;
-        PlayerReadyClientRpc(clientRpcParams);
-
-        // Check if all players ready
-        if (Instance._netPlayersReadied.Value >= PlayerConnectionManager.CheckNumLivingPlayers())
-        {
-            ProgressState();
-        }
-    }
-
-    private void ProgressState()
-    {
-        if (!IsServer) return;
-
-        Debug.Log($"<color=yellow>SERVER: </color> All players ready");
-
-        // Unready
-        Instance._netPlayersReadied.Value = 0;
-        foreach (ulong key in Instance._playerReadyDictionary.Keys.ToList())
-        {
-            Instance._playerReadyDictionary[key] = false;
-        }
-        PlayerUnreadyClientRpc();
-
-        // Progress to next state, looping back to morning if day over
-        Instance._netCurrentGameState.Value++;
-        if (((int)Instance._netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
-            Instance._netCurrentGameState.Value = GameState.Morning;
-    }
-
-    [ClientRpc]
-    public void PlayerReadyClientRpc(ClientRpcParams clientRpcParams = default)
-    {
-        OnPlayerReadyToggled?.Invoke(true);
-    }
-
-    [ClientRpc]
-    public void PlayerUnreadyClientRpc()
-    {
-        OnPlayerReadyToggled?.Invoke(false);
+        playerTrans.position = playerPositions[(int)playerID].position;
+        playerTrans.rotation = playerPositions[(int)playerID].rotation;
     }
     #endregion
 
     // ====================== State Management ======================
     #region State Management
+    private void ProgressState()
+    {
+        if (!IsServer) return;
+
+        Debug.Log("<color=yellow>SERVER: </color> Progressing State");
+
+        // Progress to next state, looping back to morning if day over
+        _netCurrentGameState.Value++;
+        if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
+            _netCurrentGameState.Value = GameState.Morning;
+    }
+
     public void UpdateGameState(GameState prev, GameState next)
     {
         if (next != GameState.Pregame)
@@ -257,7 +198,7 @@ public class GameManager : NetworkBehaviour
             case GameState.Morning:
                 if (IsServer)
                 {
-                    Instance._netMorningTimer.Value = Instance._morningTimerMax;
+                    _netMorningTimer.Value = _morningTimerMax;
                     IncrementDay();
                     CheckSurvivorWin();
                 }
@@ -267,16 +208,16 @@ public class GameManager : NetworkBehaviour
                 OnStateForage?.Invoke();
                 break;
             case GameState.Afternoon:
-                if(IsServer) Instance._netAfternoonTimer.Value = Instance._afternoonTimerMax;
+                if(IsServer) _netAfternoonTimer.Value = _afternoonTimerMax;
                 this.GetComponent<LocationManager>().ForceLocation(LocationManager.Location.Camp);
                 OnStateAfternoon?.Invoke();
                 break;
             case GameState.Evening:
-                if (IsServer) Instance._netEveningTimer.Value = Instance._eveningTimerMax;
+                if (IsServer) _netEveningTimer.Value = _eveningTimerMax;
                 OnStateEvening?.Invoke();
                 break;
             case GameState.Night:
-                if (IsServer) Instance._netNightTimer.Value = Instance._nightTimerMax;
+                if (IsServer) _netNightTimer.Value = _nightTimerMax;
                 OnStateNight?.Invoke();
                 break;
         }
@@ -288,7 +229,7 @@ public class GameManager : NetworkBehaviour
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> Incrementing Day");
-        Instance._netDay.Value++;
+        _netDay.Value++;
     }
     #endregion
 
@@ -298,14 +239,14 @@ public class GameManager : NetworkBehaviour
     // Check for game end via survivor win
     private void CheckSurvivorWin()
     {
-        if (!Instance._testForWin)
+        if (!_testForWin)
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> Checking Survivor Win");
 
-        if (Instance._netDay.Value >= Instance._numDaysTillRescue)
+        if (_netDay.Value >= _numDaysTillRescue)
         {
-            if (PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Survivors) > PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Saboteurs))
+            if (PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors) > PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs))
                 SetSurvivorWinClientRpc();
         }
     }
@@ -322,20 +263,20 @@ public class GameManager : NetworkBehaviour
     // Check for game end via Saboteur win
     private void CheckSaboteurWin()
     {
-        if (!Instance._testForWin)
+        if (!_testForWin)
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> Checking Saboteur Win");
 
         // If number of Saboteurs >= survivors
-        if (PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Saboteurs) >= PlayerConnectionManager.GetNumLivingOnTeam(PlayerData.Team.Survivors))
+        if (PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs) >= PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors))
         {
             Debug.Log("<color=yellow>SERVER: </color> # of Saboteurs >= # of survivors, WIN!");
             SetSaboteurWinClientRpc();
         }
 
         // If all players are dead
-        if (PlayerConnectionManager.CheckNumLivingPlayers() == 0)
+        if (PlayerConnectionManager.Instance.CheckNumLivingPlayers() == 0)
         {
             Debug.Log("<color=yellow>SERVER: </color> All players have died, WIN!");
             SetSaboteurWinClientRpc();
@@ -355,30 +296,30 @@ public class GameManager : NetworkBehaviour
 
     // ====================== Helpers ======================
     #region Helpers
-    public static GameManager.GameState GetCurrentGameState()
+    public GameManager.GameState GetCurrentGameState()
     {
-        return Instance._netCurrentGameState.Value;
+        return _netCurrentGameState.Value;
     }
 
-    public static int GetCurrentDay()
+    public int GetCurrentDay()
     {
-        return Instance._netDay.Value;
+        return _netDay.Value;
     }
 
-    public static float GetStateTimer()
+    public float GetStateTimer()
     {
-        switch (Instance._netCurrentGameState.Value)
+        switch (_netCurrentGameState.Value)
         {
             case 0:
                 return 1;
             case GameState.Morning:
-                return 1 - (Instance._netMorningTimer.Value / Instance._morningTimerMax);
+                return 1 - (_netMorningTimer.Value / _morningTimerMax);
             case GameState.Afternoon:
-                return 1 - (Instance._netAfternoonTimer.Value / Instance._afternoonTimerMax);
+                return 1 - (_netAfternoonTimer.Value / _afternoonTimerMax);
             case GameState.Evening:
-                return 1 - (Instance._netEveningTimer.Value / Instance._eveningTimerMax);
+                return 1 - (_netEveningTimer.Value / _eveningTimerMax);
             case GameState.Night:
-                return 1 - (Instance._netNightTimer.Value / Instance._nightTimerMax);
+                return 1 - (_netNightTimer.Value / _nightTimerMax);
         }
 
         return 1;

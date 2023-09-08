@@ -39,7 +39,8 @@ public class PlayerUI : MonoBehaviour
         _playerHealth = this.GetComponentInParent<PlayerHealth>();
 
         GameManager.OnStateChange += EnableReadyButton;
-        GameManager.OnPlayerReadyToggled += ToggleReady;
+        PlayerConnectionManager.OnPlayerReady += Ready;
+        PlayerConnectionManager.OnPlayerUnready += Unready;
         GameManager.OnStateIntro += EnablePlayerNaming;
         GameManager.OnStateMorning += DisablePlayerNaming;
         GameManager.OnStateForage += ToggleMap;
@@ -52,7 +53,8 @@ public class PlayerUI : MonoBehaviour
     private void OnDisable()
     {
         GameManager.OnStateChange -= EnableReadyButton;
-        GameManager.OnPlayerReadyToggled -= ToggleReady;
+        PlayerConnectionManager.OnPlayerReady -= Ready;
+        PlayerConnectionManager.OnPlayerUnready -= Unready;
         GameManager.OnStateIntro -= EnablePlayerNaming;
         GameManager.OnStateMorning -= DisablePlayerNaming;
         GameManager.OnStateForage -= ToggleMap;
@@ -98,14 +100,18 @@ public class PlayerUI : MonoBehaviour
         _readyButton.SetActive(false);
     }
 
-    public void ToggleReady(bool toggle)
+    public void Ready()
     {
-        _readyIndicator.SetActive(toggle);
+        _readyIndicator.SetActive(true);
 
-        if (toggle)
-            _readyButton.GetComponent<Image>().color = Color.green;
-        else
-            _readyButton.GetComponent<Image>().color = Color.red;
+        _readyButton.GetComponent<Image>().color = Color.green;
+    }
+
+    public void Unready()
+    {
+        _readyIndicator.SetActive(false);
+
+        _readyButton.GetComponent<Image>().color = Color.red;
     }
 
     private void ToggleMap()

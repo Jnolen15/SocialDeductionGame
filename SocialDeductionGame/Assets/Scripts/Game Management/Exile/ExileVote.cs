@@ -39,8 +39,8 @@ public class ExileVote : MonoBehaviour
         _playerID = playerID;
         _exileManager = eManager;
 
-        _buttonName.text = PlayerConnectionManager.GetPlayerNameByID(playerID) ?? pName;
-        _textName.text = PlayerConnectionManager.GetPlayerNameByID(playerID) ?? pName;
+        _buttonName.text = PlayerConnectionManager.Instance.GetPlayerNameByID(playerID) ?? pName;
+        _textName.text = PlayerConnectionManager.Instance.GetPlayerNameByID(playerID) ?? pName;
 
         _voteStage.SetActive(true);
         _resultsStage.SetActive(false);

@@ -28,9 +28,9 @@ public class NightEventCardVisual : MonoBehaviour
         _heldEventID = eventID;
         NightEvent eventData = CardDatabase.GetEvent(eventID);
         _eventTitle.text = eventData.GetEventName();
-        _eventRequiredNum.text = eventData.GetSuccessPoints(PlayerConnectionManager.GetNumLivingPlayers()) + " = ";
+        _eventRequiredNum.text = eventData.GetSuccessPoints(PlayerConnectionManager.Instance.GetNumLivingPlayers()) + " = ";
         _eventConsequences.text = "Fail: " + eventData.GetEventConsequences();
-        _eventBonuses.text = $"Bonus: Add {eventData.SPBonusCalculation(PlayerConnectionManager.GetNumConnectedPlayers())} additional cards to {eventData.GetEventBonuses()}";
+        _eventBonuses.text = $"Bonus: Add {eventData.SPBonusCalculation(PlayerConnectionManager.Instance.GetNumConnectedPlayers())} additional cards to {eventData.GetEventBonuses()}";
         foreach (CardTag t in eventData.GetRequiredCardTags())
         {
             TagIcon icon = Instantiate(_eventTagIconPref, _eventTagIconSlot).GetComponent<TagIcon>();

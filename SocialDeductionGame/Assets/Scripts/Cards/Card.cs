@@ -91,7 +91,7 @@ public abstract class Card : MonoBehaviour
         if (stockpile != null)
         {
             Debug.Log("Playng card to stockpile: " + _cardName);
-            stockpile.AddCard(GetCardID(), PlayerConnectionManager.GetThisPlayersID());
+            stockpile.AddCard(GetCardID(), PlayerConnectionManager.Instance.GetThisPlayersID());
         }
         else
             Debug.LogError("Card was played on a location it can't do anything with");

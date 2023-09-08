@@ -83,7 +83,7 @@ public class ExileManager : NetworkBehaviour
         _voteList.Clear();
 
         // Player ID list for clients
-        ulong[] playerIDs = new ulong[PlayerConnectionManager.GetNumLivingPlayers()+1];
+        ulong[] playerIDs = new ulong[PlayerConnectionManager.Instance.GetNumLivingPlayers()+1];
         int i = 1;
 
         // Add nobody vote
@@ -91,7 +91,7 @@ public class ExileManager : NetworkBehaviour
         playerIDs[0] = 999;
 
         // Add entry for each player
-        foreach (GameObject playa in PlayerConnectionManager.GetLivingPlayerGameObjects())
+        foreach (GameObject playa in PlayerConnectionManager.Instance.GetLivingPlayerGameObjects())
         {
             // Add vote to list
             ulong pID = playa.GetComponent<PlayerData>().GetPlayerID();
@@ -132,7 +132,7 @@ public class ExileManager : NetworkBehaviour
         voteEntry.numVotes++;
 
         // Test if all players have voted
-        if (_netPlayersVoted.Value >= PlayerConnectionManager.GetNumLivingPlayers())
+        if (_netPlayersVoted.Value >= PlayerConnectionManager.Instance.GetNumLivingPlayers())
         {
             Debug.Log("<color=yellow>SERVER: </color> All players have voted");
 

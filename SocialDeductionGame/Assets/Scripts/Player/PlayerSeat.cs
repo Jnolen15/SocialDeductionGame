@@ -27,6 +27,6 @@ public class PlayerSeat : MonoBehaviour
     {
         Debug.Log("Assigning Seat");
 
-        GameManager.GetSeat(transform, _playerData.GetPlayerID());
+        GameManager.Instance.GetSeat(transform, _playerData.GetPlayerID());
     }
 }

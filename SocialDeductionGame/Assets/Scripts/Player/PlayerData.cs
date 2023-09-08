@@ -152,7 +152,7 @@ public class PlayerData : NetworkBehaviour
     #region Player Readying
     public void ReadyPlayer()
     {
-        GameManager.ReadyPlayer();
+        PlayerConnectionManager.Instance.ReadyPlayer();
     }
     #endregion
 
