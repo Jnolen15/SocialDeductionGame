@@ -12,7 +12,7 @@ public static class SceneLoader
     {
         LobbyScene,
         CharacterSelectScene,
-        SampleScene
+        IslandGameScene
     }
 
     public static void Load(Scene targetScene)
@@ -23,6 +23,15 @@ public static class SceneLoader
     // when loading scenes during a live networked multiplayer game, must use this method
     public static void LoadNetwork(Scene targetScene)
     {
+        Debug.Log("<color=green>SCENE LOADER: </color> Loading Networked Scene " + targetScene.ToString());
         NetworkManager.Singleton.SceneManager.LoadScene(targetScene.ToString(), LoadSceneMode.Single);
+    }
+
+    public static bool IsInScene(Scene queryScene)
+    {
+        if (SceneManager.GetActiveScene().name == queryScene.ToString())
+            return true;
+        else
+            return false;
     }
 }

@@ -49,7 +49,9 @@ public class GameManager : NetworkBehaviour
         Evening,
         Night
     }
-    private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
+    [Header("Current State")]
+    [SerializeField] private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
+    [Header("Player Ready Timer Mod Curve")]
     [SerializeField] private AnimationCurve _playerReadyTimerModCurve;
     [Header("Net Variables (For Viewing)")]
     [SerializeField] private NetworkVariable<int> _netDay = new(writePerm: NetworkVariableWritePermission.Server);
@@ -72,18 +74,23 @@ public class GameManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         _netCurrentGameState.OnValueChanged += UpdateGameState;
-        PlayerConnectionManager.OnAllPlayersReady += ProgressState;
+
+        if (IsServer)
+        {
+            PlayerConnectionManager.OnPlayerSetupComplete += ProgressState;
+            PlayerConnectionManager.OnAllPlayersReady += ProgressState;
+        }
     }
 
     private void OnDisable()
     {
         _netCurrentGameState.OnValueChanged -= UpdateGameState;
-        PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
-    }
 
-    private void Start()
-    {
-        UpdateGameState(GameState.Morning, _netCurrentGameState.Value);
+        if (IsServer)
+        {
+            PlayerConnectionManager.OnPlayerSetupComplete -= ProgressState;
+            PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
+        }
     }
     #endregion
 
@@ -93,17 +100,13 @@ public class GameManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        // Calculate timer speed up modifier based on number of players ready
-        float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.CheckNumLivingPlayers());
-        float modVal = (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
-
         // State Timers
         switch (_netCurrentGameState.Value)
         {
             case 0:
                 break;
             case GameState.Morning:
-                _netMorningTimer.Value -= (Time.deltaTime * modVal);
+                _netMorningTimer.Value -= (Time.deltaTime * CalculateTimerMod());
                 if (_netMorningTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Morning Timer up, Progressing");
@@ -111,7 +114,7 @@ public class GameManager : NetworkBehaviour
                 }
                 break;
             case GameState.Afternoon:
-                _netAfternoonTimer.Value -= (Time.deltaTime * modVal);
+                _netAfternoonTimer.Value -= (Time.deltaTime * CalculateTimerMod());
                 if (_netAfternoonTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Afternoon Timer up, Progressing");
@@ -119,7 +122,7 @@ public class GameManager : NetworkBehaviour
                 }
                 break;
             case GameState.Evening:
-                _netEveningTimer.Value -= (Time.deltaTime * modVal);
+                _netEveningTimer.Value -= (Time.deltaTime * CalculateTimerMod());
                 //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
                 if (_netEveningTimer.Value <= 0)
                 {
@@ -128,7 +131,7 @@ public class GameManager : NetworkBehaviour
                 }
                 break;
             case GameState.Night:
-                _netNightTimer.Value -= (Time.deltaTime * modVal);
+                _netNightTimer.Value -= (Time.deltaTime * CalculateTimerMod());
                 //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
                 if (_netNightTimer.Value <= 0)
                 {
@@ -146,6 +149,13 @@ public class GameManager : NetworkBehaviour
             if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
                 _netCurrentGameState.Value = 0;
         }
+    }
+
+    // Calculate timer speed up modifier based on number of players ready
+    private float CalculateTimerMod()
+    {
+        float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.CheckNumLivingPlayers());
+        return (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
     }
     #endregion
 
@@ -180,15 +190,18 @@ public class GameManager : NetworkBehaviour
             _netCurrentGameState.Value = GameState.Morning;
     }
 
-    public void UpdateGameState(GameState prev, GameState next)
+    public void UpdateGameState(GameState prev, GameState current)
     {
-        if (next != GameState.Pregame)
-            OnStateChange?.Invoke();
+        if (current == GameState.Pregame)
+            return;
 
-        if (IsServer && next != GameState.Pregame && next != GameState.Intro)
+        Debug.Log("<color=yellow>SERVER: </color> Updating Game State to " + current.ToString());
+        OnStateChange?.Invoke();
+
+        if (IsServer && current != GameState.Intro)
             CheckSaboteurWin();
 
-        switch (next)
+        switch (current)
         {
             case GameState.Intro:
                 if (IsServer)

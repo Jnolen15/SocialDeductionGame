@@ -11,7 +11,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     // ============== Singleton pattern ==============
     #region Singleton
     public static PlayerConnectionManager Instance { get; private set; }
-    private void Awake()
+    private void InitializeSingleton()
     {
         if (Instance != null && Instance != this)
             Destroy(this);
@@ -24,6 +24,7 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     #region Variables and Refrences
+    [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netNumLivingPlayers = new(writePerm: NetworkVariableWritePermission.Server);
     private Dictionary<ulong, PlayerEntry> _playerDict = new();
@@ -59,6 +60,11 @@ public class PlayerConnectionManager : NetworkBehaviour
             PlayerName = name.ToString();
         }
 
+        public void SetObject(GameObject playerObj)
+        {
+            PlayerObject = playerObj;
+        }
+
         public void SetTeam(PlayerData.Team team)
         {
             PlayerTeam = team;
@@ -70,58 +76,65 @@ public class PlayerConnectionManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
     private Dictionary<ulong, bool> _playerReadyDictionary = new();
 
+    //public static event System.Action OnPlayerSetupComplete;
+
     public delegate void PlayerReadyAction();
     public static event PlayerReadyAction OnPlayerReady;
     public static event PlayerReadyAction OnPlayerUnready;
     public static event PlayerReadyAction OnAllPlayersReady;
-
-    // ============== Refrences ==============
-    //[SerializeField] private TextMeshProUGUI _playersConnectedText;
+    public static event PlayerReadyAction OnPlayerSetupComplete;
     #endregion
 
     // ============== Setup =============
     #region Setup
+    private void Awake()
+    {
+        InitializeSingleton();
+    }
+
     public override void OnNetworkSpawn()
     {
-        _netNumPlayers.OnValueChanged += UpdatePlayerConnectedText;
         PlayerData.OnChangeName += UpdateNameServerRpc;
 
-        if (!IsServer) return;
+        if (IsServer)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Doing Server setup");
 
-        NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
-        NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
-        GameManager.OnSetup += AssignRoles;
-        GameManager.OnStateMorning += SyncClientPlayerDictServerRpc;
-        GameManager.OnStateChange += UpdateNumLivingPlayersServerRpc;
+            NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayerPrefabs;
+
+            GameManager.OnSetup += AssignRoles;
+            GameManager.OnStateMorning += SyncClientPlayerDictServerRpc;
+            GameManager.OnStateChange += UpdateNumLivingPlayersServerRpc;
+        }
     }
 
     public override void OnNetworkDespawn()
     {
-        _netNumPlayers.OnValueChanged -= UpdatePlayerConnectedText;
         PlayerData.OnChangeName -= UpdateNameServerRpc;
 
-        if (!IsServer) return;
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayerPrefabs;
 
-        NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
-        NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
-        GameManager.OnSetup -= AssignRoles;
-        GameManager.OnStateMorning -= SyncClientPlayerDictServerRpc;
-        GameManager.OnStateChange -= UpdateNumLivingPlayersServerRpc;
+            GameManager.OnSetup -= AssignRoles;
+            GameManager.OnStateMorning -= SyncClientPlayerDictServerRpc;
+            GameManager.OnStateChange -= UpdateNumLivingPlayersServerRpc;
+        }
+
     }
     #endregion
 
     // ============== Client Connection ==============
     #region Client Connection
-    private void UpdatePlayerConnectedText(int prev, int next)
-    {
-        //_playersConnectedText.text = "Connected Players: " + next;
-    }
-
     private void ClientConnected(ulong clientID)
     {
         Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} connected");
         _netNumPlayers.Value++;
-        _playerDict.Add(clientID, new PlayerEntry("Player " + clientID/*, NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject*/));
+        _playerDict.Add(clientID, new PlayerEntry("Player " + clientID));
     }
 
     private void ClientDisconnected(ulong clientID)
@@ -155,6 +168,56 @@ public class PlayerConnectionManager : NetworkBehaviour
         {
             Debug.Log("<color=blue>CLIENT: </color> Recieved Id: " + iDArry[i] + " Name: " + playerEntyArry[i].PlayerName);
             _playerDict.Add(iDArry[i], new PlayerEntry(playerEntyArry[i].PlayerName, null));
+        }
+    }
+    #endregion
+
+    // ============== Player Setup ==============
+    #region Player Setup
+    private void SpawnPlayerPrefabs(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+    {
+        if (!IsServer)
+            return;
+
+        // Make sure in game scene
+        if (!SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
+            return;
+
+        Debug.Log("<color=yellow>SERVER: </color> In Island Game Scene, spawning player prefabs", gameObject);
+
+        // Spawn a player prefab for each connected player
+        foreach(ulong clientID in NetworkManager.Singleton.ConnectedClientsIds)
+        {
+            GameObject playerObj = Instantiate(_playerPrefab);
+            playerObj.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientID, true);
+        }
+
+        AddPlayerObjectsToDictionary();
+
+        // Invoke setup complete event
+        // WARNING: For some god forsaken reason, invoking an event here will cause this function immidiately run a second time. I have no idea why
+        //OnPlayerSetupComplete?.Invoke();
+    }
+
+    private void AddPlayerObjectsToDictionary()
+    {
+        Debug.Log("<color=yellow>SERVER: </color> Adding player objects to dictionary");
+
+        foreach (ulong clientID in NetworkManager.Singleton.ConnectedClientsIds)
+        {
+            if (!_playerDict.ContainsKey(clientID))
+            {
+                Debug.LogError("<color=yellow>SERVER: </color> Player ID not found in dictionary");
+                return;
+            }
+
+            if (!NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject)
+            {
+                Debug.LogError("<color=yellow>SERVER: </color> Player ID does not have object");
+                return;
+            }
+
+            _playerDict[clientID].SetObject(NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject);
         }
     }
     #endregion

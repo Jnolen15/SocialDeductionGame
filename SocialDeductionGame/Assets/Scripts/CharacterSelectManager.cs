@@ -15,9 +15,10 @@ public class CharacterSelectManager : NetworkBehaviour
     private int _characterStyleIndex;
 
     // ============== Setup ==============
-    private void Awake()
+    public override void OnNetworkSpawn()
     {
-        PlayerConnectionManager.OnAllPlayersReady += ProgressState;
+        if (IsServer)
+            PlayerConnectionManager.OnAllPlayersReady += ProgressState;
     }
 
     private void Start()
@@ -25,9 +26,10 @@ public class CharacterSelectManager : NetworkBehaviour
         _currentSelectedModel = _characterModel.GetChild(0);
     }
 
-    private void OnDisable()
+    public override void OnNetworkDespawn()
     {
-        PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
+        if (IsServer)
+            PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
     }
 
     // ============== Scene Management ==============
@@ -36,7 +38,9 @@ public class CharacterSelectManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        SceneLoader.LoadNetwork(SceneLoader.Scene.SampleScene);
+        Debug.Log("<color=yellow>SERVER: </color> All players ready, loading to game scene");
+
+        SceneLoader.LoadNetwork(SceneLoader.Scene.IslandGameScene);
     }
 
     // ============== Character Customization ==============
