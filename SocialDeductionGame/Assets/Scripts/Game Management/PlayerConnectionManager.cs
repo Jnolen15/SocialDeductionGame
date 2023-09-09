@@ -33,6 +33,8 @@ public class PlayerConnectionManager : NetworkBehaviour
         public string PlayerName;
         public GameObject PlayerObject;
         public PlayerData.Team PlayerTeam;
+        public int PlayerStyleIndex = 0;
+        public int PlayerMaterialIndex = 0;
 
         // INetworkSerializable
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -69,6 +71,24 @@ public class PlayerConnectionManager : NetworkBehaviour
         {
             PlayerTeam = team;
             PlayerObject.GetComponent<PlayerData>().SetTeam(PlayerData.Team.Saboteurs);
+        }
+
+        public void SetVisual(int style, int mat)
+        {
+            PlayerStyleIndex = style;
+            PlayerMaterialIndex = mat;
+        }
+
+        public override string ToString()
+        {
+            string outStr = PlayerName;
+            outStr += ", On team " + PlayerTeam.ToString();
+            outStr += ", With style" + PlayerStyleIndex + " and material " + PlayerMaterialIndex;
+            if (PlayerObject)
+                outStr += " object is not null";
+            else
+                outStr += " object is null";
+            return outStr;
         }
     }
 
@@ -211,11 +231,20 @@ public class PlayerConnectionManager : NetworkBehaviour
                 return;
             }
 
+            //Debug.Log("BEFORE SETUP " + _playerDict[clientID]);
+
+            PlayerEntry entry = _playerDict[clientID];
+
             // Add Player objects to dictionary
-            _playerDict[clientID].SetObject(NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject);
+            entry.SetObject(NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject);
 
             // Update players name
-            _playerDict[clientID].PlayerObject.GetComponent<PlayerData>().UpdatePlayerNameServerRPC(_playerDict[clientID].PlayerName);
+            entry.PlayerObject.GetComponent<PlayerData>().UpdatePlayerNameServerRPC(entry.PlayerName);
+
+            // Update Players Visuals
+            entry.PlayerObject.GetComponentInChildren<PlayerObj>().UpdateCharacterModelClientRPC(entry.PlayerStyleIndex, entry.PlayerMaterialIndex);
+
+            //Debug.Log("AFTER SETUP " + _playerDict[clientID]);
         }
 
         // Finish Setup Event
@@ -223,8 +252,8 @@ public class PlayerConnectionManager : NetworkBehaviour
     }
     #endregion
 
-    // ============== Player Names ==============
-    #region Player Names
+    // ============== Player Customization ==============
+    #region Player Customization
     public void UpdatePlayerName(ulong id, string pName)
     {
         if (pName == "")
@@ -247,6 +276,19 @@ public class PlayerConnectionManager : NetworkBehaviour
             return entry.PlayerName;
 
         return null;
+    }
+
+    public void UpdatePlayerVisuals(ulong id, int style, int mat)
+    {
+        UpdatePlayerVisualsServerRpc(id, style, mat);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdatePlayerVisualsServerRpc(ulong id, int style, int mat)
+    {
+        Debug.Log("<color=yellow>SERVER: </color> Setting player " + id + " style to: " + style + " mat to: " + mat);
+        PlayerEntry curPlayer = FindPlayerEntry(id);
+        curPlayer.SetVisual(style, mat);
     }
     #endregion
 

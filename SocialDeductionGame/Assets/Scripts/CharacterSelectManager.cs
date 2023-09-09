@@ -50,6 +50,11 @@ public class CharacterSelectManager : NetworkBehaviour
         PlayerConnectionManager.Instance.UpdatePlayerName(NetworkManager.Singleton.LocalClientId, newName);
     }
 
+    public void SetPlayerVisuals(int style, int mat)
+    {
+        PlayerConnectionManager.Instance.UpdatePlayerVisuals(NetworkManager.Singleton.LocalClientId, style, mat);
+    }
+
     public void RandomizeCharacter()
     {
         _characterStyleIndex = Random.Range(0, _characterModel.childCount - 1);
@@ -64,6 +69,9 @@ public class CharacterSelectManager : NetworkBehaviour
         // Update model
         _currentSelectedModel.gameObject.SetActive(true);
         _currentSelectedModel.gameObject.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[_characterMatIndex];
+
+        // Update data
+        SetPlayerVisuals(_characterStyleIndex, _characterMatIndex);
     }
 
     public void ChangeCharacterColor(bool next)
@@ -83,6 +91,9 @@ public class CharacterSelectManager : NetworkBehaviour
 
         // Set material
         _currentSelectedModel.gameObject.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[_characterMatIndex];
+
+        // Update data
+        SetPlayerVisuals(_characterStyleIndex, _characterMatIndex);
     }
 
     public void ChangeCharacterStyle(bool next)
@@ -109,5 +120,8 @@ public class CharacterSelectManager : NetworkBehaviour
         // Update model
         _currentSelectedModel.gameObject.SetActive(true);
         _currentSelectedModel.gameObject.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[_characterMatIndex];
+
+        // Update data
+        SetPlayerVisuals(_characterStyleIndex, _characterMatIndex);
     }
 }
