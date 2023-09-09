@@ -44,6 +44,12 @@ public class CharacterSelectManager : NetworkBehaviour
     }
 
     // ============== Character Customization ==============
+    public void SetPlayerName(string newName)
+    {
+        Debug.Log("Name Recieved: " + newName);
+        PlayerConnectionManager.Instance.UpdatePlayerName(NetworkManager.Singleton.LocalClientId, newName);
+    }
+
     public void RandomizeCharacter()
     {
         _characterStyleIndex = Random.Range(0, _characterModel.childCount - 1);

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using Unity.Collections;
 
 public class PlayerUI : MonoBehaviour
 {
@@ -19,7 +20,6 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _hungerText;
     [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private GameObject _deathMessage;
-    [SerializeField] private GameObject _playerNameSubmission;
     [SerializeField] private Image _healthFlashSprite;
     [SerializeField] private Image _hungerFlashSprite;
 
@@ -38,11 +38,10 @@ public class PlayerUI : MonoBehaviour
         _playerData = this.GetComponentInParent<PlayerData>();
         _playerHealth = this.GetComponentInParent<PlayerHealth>();
 
+        _playerData._netPlayerName.OnValueChanged += UpdatePlayerNameText;
         GameManager.OnStateChange += EnableReadyButton;
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
-        GameManager.OnStateIntro += EnablePlayerNaming;
-        GameManager.OnStateMorning += DisablePlayerNaming;
         GameManager.OnStateForage += ToggleMap;
         GameManager.OnStateNight += CloseExileVote;
         PlayerHealth.OnHealthModified += UpdateHealth;
@@ -52,11 +51,10 @@ public class PlayerUI : MonoBehaviour
 
     private void OnDisable()
     {
+        _playerData._netPlayerName.OnValueChanged -= UpdatePlayerNameText;
         GameManager.OnStateChange -= EnableReadyButton;
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
-        GameManager.OnStateIntro -= EnablePlayerNaming;
-        GameManager.OnStateMorning -= DisablePlayerNaming;
         GameManager.OnStateForage -= ToggleMap;
         GameManager.OnStateNight -= CloseExileVote;
         PlayerHealth.OnHealthModified -= UpdateHealth;
@@ -67,24 +65,9 @@ public class PlayerUI : MonoBehaviour
 
     // ================== Misc UI ==================
     #region Misc UI
-    private void EnablePlayerNaming()
+    public void UpdatePlayerNameText(FixedString32Bytes old, FixedString32Bytes current)
     {
-        _playerNameSubmission.SetActive(true);
-    }
-
-    private void DisablePlayerNaming()
-    {
-        _playerNameSubmission.SetActive(false);
-    }
-
-    public void SetPlayerName(string name)
-    {
-        _playerData.SetPlayerName(name);
-    }
-
-    public void UpdatePlayerNameText(string name)
-    {
-        _nameText.text = name;
+        _nameText.text = current.ToString();
     }
 
     private void EnableReadyButton()

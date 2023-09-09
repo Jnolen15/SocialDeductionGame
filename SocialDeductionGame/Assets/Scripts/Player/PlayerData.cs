@@ -19,7 +19,7 @@ public class PlayerData : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI _teamText;
 
     // ================== Variables ==================
-    public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Owner);
+    public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
     [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private List<int> _playerDeckIDs = new();
@@ -30,10 +30,6 @@ public class PlayerData : NetworkBehaviour
     }
     private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
 
-    // Events
-    public delegate void ChangeName(ulong id, string pName);
-    public static event ChangeName OnChangeName;
-
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
@@ -43,7 +39,6 @@ public class PlayerData : NetworkBehaviour
             LocationManager.OnForceLocationChange += ChangeLocation;
             CardManager.OnCardsGained += GainCards;
             _netTeam.OnValueChanged += UpdateTeamText;
-            GameManager.OnStateIntro += SetPlayerDefaultName;
             GameManager.OnStateNight += ShowEventChoices;
 
             SetPlayerIDServerRpc();
@@ -64,7 +59,6 @@ public class PlayerData : NetworkBehaviour
         LocationManager.OnForceLocationChange -= ChangeLocation;
         CardManager.OnCardsGained -= GainCards;
         _netTeam.OnValueChanged -= UpdateTeamText;
-        GameManager.OnStateIntro -= SetPlayerDefaultName;
         GameManager.OnStateNight -= ShowEventChoices;
     }
 
@@ -96,23 +90,11 @@ public class PlayerData : NetworkBehaviour
         return _netPlayerID.Value;
     }
 
-    private void SetPlayerDefaultName()
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdatePlayerNameServerRPC(string pName)
     {
-        _netPlayerName.Value = "Player " + _netPlayerID.Value;
-
-        if(_playerUI != null)
-            _playerUI.UpdatePlayerNameText(_netPlayerName.Value.ToString());
-    }
-
-    public void SetPlayerName(string pName)
-    {
-        if (pName == "")
-            return;
-
-        Debug.Log("Change Name " + _netPlayerID.Value + " to " + pName);
+        Debug.Log("<color=yellow>SERVER: </color>Updating player name " + _netPlayerID.Value + " to " + pName);
         _netPlayerName.Value = pName;
-        _playerUI.UpdatePlayerNameText(_netPlayerName.Value.ToString());
-        OnChangeName(_netPlayerID.Value, pName.ToString());
     }
     #endregion
 

@@ -76,8 +76,6 @@ public class PlayerConnectionManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
     private Dictionary<ulong, bool> _playerReadyDictionary = new();
 
-    //public static event System.Action OnPlayerSetupComplete;
-
     public delegate void PlayerReadyAction();
     public static event PlayerReadyAction OnPlayerReady;
     public static event PlayerReadyAction OnPlayerUnready;
@@ -94,8 +92,6 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        PlayerData.OnChangeName += UpdateNameServerRpc;
-
         if (IsServer)
         {
             Debug.Log("<color=yellow>SERVER: </color> Doing Server setup");
@@ -112,8 +108,6 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
-        PlayerData.OnChangeName -= UpdateNameServerRpc;
-
         if (IsServer)
         {
             NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
@@ -192,14 +186,14 @@ public class PlayerConnectionManager : NetworkBehaviour
             playerObj.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientID, true);
         }
 
-        AddPlayerObjectsToDictionary();
+        PlayerObjectSetup();
 
         // Invoke setup complete event
         // WARNING: For some god forsaken reason, invoking an event here will cause this function immidiately run a second time. I have no idea why
         //OnPlayerSetupComplete?.Invoke();
     }
 
-    private void AddPlayerObjectsToDictionary()
+    private void PlayerObjectSetup()
     {
         Debug.Log("<color=yellow>SERVER: </color> Adding player objects to dictionary");
 
@@ -217,15 +211,30 @@ public class PlayerConnectionManager : NetworkBehaviour
                 return;
             }
 
+            // Add Player objects to dictionary
             _playerDict[clientID].SetObject(NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject);
+
+            // Update players name
+            _playerDict[clientID].PlayerObject.GetComponent<PlayerData>().UpdatePlayerNameServerRPC(_playerDict[clientID].PlayerName);
         }
+
+        // Finish Setup Event
+        OnPlayerSetupComplete?.Invoke();
     }
     #endregion
 
     // ============== Player Names ==============
     #region Player Names
+    public void UpdatePlayerName(ulong id, string pName)
+    {
+        if (pName == "")
+            return;
+
+        UpdatePlayerNameServerRpc(id, pName);
+    }
+
     [ServerRpc(RequireOwnership = false)]
-    public void UpdateNameServerRpc(ulong id, string pName)
+    public void UpdatePlayerNameServerRpc(ulong id, string pName)
     {
         Debug.Log("<color=yellow>SERVER: </color> Setting player " + id + " name to: " + pName);
         PlayerEntry curPlayer = FindPlayerEntry(id);
