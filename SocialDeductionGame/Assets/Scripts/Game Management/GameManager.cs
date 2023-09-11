@@ -30,8 +30,6 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
-    [Header("Player Seating Positions")]
-    [SerializeField] private List<Transform> playerPositions = new();
     [Header("Win Settings")]
     [SerializeField] private int _numDaysTillRescue;
     [Header("Cheats")]
@@ -41,13 +39,13 @@ public class GameManager : NetworkBehaviour
     // ================== Variables ==================
     public enum GameState
     {
-        Pregame,
-        Intro,
-        Morning,
-        M_Forage,
-        Afternoon,
-        Evening,
-        Night
+        Pregame,    // Wait for players to load, make prefabs
+        Intro,      // Assign roles and seats, game intro
+        Morning,    // Show new night event
+        M_Forage,   // Pick location, pick cards
+        Afternoon,  // Add resources to stash / fire
+        Evening,    // Results of night event contribution, take food from fire, vote to exile
+        Night       // Summary of night event effects / effects happen, saboteur picks new night event
     }
     [Header("Current State")]
     [SerializeField] private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
@@ -156,23 +154,6 @@ public class GameManager : NetworkBehaviour
     {
         float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.CheckNumLivingPlayers());
         return (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
-    }
-    #endregion
-
-    // ================== Player Positions ==================
-    #region Player Positions
-    public void GetSeat(Transform playerTrans, ulong playerID)
-    {
-        Debug.Log("Getting Seat for player " + playerID);
-
-        if((int)playerID > playerPositions.Count - 1)
-        {
-            Debug.LogError("Not Enough Seats!");
-            return;
-        }
-
-        playerTrans.position = playerPositions[(int)playerID].position;
-        playerTrans.rotation = playerPositions[(int)playerID].rotation;
     }
     #endregion
 

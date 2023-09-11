@@ -225,7 +225,7 @@ public class PlayerConnectionManager : NetworkBehaviour
                 return;
             }
 
-            if (!NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject)
+            if (!NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientID).gameObject)
             {
                 Debug.LogError("<color=yellow>SERVER: </color> Player ID does not have object");
                 return;
@@ -236,7 +236,7 @@ public class PlayerConnectionManager : NetworkBehaviour
             PlayerEntry entry = _playerDict[clientID];
 
             // Add Player objects to dictionary
-            entry.SetObject(NetworkManager.SpawnManager.GetPlayerNetworkObject(clientID).gameObject);
+            entry.SetObject(NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientID).gameObject);
 
             // Update players name
             entry.PlayerObject.GetComponent<PlayerData>().UpdatePlayerNameServerRPC(entry.PlayerName);
@@ -268,14 +268,6 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log("<color=yellow>SERVER: </color> Setting player " + id + " name to: " + pName);
         PlayerEntry curPlayer = FindPlayerEntry(id);
         curPlayer.SetName(pName);
-    }
-
-    public string GetPlayerNameByID(ulong id)
-    {
-        if (_playerDict.TryGetValue(id, out PlayerEntry entry))
-            return entry.PlayerName;
-
-        return null;
     }
 
     public void UpdatePlayerVisuals(ulong id, int style, int mat)
@@ -504,9 +496,25 @@ public class PlayerConnectionManager : NetworkBehaviour
         return players;
     }
 
+    public string GetPlayerNameByID(ulong id)
+    {
+        if (_playerDict.TryGetValue(id, out PlayerEntry entry))
+            return entry.PlayerName;
+
+        return null;
+    }
+
     public ulong GetThisPlayersID()
     {
         return NetworkManager.Singleton.LocalClientId;
+    }
+
+    public GameObject GetPlayerObject(ulong playerID)
+    {
+        if (!IsServer)
+            return null;
+
+        return _playerDict[playerID].PlayerObject;
     }
     #endregion
 }
