@@ -333,6 +333,8 @@ public class PlayerData : NetworkBehaviour
     // ================ Player Death ================
     public void OnPlayerDeath()
     {
+        PlayerConnectionManager.Instance.RecordPlayerDeath(GetPlayerID());
+
         DiscardHandServerRPC();
 
         // Deal with ready for this round

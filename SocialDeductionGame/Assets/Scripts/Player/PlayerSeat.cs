@@ -41,7 +41,7 @@ public class PlayerSeat : NetworkBehaviour
                 return;
             }
 
-            GameObject playerObj = PlayerConnectionManager.Instance.GetPlayerObject(clientID);
+            GameObject playerObj = PlayerConnectionManager.Instance.GetPlayerObjectByID(clientID);
 
             // Asign player transform a seat
             playerObj.transform.position = _playerPositions[i].position;

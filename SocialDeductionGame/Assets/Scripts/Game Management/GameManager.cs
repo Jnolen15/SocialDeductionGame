@@ -152,7 +152,7 @@ public class GameManager : NetworkBehaviour
     // Calculate timer speed up modifier based on number of players ready
     private float CalculateTimerMod()
     {
-        float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.CheckNumLivingPlayers());
+        float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.GetNumLivingPlayers());
         return (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
     }
     #endregion
@@ -270,7 +270,7 @@ public class GameManager : NetworkBehaviour
         }
 
         // If all players are dead
-        if (PlayerConnectionManager.Instance.CheckNumLivingPlayers() == 0)
+        if (PlayerConnectionManager.Instance.GetNumLivingPlayers() == 0)
         {
             Debug.Log("<color=yellow>SERVER: </color> All players have died, WIN!");
             SetSaboteurWinClientRpc();

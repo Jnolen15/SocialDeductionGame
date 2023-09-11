@@ -33,8 +33,9 @@ public class PlayerConnectionManager : NetworkBehaviour
         public string PlayerName;
         public GameObject PlayerObject;
         public PlayerData.Team PlayerTeam;
-        public int PlayerStyleIndex = 0;
-        public int PlayerMaterialIndex = 0;
+        private int PlayerStyleIndex = 0;
+        private int PlayerMaterialIndex = 0;
+        private bool PlayerLiving = true;
 
         // INetworkSerializable
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -77,6 +78,26 @@ public class PlayerConnectionManager : NetworkBehaviour
         {
             PlayerStyleIndex = style;
             PlayerMaterialIndex = mat;
+        }
+        public void SetPlayerLiving(bool isLiving)
+        {
+            PlayerLiving = isLiving;
+        }
+
+
+        public int GetPlayerStyle()
+        {
+            return PlayerStyleIndex;
+        }
+
+        public int GetPlayerMaterial()
+        {
+            return PlayerMaterialIndex;
+        }
+
+        public bool GetPlayerLiving()
+        {
+            return PlayerLiving;
         }
 
         public override string ToString()
@@ -121,8 +142,6 @@ public class PlayerConnectionManager : NetworkBehaviour
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayerPrefabs;
 
             GameManager.OnSetup += AssignRoles;
-            GameManager.OnStateMorning += SyncClientPlayerDictServerRpc;
-            GameManager.OnStateChange += UpdateNumLivingPlayersServerRpc;
         }
     }
 
@@ -135,8 +154,6 @@ public class PlayerConnectionManager : NetworkBehaviour
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayerPrefabs;
 
             GameManager.OnSetup -= AssignRoles;
-            GameManager.OnStateMorning -= SyncClientPlayerDictServerRpc;
-            GameManager.OnStateChange -= UpdateNumLivingPlayersServerRpc;
         }
 
     }
@@ -156,33 +173,6 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} disconnected");
         _netNumPlayers.Value--;
         _playerDict.Remove(clientID);
-    }
-    #endregion
-
-    // ============== Client Sync ==============
-    #region Client Syncs
-    // Updates local client dictionaries to (mostly) match server one
-    // Currently only updates with IDs and Names
-    // Each morning it is synced. On clients the dict is cleared and then re-added
-    [ServerRpc]
-    private void SyncClientPlayerDictServerRpc()
-    {
-        SyncClientPlayerDictClientRpc(_playerDict.Keys.ToArray(), _playerDict.Values.ToArray());
-    }
-
-    [ClientRpc]
-    private void SyncClientPlayerDictClientRpc(ulong[] iDArry, PlayerEntry[] playerEntyArry)
-    {
-        if (IsServer)
-            return;
-
-        _playerDict.Clear();
-
-        for (int i = 0; i < iDArry.Length; i++)
-        {
-            Debug.Log("<color=blue>CLIENT: </color> Recieved Id: " + iDArry[i] + " Name: " + playerEntyArry[i].PlayerName);
-            _playerDict.Add(iDArry[i], new PlayerEntry(playerEntyArry[i].PlayerName, null));
-        }
     }
     #endregion
 
@@ -231,20 +221,19 @@ public class PlayerConnectionManager : NetworkBehaviour
                 return;
             }
 
-            //Debug.Log("BEFORE SETUP " + _playerDict[clientID]);
-
             PlayerEntry entry = _playerDict[clientID];
 
             // Add Player objects to dictionary
             entry.SetObject(NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientID).gameObject);
 
-            // Update players name
+            // Update players name in game
             entry.PlayerObject.GetComponent<PlayerData>().UpdatePlayerNameServerRPC(entry.PlayerName);
 
             // Update Players Visuals
-            entry.PlayerObject.GetComponentInChildren<PlayerObj>().UpdateCharacterModelClientRPC(entry.PlayerStyleIndex, entry.PlayerMaterialIndex);
+            entry.PlayerObject.GetComponentInChildren<PlayerObj>().UpdateCharacterModelClientRPC(entry.GetPlayerStyle(), entry.GetPlayerMaterial());
 
-            //Debug.Log("AFTER SETUP " + _playerDict[clientID]);
+            // Update player living tracker
+            _netNumLivingPlayers.Value++;
         }
 
         // Finish Setup Event
@@ -320,9 +309,16 @@ public class PlayerConnectionManager : NetworkBehaviour
         ReadyPlayerClientRpc(clientRpcParams);
 
         // Check if all players ready
-        if (_netPlayersReadied.Value >= GetNumConnectedPlayers())
+        if (SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
         {
-            ProgressState();
+            // If in game scene check against number of living players
+            if (_netPlayersReadied.Value >= GetNumLivingPlayers())
+                ProgressState();
+        } else
+        {
+            // Otherwise check against total connected players
+            if (_netPlayersReadied.Value >= GetNumConnectedPlayers())
+                ProgressState();
         }
     }
 
@@ -404,13 +400,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        AssignRolesServerRpc();
-    }
-
-    [ServerRpc]
-    public void AssignRolesServerRpc(ServerRpcParams serverRpcParams = default)
-    {
-        Debug.Log("Assigning Roles");
+        Debug.Log("<color=yellow>SERVER: </color>Assigning player roles");
 
         // Pick one random player and assign them to team Saboteurs
         ulong rand = _playerDict.Keys.ToArray()[(int)Random.Range(0, _playerDict.Keys.Count)];
@@ -420,69 +410,103 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Helpers ==============
     #region Helpers
+    // ~~~~~~~~~ Return Data From Player Dictionary ~~~~~~~~~
+    // Server only
     public PlayerEntry FindPlayerEntry(ulong id)
     {
+        if (!IsServer)
+        {
+            Debug.LogError("Server only function not called by server");
+            return null;
+        }
+
         if (_playerDict.TryGetValue(id, out PlayerEntry entry))
             return entry;
 
-        Debug.LogError("Unable to find player with ID: " + id);
+        Debug.LogError("<color=yellow>SERVER: </color>Unable to find player with ID: " + id);
         return null;
     }
 
+    // TODO: REWORK THIS? ALSO REWORK EXILE VOTING or look at it at least
+    public string GetPlayerNameByID(ulong id)
+    {
+        if (_playerDict.TryGetValue(id, out PlayerEntry entry))
+            return entry.PlayerName;
+
+        return null;
+    }
+
+    // Server only
+    public GameObject GetPlayerObjectByID(ulong playerID)
+    {
+        if (!IsServer)
+        {
+            Debug.LogError("Server only function not called by server");
+            return null;
+        }
+
+        return _playerDict[playerID].PlayerObject;
+    }
+
+    // ~~~~~~~~~ Return Network Vairables ~~~~~~~~~
+    // Server or Client
     public int GetNumConnectedPlayers()
     {
-        Debug.Log("GetNumConnectedPlayers " + _netNumPlayers.Value);
         return _netNumPlayers.Value;
     }
 
-    // Returns the network variable, which only updates at the begenning of each state
+    // Server or Client
     public int GetNumLivingPlayers()
     {
-        Debug.Log("GetNumLivingPlayers " + _netNumLivingPlayers.Value);
         return _netNumLivingPlayers.Value;
     }
 
-    // Calculates and returns number of living players
-    public int CheckNumLivingPlayers()
+
+    // ~~~~~~~~~ Return NetworkManager Data ~~~~~~~~~
+    // Server or Client
+    public ulong GetLocalPlayersID()
     {
-        int numAlive = 0;
-
-        foreach (PlayerEntry playa in _playerDict.Values)
-        {
-            if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving())
-                numAlive++;
-        }
-
-        return numAlive;
+        return NetworkManager.Singleton.LocalClientId;
     }
 
-    [ServerRpc]
-    public void UpdateNumLivingPlayersServerRpc()
+    // ~~~~~~~~~ Player Living Stuffs ~~~~~~~~~
+    // Server or Client
+    public void RecordPlayerDeath(ulong id)
     {
-        int numAlive = 0;
-
-        foreach (PlayerEntry playa in _playerDict.Values)
-        {
-            if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving())
-                numAlive++;
-        }
-
-        _netNumLivingPlayers.Value = numAlive;
+        Debug.Log("<color=yellow>SERVER: </color> Record player death called by ID " + id);
+        RecordPlayerDeathServerRpc(id);
     }
 
+    // Server only
+    [ServerRpc(RequireOwnership = false)]
+    public void RecordPlayerDeathServerRpc(ulong id)
+    {
+        FindPlayerEntry(id).SetPlayerLiving(false);
+        _netNumLivingPlayers.Value--;
+        Debug.Log("<color=yellow>SERVER: </color> Player death " + id + ": " + FindPlayerEntry(id).PlayerName + " recorded");
+    }
+
+    // Server only
     public int GetNumLivingOnTeam(PlayerData.Team team)
     {
+        if (!IsServer)
+        {
+            Debug.LogError("Server only function not called by server");
+            return -1;
+        }
+
         int numAlive = 0;
 
         foreach (PlayerEntry playa in _playerDict.Values)
         {
-            if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving() && playa.PlayerTeam == team)
+            if (playa.GetPlayerLiving() && playa.PlayerTeam == team)
                 numAlive++;
         }
-        Debug.Log(team.ToString() + numAlive);
+        Debug.Log("<color=yellow>SERVER: </color> Living members of team " + team.ToString() + " = " + numAlive);
         return numAlive;
     }
 
+    // Get rid of when re-doing exile manager?
     public List<GameObject> GetLivingPlayerGameObjects()
     {
         List<GameObject> players = new();
@@ -494,27 +518,6 @@ public class PlayerConnectionManager : NetworkBehaviour
         }
 
         return players;
-    }
-
-    public string GetPlayerNameByID(ulong id)
-    {
-        if (_playerDict.TryGetValue(id, out PlayerEntry entry))
-            return entry.PlayerName;
-
-        return null;
-    }
-
-    public ulong GetThisPlayersID()
-    {
-        return NetworkManager.Singleton.LocalClientId;
-    }
-
-    public GameObject GetPlayerObject(ulong playerID)
-    {
-        if (!IsServer)
-            return null;
-
-        return _playerDict[playerID].PlayerObject;
     }
     #endregion
 }
