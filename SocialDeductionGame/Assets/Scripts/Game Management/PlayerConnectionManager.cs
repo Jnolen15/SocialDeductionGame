@@ -164,8 +164,18 @@ public class PlayerConnectionManager : NetworkBehaviour
     private void ClientConnected(ulong clientID)
     {
         Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} connected");
+        // Update server side dictionary
         _netNumPlayers.Value++;
-        _playerDict.Add(clientID, new PlayerEntry("Player " + clientID));
+        PlayerEntry newPlayer = new PlayerEntry("Player " + clientID);
+        _playerDict.Add(clientID, newPlayer);
+
+        // sync newly joined clients player dictionary
+        ClientRpcParams clientRpcParams = default;
+        clientRpcParams.Send.TargetClientIds = new ulong[] { clientID };
+        InitialPlayerDictionarySycnClientRpc(_playerDict.Keys.ToArray(), _playerDict.Values.ToArray(), clientRpcParams);
+
+        // Update client dictionaries
+        AddPlayerToDictionaryClientRpc(clientID, newPlayer);
     }
 
     private void ClientDisconnected(ulong clientID)
@@ -173,6 +183,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} disconnected");
         _netNumPlayers.Value--;
         _playerDict.Remove(clientID);
+        RemovePlayerFromDictionaryClientRpc(clientID);
     }
     #endregion
 
@@ -257,6 +268,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log("<color=yellow>SERVER: </color> Setting player " + id + " name to: " + pName);
         PlayerEntry curPlayer = FindPlayerEntry(id);
         curPlayer.SetName(pName);
+        UpdatePlayerNameClientRpc(id, pName);
     }
 
     public void UpdatePlayerVisuals(ulong id, int style, int mat)
@@ -408,18 +420,80 @@ public class PlayerConnectionManager : NetworkBehaviour
     }
     #endregion
 
+    // ============== Player Dictionary Client Sync ==============
+    #region PlayerDictionary Client Sync
+    [ClientRpc]
+    private void InitialPlayerDictionarySycnClientRpc(ulong[] playerIDs, PlayerEntry[] playerEntries, ClientRpcParams clientRpcParams = default)
+    {
+        if (IsServer)
+            return;
+
+        Debug.Log("<color=blue>CLIENT: </color> Performing initial client dictionary sync");
+
+        for (int i = 0; i < playerIDs.Length; i++)
+        {
+            _playerDict.Add(playerIDs[i], playerEntries[i]);
+
+            Debug.Log($"<color=blue>CLIENT: </color> Client {playerIDs[i]} added to client dictionary");
+        }
+    }
+
+    [ClientRpc]
+    private void AddPlayerToDictionaryClientRpc(ulong playerID, PlayerEntry playerEntry)
+    {
+        if (IsServer)
+            return;
+
+        if (_playerDict.ContainsKey(playerID))
+            return;
+
+        _playerDict.Add(playerID, playerEntry);
+
+        Debug.Log($"<color=blue>CLIENT: </color> Client {playerID} added to client dictionary");
+    }
+
+    [ClientRpc]
+    private void RemovePlayerFromDictionaryClientRpc(ulong playerID)
+    {
+        if (IsServer)
+            return;
+
+        _playerDict.Remove(playerID);
+
+        Debug.Log($"<color=blue>CLIENT: </color> Client {playerID} removed from client dictionary");
+    }
+
+    [ClientRpc]
+    private void UpdatePlayerNameClientRpc(ulong playerID, string playerName)
+    {
+        if (IsServer)
+            return;
+
+        PlayerEntry entry = FindPlayerEntry(playerID);
+        entry.SetName(playerName);
+
+        Debug.Log($"<color=blue>CLIENT: </color> Updated player {playerID}'s name to {playerName}");
+    }
+
+    [ClientRpc]
+    private void UpdatePlayerLivingClientRpc(ulong playerID, bool playerLiving)
+    {
+        if (IsServer)
+            return;
+
+        PlayerEntry entry = FindPlayerEntry(playerID);
+        entry.SetPlayerLiving(playerLiving);
+
+        Debug.Log($"<color=blue>CLIENT: </color> Updated player {playerID}'s living status to {playerLiving}");
+    }
+    #endregion
+
     // ============== Helpers ==============
     #region Helpers
     // ~~~~~~~~~ Return Data From Player Dictionary ~~~~~~~~~
-    // Server only
+    // Server (all info) or Client (Id, name, living status)
     public PlayerEntry FindPlayerEntry(ulong id)
     {
-        if (!IsServer)
-        {
-            Debug.LogError("Server only function not called by server");
-            return null;
-        }
-
         if (_playerDict.TryGetValue(id, out PlayerEntry entry))
             return entry;
 
@@ -427,15 +501,9 @@ public class PlayerConnectionManager : NetworkBehaviour
         return null;
     }
 
-    // Server only
+    // Server or Client
     public string GetPlayerNameByID(ulong id)
     {
-        if (!IsServer)
-        {
-            Debug.LogError("Server only function not called by server");
-            return null;
-        }
-
         if (_playerDict.TryGetValue(id, out PlayerEntry entry))
             return entry.PlayerName;
 
@@ -522,6 +590,13 @@ public class PlayerConnectionManager : NetworkBehaviour
         FindPlayerEntry(id).SetPlayerLiving(false);
         _netNumLivingPlayers.Value--;
         Debug.Log("<color=yellow>SERVER: </color> Player death " + id + ": " + FindPlayerEntry(id).PlayerName + " recorded");
+        UpdatePlayerLivingClientRpc(id, false);
+    }
+
+    // Server or Client
+    public bool GetPlayerLivingByID(ulong id)
+    {
+        return FindPlayerEntry(id).GetPlayerLiving();
     }
 
     // Server only

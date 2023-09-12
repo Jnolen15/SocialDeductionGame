@@ -116,7 +116,7 @@ public class ExileManager : NetworkBehaviour
         {
             GameObject vote = Instantiate(_exileVotePrefab, _voteArea);
             //vote.transform.SetParent(_voteArea, false);
-            vote.GetComponent<ExileVote>().Setup(playerIDs[i], "Player " + playerIDs[i]);
+            vote.GetComponent<ExileVote>().Setup(playerIDs[i], PlayerConnectionManager.Instance.GetPlayerNameByID(playerIDs[i]));
             Debug.Log("<color=blue>CLIENT: </color>Spawned an exile vote", vote);
         }
     }
@@ -169,7 +169,11 @@ public class ExileManager : NetworkBehaviour
         // Reset vote objects
         foreach (Transform exilevote in _voteArea)
         {
-            exilevote.GetComponent<ExileVote>().ResetVote();
+            ExileVote vote = exilevote.GetComponent<ExileVote>();
+            if(vote.GetVotePlayerID() != 999)
+                vote.ResetVote(PlayerConnectionManager.Instance.GetPlayerLivingByID(vote.GetVotePlayerID()));
+            else
+                vote.ResetVote(true);
         }
 
         _closeUIButton.SetActive(false);

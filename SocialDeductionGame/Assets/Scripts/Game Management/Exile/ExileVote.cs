@@ -10,6 +10,7 @@ public class ExileVote : MonoBehaviour
     // ================== Refrences / Variables ==================
     [SerializeField] private GameObject _voteStage;
     [SerializeField] private GameObject _resultsStage;
+    [SerializeField] private GameObject _deadStage;
     [SerializeField] private GameObject _confirmationButton;
     [SerializeField] private GameObject _voteSubmittedText;
     [SerializeField] private TextMeshProUGUI _buttonName;
@@ -18,6 +19,7 @@ public class ExileVote : MonoBehaviour
 
     private ulong _votePlayerID;
     private string _playerName;
+    private bool _playerLiving;
     private ExileManager _exileManager;
 
     // Event
@@ -42,8 +44,9 @@ public class ExileVote : MonoBehaviour
     public void Setup(ulong pID, string pName)
     {
         _votePlayerID = pID;
+        _playerLiving = true;
 
-        if(pID == 999)
+        if (pID == 999)
         {
             _playerName = "Nobody";
             _buttonName.text = "Nobody";
@@ -63,15 +66,30 @@ public class ExileVote : MonoBehaviour
     #endregion
 
     // ================== Function ==================
-    public void ResetVote()
+    public void ResetVote(bool playerLiving)
     {
-        _voteStage.SetActive(true);
-        _resultsStage.SetActive(false);
-        _voteSubmittedText.SetActive(false);
+        _playerLiving = playerLiving;
+
+        if (_playerLiving)
+        {
+            _voteStage.SetActive(true);
+            _resultsStage.SetActive(false);
+            _voteSubmittedText.SetActive(false);
+        }
+        else
+        {
+            _deadStage.SetActive(true);
+            _voteStage.SetActive(false);
+            _resultsStage.SetActive(false);
+            _voteSubmittedText.SetActive(false);
+        }
     }
 
     public void DisplayResults(int numVotes)
     {
+        if (!_playerLiving)
+            return;
+
         _resultsNum.text = numVotes.ToString();
 
         _voteStage.SetActive(false);
@@ -80,6 +98,9 @@ public class ExileVote : MonoBehaviour
 
     public void DisplaySubmitted()
     {
+        if (!_playerLiving)
+            return;
+
         _resultsNum.text = "?";
 
         _voteStage.SetActive(false);
@@ -101,7 +122,18 @@ public class ExileVote : MonoBehaviour
 
     public void SubmitVote()
     {
+        if (!_playerLiving)
+        {
+            Debug.LogError("Cannot vote for a dead player!");
+            return;
+        }
+
         OnVoteSubmitted?.Invoke();
         _exileManager.SubmitVote(PlayerConnectionManager.Instance.GetLocalPlayersID(), _votePlayerID);
+    }
+
+    public ulong GetVotePlayerID()
+    {
+        return _votePlayerID;
     }
 }
