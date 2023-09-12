@@ -516,6 +516,7 @@ GameObject:
   - component: {fileID: 5041042436349606569}
   - component: {fileID: 5041042436349606568}
   - component: {fileID: 3991373037302423509}
+  - component: {fileID: -2777534755115693201}
   m_Layer: 5
   m_Name: VoteContainer
   m_TagString: Untagged
@@ -598,9 +599,29 @@ MonoBehaviour:
   _voteStage: {fileID: 3875501225571863715}
   _resultsStage: {fileID: 1270135996827713983}
   _confirmationButton: {fileID: 3068717396315135535}
+  _voteSubmittedText: {fileID: 4073950341399503674}
   _buttonName: {fileID: 5781055676974894539}
   _textName: {fileID: 6752228354934978652}
   _resultsNum: {fileID: 8172621455753731990}
+--- !u!114 &-2777534755115693201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5041042436349606570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &7366460527772149547
 GameObject:
   m_ObjectHideFlags: 0

@@ -427,9 +427,15 @@ public class PlayerConnectionManager : NetworkBehaviour
         return null;
     }
 
-    // TODO: REWORK THIS? ALSO REWORK EXILE VOTING or look at it at least
+    // Server only
     public string GetPlayerNameByID(ulong id)
     {
+        if (!IsServer)
+        {
+            Debug.LogError("Server only function not called by server");
+            return null;
+        }
+
         if (_playerDict.TryGetValue(id, out PlayerEntry entry))
             return entry.PlayerName;
 
@@ -448,6 +454,38 @@ public class PlayerConnectionManager : NetworkBehaviour
         return _playerDict[playerID].PlayerObject;
     }
 
+    // Server only
+    public List<ulong> GetPlayerIDs()
+    {
+        if (!IsServer)
+        {
+            Debug.LogError("Server only function not called by server");
+            return null;
+        }
+
+        return _playerDict.Keys.ToList<ulong>();
+    }
+
+    // Server only
+    public List<ulong> GetLivingPlayerIDs()
+    {
+        if (!IsServer)
+        {
+            Debug.LogError("Server only function not called by server");
+            return null;
+        }
+
+        List<ulong> playerIDs = new();
+
+        foreach (ulong id in _playerDict.Keys)
+        {
+            if (FindPlayerEntry(id).GetPlayerLiving())
+                playerIDs.Add(id);
+        }
+
+        return playerIDs;
+    }
+
     // ~~~~~~~~~ Return Network Vairables ~~~~~~~~~
     // Server or Client
     public int GetNumConnectedPlayers()
@@ -462,7 +500,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     }
 
 
-    // ~~~~~~~~~ Return NetworkManager Data ~~~~~~~~~
+    // ~~~~~~~~~ Get Local Player Info ~~~~~~~~~
     // Server or Client
     public ulong GetLocalPlayersID()
     {
@@ -504,20 +542,6 @@ public class PlayerConnectionManager : NetworkBehaviour
         }
         Debug.Log("<color=yellow>SERVER: </color> Living members of team " + team.ToString() + " = " + numAlive);
         return numAlive;
-    }
-
-    // Get rid of when re-doing exile manager?
-    public List<GameObject> GetLivingPlayerGameObjects()
-    {
-        List<GameObject> players = new();
-
-        foreach (PlayerEntry playa in _playerDict.Values)
-        {
-            if (playa.PlayerObject.GetComponent<PlayerHealth>().IsLiving())
-                players.Add(playa.PlayerObject);
-        }
-
-        return players;
     }
     #endregion
 }
