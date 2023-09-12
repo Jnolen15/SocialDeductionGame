@@ -422,6 +422,13 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Player Dictionary Client Sync ==============
     #region PlayerDictionary Client Sync
+    /* NOTICE
+     * Since I sync all PlayerEntries, all clients now have access to all that info
+     * So for example clients could access what team a player is on and also (untested) their game object
+     * In the future, may want to change it so that the client does not reiceive that info
+     * As a cheat could be made to instantly see player teams
+    */
+
     [ClientRpc]
     private void InitialPlayerDictionarySycnClientRpc(ulong[] playerIDs, PlayerEntry[] playerEntries, ClientRpcParams clientRpcParams = default)
     {

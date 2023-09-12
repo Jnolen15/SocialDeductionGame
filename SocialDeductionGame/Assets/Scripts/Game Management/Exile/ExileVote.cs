@@ -14,7 +14,8 @@ public class ExileVote : MonoBehaviour
     [SerializeField] private GameObject _confirmationButton;
     [SerializeField] private GameObject _voteSubmittedText;
     [SerializeField] private TextMeshProUGUI _buttonName;
-    [SerializeField] private TextMeshProUGUI _textName;
+    [SerializeField] private TextMeshProUGUI _resultsName;
+    [SerializeField] private TextMeshProUGUI _deadName;
     [SerializeField] private TextMeshProUGUI _resultsNum;
 
     private ulong _votePlayerID;
@@ -50,12 +51,14 @@ public class ExileVote : MonoBehaviour
         {
             _playerName = "Nobody";
             _buttonName.text = "Nobody";
-            _textName.text = "Nobody";
+            _resultsName.text = "Nobody";
+            _deadName.text = "Nobody";
         } else
         {
             _playerName = pName;
             _buttonName.text = _playerName;
-            _textName.text = _playerName;
+            _resultsName.text = _playerName;
+            _deadName.text = _playerName;
         }
 
         _voteStage.SetActive(true);

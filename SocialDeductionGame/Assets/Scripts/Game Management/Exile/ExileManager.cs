@@ -123,6 +123,12 @@ public class ExileManager : NetworkBehaviour
 
     private void EnableExileButton()
     {
+        if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
+        {
+            Debug.Log("<color=blue>CLIENT: </color>Player is dead, and cannot vote");
+            return;
+        }
+
         _exileButton.SetActive(true);
     }
 
@@ -163,8 +169,11 @@ public class ExileManager : NetworkBehaviour
         _exileButton.SetActive(false);
 
         // Dont let dead players vote
-        //if (!_playerHealth.IsLiving())
-        //    return;
+        if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
+        {
+            Debug.Log("<color=blue>CLIENT: </color>Player is dead, and cannot vote");
+            return;
+        }
 
         // Reset vote objects
         foreach (Transform exilevote in _voteArea)
