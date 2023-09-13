@@ -30,7 +30,16 @@ public class LobbyManager : MonoBehaviour
 
     // ============== Variables ==============
     [SerializeField] private bool _enableTestMode;
-    private Lobby joinedLobby;
+    private Lobby _joinedLobby;
+    private float _hearthbeatTimer;
+
+    public delegate void LobbyAction();
+    public static event LobbyAction OnStartCreateLobby;
+    public static event LobbyAction OnFailCreateLobby;
+    public static event LobbyAction OnStartQuickJoin;
+    public static event LobbyAction OnFailQuickJoin;
+    public static event LobbyAction OnStartCodeJoin;
+    public static event LobbyAction OnFailCodeJoin;
 
     // ============== Setup =============
     #region Setup
@@ -64,17 +73,37 @@ public class LobbyManager : MonoBehaviour
     #endregion
 
     // ============== Lobby =============
-    // Delete later if not needed
-    public void TestCreateLobby()
+    private void Update()
     {
-        CreateLobby("Lobby name", false);
+        HandleHeartbeat();
+    }
+
+    public void HandleHeartbeat()
+    {
+        if (IsLobbyHost())
+        {
+            _hearthbeatTimer -= Time.deltaTime;
+            if(_hearthbeatTimer <= 0f)
+            {
+                _hearthbeatTimer = 15f;
+
+                LobbyService.Instance.SendHeartbeatPingAsync(_joinedLobby.Id);
+            }
+        }
+    }
+
+    public bool IsLobbyHost()
+    {
+        return (_joinedLobby != null && _joinedLobby.HostId == AuthenticationService.Instance.PlayerId);
     }
 
     public async void CreateLobby(string lobbyName, bool isPrivate)
     {
+        OnStartCreateLobby?.Invoke();
+
         try
         {
-            joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, 8, new CreateLobbyOptions
+            _joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, 8, new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
             });
@@ -84,17 +113,60 @@ public class LobbyManager : MonoBehaviour
         }
         catch (LobbyServiceException e)
         {
+            OnFailCreateLobby();
             Debug.LogError(e);
         }
     }
 
     public async void QuickJoin()
     {
+        OnStartQuickJoin?.Invoke();
+
         try
         {
-            joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+            _joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
 
             ConnectionManager.Instance.JoinGameTest();
+        }
+        catch (LobbyServiceException e)
+        {
+            OnFailQuickJoin();
+            Debug.LogError(e);
+        }
+    }
+
+    public async void JoinWithCode(string lobbyCode)
+    {
+        if (lobbyCode == "")
+            return;
+
+        OnStartCodeJoin?.Invoke();
+
+        try
+        {
+            _joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+
+            ConnectionManager.Instance.JoinGameTest();
+        }
+        catch (LobbyServiceException e)
+        {
+            OnFailCodeJoin?.Invoke();
+            Debug.LogError(e);
+        }
+    }
+
+    public async void DeleteLobby()
+    {
+        if (_joinedLobby == null)
+            return;
+
+        try
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Deleting lobby");
+
+            await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
+
+            _joinedLobby = null;
         }
         catch (LobbyServiceException e)
         {
@@ -102,13 +174,35 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async void JoinWithCode(string lobbyCode)
+    public async void LeaveLobby()
     {
+        if (_joinedLobby == null)
+            return;
+
         try
         {
-            joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+            Debug.Log("<color=purple>CONNECTION: </color>leaving lobby");
 
-            ConnectionManager.Instance.JoinGameTest();
+            await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, AuthenticationService.Instance.PlayerId);
+
+            _joinedLobby = null;
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError(e);
+        }
+    }
+
+    public async void KickPlayerFromLobby(string playerID)
+    {
+        if (!IsLobbyHost())
+            return;
+
+        try
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Kicking player: " + playerID);
+
+            await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, playerID);
         }
         catch (LobbyServiceException e)
         {
@@ -118,6 +212,6 @@ public class LobbyManager : MonoBehaviour
 
     public Lobby GetLobby()
     {
-        return joinedLobby;
+        return _joinedLobby;
     }
 }

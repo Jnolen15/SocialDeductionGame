@@ -19,4 +19,9 @@ public class LobbyUI : MonoBehaviour
     {
         LobbyManager.Instance.JoinWithCode(_joinCode.text);
     }
+
+    public void LeaveLobby()
+    {
+        LobbyManager.Instance.LeaveLobby();
+    }
 }

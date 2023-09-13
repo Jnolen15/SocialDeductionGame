@@ -18,7 +18,7 @@ public class CharacterSelectManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         if (IsServer)
-            PlayerConnectionManager.OnAllPlayersReady += ProgressState;
+            PlayerConnectionManager.OnAllPlayersReady += LoadToGameScene;
     }
 
     private void Start()
@@ -29,17 +29,21 @@ public class CharacterSelectManager : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         if (IsServer)
-            PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
+            PlayerConnectionManager.OnAllPlayersReady -= LoadToGameScene;
     }
 
     // ============== Scene Management ==============
-    private void ProgressState()
+    private void LoadToGameScene()
     {
         if (!IsServer)
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> All players ready, loading to game scene");
 
+        // Clean up lobby
+        LobbyManager.Instance.DeleteLobby();
+
+        // Load game scene
         SceneLoader.LoadNetwork(SceneLoader.Scene.IslandGameScene);
     }
 

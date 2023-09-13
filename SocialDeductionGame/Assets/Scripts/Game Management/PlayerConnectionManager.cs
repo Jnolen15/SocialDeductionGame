@@ -325,12 +325,12 @@ public class PlayerConnectionManager : NetworkBehaviour
         {
             // If in game scene check against number of living players
             if (_netPlayersReadied.Value >= GetNumLivingPlayers())
-                ProgressState();
+                AllPlayersReady();
         } else
         {
             // Otherwise check against total connected players
             if (_netPlayersReadied.Value >= GetNumConnectedPlayers())
-                ProgressState();
+                AllPlayersReady();
         }
     }
 
@@ -386,7 +386,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         UnreadyPlayerClientRpc();
     }
 
-    private void ProgressState()
+    private void AllPlayersReady()
     {
         if (!IsServer) return;
 
