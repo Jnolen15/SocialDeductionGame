@@ -10,13 +10,13 @@ public class ConnectionFailUI : MonoBehaviour
 
     void Start()
     {
-        RelayTest.OnFailedToJoinGame += OnFailToJoinGame;
+        ConnectionManager.OnFailedToJoinGame += OnFailToJoinGame;
         Hide();
     }
 
     private void OnDestroy()
     {
-        RelayTest.OnFailedToJoinGame -= OnFailToJoinGame;
+        ConnectionManager.OnFailedToJoinGame -= OnFailToJoinGame;
     }
 
     private void OnFailToJoinGame()

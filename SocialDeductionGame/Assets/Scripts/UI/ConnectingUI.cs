@@ -6,15 +6,15 @@ public class ConnectingUI : MonoBehaviour
 {
     void Start()
     {
-        RelayTest.OnTryingToJoinGame += Show;
-        RelayTest.OnFailedToJoinGame += Hide;
+        ConnectionManager.OnTryingToJoinGame += Show;
+        ConnectionManager.OnFailedToJoinGame += Hide;
         Hide();
     }
 
     private void OnDestroy()
     {
-        RelayTest.OnTryingToJoinGame -= Show;
-        RelayTest.OnFailedToJoinGame -= Hide;
+        ConnectionManager.OnTryingToJoinGame -= Show;
+        ConnectionManager.OnFailedToJoinGame -= Hide;
     }
 
     private void Show()

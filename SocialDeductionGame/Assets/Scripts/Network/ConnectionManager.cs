@@ -8,14 +8,28 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 
-// This code is by TaroDev, from this tutorial: https://www.youtube.com/watch?v=fdkvm21Y0xE
+// Code written following Code Monkey: https://www.youtube.com/watch?v=7glCsF9fv3s&t=13474s
 
-public class RelayTest : MonoBehaviour
+public class ConnectionManager : MonoBehaviour
 {
-    [SerializeField] private TMP_Text _joinCodeText;
-    [SerializeField] private TMP_InputField _joinInput;
+    // ============== Singleton pattern ==============
+    #region Singleton
+    public static ConnectionManager Instance { get; private set; }
+    private void InitializeSingleton()
+    {
+        if (Instance != null && Instance != this)
+            Destroy(this);
+        else
+            Instance = this;
+
+        DontDestroyOnLoad(gameObject);
+    }
+    #endregion
+
+    // ============== Refrences ==============
     [SerializeField] private GameObject _buttons;
 
+    // ============== Variables ==============
     private UnityTransport _transport;
     private const int MaxPlayers = 5;
 
@@ -23,33 +37,72 @@ public class RelayTest : MonoBehaviour
     public static event ConnectingAction OnTryingToJoinGame;
     public static event ConnectingAction OnFailedToJoinGame;
 
-    private async void Awake()
+    private void Awake()
     {
-        _transport = FindObjectOfType<UnityTransport>();
+        InitializeSingleton();
+
+        /*_transport = FindObjectOfType<UnityTransport>();
 
         _buttons.SetActive(false);
 
         await SignInCachedUserAsync();
 
-        _buttons.SetActive(true);
+        _buttons.SetActive(true);*/
     }
 
-    private static async Task Authenticate()
+    // ============== Connections ==============
+    public void CreateGameTest()
+    {
+        NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApproval;
+        NetworkManager.Singleton.StartHost();
+    }
+
+    public void JoinGameTest()
+    {
+        OnTryingToJoinGame?.Invoke();
+
+        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_ClientDisconnect;
+        NetworkManager.Singleton.StartClient();
+    }
+
+    private void NetworkManager_ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
+    {
+        // If not in character select scene deny connection
+        if (!SceneLoader.IsInScene(SceneLoader.Scene.CharacterSelectScene))
+        {
+            connectionApprovalResponse.Approved = false;
+            connectionApprovalResponse.Reason = "Game already started";
+            Debug.Log("<color=purple>CONNECTION: </color> Connection denied, Game already started");
+            return;
+        }
+
+        // Approve connection if nothing above has fired
+        connectionApprovalResponse.Approved = true;
+    }
+
+    private void NetworkManager_ClientDisconnect(ulong playerID)
+    {
+        OnFailedToJoinGame?.Invoke();
+    }
+
+
+    // ============== OLD ==============
+    /*private static async Task Authenticate()
     {
         await UnityServices.InitializeAsync();
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
-    }
+    }*/
 
-    async static Task SignInCachedUserAsync()
+    /*async static Task SignInCachedUserAsync()
     {
         await UnityServices.InitializeAsync();
 
         // Check if a cached player already exists by checking if the session token exists
-        /*if (!AuthenticationService.Instance.SessionTokenExists)
+        if (!AuthenticationService.Instance.SessionTokenExists)
         {
             Debug.Log("Cached Player re-join");
             return;
-        }*/
+        }
 
         // Sign in Anonymously
         // This call will sign in the cached player.
@@ -73,9 +126,9 @@ public class RelayTest : MonoBehaviour
             // Notify the player with the proper error message
             Debug.LogException(ex);
         }
-    }
+    }*/
 
-    public async void CreateGame()
+    /*public async void CreateGame()
     {
         //_buttons.SetActive(false);
 
@@ -88,48 +141,11 @@ public class RelayTest : MonoBehaviour
         NetworkManager.Singleton.StartHost();
 
         SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
-    }
+    }*/
 
-    private void NetworkManager_ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
-    {
-        //Debug.Log("<color=purple>CONNECTION: </color> In NetworkManager_ConnectionApproval");
 
-        if (!SceneLoader.IsInScene(SceneLoader.Scene.CharacterSelectScene))
-        {
-            connectionApprovalResponse.Approved = false;
-            connectionApprovalResponse.Reason = "Game already started";
-            Debug.Log("<color=purple>CONNECTION: </color> Connection denied, Game already started");
-            return;
-        }
 
-        connectionApprovalResponse.Approved = true;
-    }
-
-    public void CreateGameTest()
-    {
-        //_buttons.SetActive(false);
-
-        NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApproval;
-        NetworkManager.Singleton.StartHost();
-
-        SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
-    }
-
-    public void JoinGameTest()
-    {
-        //_buttons.SetActive(false);
-        OnTryingToJoinGame?.Invoke();
-
-        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_ClientDisconnect;
-        NetworkManager.Singleton.StartClient();
-    }
-
-    private void NetworkManager_ClientDisconnect(ulong playerID)
-    {
-        OnFailedToJoinGame?.Invoke();
-    }
-
-    public async void JoinGame()
+    /*public async void JoinGame()
     {
         //_buttons.SetActive(false);
 
@@ -147,13 +163,5 @@ public class RelayTest : MonoBehaviour
             Debug.LogError("Room with provided join code not found!");
             return;
         }
-    }
-
-    public void CopyCodeText()
-    {
-        TextEditor texteditor = new();
-        texteditor.text = _joinCodeText.text;
-        texteditor.SelectAll();
-        texteditor.Copy();
-    }
+    }*/
 }
