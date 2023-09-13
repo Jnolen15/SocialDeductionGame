@@ -19,6 +19,10 @@ public class RelayTest : MonoBehaviour
     private UnityTransport _transport;
     private const int MaxPlayers = 5;
 
+    public delegate void ConnectingAction();
+    public static event ConnectingAction OnTryingToJoinGame;
+    public static event ConnectingAction OnFailedToJoinGame;
+
     private async void Awake()
     {
         _transport = FindObjectOfType<UnityTransport>();
@@ -73,22 +77,39 @@ public class RelayTest : MonoBehaviour
 
     public async void CreateGame()
     {
-        _buttons.SetActive(false);
+        //_buttons.SetActive(false);
 
         Allocation a = await RelayService.Instance.CreateAllocationAsync(MaxPlayers);
         _joinCodeText.text = await RelayService.Instance.GetJoinCodeAsync(a.AllocationId);
 
         _transport.SetHostRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData);
 
+        NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApproval;
         NetworkManager.Singleton.StartHost();
 
         SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
     }
 
+    private void NetworkManager_ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
+    {
+        //Debug.Log("<color=purple>CONNECTION: </color> In NetworkManager_ConnectionApproval");
+
+        if (!SceneLoader.IsInScene(SceneLoader.Scene.CharacterSelectScene))
+        {
+            connectionApprovalResponse.Approved = false;
+            connectionApprovalResponse.Reason = "Game already started";
+            Debug.Log("<color=purple>CONNECTION: </color> Connection denied, Game already started");
+            return;
+        }
+
+        connectionApprovalResponse.Approved = true;
+    }
+
     public void CreateGameTest()
     {
-        _buttons.SetActive(false);
+        //_buttons.SetActive(false);
 
+        NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApproval;
         NetworkManager.Singleton.StartHost();
 
         SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
@@ -96,14 +117,21 @@ public class RelayTest : MonoBehaviour
 
     public void JoinGameTest()
     {
-        _buttons.SetActive(false);
+        //_buttons.SetActive(false);
+        OnTryingToJoinGame?.Invoke();
 
+        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_ClientDisconnect;
         NetworkManager.Singleton.StartClient();
+    }
+
+    private void NetworkManager_ClientDisconnect(ulong playerID)
+    {
+        OnFailedToJoinGame?.Invoke();
     }
 
     public async void JoinGame()
     {
-        _buttons.SetActive(false);
+        //_buttons.SetActive(false);
 
         try
         {
@@ -115,7 +143,7 @@ public class RelayTest : MonoBehaviour
         }
         catch
         {
-            _buttons.SetActive(true);
+            //_buttons.SetActive(true);
             Debug.LogError("Room with provided join code not found!");
             return;
         }
