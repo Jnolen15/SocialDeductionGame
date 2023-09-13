@@ -15,6 +15,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private GameObject _readyButton;
     [SerializeField] private GameObject _readyIndicator;
     [SerializeField] private GameObject _islandMap;
+    [SerializeField] private GameObject _introRole;
     [SerializeField] private TextMeshProUGUI _locationText;
     [SerializeField] private TextMeshProUGUI _healthText;
     [SerializeField] private TextMeshProUGUI _hungerText;
@@ -40,8 +41,10 @@ public class PlayerUI : MonoBehaviour
 
         _playerData._netPlayerName.OnValueChanged += UpdatePlayerNameText;
         GameManager.OnStateChange += EnableReadyButton;
+        GameManager.OnStateChange += StateChangeEvent;
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
+        GameManager.OnStateIntro += DisplayRole;
         GameManager.OnStateForage += ToggleMap;
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
@@ -52,8 +55,10 @@ public class PlayerUI : MonoBehaviour
     {
         _playerData._netPlayerName.OnValueChanged -= UpdatePlayerNameText;
         GameManager.OnStateChange -= EnableReadyButton;
+        GameManager.OnStateChange += StateChangeEvent;
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
+        GameManager.OnStateIntro -= DisplayRole;
         GameManager.OnStateForage -= ToggleMap;
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
@@ -63,6 +68,12 @@ public class PlayerUI : MonoBehaviour
 
     // ================== Misc UI ==================
     #region Misc UI
+    public void StateChangeEvent()
+    {
+        if(_introRole != null && _introRole.activeInHierarchy)
+            _introRole.SetActive(false);
+    }
+
     public void UpdatePlayerNameText(FixedString32Bytes old, FixedString32Bytes current)
     {
         _nameText.text = current.ToString();
@@ -93,6 +104,23 @@ public class PlayerUI : MonoBehaviour
         _readyIndicator.SetActive(false);
 
         _readyButton.GetComponent<Image>().color = Color.red;
+    }
+
+    private void DisplayRole()
+    {
+        _introRole.SetActive(true);
+        TextMeshProUGUI roleText = _introRole.GetComponentInChildren<TextMeshProUGUI>();
+
+        if (_playerData.GetPlayerTeam() == PlayerData.Team.Survivors)
+        {
+            roleText.text = "Survivors";
+            roleText.color = Color.green;
+        }
+        else if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        {
+            roleText.text = "Saboteurs";
+            roleText.color = Color.red;
+        }
     }
 
     private void ToggleMap()

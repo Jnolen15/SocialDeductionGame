@@ -7467,10 +7467,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2f3d9555b5d68842a4faea9cce72773, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _introTimerMax: 5
   _morningTimerMax: 10
   _afternoonTimerMax: 60
   _eveningTimerMax: 140
   _nightTimerMax: 15
+  _netIntroTimer:
+    m_InternalValue: 0
   _netMorningTimer:
     m_InternalValue: 0
   _netAfternoonTimer:

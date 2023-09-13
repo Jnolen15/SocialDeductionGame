@@ -22,10 +22,12 @@ public class GameManager : NetworkBehaviour
 
     // ================== Refrences ==================
     [Header("State Timers")]
+    [SerializeField] private float _introTimerMax;
     [SerializeField] private float _morningTimerMax;
     [SerializeField] private float _afternoonTimerMax;
     [SerializeField] private float _eveningTimerMax;
     [SerializeField] private float _nightTimerMax;
+    [SerializeField] private NetworkVariable<float> _netIntroTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netMorningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
@@ -102,6 +104,14 @@ public class GameManager : NetworkBehaviour
         switch (_netCurrentGameState.Value)
         {
             case 0:
+                break;
+            case GameState.Intro:
+                _netIntroTimer.Value -= (Time.deltaTime * CalculateTimerMod());
+                if (_netIntroTimer.Value <= 0)
+                {
+                    Debug.Log($"<color=yellow>SERVER: </color> Intro Timer up, Progressing");
+                    ProgressState();
+                }
                 break;
             case GameState.Morning:
                 _netMorningTimer.Value -= (Time.deltaTime * CalculateTimerMod());
@@ -186,7 +196,10 @@ public class GameManager : NetworkBehaviour
         {
             case GameState.Intro:
                 if (IsServer)
+                {
+                    _netIntroTimer.Value = _introTimerMax;
                     OnSetup?.Invoke();
+                }
                 OnStateIntro?.Invoke();
                 break;
             case GameState.Morning:
@@ -306,6 +319,8 @@ public class GameManager : NetworkBehaviour
         {
             case 0:
                 return 1;
+            case GameState.Intro:
+                return 1 - (_netIntroTimer.Value / _introTimerMax);
             case GameState.Morning:
                 return 1 - (_netMorningTimer.Value / _morningTimerMax);
             case GameState.Afternoon:
