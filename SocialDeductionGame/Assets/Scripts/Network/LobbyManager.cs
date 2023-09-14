@@ -299,6 +299,14 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    public void DisconnectFromLobby()
+    {
+        if (IsLobbyHost())
+            DeleteLobby();
+        else
+            LeaveLobby();
+    }
+
     public async void DeleteLobby()
     {
         if (_joinedLobby == null)

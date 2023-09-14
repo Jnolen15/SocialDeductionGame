@@ -15,6 +15,7 @@ public class CharacterSelectManager : NetworkBehaviour
     private int _characterStyleIndex;
 
     // ============== Setup ==============
+    #region Setup
     public override void OnNetworkSpawn()
     {
         if (IsServer)
@@ -32,7 +33,14 @@ public class CharacterSelectManager : NetworkBehaviour
             PlayerConnectionManager.OnAllPlayersReady -= LoadToGameScene;
     }
 
+    private void OnApplicationQuit()
+    {
+        LobbyManager.Instance.DisconnectFromLobby();
+    }
+    #endregion
+
     // ============== Scene Management ==============
+    #region Scene Management
     private void LoadToGameScene()
     {
         if (!IsServer)
@@ -46,8 +54,10 @@ public class CharacterSelectManager : NetworkBehaviour
         // Load game scene
         SceneLoader.LoadNetwork(SceneLoader.Scene.IslandGameScene);
     }
+    #endregion
 
     // ============== Character Customization ==============
+    #region Character Customization
     public void SetPlayerName(string newName)
     {
         Debug.Log("Name Recieved: " + newName);
@@ -128,4 +138,5 @@ public class CharacterSelectManager : NetworkBehaviour
         // Update data
         SetPlayerVisuals(_characterStyleIndex, _characterMatIndex);
     }
+    #endregion
 }

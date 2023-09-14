@@ -34,6 +34,13 @@ public class CharacterSelectUI : MonoBehaviour
     }
 
     // ============== Functions ==============
+    public void ReturnToMainMenu()
+    {
+        LobbyManager.Instance.DisconnectFromLobby();
+
+        SceneLoader.Load(SceneLoader.Scene.MainMenu);
+    }
+
     public void ToggleReadyPlayer()
     {
         if(!_localPlayerReady)

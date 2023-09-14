@@ -35,14 +35,6 @@ public class LobbyUI : MonoBehaviour
         LobbyManager.Instance.JoinWithCode(_joinCode.text);
     }
 
-    public void LeaveLobby()
-    {
-        if(LobbyManager.Instance.IsLobbyHost())
-            LobbyManager.Instance.DeleteLobby();
-        else
-            LobbyManager.Instance.LeaveLobby();
-    }
-
     private void UpdateLobbyList(List<Lobby> lobbyList)
     {
         foreach(Transform child in _lobbyContainer)
@@ -59,6 +51,6 @@ public class LobbyUI : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        LeaveLobby();
+        LobbyManager.Instance.DisconnectFromLobby();
     }
 }
