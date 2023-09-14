@@ -4,21 +4,22 @@ using UnityEngine;
 
 public class CardPicker : MonoBehaviour
 {
-    // Parameters
+    // ============== Parameters ==============
     [Header("Parameters")]
     [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
     [SerializeField] private int _cardsDelt;
     [SerializeField] private int _cardsChosen;
-    // Refrences
+    // ============== Refrences ==============
     [Header("Refrences")]
     private CardManager _cardManager;
     [SerializeField] private Transform _cardCanvas;
     [SerializeField] private GameObject _takeButton;
     [SerializeField] private GameObject _requirementText;
-    // Variables
+    // ============== Variables ==============
     [Header("Variables")]
     [SerializeField] private List<Card> _chosenCards = new();
 
+    // ============== Setup ==============
     void OnValidate()
     {
         _cardDropTable.ValidateTable();
@@ -31,6 +32,7 @@ public class CardPicker : MonoBehaviour
         DealCards();
     }
 
+    // ============== Functions ==============
     public void DealCards()
     {
         if(_cardManager == null)
@@ -98,5 +100,12 @@ public class CardPicker : MonoBehaviour
             _takeButton.SetActive(true);
             _requirementText.SetActive(false);
         }
+    }
+
+    // Only used in simplified forrage system
+    public void ReadyPlayer()
+    {
+        Debug.Log("FORRAGE READY");
+        PlayerConnectionManager.Instance.ReadyPlayer();
     }
 }
