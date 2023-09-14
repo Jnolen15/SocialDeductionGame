@@ -40,7 +40,7 @@ public class NightEventResults : MonoBehaviour
         foreach (ulong id in contributorIDS)
         {
             TextMeshProUGUI namePlate = Instantiate(_playerNamePref, _contributorsArea).GetComponent<TextMeshProUGUI>();
-            namePlate.text = PlayerConnectionManager.GetPlayerNameByID(id);
+            namePlate.text = PlayerConnectionManager.Instance.GetPlayerNameByID(id);
         }
 
         // Cards

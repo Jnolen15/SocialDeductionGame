@@ -34,7 +34,7 @@ public class GameInfoUI : MonoBehaviour
     // =================== Update ===================
     void Update()
     {
-        if(GameManager.GetCurrentGameState() == GameManager.GameState.Morning && !_updatedDay)
+        if(GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Morning && !_updatedDay)
         {
             UpdateDayText();
             _updatedDay = true;
@@ -44,15 +44,15 @@ public class GameInfoUI : MonoBehaviour
         }
 
         // State Timer stuff
-        _stateTimerFill.fillAmount = GameManager.GetStateTimer();
+        _stateTimerFill.fillAmount = GameManager.Instance.GetStateTimer();
     }
 
     // =================== UI Functions ===================
     private void UpdateStateUI()
     {
-        _gameStateText.text = GameManager.GetCurrentGameState().ToString();
+        _gameStateText.text = GameManager.Instance.GetCurrentGameState().ToString();
 
-        switch (GameManager.GetCurrentGameState())
+        switch (GameManager.Instance.GetCurrentGameState())
         {
             case GameManager.GameState.Morning:
                 _stateTimerBackground.sprite = _morningTimerSprite;
@@ -75,6 +75,6 @@ public class GameInfoUI : MonoBehaviour
 
     private void UpdateDayText()
     {
-        _dayText.text = "Day: " + GameManager.GetCurrentDay().ToString();
+        _dayText.text = "Day: " + GameManager.Instance.GetCurrentDay().ToString();
     }
 }

@@ -31,8 +31,6 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _playerData._netPlayerName.OnValueChanged += UpdateNamePlate;
         _playerHealth._netIsLiving.OnValueChanged += UpdateDeathIndicator;
 
-        _netCharacterIndex.OnValueChanged += UpdateCharacterModel;
-        _netCharacterMatIndex.OnValueChanged += UpdateCharacterMat;
         _netTookFromFire.OnValueChanged += UpdateCampfireIcon;
     }
 
@@ -41,8 +39,6 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _playerData._netPlayerName.OnValueChanged -= UpdateNamePlate;
         _playerHealth._netIsLiving.OnValueChanged -= UpdateDeathIndicator;
 
-        _netCharacterIndex.OnValueChanged -= UpdateCharacterModel;
-        _netCharacterMatIndex.OnValueChanged -= UpdateCharacterMat;
         _netTookFromFire.OnValueChanged -= UpdateCampfireIcon;
         
         if (IsOwner)
@@ -53,21 +49,12 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     {
         if (IsOwner)
         {
-            Debug.Log("Randomizing Character");
-            _netCharacterIndex.Value = Random.Range(0, _character.childCount - 1);
-            _netCharacterMatIndex.Value = Random.Range(0, _characterMatList.Count);
-
             GameManager.OnStateMorning += ToggleCampfireIconOff;
-        }
-        else
-        {
-            Debug.Log("initial Character Setup");
-            UpdateCharacterModel(0, _netCharacterIndex.Value);
-            UpdateCharacterMat(0, _netCharacterMatIndex.Value);
         }
     }
 
-    private void UpdateCharacterModel(int prev, int next)
+    [ClientRpc]
+    public void UpdateCharacterModelClientRPC(int styleIndex, int materialIndex)
     {
         Debug.Log("Updating Character");
 
@@ -75,12 +62,11 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _character.GetChild(0).gameObject.SetActive(false);
 
         // Set correct model active
-        _character.GetChild(next).gameObject.SetActive(true);
-    }
+        Transform model = _character.GetChild(styleIndex);
+        model.gameObject.SetActive(true);
 
-    private void UpdateCharacterMat(int prev, int next)
-    {
-        _character.GetChild(_netCharacterIndex.Value).gameObject.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[next];
+        // Set Material
+        model.gameObject.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[materialIndex];
     }
 
     // ================== Info ==================

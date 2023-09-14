@@ -266,7 +266,7 @@ public class EventManager : NetworkBehaviour
             }
         }
 
-        int spRequirement = nEvent.GetSuccessPoints(PlayerConnectionManager.GetNumLivingPlayers());
+        int spRequirement = nEvent.GetSuccessPoints(PlayerConnectionManager.Instance.GetNumLivingPlayers());
         // If number of points >= number of required points, success
         if (successPoints >= spRequirement)
         {
@@ -275,7 +275,7 @@ public class EventManager : NetworkBehaviour
 
             // If number of points >= extra bonus
             // Extra bonus calculated with number of connected players not living players
-            if ((successPoints - spRequirement) >= nEvent.SPBonusCalculation(PlayerConnectionManager.GetNumConnectedPlayers()))
+            if ((successPoints - spRequirement) >= nEvent.SPBonusCalculation(PlayerConnectionManager.Instance.GetNumConnectedPlayers()))
             {
                 Debug.Log("<color=yellow>SERVER: </color>Earned Bonus!");
                 _netEarnedBonusNightEvent.Value = true;

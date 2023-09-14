@@ -125,8 +125,8 @@ public class PlayerHealth : NetworkBehaviour
             return;
 
         Debug.Log($"<color=#FF0000>Player {NetworkManager.Singleton.LocalClientId} has died!</color>");
-        OnDeath();
         _playerData.OnPlayerDeath();
+        OnDeath?.Invoke();
     }
 
     public bool IsLiving()

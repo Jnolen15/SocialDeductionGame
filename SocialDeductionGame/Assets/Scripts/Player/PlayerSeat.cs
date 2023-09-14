@@ -1,32 +1,53 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class PlayerSeat : MonoBehaviour
+public class PlayerSeat : NetworkBehaviour
 {
     // ================== Refrences ==================
-    private PlayerData _playerData;
+    [Header("Player Seating Positions")]
+    [SerializeField] private List<Transform> _playerPositions = new();
 
     // ================== Setup ==================
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        Debug.Log("Player Seat Start");
-
-        GameManager.OnStateIntro += AssignSeat;
-
-        _playerData = gameObject.GetComponent<PlayerData>();
+        if(IsServer)
+            GameManager.OnStateIntro += AssignSeatsServerRpc;
     }
 
-    private void OnDisable()
+    public override void OnNetworkDespawn()
     {
-        GameManager.OnStateIntro -= AssignSeat;
+        if (IsServer)
+            GameManager.OnStateIntro -= AssignSeatsServerRpc;
     }
 
     // ================== Seats ==================
-    public void AssignSeat()
+    [ServerRpc]
+    private void AssignSeatsServerRpc()
     {
-        Debug.Log("Assigning Seat");
+        if (!IsServer)
+            return;
 
-        GameManager.GetSeat(transform, _playerData.GetPlayerID());
+        // Assign Seat for each player
+        int i = 0;
+        foreach (ulong clientID in NetworkManager.Singleton.ConnectedClientsIds)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Getting Seat for player " + clientID);
+
+            if (i > _playerPositions.Count - 1)
+            {
+                Debug.LogError("Not Enough Seats!");
+                return;
+            }
+
+            GameObject playerObj = PlayerConnectionManager.Instance.GetPlayerObjectByID(clientID);
+
+            // Asign player transform a seat
+            playerObj.transform.position = _playerPositions[i].position;
+            playerObj.transform.rotation = _playerPositions[i].rotation;
+
+            i++;
+        }
     }
 }

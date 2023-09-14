@@ -4,9 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using Unity.Collections;
 
 public class PlayerUI : MonoBehaviour
 {
+    // ================== Variables / Refrences ==================
+    #region Variables / Refrences
     private PlayerData _playerData;
     private PlayerHealth _playerHealth;
 
@@ -14,22 +17,15 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private GameObject _readyButton;
     [SerializeField] private GameObject _readyIndicator;
     [SerializeField] private GameObject _islandMap;
+    [SerializeField] private GameObject _introRole;
     [SerializeField] private TextMeshProUGUI _locationText;
     [SerializeField] private TextMeshProUGUI _healthText;
     [SerializeField] private TextMeshProUGUI _hungerText;
     [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private GameObject _deathMessage;
-    [SerializeField] private GameObject _playerNameSubmission;
     [SerializeField] private Image _healthFlashSprite;
     [SerializeField] private Image _hungerFlashSprite;
-
-    [Header("Exile Vote UI Refrences")]
-    [SerializeField] private GameObject _votePrefab;
-    [SerializeField] private Transform _voteArea;
-    [SerializeField] private GameObject _exileUI;
-    [SerializeField] private GameObject _closeUIButton;
-
-    private bool hasVoted;
+    #endregion
 
     // ================== Setup ==================
     #region Setup
@@ -38,12 +34,13 @@ public class PlayerUI : MonoBehaviour
         _playerData = this.GetComponentInParent<PlayerData>();
         _playerHealth = this.GetComponentInParent<PlayerHealth>();
 
+        _playerData._netPlayerName.OnValueChanged += UpdatePlayerNameText;
         GameManager.OnStateChange += EnableReadyButton;
-        GameManager.OnPlayerReadyToggled += ToggleReady;
-        GameManager.OnStateIntro += EnablePlayerNaming;
-        GameManager.OnStateMorning += DisablePlayerNaming;
+        GameManager.OnStateChange += StateChangeEvent;
+        PlayerConnectionManager.OnPlayerReady += Ready;
+        PlayerConnectionManager.OnPlayerUnready += Unready;
+        GameManager.OnStateIntro += DisplayRole;
         GameManager.OnStateForage += ToggleMap;
-        GameManager.OnStateNight += CloseExileVote;
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
         PlayerHealth.OnDeath += DisplayDeathMessage;
@@ -51,12 +48,13 @@ public class PlayerUI : MonoBehaviour
 
     private void OnDisable()
     {
+        _playerData._netPlayerName.OnValueChanged -= UpdatePlayerNameText;
         GameManager.OnStateChange -= EnableReadyButton;
-        GameManager.OnPlayerReadyToggled -= ToggleReady;
-        GameManager.OnStateIntro -= EnablePlayerNaming;
-        GameManager.OnStateMorning -= DisablePlayerNaming;
+        GameManager.OnStateChange += StateChangeEvent;
+        PlayerConnectionManager.OnPlayerReady -= Ready;
+        PlayerConnectionManager.OnPlayerUnready -= Unready;
+        GameManager.OnStateIntro -= DisplayRole;
         GameManager.OnStateForage -= ToggleMap;
-        GameManager.OnStateNight -= CloseExileVote;
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= DisplayDeathMessage;
@@ -65,24 +63,15 @@ public class PlayerUI : MonoBehaviour
 
     // ================== Misc UI ==================
     #region Misc UI
-    private void EnablePlayerNaming()
+    public void StateChangeEvent()
     {
-        _playerNameSubmission.SetActive(true);
+        if(_introRole != null && _introRole.activeInHierarchy)
+            _introRole.SetActive(false);
     }
 
-    private void DisablePlayerNaming()
+    public void UpdatePlayerNameText(FixedString32Bytes old, FixedString32Bytes current)
     {
-        _playerNameSubmission.SetActive(false);
-    }
-
-    public void SetPlayerName(string name)
-    {
-        _playerData.SetPlayerName(name);
-    }
-
-    public void UpdatePlayerNameText(string name)
-    {
-        _nameText.text = name;
+        _nameText.text = current.ToString();
     }
 
     private void EnableReadyButton()
@@ -98,14 +87,35 @@ public class PlayerUI : MonoBehaviour
         _readyButton.SetActive(false);
     }
 
-    public void ToggleReady(bool toggle)
+    public void Ready()
     {
-        _readyIndicator.SetActive(toggle);
+        _readyIndicator.SetActive(true);
 
-        if (toggle)
-            _readyButton.GetComponent<Image>().color = Color.green;
-        else
-            _readyButton.GetComponent<Image>().color = Color.red;
+        _readyButton.GetComponent<Image>().color = Color.green;
+    }
+
+    public void Unready()
+    {
+        _readyIndicator.SetActive(false);
+
+        _readyButton.GetComponent<Image>().color = Color.red;
+    }
+
+    private void DisplayRole()
+    {
+        _introRole.SetActive(true);
+        TextMeshProUGUI roleText = _introRole.GetComponentInChildren<TextMeshProUGUI>();
+
+        if (_playerData.GetPlayerTeam() == PlayerData.Team.Survivors)
+        {
+            roleText.text = "Survivors";
+            roleText.color = Color.green;
+        }
+        else if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        {
+            roleText.text = "Saboteurs";
+            roleText.color = Color.red;
+        }
     }
 
     private void ToggleMap()
@@ -154,77 +164,6 @@ public class PlayerUI : MonoBehaviour
     private void DisplayDeathMessage()
     {
         _deathMessage.SetActive(true);
-    }
-    #endregion
-
-    // ================== Exile UI ==================
-    #region Exile UI
-    public void Vote()
-    {
-        hasVoted = true;
-    }
-
-    public bool HasVoted()
-    {
-        return hasVoted;
-    }
-
-    public void StartExile(ulong[] playerIDList, ExileManager exileManager)
-    {
-        // Dont let dead players vote
-        if (!_playerHealth.IsLiving())
-            return;
-
-        // Clear old stuff
-        foreach (Transform child in _voteArea)
-            Destroy(child.gameObject);
-
-        _closeUIButton.SetActive(false);
-        _exileUI.SetActive(true);
-        hasVoted = false;
-
-        // Add nobody vote
-        ExileVote nobodyVote = Instantiate(_votePrefab, _voteArea).GetComponent<ExileVote>();
-        nobodyVote.Setup(999, "Nobody", exileManager);
-
-        // Add entry for each player
-        foreach (ulong id in playerIDList)
-        {
-            if (id != 999)
-            {
-                // Instantiate a vote box
-                var curVote = Instantiate(_votePrefab, _voteArea).GetComponent<ExileVote>();
-
-                // Setup Vote
-                ulong pID = id;
-                string pName = "Player " + pID.ToString();
-                curVote.Setup(pID, pName, exileManager);
-            }
-        }
-    }
-
-    public void ShowResults(int[] results)
-    {
-        // Dont show dead players (Unless they just died)
-        if (!_exileUI.activeInHierarchy)
-            return;
-
-        _closeUIButton.SetActive(true);
-
-        int i = 0;
-
-        foreach (Transform child in _voteArea)
-        {
-            child.GetComponent<ExileVote>().DisplayResults(results[i]);
-            i++;
-        }
-    }
-
-    // Called when the state transitions.
-    // This matters if the timer ends but players are not done voting.
-    private void CloseExileVote()
-    {
-        _exileUI.SetActive(false);
     }
     #endregion
 }
