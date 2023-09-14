@@ -10,7 +10,7 @@ using UnityEngine;
 
 // Code written following Code Monkey: https://www.youtube.com/watch?v=7glCsF9fv3s&t=13474s
 
-public class ConnectionManager : MonoBehaviour
+public class ConnectionManager : NetworkBehaviour
 {
     // ============== Singleton pattern ==============
     #region Singleton
@@ -85,6 +85,12 @@ public class ConnectionManager : MonoBehaviour
         OnFailedToJoinGame?.Invoke();
     }
 
+    public void Shutdown()
+    {
+        Debug.Log("COMMENING SHUTDOWN");
+
+        NetworkManager.Singleton.Shutdown();
+    }
 
     // ============== OLD ==============
     /*private static async Task Authenticate()

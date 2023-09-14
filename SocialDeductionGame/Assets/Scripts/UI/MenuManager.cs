@@ -12,8 +12,8 @@ public class MenuManager : MonoBehaviour
     private void Awake()
     {
         // Cleanup
-        if (ConnectionManager.Instance != null)
-            Destroy(ConnectionManager.Instance.gameObject);
+        if (NetworkManager.Singleton != null)
+            Destroy(NetworkManager.Singleton.gameObject);
         if (LobbyManager.Instance != null)
             Destroy(LobbyManager.Instance.gameObject);
         if (PlayerConnectionManager.Instance != null)

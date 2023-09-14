@@ -8,6 +8,8 @@ using Unity.Collections;
 
 public class PlayerUI : MonoBehaviour
 {
+    // ================== Variables / Refrences ==================
+    #region Variables / Refrences
     private PlayerData _playerData;
     private PlayerHealth _playerHealth;
 
@@ -23,14 +25,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private GameObject _deathMessage;
     [SerializeField] private Image _healthFlashSprite;
     [SerializeField] private Image _hungerFlashSprite;
-
-    [Header("Exile Vote UI Refrences")]
-    [SerializeField] private GameObject _votePrefab;
-    [SerializeField] private Transform _voteArea;
-    [SerializeField] private GameObject _exileUI;
-    [SerializeField] private GameObject _closeUIButton;
-
-    private bool hasVoted;
+    #endregion
 
     // ================== Setup ==================
     #region Setup

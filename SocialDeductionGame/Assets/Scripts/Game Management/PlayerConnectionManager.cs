@@ -182,8 +182,14 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} disconnected");
         _netNumPlayers.Value--;
+        
+        if(GetPlayerLivingByID(clientID))
+            _netNumLivingPlayers.Value--;
+
         _playerDict.Remove(clientID);
         RemovePlayerFromDictionaryClientRpc(clientID);
+
+        TestAllPlayersReady();
     }
     #endregion
 
@@ -320,18 +326,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         _playerReadyDictionary[clientID] = true;
         ReadyPlayerClientRpc(clientRpcParams);
 
-        // Check if all players ready
-        if (SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
-        {
-            // If in game scene check against number of living players
-            if (_netPlayersReadied.Value >= GetNumLivingPlayers())
-                AllPlayersReady();
-        } else
-        {
-            // Otherwise check against total connected players
-            if (_netPlayersReadied.Value >= GetNumConnectedPlayers())
-                AllPlayersReady();
-        }
+        TestAllPlayersReady();
     }
 
     [ClientRpc]
@@ -384,6 +379,25 @@ public class PlayerConnectionManager : NetworkBehaviour
             _playerReadyDictionary[key] = false;
         }
         UnreadyPlayerClientRpc();
+    }
+
+    private void TestAllPlayersReady()
+    {
+        if (!IsServer) return;
+
+        // Check if all players ready
+        if (SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
+        {
+            // If in game scene check against number of living players
+            if (_netPlayersReadied.Value >= GetNumLivingPlayers())
+                AllPlayersReady();
+        }
+        else
+        {
+            // Otherwise check against total connected players
+            if (_netPlayersReadied.Value >= GetNumConnectedPlayers())
+                AllPlayersReady();
+        }
     }
 
     private void AllPlayersReady()

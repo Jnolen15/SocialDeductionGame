@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 using TMPro;
 
 public class GameOverUI : MonoBehaviour
@@ -41,6 +42,13 @@ public class GameOverUI : MonoBehaviour
 
         // Pause Game
         Time.timeScale = 0;
+    }
+
+    public void ReturnToMainMenu()
+    {
+        ConnectionManager.Instance.Shutdown();
+
+        SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
 
     private void Show()

@@ -12,10 +12,9 @@ public class Menu : NetworkBehaviour
         Application.Quit();
     }
 
-    public void RestartGame()
+    public void ReturnToMenu()
     {
-        if(IsServer)
-            NetworkManager.Singleton.Shutdown();
+        ConnectionManager.Instance.Shutdown();
 
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
