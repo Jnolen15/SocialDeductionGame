@@ -10,6 +10,7 @@ public static class SceneLoader
 
     public enum Scene
     {
+        MainMenu,
         LobbyScene,
         CharacterSelectScene,
         IslandGameScene

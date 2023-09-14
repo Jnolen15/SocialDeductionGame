@@ -17,6 +17,6 @@ public class Menu : NetworkBehaviour
         if(IsServer)
             NetworkManager.Singleton.Shutdown();
 
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
 }
