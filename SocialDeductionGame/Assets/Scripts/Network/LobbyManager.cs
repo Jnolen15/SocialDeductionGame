@@ -220,7 +220,7 @@ public class LobbyManager : MonoBehaviour
 
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation, "dtls"));
 
-            ConnectionManager.Instance.CreateGameTest();
+            ConnectionManager.Instance.CreateGame();
             SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
         }
         catch (LobbyServiceException e)
@@ -242,7 +242,7 @@ public class LobbyManager : MonoBehaviour
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
-            ConnectionManager.Instance.JoinGameTest();
+            ConnectionManager.Instance.JoinGame();
         }
         catch (LobbyServiceException e)
         {
@@ -266,7 +266,7 @@ public class LobbyManager : MonoBehaviour
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
-            ConnectionManager.Instance.JoinGameTest();
+            ConnectionManager.Instance.JoinGame();
         }
         catch (LobbyServiceException e)
         {
@@ -290,7 +290,7 @@ public class LobbyManager : MonoBehaviour
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
-            ConnectionManager.Instance.JoinGameTest();
+            ConnectionManager.Instance.JoinGame();
         }
         catch (LobbyServiceException e)
         {

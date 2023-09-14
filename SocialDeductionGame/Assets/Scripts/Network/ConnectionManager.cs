@@ -31,7 +31,6 @@ public class ConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     private UnityTransport _transport;
-    private const int MaxPlayers = 5;
 
     public delegate void ConnectingAction();
     public static event ConnectingAction OnTryingToJoinGame;
@@ -40,24 +39,16 @@ public class ConnectionManager : NetworkBehaviour
     private void Awake()
     {
         InitializeSingleton();
-
-        /*_transport = FindObjectOfType<UnityTransport>();
-
-        _buttons.SetActive(false);
-
-        await SignInCachedUserAsync();
-
-        _buttons.SetActive(true);*/
     }
 
     // ============== Connections ==============
-    public void CreateGameTest()
+    public void CreateGame()
     {
         NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApproval;
         NetworkManager.Singleton.StartHost();
     }
 
-    public void JoinGameTest()
+    public void JoinGame()
     {
         OnTryingToJoinGame?.Invoke();
 
@@ -91,83 +82,4 @@ public class ConnectionManager : NetworkBehaviour
 
         NetworkManager.Singleton.Shutdown();
     }
-
-    // ============== OLD ==============
-    /*private static async Task Authenticate()
-    {
-        await UnityServices.InitializeAsync();
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
-    }*/
-
-    /*async static Task SignInCachedUserAsync()
-    {
-        await UnityServices.InitializeAsync();
-
-        // Check if a cached player already exists by checking if the session token exists
-        if (!AuthenticationService.Instance.SessionTokenExists)
-        {
-            Debug.Log("Cached Player re-join");
-            return;
-        }
-
-        // Sign in Anonymously
-        // This call will sign in the cached player.
-        try
-        {
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            Debug.Log("Sign in anonymously succeeded!");
-
-            // Shows how to get the playerID
-            Debug.Log($"PlayerID: {AuthenticationService.Instance.PlayerId}");
-        }
-        catch (AuthenticationException ex)
-        {
-            // Compare error code to AuthenticationErrorCodes
-            // Notify the player with the proper error message
-            Debug.LogException(ex);
-        }
-        catch (RequestFailedException ex)
-        {
-            // Compare error code to CommonErrorCodes
-            // Notify the player with the proper error message
-            Debug.LogException(ex);
-        }
-    }*/
-
-    /*public async void CreateGame()
-    {
-        //_buttons.SetActive(false);
-
-        Allocation a = await RelayService.Instance.CreateAllocationAsync(MaxPlayers);
-        _joinCodeText.text = await RelayService.Instance.GetJoinCodeAsync(a.AllocationId);
-
-        _transport.SetHostRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData);
-
-        NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApproval;
-        NetworkManager.Singleton.StartHost();
-
-        SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
-    }*/
-
-
-
-    /*public async void JoinGame()
-    {
-        //_buttons.SetActive(false);
-
-        try
-        {
-            JoinAllocation a = await RelayService.Instance.JoinAllocationAsync(_joinInput.text);
-
-            _transport.SetClientRelayData(a.RelayServer.IpV4, (ushort)a.RelayServer.Port, a.AllocationIdBytes, a.Key, a.ConnectionData, a.HostConnectionData);
-
-            NetworkManager.Singleton.StartClient();
-        }
-        catch
-        {
-            //_buttons.SetActive(true);
-            Debug.LogError("Room with provided join code not found!");
-            return;
-        }
-    }*/
 }
