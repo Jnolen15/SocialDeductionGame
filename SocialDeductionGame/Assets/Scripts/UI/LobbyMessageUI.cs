@@ -12,6 +12,7 @@ public class LobbyMessageUI : MonoBehaviour
     // ============== Setup ==============
     void Start()
     {
+        ConnectionManager.OnTryingToJoinGame += TryingToJoinGameMessage;
         ConnectionManager.OnFailedToJoinGame += FailJoinGameMessage;
         LobbyManager.OnStartCreateLobby += StartCreateLobbyMessage;
         LobbyManager.OnFailCreateLobby += FailCreateLobbyMessage;
@@ -24,6 +25,7 @@ public class LobbyMessageUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        ConnectionManager.OnTryingToJoinGame -= TryingToJoinGameMessage;
         ConnectionManager.OnFailedToJoinGame -= FailJoinGameMessage;
         LobbyManager.OnStartCreateLobby -= StartCreateLobbyMessage;
         LobbyManager.OnFailCreateLobby -= FailCreateLobbyMessage;
@@ -38,6 +40,11 @@ public class LobbyMessageUI : MonoBehaviour
     {
         _reasonText.text = message;
         Show();
+    }
+
+    private void TryingToJoinGameMessage()
+    {
+        DisplayMessage("Connecting...");
     }
 
     private void FailJoinGameMessage()
