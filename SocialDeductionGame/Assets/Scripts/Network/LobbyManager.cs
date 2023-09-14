@@ -32,6 +32,7 @@ public class LobbyManager : MonoBehaviour
     [SerializeField] private bool _enableTestMode;
     private Lobby _joinedLobby;
     private float _hearthbeatTimer;
+    private float _listRefreshTimer;
 
     public delegate void LobbyAction();
     public static event LobbyAction OnStartCreateLobby;
@@ -40,6 +41,9 @@ public class LobbyManager : MonoBehaviour
     public static event LobbyAction OnFailQuickJoin;
     public static event LobbyAction OnStartCodeJoin;
     public static event LobbyAction OnFailCodeJoin;
+
+    public delegate void LobbyListAction(List<Lobby> lobbyList);
+    public static event LobbyListAction OnLobbyListChanged;
 
     // ============== Setup =============
     #region Setup
@@ -76,6 +80,19 @@ public class LobbyManager : MonoBehaviour
     private void Update()
     {
         HandleHeartbeat();
+
+        // Auto-Refresh lobby list
+        if(_joinedLobby == null && AuthenticationService.Instance.IsSignedIn)
+        {
+            _listRefreshTimer -= Time.deltaTime;
+            if (_listRefreshTimer <= 0f)
+            {
+                Debug.Log("Refreshing Lobby List");
+
+                _listRefreshTimer = 5f;
+                ListLobbies();
+            }
+        }
     }
 
     public void HandleHeartbeat()
@@ -95,6 +112,28 @@ public class LobbyManager : MonoBehaviour
     public bool IsLobbyHost()
     {
         return (_joinedLobby != null && _joinedLobby.HostId == AuthenticationService.Instance.PlayerId);
+    }
+
+    private async void ListLobbies()
+    {
+        try
+        {
+            QueryLobbiesOptions queryLobbiesOptions = new QueryLobbiesOptions
+            {
+                Filters = new List<QueryFilter>
+            {
+                new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "0", QueryFilter.OpOptions.GT)
+            },
+            };
+            QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync(queryLobbiesOptions);
+            OnLobbyListChanged?.Invoke(queryResponse.Results);
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError(e);
+        }
+
+
     }
 
     public async void CreateLobby(string lobbyName, bool isPrivate)
@@ -145,6 +184,26 @@ public class LobbyManager : MonoBehaviour
         try
         {
             _joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+
+            ConnectionManager.Instance.JoinGameTest();
+        }
+        catch (LobbyServiceException e)
+        {
+            OnFailCodeJoin?.Invoke();
+            Debug.LogError(e);
+        }
+    }
+
+    public async void JoinWithID(string lobbyID)
+    {
+        if (lobbyID == "")
+            return;
+
+        OnStartCodeJoin?.Invoke();
+
+        try
+        {
+            _joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyID);
 
             ConnectionManager.Instance.JoinGameTest();
         }
