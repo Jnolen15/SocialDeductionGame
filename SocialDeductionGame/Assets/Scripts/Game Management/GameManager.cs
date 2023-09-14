@@ -175,6 +175,9 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color> Progressing State");
 
+        // Unready all players in case state progressed due to time
+        PlayerConnectionManager.Instance.UnreadyAllPlayers();
+
         // Progress to next state, looping back to morning if day over
         _netCurrentGameState.Value++;
         if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)

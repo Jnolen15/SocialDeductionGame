@@ -117,6 +117,9 @@ public class PlayerConnectionManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
     private Dictionary<ulong, bool> _playerReadyDictionary = new();
 
+    public delegate void PlayerDisconnectAction(ulong clientID);
+    public static event PlayerDisconnectAction OnPlayerDisconnect;
+
     public delegate void PlayerReadyAction();
     public static event PlayerReadyAction OnPlayerReady;
     public static event PlayerReadyAction OnPlayerUnready;
@@ -180,16 +183,23 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     private void ClientDisconnected(ulong clientID)
     {
+        // When someone leaves count them as dead
+        RecordPlayerDeathServerRpc(clientID);
+
         Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} disconnected");
         _netNumPlayers.Value--;
-        
-        if(GetPlayerLivingByID(clientID))
-            _netNumLivingPlayers.Value--;
 
+        // Update server and client dictionaries
         _playerDict.Remove(clientID);
         RemovePlayerFromDictionaryClientRpc(clientID);
 
+        // Test for ready again (In case all but player who left were ready)
+        // If player who left is ready, unready them, otherwise they will be counted when they should not
+        if (GetPlayerReadyByID(clientID))
+            UnreadyPlayerByID(clientID);
         TestAllPlayersReady();
+
+        OnPlayerDisconnect?.Invoke(clientID);
     }
     #endregion
 
@@ -369,6 +379,13 @@ public class PlayerConnectionManager : NetworkBehaviour
         OnPlayerUnready?.Invoke();
     }
 
+    public void UnreadyAllPlayers()
+    {
+        if (!IsServer) return;
+
+        UnreadyAllPlayersServerRpc();
+    }
+
     [ServerRpc(RequireOwnership = false)]
     private void UnreadyAllPlayersServerRpc(ServerRpcParams serverRpcParams = default)
     {
@@ -416,6 +433,20 @@ public class PlayerConnectionManager : NetworkBehaviour
     public int GetNumReadyPlayers()
     {
         return _netPlayersReadied.Value;
+    }
+
+    private bool GetPlayerReadyByID(ulong clientID)
+    {
+        return _playerReadyDictionary[clientID];
+    }
+
+    private void UnreadyPlayerByID(ulong clientID)
+    {
+        if (!IsServer)
+            return;
+
+        _netPlayersReadied.Value--;
+        _playerReadyDictionary[clientID] = false;
     }
     #endregion
 
@@ -617,7 +648,9 @@ public class PlayerConnectionManager : NetworkBehaviour
     // Server or Client
     public bool GetPlayerLivingByID(ulong id)
     {
-        return FindPlayerEntry(id).GetPlayerLiving();
+        if (FindPlayerEntry(id) != null)
+            return FindPlayerEntry(id).GetPlayerLiving();
+        else return false;
     }
 
     // Server only

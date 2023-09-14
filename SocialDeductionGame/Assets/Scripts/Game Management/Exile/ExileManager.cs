@@ -56,6 +56,7 @@ public class ExileManager : NetworkBehaviour
         if (IsServer)
         {
             GameManager.OnStateIntro += InitializeExileVotes;
+            PlayerConnectionManager.OnPlayerDisconnect += TestForCompletionOnClientDisconnect;
         }
     }
 
@@ -68,6 +69,7 @@ public class ExileManager : NetworkBehaviour
         if (IsServer)
         {
             GameManager.OnStateIntro -= InitializeExileVotes;
+            PlayerConnectionManager.OnPlayerDisconnect -= TestForCompletionOnClientDisconnect;
         }
     }
     #endregion
@@ -179,9 +181,12 @@ public class ExileManager : NetworkBehaviour
         foreach (Transform exilevote in _voteArea)
         {
             ExileVote vote = exilevote.GetComponent<ExileVote>();
+            // Reset player votes, show if the player is dead or living (or dead if diconnected)
             if(vote.GetVotePlayerID() != 999)
+            {
                 vote.ResetVote(PlayerConnectionManager.Instance.GetPlayerLivingByID(vote.GetVotePlayerID()));
-            else
+            }
+            else // Nobody vote
                 vote.ResetVote(true);
         }
 
@@ -217,6 +222,20 @@ public class ExileManager : NetworkBehaviour
         Debug.Log("<color=yellow>SERVER: </color>" + playerID + "voted for " + VotedID);
 
         // Test if all players have voted
+        TestForVoteCompletetion();
+    }
+
+    private void TestForCompletionOnClientDisconnect(ulong playerID)
+    {
+        Debug.Log("<color=yellow>SERVER: </color> Client disconnected, testing for vote completion");
+        TestForVoteCompletetion();
+    }
+
+    private void TestForVoteCompletetion()
+    {
+        if (!IsServer)
+            return;
+
         if (_netPlayersVoted.Value >= PlayerConnectionManager.Instance.GetNumLivingPlayers())
         {
             Debug.Log("<color=yellow>SERVER: </color> All players have voted");
@@ -225,6 +244,7 @@ public class ExileManager : NetworkBehaviour
             int[] results = new int[_voteList.Count];
             int i = 0;
 
+            // Find highest voted
             ExileVoteEntry dummy = new ExileVoteEntry(888, "dummy");
             ExileVoteEntry curHeighest = dummy;
             ExileVoteEntry prevHeighest = dummy;
@@ -247,14 +267,20 @@ public class ExileManager : NetworkBehaviour
             if (curHeighest.NumVotes == prevHeighest.NumVotes)
                 Debug.Log("<color=yellow>SERVER: </color> Tie for highest vote, no punishement");
             // If nobody highest, no punishement
-            else if(curHeighest.PlayerID == 999)
+            else if (curHeighest.PlayerID == 999)
                 Debug.Log("<color=yellow>SERVER: </color> Nobody voted highest, no punishement");
             // kill highest voted player
             else
             {
                 Debug.Log("<color=yellow>SERVER: </color> Killing " + curHeighest.PlayerName);
-                GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(curHeighest.PlayerID);
-                playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99);
+                if (PlayerConnectionManager.Instance.FindPlayerEntry(curHeighest.PlayerID) != null) 
+                {
+                    GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(curHeighest.PlayerID);
+                    playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99);
+                } else
+                {
+                    Debug.Log("<color=yellow>SERVER: </color> TOP VOTED PLAYER NOT FOUND!");
+                }
             }
 
             // Show Results
