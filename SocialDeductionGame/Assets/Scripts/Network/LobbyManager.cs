@@ -82,15 +82,18 @@ public class LobbyManager : MonoBehaviour
         HandleHeartbeat();
 
         // Auto-Refresh lobby list
-        if(_joinedLobby == null && AuthenticationService.Instance.IsSignedIn)
+        if (!SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
         {
-            _listRefreshTimer -= Time.deltaTime;
-            if (_listRefreshTimer <= 0f)
+            if (_joinedLobby == null && AuthenticationService.Instance.IsSignedIn)
             {
-                Debug.Log("Refreshing Lobby List");
+                _listRefreshTimer -= Time.deltaTime;
+                if (_listRefreshTimer <= 0f)
+                {
+                    Debug.Log("Refreshing Lobby List");
 
-                _listRefreshTimer = 5f;
-                ListLobbies();
+                    _listRefreshTimer = 5f;
+                    ListLobbies();
+                }
             }
         }
     }

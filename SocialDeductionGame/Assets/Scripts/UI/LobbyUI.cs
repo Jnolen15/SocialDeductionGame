@@ -21,7 +21,7 @@ public class LobbyUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        
+        LobbyManager.OnLobbyListChanged -= UpdateLobbyList;
     }
 
     // ============== Functions ==============
@@ -37,7 +37,10 @@ public class LobbyUI : MonoBehaviour
 
     public void LeaveLobby()
     {
-        LobbyManager.Instance.LeaveLobby();
+        if(LobbyManager.Instance.IsLobbyHost())
+            LobbyManager.Instance.DeleteLobby();
+        else
+            LobbyManager.Instance.LeaveLobby();
     }
 
     private void UpdateLobbyList(List<Lobby> lobbyList)
@@ -52,5 +55,10 @@ public class LobbyUI : MonoBehaviour
             GameObject lobbyEntry = Instantiate(_lobbytemplate, _lobbyContainer);
             lobbyEntry.GetComponent<LobbyEntryUI>().Setup(lobby);
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        LeaveLobby();
     }
 }
