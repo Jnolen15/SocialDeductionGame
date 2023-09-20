@@ -101,11 +101,4 @@ public class CardPicker : MonoBehaviour
             _requirementText.SetActive(false);
         }
     }
-
-    // Only used in simplified forrage system
-    public void ReadyPlayer()
-    {
-        Debug.Log("FORRAGE READY");
-        PlayerConnectionManager.Instance.ReadyPlayer();
-    }
 }
