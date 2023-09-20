@@ -29,6 +29,8 @@ public class PlayerData : NetworkBehaviour
         Saboteurs
     }
     private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private int _maxMP = 2;
+    public NetworkVariable<int> _netCurrentMP = new(writePerm: NetworkVariableWritePermission.Server);
 
     // ================== Setup ==================
     #region Setup
@@ -40,6 +42,7 @@ public class PlayerData : NetworkBehaviour
             CardManager.OnCardsGained += GainCards;
             _netTeam.OnValueChanged += UpdateTeamText;
             GameManager.OnStateNight += ShowEventChoices;
+            GameManager.OnStateMorning += ResetMovementPoints;
 
             SetPlayerIDServerRpc();
         } else
@@ -60,6 +63,7 @@ public class PlayerData : NetworkBehaviour
         CardManager.OnCardsGained -= GainCards;
         _netTeam.OnValueChanged -= UpdateTeamText;
         GameManager.OnStateNight -= ShowEventChoices;
+        GameManager.OnStateMorning -= ResetMovementPoints;
     }
 
     private void Start()
@@ -68,7 +72,9 @@ public class PlayerData : NetworkBehaviour
         _playerController = gameObject.GetComponent<PlayerController>();
         _playerHealth = gameObject.GetComponent<PlayerHealth>();
 
-        // TODO: NOT HAVE DIRECT REFRENCES, Use singleton or some other method
+        ResetMovementPoints();
+
+        // TODO: NOT HAVE DIRECT REFRENCES, Use singleton or some other method ?
         GameObject gameMan = GameObject.FindGameObjectWithTag("GameManager");
         _locationManager = gameMan.GetComponent<LocationManager>();
         _nightEventManger = gameMan.GetComponent<EventManager>();
@@ -264,13 +270,21 @@ public class PlayerData : NetworkBehaviour
 
     #endregion
 
-    // ================ Location ================
+    // ================ Location / Movement ================
     #region Location
     // Called when the player chooses a location on their map
     // Or when location change is forced by game manager / location manager
     // Called by button
     public void ChangeLocation(string locationName)
     {
+        if (GetMovementPoints() > 0)
+            SpendMovementPoint();
+        else
+        {
+            Debug.Log("<color=blue>CLIENT: </color>Cannot move, no points!");
+            return;
+        }
+
         LocationManager.LocationName newLocation;
 
         switch (locationName)
@@ -309,6 +323,44 @@ public class PlayerData : NetworkBehaviour
         _locationManager.SetLocation(newLocation);
 
         UpdateLocation(newLocation);
+    }
+
+    // ==== MOVEMENT POINTS ====
+    public void ResetMovementPoints()
+    {
+        ModifyMovementPointsServerRPC(_maxMP, false);
+    }
+
+    public void SpendMovementPoint()
+    {
+        ModifyMovementPointsServerRPC(-1, true);
+    }
+
+    public int GetMovementPoints()
+    {
+        return _netCurrentMP.Value;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ModifyMovementPointsServerRPC(int ammount, bool add)
+    {
+        Debug.Log($"{NetworkManager.Singleton.LocalClientId} had its MP modified by {ammount}");
+
+        // temp for calculations
+        int tempMP = _netCurrentMP.Value;
+
+        if (add)
+            tempMP += ammount;
+        else
+            tempMP = ammount;
+
+        // Clamp MP within bounds
+        if (tempMP < 0)
+            tempMP = 0;
+        else if (tempMP > _maxMP)
+            tempMP = _maxMP;
+
+        _netCurrentMP.Value = tempMP;
     }
     #endregion
 

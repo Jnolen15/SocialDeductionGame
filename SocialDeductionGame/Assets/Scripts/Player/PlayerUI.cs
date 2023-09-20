@@ -22,6 +22,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _healthText;
     [SerializeField] private TextMeshProUGUI _hungerText;
     [SerializeField] private TextMeshProUGUI _nameText;
+    [SerializeField] private TextMeshProUGUI _movementText;
     [SerializeField] private GameObject _deathMessage;
     [SerializeField] private Image _healthFlashSprite;
     [SerializeField] private Image _hungerFlashSprite;
@@ -44,6 +45,7 @@ public class PlayerUI : MonoBehaviour
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
         PlayerHealth.OnDeath += DisplayDeathMessage;
+        _playerData._netCurrentMP.OnValueChanged += UpdateMovement;
     }
 
     private void OnDisable()
@@ -58,6 +60,7 @@ public class PlayerUI : MonoBehaviour
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= DisplayDeathMessage;
+        _playerData._netCurrentMP.OnValueChanged -= UpdateMovement;
     }
     #endregion
 
@@ -118,9 +121,9 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
-    private void ToggleMap()
+    public void ToggleMap()
     {
-        if (!_playerHealth.IsLiving())
+        if (!_playerHealth.IsLiving() || GameManager.Instance.GetCurrentGameState() != GameManager.GameState.Midday)
             return;
 
         _islandMap.SetActive(!_islandMap.activeSelf);
@@ -159,6 +162,11 @@ public class PlayerUI : MonoBehaviour
         _hungerFlashSprite.DOFade(0.8f, 0.25f).OnComplete(() => { _hungerFlashSprite.DOFade(0, 0.25f); });
 
         _hungerText.text = newTotal.ToString();
+    }
+
+    private void UpdateMovement(int prev, int current)
+    {
+        _movementText.text = "Movement: " + current;
     }
 
     private void DisplayDeathMessage()

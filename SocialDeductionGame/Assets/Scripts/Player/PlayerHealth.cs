@@ -183,12 +183,12 @@ public class PlayerHealth : NetworkBehaviour
     private void HealthChanged(int prev, int next)
     {
         int modifiedAmmount = next-prev;
-        OnHealthModified(modifiedAmmount, next);
+        OnHealthModified?.Invoke(modifiedAmmount, next);
     }
 
     private void HungerChanged(float prev, float next)
     {
         float modifiedAmmount = next - prev;
-        OnHungerModified(modifiedAmmount, next);
+        OnHungerModified?.Invoke(modifiedAmmount, next);
     }
 }
