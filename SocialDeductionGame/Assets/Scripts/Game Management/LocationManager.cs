@@ -89,7 +89,7 @@ public class LocationManager : NetworkBehaviour
     }
 
     // Removes player from previous seat location and sets them to the new seat location
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void MoveClientServerRpc(ulong clientID, LocationName oldLocationName, LocationName newLocationName)
     {
         if(oldLocationName == newLocationName)
@@ -113,7 +113,7 @@ public class LocationManager : NetworkBehaviour
 
     // Sets player to new seat location
     // Used at game setup
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void SetClientServerRpc(ulong clientID, LocationName newLocationName)
     {
         // Get location refrence

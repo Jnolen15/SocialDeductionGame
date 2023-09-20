@@ -29,7 +29,7 @@ public class CardPicker : MonoBehaviour
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
         _cardDropTable.ValidateTable();
-        DealCards();
+        //DealCards();
     }
 
     // ============== Functions ==============
