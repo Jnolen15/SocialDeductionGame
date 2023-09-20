@@ -1,61 +1,78 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class LocationManager : MonoBehaviour
+public class LocationManager : NetworkBehaviour
 {
-    // Location gameobject refrences
+    // ============== Variables / Refrences ==============
+    #region Variables / Refrences
     [Header("Locations")]
-    [SerializeField] private GameObject _beachForage;
-    [SerializeField] private GameObject _forestForage;
-    [SerializeField] private GameObject _plateauForage;
+    [SerializeField] private Location _campLocation;
+    [SerializeField] private Location _beachLocation;
+    [SerializeField] private Location _forestLocation;
+    [SerializeField] private Location _plateauLocation;
 
     // Events
-    public delegate void ChangeLocationAction(Location newLocation);
+    public delegate void ChangeLocationAction(LocationName newLocation);
     public static event ChangeLocationAction OnForceLocationChange;
 
     // Location
-    public enum Location
+    public enum LocationName
     {
         Camp,
         Beach,
         Forest,
         Plateau
     }
-    [SerializeField] private Location location;
+    [SerializeField] private LocationName curLocalLocation;
+    #endregion
 
-    // ====================== Location Setting ======================
-    public void SetLocation(Location newLocation)
+    // ============== Location Management ==============
+    #region Location Management
+    // Sets player to camp location.
+    // Called only at the start of the game
+    public void SetInitialLocation()
     {
-        location = newLocation;
-
-        MoveToLocation();
+        Debug.Log("<color=blue>CLIENT: </color>Setting player to camp");
+        OnForceLocationChange?.Invoke(LocationName.Camp);
+        SetClientServerRpc(NetworkManager.Singleton.LocalClientId, LocationName.Camp);
+        MoveToLocation(LocationName.Camp);
     }
 
-    public void ForceLocation(Location newLocation)
+    public void SetLocation(LocationName newLocation)
     {
-        location = newLocation;
-        OnForceLocationChange(newLocation);
-
-        MoveToLocation();
+        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, curLocalLocation, newLocation);
+        MoveToLocation(newLocation);
     }
 
-    private void MoveToLocation()
+    public void ForceLocation(LocationName newLocation)
     {
+        OnForceLocationChange?.Invoke(newLocation);
+
+        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, curLocalLocation, newLocation);
+        MoveToLocation(newLocation);
+    }
+
+    private void MoveToLocation(LocationName newLocation)
+    {
+        curLocalLocation = newLocation;
+
         DisableAllLocations();
 
-        switch (location)
+        switch (curLocalLocation)
         {
-            case Location.Camp:
+            case LocationName.Camp:
+                _campLocation.EnableLocation();
                 break;
-            case Location.Beach:
-                _beachForage.SetActive(true);
+            case LocationName.Beach:
+                _beachLocation.EnableLocation();
                 break;
-            case Location.Forest:
-                _forestForage.SetActive(true);
+            case LocationName.Forest:
+                _forestLocation.EnableLocation();
                 break;
-            case Location.Plateau:
-                _plateauForage.SetActive(true);
+            case LocationName.Plateau:
+                _plateauLocation.EnableLocation();
                 break;
             default:
                 Debug.LogError("MoveToLocation picked default case");
@@ -65,8 +82,64 @@ public class LocationManager : MonoBehaviour
 
     private void DisableAllLocations()
     {
-        _beachForage.SetActive(false);
-        _forestForage.SetActive(false);
-        _plateauForage.SetActive(false);
+        _campLocation.DisableLocation();
+        _beachLocation.DisableLocation();
+        _forestLocation.DisableLocation();
+        _plateauLocation.DisableLocation();
     }
+
+    // Removes player from previous seat location and sets them to the new seat location
+    [ServerRpc]
+    private void MoveClientServerRpc(ulong clientID, LocationName oldLocationName, LocationName newLocationName)
+    {
+        if(oldLocationName == newLocationName)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Old and new locations are the same. Not updating seats");
+            return;
+        }
+
+        // Get location refrences
+        Location oldLocation = GetLocationFromName(oldLocationName);
+        Location newLocation = GetLocationFromName(newLocationName);
+
+        // Remove client from previous location
+        SeatManager seatMan = oldLocation.GetLocationSeatManager();
+        seatMan.ClearSeat(clientID);
+
+        // Assign client to new location
+        seatMan = newLocation.GetLocationSeatManager();
+        seatMan.AssignSeat(clientID);
+    }
+
+    // Sets player to new seat location
+    // Used at game setup
+    [ServerRpc]
+    private void SetClientServerRpc(ulong clientID, LocationName newLocationName)
+    {
+        // Get location refrence
+        Location newLocation = GetLocationFromName(newLocationName);
+
+        // Assign client to new location
+        SeatManager seatMan = newLocation.GetLocationSeatManager();
+        seatMan.AssignSeat(clientID);
+    }
+
+    private Location GetLocationFromName(LocationName locationName)
+    {
+        switch (locationName)
+        {
+            case LocationName.Camp:
+                return _campLocation;
+            case LocationName.Beach:
+                return _beachLocation;
+            case LocationName.Forest:
+                return _forestLocation;
+            case LocationName.Plateau:
+                return _plateauLocation;
+            default:
+                Debug.LogError("MoveToLocation picked default case");
+                return null;
+        }
+    }
+    #endregion
 }

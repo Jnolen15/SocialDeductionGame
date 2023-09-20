@@ -38,6 +38,8 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private bool _testForWin;
     [SerializeField] private bool _doCheats;
 
+    private LocationManager _locationManager;
+
     // ================== Variables ==================
     public enum GameState
     {
@@ -56,6 +58,8 @@ public class GameManager : NetworkBehaviour
     [Header("Net Variables (For Viewing)")]
     [SerializeField] private NetworkVariable<int> _netDay = new(writePerm: NetworkVariableWritePermission.Server);
 
+    private bool _pregameComplete = false;
+
     // ================== Events ==================
     public delegate void ChangeStateAction();
     public static event ChangeStateAction OnStateChange;
@@ -73,11 +77,13 @@ public class GameManager : NetworkBehaviour
     #region Setup
     public override void OnNetworkSpawn()
     {
+        _locationManager = this.GetComponent<LocationManager>();
+
         _netCurrentGameState.OnValueChanged += UpdateGameState;
 
         if (IsServer)
         {
-            PlayerConnectionManager.OnPlayerSetupComplete += ProgressState;
+            PlayerConnectionManager.OnPlayerSetupComplete += PregameComplete;
             PlayerConnectionManager.OnAllPlayersReady += ProgressState;
         }
     }
@@ -88,7 +94,7 @@ public class GameManager : NetworkBehaviour
 
         if (IsServer)
         {
-            PlayerConnectionManager.OnPlayerSetupComplete -= ProgressState;
+            PlayerConnectionManager.OnPlayerSetupComplete -= PregameComplete;
             PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
         }
     }
@@ -99,6 +105,14 @@ public class GameManager : NetworkBehaviour
     private void Update()
     {
         if (!IsServer) return;
+
+        // pregame stall
+        // This is here so that start methods propperly trigger before any more functions are called
+        if (_pregameComplete && _netCurrentGameState.Value == GameState.Pregame)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Pregame stall complete, progressing");
+            ProgressState();
+        }
 
         // State Timers
         switch (_netCurrentGameState.Value)
@@ -169,6 +183,12 @@ public class GameManager : NetworkBehaviour
 
     // ====================== State Management ======================
     #region State Management
+    private void PregameComplete()
+    {
+        Debug.Log("<color=yellow>SERVER: </color> Pregame setup complete, waiting a sec for start methods");
+        _pregameComplete = true;
+    }
+
     private void ProgressState()
     {
         if (!IsServer) return;
@@ -204,6 +224,7 @@ public class GameManager : NetworkBehaviour
                     OnSetup?.Invoke();
                 }
                 OnStateIntro?.Invoke();
+                _locationManager.SetInitialLocation();
                 break;
             case GameState.Morning:
                 if (IsServer)
@@ -219,7 +240,7 @@ public class GameManager : NetworkBehaviour
                 break;
             case GameState.Afternoon:
                 if(IsServer) _netAfternoonTimer.Value = _afternoonTimerMax;
-                this.GetComponent<LocationManager>().ForceLocation(LocationManager.Location.Camp);
+                _locationManager.ForceLocation(LocationManager.LocationName.Camp);
                 OnStateAfternoon?.Invoke();
                 break;
             case GameState.Evening:

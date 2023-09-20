@@ -21,7 +21,7 @@ public class PlayerData : NetworkBehaviour
     // ================== Variables ==================
     public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
-    [SerializeField] private NetworkVariable<LocationManager.Location> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
+    [SerializeField] private NetworkVariable<LocationManager.LocationName> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     [SerializeField] private List<int> _playerDeckIDs = new();
     public enum Team
     {
@@ -36,7 +36,7 @@ public class PlayerData : NetworkBehaviour
     {
         if (IsOwner)
         {
-            LocationManager.OnForceLocationChange += ChangeLocation;
+            LocationManager.OnForceLocationChange += UpdateLocation;
             CardManager.OnCardsGained += GainCards;
             _netTeam.OnValueChanged += UpdateTeamText;
             GameManager.OnStateNight += ShowEventChoices;
@@ -56,7 +56,7 @@ public class PlayerData : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        LocationManager.OnForceLocationChange -= ChangeLocation;
+        LocationManager.OnForceLocationChange -= UpdateLocation;
         CardManager.OnCardsGained -= GainCards;
         _netTeam.OnValueChanged -= UpdateTeamText;
         GameManager.OnStateNight -= ShowEventChoices;
@@ -271,62 +271,44 @@ public class PlayerData : NetworkBehaviour
     // Called by button
     public void ChangeLocation(string locationName)
     {
-        LocationManager.Location newLocation;
+        LocationManager.LocationName newLocation;
 
         switch (locationName)
         {
             case "Camp":
-                newLocation = LocationManager.Location.Camp;
+                newLocation = LocationManager.LocationName.Camp;
                 break;
             case "Beach":
-                newLocation = LocationManager.Location.Beach;
+                newLocation = LocationManager.LocationName.Beach;
                 break;
             case "Forest":
-                newLocation = LocationManager.Location.Forest;
+                newLocation = LocationManager.LocationName.Forest;
                 break;
             case "Plateau":
-                newLocation = LocationManager.Location.Plateau;
+                newLocation = LocationManager.LocationName.Plateau;
                 break;
             default:
                 Debug.LogError("MoveToLocation picked default case, setting camp");
-                newLocation = LocationManager.Location.Camp;
+                newLocation = LocationManager.LocationName.Camp;
                 break;
         }
 
-        ChangeLocationServerRpc(newLocation);
+        ChangeLocation(newLocation);
     }
 
-    // Called by event
-    private void ChangeLocation(LocationManager.Location newLocation)
+    private void UpdateLocation(LocationManager.LocationName location)
     {
-        ChangeLocationServerRpc(newLocation);
-    }
-    
-    [ServerRpc]
-    public void ChangeLocationServerRpc(LocationManager.Location location, ServerRpcParams serverRpcParams = default)
-    {
-        // Get client data
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientId }
-            }
-        };
-
-        ChangeLocationClientRpc(location, clientRpcParams);
-    }
-
-    [ClientRpc]
-    public void ChangeLocationClientRpc(LocationManager.Location location, ClientRpcParams clientRpcParams = default)
-    {
-        Debug.Log("Changing player location to " + location.ToString());
+        Debug.Log("Updating player location to " + location.ToString());
 
         _netCurrentLocation.Value = location;
         _playerUI.UpdateLocationText(location.ToString());
+    }
 
-        _locationManager.SetLocation(location);
+    private void ChangeLocation(LocationManager.LocationName newLocation)
+    {
+        _locationManager.SetLocation(newLocation);
+
+        UpdateLocation(newLocation);
     }
     #endregion
 
