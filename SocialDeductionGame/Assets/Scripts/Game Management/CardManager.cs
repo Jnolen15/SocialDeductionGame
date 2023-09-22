@@ -15,13 +15,13 @@ public class CardManager : NetworkBehaviour
     public void GiveCards(int[] cardIDs)
     {
         Debug.Log("Cards Given");
-        OnCardsGained(cardIDs);
+        OnCardsGained?.Invoke(cardIDs);
     }
 
     public void GiveCard(int cardID)
     {
         int[] card = { cardID };
 
-        OnCardsGained(card);
+        OnCardsGained?.Invoke(card);
     }
 }

@@ -20,6 +20,12 @@ public class HandManager : NetworkBehaviour
         if (!IsOwner && !IsServer) enabled = false;
     }
 
+    // ================ Helpers ================
+    public int GetNumCardsHeld()
+    {
+        return _playerDeck.Count;
+    }
+
     // ================ Deck Management ================
     #region Deck Management
 

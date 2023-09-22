@@ -12,6 +12,8 @@ public class PlayerCardManager : NetworkBehaviour
     [SerializeField] private GameObject _cardPlayLocation;
 
     // ================ Variables ================
+    [SerializeField] private int _defaultHandSize;
+    [SerializeField] private NetworkVariable<int> _netHandSize = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private List<int> _playerDeckIDs = new();
 
     // ================ Setup ================
@@ -19,6 +21,11 @@ public class PlayerCardManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         if (!IsOwner && !IsServer) enabled = false;
+
+        if (IsServer)
+        {
+            _netHandSize.Value = _defaultHandSize;
+        }
 
         if (IsOwner)
         {
@@ -54,6 +61,16 @@ public class PlayerCardManager : NetworkBehaviour
         return _playerDeckIDs.Count;
     }
 
+    public int GetNumCardsHeldClient()
+    {
+        return _handManager.GetNumCardsHeld();
+    }
+
+    public int GetNumCardsHeldServer()
+    {
+        return _playerDeckIDs.Count;
+    }
+
     #endregion
 
     // ================ Card Add / Remove ================
@@ -73,6 +90,13 @@ public class PlayerCardManager : NetworkBehaviour
 
         foreach (int id in cardIDs)
         {
+            // Make sure hand is not full
+            if (GetNumCardsHeldServer() >= _netHandSize.Value)
+            {
+                Debug.Log("<color=yellow>SERVER: </color>Player " + clientId + "'s hand is full, cannot add more cards");
+                return;
+            }
+
             // Add to player networked deck
             _playerDeckIDs.Add(id);
 
@@ -85,6 +109,13 @@ public class PlayerCardManager : NetworkBehaviour
     private void GiveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
     {
         Debug.Log($"{NetworkManager.Singleton.LocalClientId} recieved a card with id {cardID}");
+
+        // Make sure hand is not full
+        if (GetNumCardsHeldClient() >= _netHandSize.Value)
+        {
+            Debug.Log("<color=blue>CLIENT: </color>Player " + NetworkManager.Singleton.LocalClientId + "'s hand is full, cannot add more cards");
+            return;
+        }
 
         _handManager.AddCard(cardID);
     }
