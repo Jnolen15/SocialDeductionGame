@@ -15,6 +15,7 @@ public class PlayerCardManager : NetworkBehaviour
     [SerializeField] private int _defaultHandSize;
     [SerializeField] private NetworkVariable<int> _netHandSize = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private List<int> _playerDeckIDs = new();
+    [SerializeField] private bool _discardMode;
 
     // ================ Setup ================
     #region Setup
@@ -59,6 +60,11 @@ public class PlayerCardManager : NetworkBehaviour
     public int GetDeckSize()
     {
         return _playerDeckIDs.Count;
+    }
+
+    public int GetHandSize()
+    {
+        return _netHandSize.Value;
     }
 
     public int GetNumCardsHeldClient()
@@ -122,6 +128,53 @@ public class PlayerCardManager : NetworkBehaviour
     #endregion
 
     #region Card Discard
+    public void EnableDiscard()
+    {
+        _discardMode = true;
+    }
+
+    public void DisableDiscard()
+    {
+        _discardMode = false;
+    }
+
+    [ServerRpc]
+    public void DiscardCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        // Test if networked deck contains the card that is being played
+        if (_playerDeckIDs.Contains(cardID))
+        {
+            Debug.Log($"<color=yellow>SERVER: </color> removed card {cardID} from {clientId}");
+
+            // Remove from player's networked deck
+            _playerDeckIDs.Remove(cardID);
+
+            // Update player client hand
+            RemoveCardClientRpc(cardID, clientRpcParams);
+        }
+        else
+            Debug.LogError($"{cardID} not found in player's networked deck!");
+    }
+
+    // Removes cards from the clients hand
+    [ClientRpc]
+    private void RemoveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
+    {
+        Debug.Log($"{NetworkManager.Singleton.LocalClientId} removing card with ID {cardID}");
+
+        _handManager.RemoveCard(cardID);
+    }
+
     // Discards all cards in players netwworked deck, and Hand Manager local deck
     [ServerRpc]
     public void DiscardHandServerRPC(ServerRpcParams serverRpcParams = default)
@@ -156,6 +209,13 @@ public class PlayerCardManager : NetworkBehaviour
     // Tests if card is played onto a card playable object then calls player data server RPC to play the card
     public void TryCardPlay(Card playedCard)
     {
+        // If over discard zone
+        if (_discardMode)
+        {
+            DiscardCardServerRPC(playedCard.GetCardID());
+            return;
+        }
+
         // Raycast test if card is played on playable object
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 999f, _cardPlayableLayerMask))
@@ -232,15 +292,6 @@ public class PlayerCardManager : NetworkBehaviour
         {
             playedCard.OnPlay(_cardPlayLocation);
         }
-    }
-
-    // Removes cards from the clients hand
-    [ClientRpc]
-    private void RemoveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
-    {
-        Debug.Log($"{NetworkManager.Singleton.LocalClientId} removing card with ID {cardID}");
-
-        _handManager.RemoveCard(cardID);
     }
 
     #endregion
