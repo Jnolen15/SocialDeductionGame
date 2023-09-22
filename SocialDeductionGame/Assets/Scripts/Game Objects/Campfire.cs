@@ -39,18 +39,21 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         _servingsText.text = "Servings: " + _netServingsStored.Value;
     }
 
-    private void OnEnable()
+    private void Start()
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
     }
 
-    private void OnDisable()
+    public override void OnDestroy()
     {
         _netServingsStored.OnValueChanged -= UpdateServingsText;
         GameManager.OnStateMorning -= SetStateExtingushed;
         GameManager.OnStateAfternoon -= SetStateCooking;
         GameManager.OnStateEvening -= SetStateFoodReady;
         GameManager.OnStateNight -= SetStateExtingushed;
+
+        // Always invoked the base 
+        base.OnDestroy();
     }
 
     // ================== Text ==================

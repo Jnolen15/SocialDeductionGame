@@ -25,13 +25,16 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         GameManager.OnStateEvening += ToggleAcceptingCards;
     }
 
-    private void OnDisable()
+    public override void OnDestroy()
     {
         _netCardsInStockpile.OnValueChanged -= UpdateCardsText;
 
         GameManager.OnStateMorning -= ClearAll;
         GameManager.OnStateAfternoon -= ToggleAcceptingCards;
         GameManager.OnStateEvening -= ToggleAcceptingCards;
+
+        // Always invoked the base 
+        base.OnDestroy();
     }
 
     // ================== Text ==================

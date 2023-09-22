@@ -3,34 +3,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CardSelectable : MonoBehaviour
+public class CardSelectable : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    // Refrences
+    // ============= Refrences / Variables =============
     private Card _card;
     private CardPicker _cardPicker;
-    // Variables
-    private bool _cardSelected;
 
+    // ============= Setup =============
     void Start()
     {
         _card = GetComponentInParent<Card>();
         _cardPicker = GetComponentInParent<CardPicker>();
     }
 
+    // ============= Functions =============
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        transform.localScale = Vector3.one;
+    }
+
     public void OnSelect()
     {
-        if (!_cardSelected)
-        {
-            _cardSelected = _cardPicker.SelectCard(_card);
-
-            if (_cardSelected)
-                transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
-        }
-        else
-        {
-            _cardPicker.DeselectCard(_card);
-            _cardSelected = false;
-            transform.localScale = Vector3.one;
-        }
+        _cardPicker.SelectCard(_card);
     }
 }
