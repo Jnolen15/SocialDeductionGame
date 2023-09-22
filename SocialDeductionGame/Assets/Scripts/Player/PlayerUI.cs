@@ -45,7 +45,6 @@ public class PlayerUI : MonoBehaviour
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
         PlayerHealth.OnDeath += DisplayDeathMessage;
-        _playerData._netCurrentMP.OnValueChanged += UpdateMovement;
     }
 
     private void OnDisable()
@@ -60,7 +59,6 @@ public class PlayerUI : MonoBehaviour
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= DisplayDeathMessage;
-        _playerData._netCurrentMP.OnValueChanged -= UpdateMovement;
     }
     #endregion
 
@@ -164,7 +162,7 @@ public class PlayerUI : MonoBehaviour
         _hungerText.text = newTotal.ToString();
     }
 
-    private void UpdateMovement(int prev, int current)
+    public void UpdateMovement(int prev, int current)
     {
         _movementText.text = "Movement: " + current;
     }

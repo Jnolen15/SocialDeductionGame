@@ -8,8 +8,9 @@ using TMPro;
 public class PlayerData : NetworkBehaviour
 {
     // ================== Refrences ==================
+    #region Refrences
     private HandManager _handManager;
-    private PlayerController _playerController;
+    private PlayerCardManager _playerCardManager;
     private PlayerHealth _playerHealth;
     [SerializeField] private PlayerUI _playerUI;
 
@@ -17,12 +18,13 @@ public class PlayerData : NetworkBehaviour
     private EventManager _nightEventManger;
 
     [SerializeField] private TextMeshProUGUI _teamText;
+    #endregion
 
     // ================== Variables ==================
+    #region Variables
     public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
     [SerializeField] private NetworkVariable<LocationManager.LocationName> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
-    [SerializeField] private List<int> _playerDeckIDs = new();
     public enum Team
     {
         Survivors,
@@ -30,7 +32,8 @@ public class PlayerData : NetworkBehaviour
     }
     private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _maxMP = 2;
-    public NetworkVariable<int> _netCurrentMP = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netCurrentMP = new(writePerm: NetworkVariableWritePermission.Server);
+    #endregion
 
     // ================== Setup ==================
     #region Setup
@@ -39,10 +42,12 @@ public class PlayerData : NetworkBehaviour
         if (IsOwner)
         {
             LocationManager.OnForceLocationChange += UpdateLocation;
-            CardManager.OnCardsGained += GainCards;
             _netTeam.OnValueChanged += UpdateTeamText;
+            _netCurrentMP.OnValueChanged += UpdateMovementPointUI;
             GameManager.OnStateNight += ShowEventChoices;
             GameManager.OnStateMorning += ResetMovementPoints;
+
+            gameObject.tag = "Player";
 
             SetPlayerIDServerRpc();
         } else
@@ -60,8 +65,8 @@ public class PlayerData : NetworkBehaviour
         if (!IsOwner) return;
 
         LocationManager.OnForceLocationChange -= UpdateLocation;
-        CardManager.OnCardsGained -= GainCards;
         _netTeam.OnValueChanged -= UpdateTeamText;
+        _netCurrentMP.OnValueChanged -= UpdateMovementPointUI;
         GameManager.OnStateNight -= ShowEventChoices;
         GameManager.OnStateMorning -= ResetMovementPoints;
     }
@@ -69,7 +74,7 @@ public class PlayerData : NetworkBehaviour
     private void Start()
     {
         _handManager = gameObject.GetComponent<HandManager>();
-        _playerController = gameObject.GetComponent<PlayerController>();
+        _playerCardManager = gameObject.GetComponent<PlayerCardManager>();
         _playerHealth = gameObject.GetComponent<PlayerHealth>();
 
         ResetMovementPoints();
@@ -144,132 +149,6 @@ public class PlayerData : NetworkBehaviour
     }
     #endregion
 
-    // ================ Player Deck ================
-    #region Player Deck Functions
-    // Triggered by CardManager's On Card Gained event, adds cards to players hand (server and client)
-    public void GainCards(int[] cardIDs)
-    {
-        DrawCardsServerRPC(cardIDs);
-    }
-    #endregion
-
-    #region Player Deck Helpers
-
-    public int GetDeckSize()
-    {
-        return _playerDeckIDs.Count;
-    }
-
-    #endregion
-
-    // ================ Card Add / Remove ================
-    #region Card Draw
-    [ServerRpc]
-    private void DrawCardsServerRPC(int[] cardIDs, ServerRpcParams serverRpcParams = default)
-    {
-        // Get client data
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientId }
-            }
-        };
-
-        foreach (int id in cardIDs)
-        {
-            // Add to player networked deck
-            _playerDeckIDs.Add(id);
-
-            // Update player hand
-            GiveCardClientRpc(id, clientRpcParams);
-        }
-    }
-
-    [ClientRpc]
-    private void GiveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
-    {
-        Debug.Log($"{NetworkManager.Singleton.LocalClientId} recieved a card with id {cardID}");
-
-        _handManager.AddCard(cardID);
-    }
-    #endregion
-
-    #region Card Discard
-    // Discards all cards in players netwworked deck, and Hand Manager local deck
-    [ServerRpc]
-    public void DiscardHandServerRPC(ServerRpcParams serverRpcParams = default)
-    {
-        // Get client data
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientId }
-            }
-        };
-
-        // Remove all cards from hand
-        _playerDeckIDs.Clear();
-
-        // Update player client hand
-        DiscardHandClientRpc(clientRpcParams);
-    }
-
-    // Removes all cards from the clients hand locally
-    [ClientRpc]
-    private void DiscardHandClientRpc(ClientRpcParams clientRpcParams = default)
-    {
-        _handManager.DiscardHand();
-    }
-    #endregion
-
-    // ================ Card Play ================
-    #region Card Play
-
-    // Test if card is in deck, then removes it and calls player controller to play it
-    [ServerRpc]
-    public void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
-    {
-        // Get client data
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientId }
-            }
-        };
-
-        // Test if networked deck contains the card that is being played
-        if (_playerDeckIDs.Contains(cardID))
-        {
-            // Remove from player's networked deck
-            _playerDeckIDs.Remove(cardID);
-
-            // Update player client hand
-            RemoveCardClientRpc(cardID, clientRpcParams);
-
-            // Play card
-            _playerController.ExecutePlayedCardClientRpc(cardID, clientRpcParams);
-        }
-        else
-            Debug.LogError($"{cardID} not found in player's networked deck!");
-    }
-
-    // Removes cards from the clients hand
-    [ClientRpc]
-    private void RemoveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
-    {
-        Debug.Log($"{NetworkManager.Singleton.LocalClientId} removing card with ID {cardID}");
-
-        _handManager.RemoveCard(cardID);
-    }
-
-    #endregion
-
     // ================ Location / Movement ================
     #region Location
     // Called when the player chooses a location on their map
@@ -341,6 +220,11 @@ public class PlayerData : NetworkBehaviour
         return _netCurrentMP.Value;
     }
 
+    private void UpdateMovementPointUI(int prev, int cur)
+    {
+        _playerUI.UpdateMovement(prev, cur);
+    }
+
     [ServerRpc(RequireOwnership = false)]
     private void ModifyMovementPointsServerRPC(int ammount, bool add)
     {
@@ -365,14 +249,16 @@ public class PlayerData : NetworkBehaviour
     #endregion
 
     // ================ Player Death ================
+    #region OnPlayerDeath
     public void OnPlayerDeath()
     {
         PlayerConnectionManager.Instance.RecordPlayerDeath(GetPlayerID());
 
-        DiscardHandServerRPC();
+        _playerCardManager.DiscardHandServerRPC();
 
         // Deal with ready for this round
         //ReadyPlayer();
         _playerUI.DisableReadyButton();
     }
+    #endregion
 }

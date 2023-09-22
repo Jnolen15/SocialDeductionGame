@@ -6,22 +6,18 @@ using TMPro;
 
 public class HandManager : NetworkBehaviour
 {
-    // Refrences
-    private PlayerData _pData;
+    // Tracks the local verisions of player cards
+    // A list of card's is controlled by the server in player data
+
+    // ================ Refrences / Variables ================
     [SerializeField] private Transform _cardSlot;
 
-    // Data
     [SerializeField] private List<Card> _playerDeck = new();
 
     // ================ Setup ================
     public override void OnNetworkSpawn()
     {
         if (!IsOwner && !IsServer) enabled = false;
-    }
-
-    private void Start()
-    {
-        _pData = gameObject.GetComponent<PlayerData>();
     }
 
     // ================ Deck Management ================

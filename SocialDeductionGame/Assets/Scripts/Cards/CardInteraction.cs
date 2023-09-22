@@ -14,7 +14,7 @@ public class CardInteraction : MonoBehaviour,
     [SerializeField] private GameObject _dragIcon;
     [SerializeField] private Card _card;
     [SerializeField] private HandManager _handManager;
-    [SerializeField] private PlayerController _playerController;
+    [SerializeField] private PlayerCardManager _playerCardManager;
     private GameObject _indicator;
 
     // =============== Setup ===============
@@ -22,7 +22,7 @@ public class CardInteraction : MonoBehaviour,
     {
         _card = this.GetComponentInParent<Card>();
         _handManager = this.GetComponentInParent<HandManager>();
-        _playerController = this.GetComponentInParent<PlayerController>();
+        _playerCardManager = this.GetComponentInParent<PlayerCardManager>();
     }
 
     // =============== Interaction ===============
@@ -46,7 +46,7 @@ public class CardInteraction : MonoBehaviour,
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        _playerController.TryCardPlay(_card);
+        _playerCardManager.TryCardPlay(_card);
 
         Destroy(_indicator);
         _indicator = null;
