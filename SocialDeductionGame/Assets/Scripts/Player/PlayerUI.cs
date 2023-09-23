@@ -23,6 +23,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _hungerText;
     [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private TextMeshProUGUI _movementText;
+    [SerializeField] private TextMeshProUGUI _dangerText;
     [SerializeField] private GameObject _deathMessage;
     [SerializeField] private Image _healthFlashSprite;
     [SerializeField] private Image _hungerFlashSprite;
@@ -165,6 +166,11 @@ public class PlayerUI : MonoBehaviour
     public void UpdateMovement(int prev, int current)
     {
         _movementText.text = "Movement: " + current;
+    }
+
+    public void UpdateDanger(int prev, int current)
+    {
+        _dangerText.text = "Danger Level: " + current;
     }
 
     private void DisplayDeathMessage()

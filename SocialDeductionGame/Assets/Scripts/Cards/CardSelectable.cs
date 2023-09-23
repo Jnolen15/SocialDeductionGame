@@ -7,13 +7,13 @@ public class CardSelectable : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 {
     // ============= Refrences / Variables =============
     private Card _card;
-    private CardPicker _cardPicker;
+    private Forage _cardPicker;
 
     // ============= Setup =============
     void Start()
     {
         _card = GetComponentInParent<Card>();
-        _cardPicker = GetComponentInParent<CardPicker>();
+        _cardPicker = GetComponentInParent<Forage>();
     }
 
     // ============= Functions =============

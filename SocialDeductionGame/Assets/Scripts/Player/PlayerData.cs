@@ -33,6 +33,9 @@ public class PlayerData : NetworkBehaviour
     private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _maxMP = 2;
     [SerializeField] private NetworkVariable<int> _netCurrentMP = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private int _maxDanger = 10;
+    [SerializeField] private int _morningDangerReductionVal = 3;
+    [SerializeField] private NetworkVariable<int> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
     #endregion
 
     // ================== Setup ==================
@@ -44,12 +47,16 @@ public class PlayerData : NetworkBehaviour
             LocationManager.OnForceLocationChange += UpdateLocation;
             _netTeam.OnValueChanged += UpdateTeamText;
             _netCurrentMP.OnValueChanged += UpdateMovementPointUI;
+            _netCurrentDanger.OnValueChanged += UpdateDangerLevelUI;
             GameManager.OnStateNight += ShowEventChoices;
             GameManager.OnStateMorning += ResetMovementPoints;
+            GameManager.OnStateMorning += MorningDangerReduction;
+            Forage.OnDangerIncrement += ModifyDangerLevel;
 
             gameObject.tag = "Player";
 
             SetPlayerIDServerRpc();
+            SetDangerLevel(1);
         } else
         {
             Destroy(_playerUI.gameObject);
@@ -67,8 +74,11 @@ public class PlayerData : NetworkBehaviour
         LocationManager.OnForceLocationChange -= UpdateLocation;
         _netTeam.OnValueChanged -= UpdateTeamText;
         _netCurrentMP.OnValueChanged -= UpdateMovementPointUI;
+        _netCurrentDanger.OnValueChanged -= UpdateDangerLevelUI;
         GameManager.OnStateNight -= ShowEventChoices;
         GameManager.OnStateMorning -= ResetMovementPoints;
+        GameManager.OnStateMorning -= MorningDangerReduction;
+        Forage.OnDangerIncrement -= ModifyDangerLevel;
     }
 
     private void Start()
@@ -245,6 +255,56 @@ public class PlayerData : NetworkBehaviour
             tempMP = _maxMP;
 
         _netCurrentMP.Value = tempMP;
+    }
+    #endregion
+
+    // ================ Danger Level ================
+    #region Danger Level
+    private void UpdateDangerLevelUI(int prev, int cur)
+    {
+        _playerUI.UpdateDanger(prev, cur);
+    }
+
+    public int GetDangerLevel()
+    {
+        return _netCurrentDanger.Value;
+    }
+
+    public void MorningDangerReduction()
+    {
+        ModifyDangerLevelServerRPC(-_morningDangerReductionVal, true);
+    }
+
+    public void ModifyDangerLevel(int ammount)
+    {
+        ModifyDangerLevelServerRPC(ammount, true);
+    }
+
+    public void SetDangerLevel(int ammount)
+    {
+        ModifyDangerLevelServerRPC(ammount, false);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ModifyDangerLevelServerRPC(int ammount, bool add, ServerRpcParams serverRpcParams = default)
+    {
+        Debug.Log($"{NetworkManager.Singleton.LocalClientId} had its danger level incremented by {ammount}");
+
+        // temp for calculations
+        int tempDL = _netCurrentDanger.Value;
+
+        if (add)
+            tempDL += ammount;
+        else
+            tempDL = ammount;
+
+        // Clamp HP within bounds
+        if (tempDL < 1)
+            tempDL = 1;
+        else if (tempDL > _maxDanger)
+            tempDL = _maxDanger;
+
+        _netCurrentDanger.Value = tempDL;
     }
     #endregion
 
