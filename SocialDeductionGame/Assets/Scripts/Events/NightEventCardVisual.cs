@@ -26,7 +26,7 @@ public class NightEventCardVisual : MonoBehaviour
 
         // Setup new
         _heldEventID = eventID;
-        NightEvent eventData = CardDatabase.GetEvent(eventID);
+        NightEvent eventData = CardDatabase.Instance.GetEvent(eventID);
         _eventTitle.text = eventData.GetEventName();
         _eventRequiredNum.text = eventData.GetSuccessPoints(PlayerConnectionManager.Instance.GetNumLivingPlayers()) + " = ";
         _eventConsequences.text = "Fail: " + eventData.GetEventConsequences();

@@ -25,7 +25,7 @@ public class NightEventRecapUI : MonoBehaviour
     {
         _eventCard.Setup(eventID);
 
-        NightEvent nEvent = CardDatabase.GetEvent(eventID);
+        NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
         if (passed)
         {
             if (bonus)

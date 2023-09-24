@@ -69,7 +69,7 @@ public class HandManager : NetworkBehaviour
 
     public void AddCard(int cardID)
     {
-        GameObject newCard = Instantiate(CardDatabase.GetCard(cardID), _handZone);
+        GameObject newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), _handZone);
         newCard.transform.SetAsFirstSibling();
         Card newCardScript = newCard.GetComponent<Card>();
 

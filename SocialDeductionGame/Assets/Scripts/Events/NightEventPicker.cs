@@ -28,7 +28,7 @@ public class NightEventPicker : MonoBehaviour
     public void DealOptions(int prevDayEvent = 0)
     {
         // Get 3 random events then deal them to the UI
-        List<int> randEvents = CardDatabase.GetRandEvents(3, prevDayEvent);
+        List<int> randEvents = CardDatabase.Instance.GetRandEvents(3, prevDayEvent);
 
         foreach (int eventID in randEvents)
         {

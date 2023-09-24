@@ -46,7 +46,7 @@ public class NightEventResults : MonoBehaviour
         // Cards
         foreach (int cardID in cardIDs)
         {
-            Card cardObj = Instantiate(CardDatabase.GetCard(cardID), _cardArea).GetComponent<Card>();
+            Card cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardArea).GetComponent<Card>();
             cardObj.SetupUI();
         }
     }

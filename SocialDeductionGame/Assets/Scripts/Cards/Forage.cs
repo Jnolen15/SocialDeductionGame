@@ -82,7 +82,7 @@ public class Forage : MonoBehaviour
 
     private void SpawnHazard(Hazard.DangerLevel dangerLevel)
     {
-        int randHazardID = CardDatabase.GetRandHazard(dangerLevel);
+        int randHazardID = CardDatabase.Instance.GetRandHazard(dangerLevel);
         HazardCardVisual card = Instantiate(_hazardCardPref, _cardZone).GetComponent<HazardCardVisual>();
 
         card.Setup(randHazardID);
@@ -104,7 +104,7 @@ public class Forage : MonoBehaviour
             int cardID = _cardDropTable.PickCardDrop();
 
             // Put card on screen
-            Card newCard = Instantiate(CardDatabase.GetCard(cardID), _cardZone).GetComponent<Card>();
+            Card newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardZone).GetComponent<Card>();
             newCard.SetupSelectable();
         }
     }

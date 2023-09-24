@@ -107,7 +107,7 @@ public class EventManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void SetNightEventServerRpc(int eventID)
     {
-        if (!CardDatabase.ContainsEvent(eventID))
+        if (!CardDatabase.Instance.ContainsEvent(eventID))
             return;
 
         _netCurrentNightEventID.Value = eventID;
@@ -116,7 +116,7 @@ public class EventManager : NetworkBehaviour
     private void PickRandomEvent()
     {
         Debug.Log($"<color=yellow>SERVER: </color>PICKING RANDOM EVENT");
-        SetNightEventServerRpc(CardDatabase.GetRandEvent(_netPreviousNightEventID.Value));
+        SetNightEventServerRpc(CardDatabase.Instance.GetRandEvent(_netPreviousNightEventID.Value));
     }
 
     [ServerRpc]
@@ -126,7 +126,7 @@ public class EventManager : NetworkBehaviour
         if(_netPreviousNightEventID.Value == _netCurrentNightEventID.Value)
         {
             Debug.Log("<color=yellow>SERVER: </color>Prev and current events are the same, picking random");
-            _netCurrentNightEventID.Value = CardDatabase.GetRandEvent(_netPreviousNightEventID.Value);
+            _netCurrentNightEventID.Value = CardDatabase.Instance.GetRandEvent(_netPreviousNightEventID.Value);
         }
 
         // Set previous event to current event
@@ -175,7 +175,7 @@ public class EventManager : NetworkBehaviour
             return;
 
         // Invoke Night Event
-        NightEvent nEvent = CardDatabase.GetEvent(eventID);
+        NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
 
         if (nEvent)
             nEvent.InvokeEvent();
@@ -198,7 +198,7 @@ public class EventManager : NetworkBehaviour
             return;
 
         // Invoke Night Event Bonus
-        NightEvent nEvent = CardDatabase.GetEvent(eventID);
+        NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
 
         if (nEvent)
             nEvent.InvokeBonus();
@@ -217,7 +217,7 @@ public class EventManager : NetworkBehaviour
             return;
 
         // Get night event
-        NightEvent nEvent = CardDatabase.GetEvent(_netCurrentNightEventID.Value);
+        NightEvent nEvent = CardDatabase.Instance.GetEvent(_netCurrentNightEventID.Value);
         if (!nEvent)
             return;
 
@@ -238,7 +238,7 @@ public class EventManager : NetworkBehaviour
                 Debug.Log("<color=yellow>SERVER: </color>No cards in stockpile");
                 break;
             }
-            GameObject card = CardDatabase.GetCard(cardID);
+            GameObject card = CardDatabase.Instance.GetCard(cardID);
             bool matched = false;
 
             cardIDS[i] = cardID;

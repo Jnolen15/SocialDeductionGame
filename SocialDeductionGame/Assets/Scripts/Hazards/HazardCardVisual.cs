@@ -17,7 +17,7 @@ public class HazardCardVisual : MonoBehaviour
     public void Setup(int hazardID)
     {
         _heldHazardID = hazardID;
-        _hazardData = CardDatabase.GetHazard(hazardID);
+        _hazardData = CardDatabase.Instance.GetHazard(hazardID);
         _hazardTitle.text = _hazardData.GetHazardName();
         _hazardConsequences.text = _hazardData.GetHazardConsequences();
         _hazardType.text = _hazardData.GetHazardType().ToString();

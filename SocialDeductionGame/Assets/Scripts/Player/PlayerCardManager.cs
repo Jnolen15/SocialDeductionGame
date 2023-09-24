@@ -277,7 +277,7 @@ public class PlayerCardManager : NetworkBehaviour
     public void ExecutePlayedCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
     {
         // Instantiate the prefab to play it
-        Card playedCard = Instantiate(CardDatabase.GetCard(cardID), transform).GetComponent<Card>();
+        Card playedCard = Instantiate(CardDatabase.Instance.GetCard(cardID), transform).GetComponent<Card>();
 
         Debug.Log($"{playedCard.GetCardName()} played on {_cardPlayLocation}");
 

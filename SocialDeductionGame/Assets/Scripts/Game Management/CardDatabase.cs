@@ -33,19 +33,17 @@ public class CardDatabase : MonoBehaviour
     private void FillCardIDs()
     {
         Debug.Log("Filling Card IDs");
-        Instance = this;
-        foreach (CardEntry entry in Instance._globalCardList)
+        foreach (CardEntry entry in _globalCardList)
         {
             entry.CardID = entry.CardObj.GetComponent<Card>().GetCardID();
             Debug.Log("Setting Card ID " + entry.CardObj.GetComponent<Card>().GetCardID());
         }
-        Instance = null;
     }
 
     // ===== Card Functions =====
-    public static GameObject GetCard(int cardID)
+    public GameObject GetCard(int cardID)
     {
-        foreach (CardEntry card in Instance._globalCardList)
+        foreach (CardEntry card in _globalCardList)
         {
             if (card.CardID == cardID)
                 return card.CardObj;
@@ -56,9 +54,9 @@ public class CardDatabase : MonoBehaviour
     }
 
     // FOR TESTING: Get a random card from all cards in the DB
-    public static int DrawCard()
+    public int DrawCard()
     {
-        return Instance._globalCardList[Random.Range(0, Instance._globalCardList.Count)].CardID;
+        return _globalCardList[Random.Range(0, _globalCardList.Count)].CardID;
     }
     #endregion
 
@@ -78,19 +76,17 @@ public class CardDatabase : MonoBehaviour
     private void FillEventIDs()
     {
         Debug.Log("Filling Event IDs");
-        Instance = this;
-        foreach (EventEntry entry in Instance._globalEventList)
+        foreach (EventEntry entry in _globalEventList)
         {
             entry.EventID = entry.EventSO.GetEventID();
             Debug.Log("Setting Event ID " + entry.EventSO.GetEventID());
         }
-        Instance = null;
     }
 
     //  ===== Event Functions =====
-    public static bool ContainsEvent(int eventID)
+    public bool ContainsEvent(int eventID)
     {
-        foreach (EventEntry entry in Instance._globalEventList)
+        foreach (EventEntry entry in _globalEventList)
         {
             if (entry.EventID == eventID)
                 return true;
@@ -99,9 +95,9 @@ public class CardDatabase : MonoBehaviour
         return false;
     }
 
-    public static NightEvent GetEvent(int eventID)
+    public NightEvent GetEvent(int eventID)
     {
-        foreach (EventEntry entry in Instance._globalEventList)
+        foreach (EventEntry entry in _globalEventList)
         {
             if (entry.EventID == eventID)
                 return entry.EventSO;
@@ -112,13 +108,13 @@ public class CardDatabase : MonoBehaviour
     }
 
     // Gets 1 random event
-    public static int GetRandEvent(int prevEvent = 0)
+    public int GetRandEvent(int prevEvent = 0)
     {
-        int newEvent = Instance._globalEventList[Random.Range(0, Instance._globalEventList.Count)].EventID;
+        int newEvent = _globalEventList[Random.Range(0, _globalEventList.Count)].EventID;
         int breakoutNum = 0;
         while (newEvent == prevEvent)
         {
-            newEvent = Instance._globalEventList[Random.Range(0, Instance._globalEventList.Count)].EventID;
+            newEvent = _globalEventList[Random.Range(0, _globalEventList.Count)].EventID;
 
             // Emergency breakout
             breakoutNum++;
@@ -133,9 +129,9 @@ public class CardDatabase : MonoBehaviour
     }
 
     // Returns multiple random events, avoiding duplicates
-    public static List<int> GetRandEvents(int num, int prevEvent = 0)
+    public List<int> GetRandEvents(int num, int prevEvent = 0)
     {
-        if (num > Instance._globalEventList.Count)
+        if (num > _globalEventList.Count)
         {
             Debug.LogError("GetRandEvents: Number of entries to pick exceeds the size of the list");
             return null;
@@ -143,7 +139,7 @@ public class CardDatabase : MonoBehaviour
 
         List<int> pickedEvents = new();
         List<EventEntry> eventListCopy = new();
-        eventListCopy.AddRange(Instance._globalEventList);
+        eventListCopy.AddRange(_globalEventList);
 
         for (int i = 0; i < num; i++)
         {
@@ -188,19 +184,17 @@ public class CardDatabase : MonoBehaviour
     private void FillHazardIDs()
     {
         Debug.Log("Filling Hazard IDs");
-        Instance = this;
-        foreach (HazardEntry entry in Instance._globalHazardList)
+        foreach (HazardEntry entry in _globalHazardList)
         {
             entry.HazardID = entry.HazardSO.GetHazardID();
             Debug.Log("Setting Hazard ID " + entry.HazardSO.GetHazardID());
         }
-        Instance = null;
     }
 
     //  ===== Hazard Functions =====
-    public static Hazard GetHazard(int hazardID)
+    public Hazard GetHazard(int hazardID)
     {
-        foreach (HazardEntry entry in Instance._globalHazardList)
+        foreach (HazardEntry entry in _globalHazardList)
         {
             if (entry.HazardID == hazardID)
                 return entry.HazardSO;
@@ -211,14 +205,14 @@ public class CardDatabase : MonoBehaviour
     }
 
     // Gets 1 random hazard
-    public static int GetRandHazard(Hazard.DangerLevel dangerLevel)
+    public int GetRandHazard(Hazard.DangerLevel dangerLevel)
     {
         // FOR NOW JUST REROLLS UNTIL CORRENT TEIR. BUT IN FUTURE HAVE MULTIPLE LISTS? AUTO SORTED ON START
-        HazardEntry newHazard = Instance._globalHazardList[Random.Range(0, Instance._globalHazardList.Count)];
+        HazardEntry newHazard = _globalHazardList[Random.Range(0, _globalHazardList.Count)];
         int breakoutNum = 0;
         while (newHazard.HazardSO.GetHazardDangerLevel() != dangerLevel)
         {
-            newHazard = Instance._globalHazardList[Random.Range(0, Instance._globalHazardList.Count)];
+            newHazard = _globalHazardList[Random.Range(0, _globalHazardList.Count)];
 
             // Emergency breakout
             breakoutNum++;
