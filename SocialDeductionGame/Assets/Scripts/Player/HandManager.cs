@@ -204,5 +204,23 @@ public class HandManager : NetworkBehaviour
             _equipedGearTwo.OnEquip();
         }
     }
+
+    public bool CheckGearTagsFor(CardTag tag)
+    {
+        Debug.Log("Checking gear for tag " + tag);
+        if (_equipedGearOne != null && _equipedGearOne.HasTag(tag))
+        {
+            Debug.Log("Found matching tag in slot 1");
+            return true;
+        }
+        else if (_equipedGearTwo != null && _equipedGearTwo.HasTag(tag))
+        {
+            Debug.Log("Found matching tag in slot 2");
+            return true;
+        }
+
+        Debug.Log("Did not find mathcing tag in either slot");
+        return false;
+    }
     #endregion
 }

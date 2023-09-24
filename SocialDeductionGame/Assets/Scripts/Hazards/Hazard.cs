@@ -25,9 +25,11 @@ public abstract class Hazard : ScriptableObject
         High
     }
     [SerializeField] private DangerLevel _dangerLevel;
+    [SerializeField] private CardTag _preventionTag;
 
 
     // ========== Getters ==========
+    #region Getters
     public int GetHazardID()
     {
         return _hazardID;
@@ -52,11 +54,12 @@ public abstract class Hazard : ScriptableObject
     {
         return _dangerLevel;
     }
+    #endregion
 
     // ========== OVERRIDE CLASSES ==========
-    public virtual void RunHazard()
+    public virtual void RunHazard(HandManager handMan)
     {
-        if (!TestForPrevention())
+        if (!TestForPrevention(handMan))
         {
             Debug.Log("<color=red>HAZARD: </color>Not prevented, invoking consequence");
             InvokeHazardConsequence();
@@ -65,10 +68,12 @@ public abstract class Hazard : ScriptableObject
             Debug.Log("<color=red>HAZARD: </color>Prevented, nothing happen");
     }
 
-    public virtual bool TestForPrevention()
+    public virtual bool TestForPrevention(HandManager handMan)
     {
-        // TODO
         // Tests to see if can be prevented by player gear
+        if (handMan.CheckGearTagsFor(_preventionTag))
+            return true;
+
         return false;
     }
 

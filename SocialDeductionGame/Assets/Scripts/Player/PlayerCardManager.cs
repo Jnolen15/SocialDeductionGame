@@ -405,11 +405,5 @@ public class PlayerCardManager : NetworkBehaviour
         // re-instantiate card
         _handManager.AddGearCard(cardID, gearSlot);
     }
-
-    public CardTag CheckGearTags()
-    {
-        return null;
-    }
-
     #endregion
 }

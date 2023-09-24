@@ -36,8 +36,8 @@ public class HazardCardVisual : MonoBehaviour
         return _heldHazardID;
     }
 
-    public void RunHazard()
+    public void RunHazard(HandManager handMan)
     {
-        _hazardData.RunHazard();
+        _hazardData.RunHazard(handMan);
     }
 }

@@ -16,6 +16,7 @@ public class Forage : MonoBehaviour
     [Header("Refrences")]
     private CardManager _cardManager;
     private PlayerData _playerData;
+    private HandManager _playerHandMan;
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _forageMenu;
     [SerializeField] private GameObject _redealButton;
@@ -37,6 +38,7 @@ public class Forage : MonoBehaviour
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
         _playerData = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>();
+        _playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
         _cardDropTable.ValidateTable();
     }
     #endregion
@@ -57,22 +59,26 @@ public class Forage : MonoBehaviour
         // Test for hazard
         int playerDangerLevel = _playerData.GetDangerLevel();
 
+        // Get hazard teir
         Hazard.DangerLevel dangerLevel = Hazard.DangerLevel.Low;
         if (_tierTwoHazardThreshold < playerDangerLevel && playerDangerLevel <= _tierThreeHazardThreshold)
             dangerLevel = Hazard.DangerLevel.Medium;
         else if (_tierThreeHazardThreshold < playerDangerLevel)
             dangerLevel = Hazard.DangerLevel.High;
 
+        // Roll Hazard chances
         float hazardChance = _dangerLevelDrawChances.Evaluate(playerDangerLevel*0.1f);
         Debug.Log($"<color=blue>CLIENT: </color> Player DL: {playerDangerLevel}, hazard chance: {hazardChance}, hazard level {dangerLevel}. Rolling.");
         float rand = (Random.Range(0, 100)*0.01f);
 
+        // Hazard
         if (hazardChance >= rand)
         {
             Debug.Log($"<color=blue>CLIENT: </color> Rolled: {rand}, hazard encountered!");
             SpawnHazard(dangerLevel);
             return true;
         }
+        // No Hazard
         else
         {
             Debug.Log($"<color=blue>CLIENT: </color> Rolled: {rand}, no hazard!");
@@ -82,11 +88,12 @@ public class Forage : MonoBehaviour
 
     private void SpawnHazard(Hazard.DangerLevel dangerLevel)
     {
+        // Spawn in random hazard
         int randHazardID = CardDatabase.Instance.GetRandHazard(dangerLevel);
-        HazardCardVisual card = Instantiate(_hazardCardPref, _cardZone).GetComponent<HazardCardVisual>();
+        HazardCardVisual hazard = Instantiate(_hazardCardPref, _cardZone).GetComponent<HazardCardVisual>();
+        hazard.Setup(randHazardID);
 
-        card.Setup(randHazardID);
-        card.RunHazard();
+        hazard.RunHazard(_playerHandMan);
 
         OpenHazardUI();
     }
