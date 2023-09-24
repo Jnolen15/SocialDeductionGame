@@ -16,8 +16,13 @@ public class HandManager : NetworkBehaviour
     [SerializeField] private GameObject _cardSlotPref;
 
     [SerializeField] private List<Card> _playerDeck = new();
+    [SerializeField] private Transform _gearSlotOne;
+    [SerializeField] private Transform _gearSlotTwo;
+    [SerializeField] private Gear _equipedGearOne;
+    [SerializeField] private Gear _equipedGearTwo;
 
     // ================ Setup ================
+    #region Setup
     public override void OnNetworkSpawn()
     {
         if (!IsOwner && !IsServer) enabled = false;
@@ -29,8 +34,10 @@ public class HandManager : NetworkBehaviour
 
         SetupHand(_pcm.GetHandSize());
     }
+    #endregion
 
     // ================ Helpers ================
+    #region Helpers
     private void SetupHand(int handLimit)
     {
         for(int i = 0; i < handLimit; i++)
@@ -38,6 +45,36 @@ public class HandManager : NetworkBehaviour
             GameObject newSlot = Instantiate(_cardSlotPref, _handZone);
             newSlot.transform.SetAsFirstSibling();
             _cardSlots.Add(newSlot);
+        }
+    }
+
+    public void UpdateHandSlots(int newSlotCount)
+    {
+        int difference = (newSlotCount - _cardSlots.Count);
+
+        // Increment
+        if (difference >= 1)
+        {
+            Debug.Log("Adding hand slot(s)");
+
+            for (int i = 0; i < difference; i++)
+            {
+                GameObject newSlot = Instantiate(_cardSlotPref, _handZone);
+                newSlot.transform.SetAsFirstSibling();
+                _cardSlots.Add(newSlot);
+            }
+        }
+        // Decrement
+        else if (difference <= -1)
+        {
+            Debug.Log("Removing hand slot(s)");
+
+            Debug.LogError("REMOVING SLOT NOT YET IMPLEMENTED");
+        }
+        // The same
+        else if (difference == 0)
+        {
+            Debug.Log("UpdateHandSlots was called but slot count already the given number");
         }
     }
 
@@ -63,6 +100,7 @@ public class HandManager : NetworkBehaviour
     {
         return _playerDeck.Count;
     }
+    #endregion
 
     // ================ Deck Management ================
     #region Deck Management
@@ -125,5 +163,46 @@ public class HandManager : NetworkBehaviour
         AdjustSlots();
     }
 
+    #endregion
+
+    // ================ Gear Management ================
+    #region Gear Management
+    public void AddGearCard(int cardID, int gearSlot)
+    {
+        GameObject newGear = null;
+        Gear newCardScript = null;
+
+        if (gearSlot == 1)
+        {
+            newGear = Instantiate(CardDatabase.Instance.GetCard(cardID), _gearSlotOne);
+            newCardScript = newGear.GetComponent<Gear>();
+        }
+        else if (gearSlot == 2)
+        {
+            newGear = Instantiate(CardDatabase.Instance.GetCard(cardID), _gearSlotTwo);
+            newCardScript = newGear.GetComponent<Gear>();
+        }
+
+        newCardScript.SetupPlayable();
+        EquipToSlot(gearSlot, newCardScript);
+
+        Debug.Log($"Equiping a gear card {newCardScript.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
+    }
+
+    private void EquipToSlot(int gearSlot, Gear gear)
+    {
+        Debug.Log($"Equiping a gear to slot {gearSlot}");
+
+        if (gearSlot == 1)
+        {
+            _equipedGearOne = gear;
+            _equipedGearOne.OnEquip();
+        }
+        else if (gearSlot == 2)
+        {
+            _equipedGearTwo = gear;
+            _equipedGearTwo.OnEquip();
+        }
+    }
     #endregion
 }

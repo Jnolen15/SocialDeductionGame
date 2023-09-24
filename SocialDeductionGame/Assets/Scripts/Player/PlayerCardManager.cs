@@ -16,6 +16,9 @@ public class PlayerCardManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netHandSize = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private List<int> _playerDeckIDs = new();
     [SerializeField] private bool _discardMode;
+    [SerializeField] private int _playerGearOne;
+    [SerializeField] private int _playerGearTwo;
+    private int _gearSlotHovered;
 
     // ================ Setup ================
     #region Setup
@@ -77,6 +80,36 @@ public class PlayerCardManager : NetworkBehaviour
         return _playerDeckIDs.Count;
     }
 
+    public void IncrementPlayerHandSize(int num)
+    {
+        IncrementPlayerHandSizeServerRpc(num);
+    }
+
+    [ServerRpc]
+    public void IncrementPlayerHandSizeServerRpc(int num, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        _netHandSize.Value += num;
+        Debug.Log($"<color=yellow>SERVER: </color> Incremented player {clientId}'s hand size");
+
+        IncrementPlayerHandSizeClientRpc(clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void IncrementPlayerHandSizeClientRpc(ClientRpcParams clientRpcParams = default)
+    {
+        _handManager.UpdateHandSlots(_netHandSize.Value);
+        Debug.Log("<color=blue>CLIENT: </color> Incremented player hand size");
+    }
     #endregion
 
     // ================ Card Add / Remove ================
@@ -216,6 +249,13 @@ public class PlayerCardManager : NetworkBehaviour
             return;
         }
 
+        // If over gear slot
+        if(_gearSlotHovered != 0)
+        {
+            EquipGear(_gearSlotHovered, playedCard);
+            return;
+        }
+
         // Raycast test if card is played on playable object
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 999f, _cardPlayableLayerMask))
@@ -292,6 +332,83 @@ public class PlayerCardManager : NetworkBehaviour
         {
             playedCard.OnPlay(_cardPlayLocation);
         }
+    }
+
+    #endregion
+
+    // ================ Gear ================
+    #region Gear
+    public void HoveringGearSlot(int gearNum)
+    {
+        _gearSlotHovered = gearNum;
+    }
+
+    public void EndHoveringGearSlot()
+    {
+        _gearSlotHovered = 0;
+    }
+
+    public void EquipGear(int gearSlot, Card card)
+    {
+        if (!card.HasTag("Gear"))
+        {
+            Debug.Log("Card is not gear, can't equip");
+            return;
+        }
+
+        Debug.Log("Attempting to equip gear!");
+
+        if (gearSlot == 1 || gearSlot == 2)
+            EquipGearServerRPC(gearSlot, card.GetCardID());
+        else
+            Debug.Log("Attempting to equip to non-existant gear slot");
+    }
+
+    [ServerRpc]
+    public void EquipGearServerRPC(int gearSlot, int cardID, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        // Test if networked deck contains the card that is being played
+        if (_playerDeckIDs.Contains(cardID))
+        {
+            // Remove from player's networked deck
+            _playerDeckIDs.Remove(cardID);
+
+            // Update player client hand
+            RemoveCardClientRpc(cardID, clientRpcParams);
+
+            // Equip Card
+            if (gearSlot == 1)
+                _playerGearOne = cardID;
+            else if (gearSlot == 2)
+                _playerGearTwo = cardID;
+
+            EquipGearClientRpc(gearSlot, cardID, clientRpcParams);
+        }
+        else
+            Debug.LogError($"{cardID} not found in player's networked deck!");
+    }
+
+    // Instantiates the card prefab then calls its OnPlay function at the played location
+    [ClientRpc]
+    public void EquipGearClientRpc(int gearSlot, int cardID, ClientRpcParams clientRpcParams = default)
+    {
+        // re-instantiate card
+        _handManager.AddGearCard(cardID, gearSlot);
+    }
+
+    public CardTag CheckGearTags()
+    {
+        return null;
     }
 
     #endregion

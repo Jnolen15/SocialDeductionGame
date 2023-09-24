@@ -246,7 +246,7 @@ public class EventManager : NetworkBehaviour
             // Test if card subtype matches Night event subtype requirement list
             foreach (CardTag tag in nEvent.GetRequiredCardTags())
             {
-                if (card.GetComponent<Card>().GetSubTags().Contains(tag))
+                if (card.GetComponent<Card>().HasTag(tag))
                 {
                     matched = true;
                     Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, contained subtag {tag}");

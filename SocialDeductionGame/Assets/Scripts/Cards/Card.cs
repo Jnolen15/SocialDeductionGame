@@ -5,19 +5,19 @@ using UnityEngine;
 public abstract class Card : MonoBehaviour
 {
     [Header("Card ID Type -, Card ---")]
-    [SerializeField] private int _cardID;
+    [SerializeField] protected int _cardID;
 
     [Header("Card Details")]
-    [SerializeField] private string _cardName;
+    [SerializeField] protected string _cardName;
     [TextArea]
-    [SerializeField] private string _cardDescription;
-    [SerializeField] private Sprite _cardArt;
-    [SerializeField] private List<CardTag> _tags;
+    [SerializeField] protected string _cardDescription;
+    [SerializeField] protected Sprite _cardArt;
+    [SerializeField] protected List<CardTag> _tags;
 
     [Header("Card Prefabs")]
-    [SerializeField] private GameObject _cardPlayablePrefab;
-    [SerializeField] private GameObject _cardSelectablePrefab;
-    [SerializeField] private GameObject _cardUIPrefab;
+    [SerializeField] protected GameObject _cardPlayablePrefab;
+    [SerializeField] protected GameObject _cardSelectablePrefab;
+    [SerializeField] protected GameObject _cardUIPrefab;
 
     // ========== Getters ==========
     public int GetCardID()
@@ -56,29 +56,23 @@ public abstract class Card : MonoBehaviour
         return false;
     }
 
-    public List<CardTag> GetSubTags()
-    {
-        return _tags;
-    }
-
-
     // ========== Card Functionality ==========
     // Playable card for in the playerss hand
-    public void SetupPlayable()
+    public virtual void SetupPlayable()
     {
         GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
     }
 
     // Selectable card for foraging
-    public void SetupSelectable()
+    public virtual void SetupSelectable()
     {
         GameObject cardVisual = Instantiate(_cardSelectablePrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
     }
 
     // Visual card for non-interactable UI
-    public void SetupUI()
+    public virtual void SetupUI()
     {
         GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);

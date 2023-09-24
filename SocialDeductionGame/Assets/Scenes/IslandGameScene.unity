@@ -29171,7 +29171,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1298198030}
-  - component: {fileID: 1298198028}
   - component: {fileID: 1298198029}
   m_Layer: 0
   m_Name: CardManager
@@ -29180,25 +29179,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1298198028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1298198027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 325639707
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 0
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
 --- !u!114 &1298198029
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32513,6 +32493,10 @@ MonoBehaviour:
     CardObj: {fileID: 8127116550430777070, guid: a20501a5289c8fb4e92d1bf3c57cd0c2, type: 3}
   - CardID: 3001
     CardObj: {fileID: 8127116550430777070, guid: f2f1f518331c6104f8a98f937957c9b8, type: 3}
+  - CardID: 4001
+    CardObj: {fileID: 8127116550430777070, guid: 384bdfe87f5c5334ca2d835ba0f78a1e, type: 3}
+  - CardID: 4002
+    CardObj: {fileID: 9091030622661736120, guid: c9bc807831acca140897bfb015104e72, type: 3}
   _globalEventList:
   - EventID: 1001
     EventSO: {fileID: 11400000, guid: 7ab8ada28df80f24a8578185ad19188e, type: 2}
