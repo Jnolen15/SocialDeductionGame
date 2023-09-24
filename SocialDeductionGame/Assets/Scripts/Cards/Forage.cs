@@ -10,12 +10,17 @@ public class Forage : MonoBehaviour
     [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
     [SerializeField] private int _cardsDelt;
     [SerializeField] private AnimationCurve _dangerLevelDrawChances;
+    [SerializeField] private int _tierTwoHazardThreshold;
+    [SerializeField] private int _tierThreeHazardThreshold;
 
     [Header("Refrences")]
     private CardManager _cardManager;
     private PlayerData _playerData;
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _forageMenu;
+    [SerializeField] private GameObject _redealButton;
+    [SerializeField] private GameObject _hazardCloseButton;
+    [SerializeField] private GameObject _hazardCardPref;
 
     public delegate void ForageAction(int dangerLevel);
     public static event ForageAction OnDangerIncrement;
@@ -38,19 +43,34 @@ public class Forage : MonoBehaviour
 
     // ============== Functions ==============
     #region Functions
+    public void TestHazardThenDeal()
+    {
+        if (!HazardTest())
+            DealCards();
+    }
+
     public bool HazardTest()
     {
+        // Increase danger with each forage action
+        IncrementDanger(1);
+
+        // Test for hazard
         int playerDangerLevel = _playerData.GetDangerLevel();
+
+        Hazard.DangerLevel dangerLevel = Hazard.DangerLevel.Low;
+        if (_tierTwoHazardThreshold < playerDangerLevel && playerDangerLevel <= _tierThreeHazardThreshold)
+            dangerLevel = Hazard.DangerLevel.Medium;
+        else if (_tierThreeHazardThreshold < playerDangerLevel)
+            dangerLevel = Hazard.DangerLevel.High;
+
         float hazardChance = _dangerLevelDrawChances.Evaluate(playerDangerLevel*0.1f);
-
-        Debug.Log($"<color=blue>CLIENT: </color> Player DL: {playerDangerLevel}, hazrd chance: {hazardChance}. Rolling.");
-
+        Debug.Log($"<color=blue>CLIENT: </color> Player DL: {playerDangerLevel}, hazard chance: {hazardChance}, hazard level {dangerLevel}. Rolling.");
         float rand = (Random.Range(0, 100)*0.01f);
 
         if (hazardChance >= rand)
         {
             Debug.Log($"<color=blue>CLIENT: </color> Rolled: {rand}, hazard encountered!");
-            //TODO: Spawn hazard
+            SpawnHazard(dangerLevel);
             return true;
         }
         else
@@ -60,16 +80,21 @@ public class Forage : MonoBehaviour
         }
     }
 
+    private void SpawnHazard(Hazard.DangerLevel dangerLevel)
+    {
+        int randHazardID = CardDatabase.GetRandHazard(dangerLevel);
+        HazardCardVisual card = Instantiate(_hazardCardPref, _cardZone).GetComponent<HazardCardVisual>();
+
+        card.Setup(randHazardID);
+        card.RunHazard();
+
+        OpenHazardUI();
+    }
+
     public void DealCards()
     {
         if (_cardManager == null)
             _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
-
-        // Test for hazard encounter
-        bool encountered = HazardTest();
-
-        if (encountered)
-            return;
 
         // Pick and deal random foraged cards
         Debug.Log(gameObject.name + " Dealing cards");
@@ -82,16 +107,13 @@ public class Forage : MonoBehaviour
             Card newCard = Instantiate(CardDatabase.GetCard(cardID), _cardZone).GetComponent<Card>();
             newCard.SetupSelectable();
         }
-
-        // Increase danger with each forage action
-        IncrementDanger(1);
     }
 
     public void RedealCards()
     {
         Debug.Log(gameObject.name + " Redealing cards");
         ClearCards();
-        DealCards();
+        TestHazardThenDeal();
     }
 
     public void SelectCard(Card card)
@@ -121,6 +143,20 @@ public class Forage : MonoBehaviour
     {
         Debug.Log("Sending Increment Danger Event " + dangerInc);
         OnDangerIncrement?.Invoke(dangerInc);
+    }
+
+    private void OpenHazardUI()
+    {
+        _hazardCloseButton.SetActive(true);
+        _redealButton.SetActive(false);
+    }
+
+    public void CloseHazardAndDeal()
+    {
+        _hazardCloseButton.SetActive(false);
+        _redealButton.SetActive(true);
+        ClearCards();
+        DealCards();
     }
     #endregion
 }

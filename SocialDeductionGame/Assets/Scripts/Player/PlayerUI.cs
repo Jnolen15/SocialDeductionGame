@@ -171,6 +171,13 @@ public class PlayerUI : MonoBehaviour
     public void UpdateDanger(int prev, int current)
     {
         _dangerText.text = "Danger Level: " + current;
+
+        // Should not hard code this (should have value refrences)
+        _dangerText.color = Color.green;
+        if (4 < current && current <= 8)
+            _dangerText.color = Color.yellow;
+        else if (8 < current)
+            _dangerText.color = Color.red;
     }
 
     private void DisplayDeathMessage()

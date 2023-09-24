@@ -62,7 +62,6 @@ public class CardDatabase : MonoBehaviour
     }
     #endregion
 
-
     // ============== Night Events ==============
     #region Night Events
     //  ===== Global Event List =====
@@ -170,6 +169,67 @@ public class CardDatabase : MonoBehaviour
         }
 
         return pickedEvents;
+    }
+    #endregion
+
+    // ============== Hazards ==============
+    #region Hazards
+    //  ===== Global Hazard List =====
+    [SerializeField] private List<HazardEntry> _globalHazardList = new List<HazardEntry>();
+    [System.Serializable]
+    public class HazardEntry
+    {
+        public int HazardID = 0;
+        public Hazard HazardSO = null;
+    }
+
+    // Automatically fills IDs for all entires with a SO
+    [Button("Fill IDs in hazard list")]
+    private void FillHazardIDs()
+    {
+        Debug.Log("Filling Hazard IDs");
+        Instance = this;
+        foreach (HazardEntry entry in Instance._globalHazardList)
+        {
+            entry.HazardID = entry.HazardSO.GetHazardID();
+            Debug.Log("Setting Hazard ID " + entry.HazardSO.GetHazardID());
+        }
+        Instance = null;
+    }
+
+    //  ===== Hazard Functions =====
+    public static Hazard GetHazard(int hazardID)
+    {
+        foreach (HazardEntry entry in Instance._globalHazardList)
+        {
+            if (entry.HazardID == hazardID)
+                return entry.HazardSO;
+        }
+
+        Debug.LogError($"Hazard with ID:{hazardID} not found in global event list.");
+        return null;
+    }
+
+    // Gets 1 random hazard
+    public static int GetRandHazard(Hazard.DangerLevel dangerLevel)
+    {
+        // FOR NOW JUST REROLLS UNTIL CORRENT TEIR. BUT IN FUTURE HAVE MULTIPLE LISTS? AUTO SORTED ON START
+        HazardEntry newHazard = Instance._globalHazardList[Random.Range(0, Instance._globalHazardList.Count)];
+        int breakoutNum = 0;
+        while (newHazard.HazardSO.GetHazardDangerLevel() != dangerLevel)
+        {
+            newHazard = Instance._globalHazardList[Random.Range(0, Instance._globalHazardList.Count)];
+
+            // Emergency breakout
+            breakoutNum++;
+            if (breakoutNum > 100)
+            {
+                Debug.Log("Breakout of While triggered");
+                break;
+            }
+        }
+
+        return newHazard.HazardID;
     }
     #endregion
 }
