@@ -1569,8 +1569,7 @@ MonoBehaviour:
     m_InternalValue: 0
   _playerDeckIDs: 
   _discardMode: 0
-  _playerGearOne: 0
-  _playerGearTwo: 0
+  _playerGear: 
 --- !u!114 &7396467555879967249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1587,10 +1586,10 @@ MonoBehaviour:
   _cardSlots: []
   _cardSlotPref: {fileID: 8678071956619403002, guid: d5a823d4e6a00a849b077c416274a018, type: 3}
   _playerDeck: []
-  _gearSlotOne: {fileID: 8201176300363492241}
-  _gearSlotTwo: {fileID: 8833414316130185404}
-  _equipedGearOne: {fileID: 0}
-  _equipedGearTwo: {fileID: 0}
+  _gearSlots:
+  - {fileID: 8201176300363492241}
+  - {fileID: 8833414316130185404}
+  _equipedGear: []
 --- !u!1 &3576201149009013763
 GameObject:
   m_ObjectHideFlags: 0
@@ -3251,6 +3250,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gearSlot: 1
+  _equippedGear: {fileID: 0}
 --- !u!1 &5585318997350208905
 GameObject:
   m_ObjectHideFlags: 0
@@ -8180,6 +8180,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gearSlot: 2
+  _equippedGear: {fileID: 0}
 --- !u!1 &7367721788867675712
 GameObject:
   m_ObjectHideFlags: 0

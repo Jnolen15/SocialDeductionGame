@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class HazardCardVisual : MonoBehaviour
 {
     // ================== Refrences ==================
+    [SerializeField] private Image _hazardCard;
+    [SerializeField] private GameObject _slash;
     [SerializeField] private TextMeshProUGUI _hazardTitle;
     [SerializeField] private TextMeshProUGUI _hazardConsequences;
     [SerializeField] private TextMeshProUGUI _hazardType;
@@ -38,6 +41,11 @@ public class HazardCardVisual : MonoBehaviour
 
     public void RunHazard(HandManager handMan)
     {
-        _hazardData.RunHazard(handMan);
+        if (!_hazardData.RunHazard(handMan))
+        {
+            // If this triggerrs the card was prevented
+            _hazardCard.color = Color.grey;
+            _slash.SetActive(true);
+        }
     }
 }

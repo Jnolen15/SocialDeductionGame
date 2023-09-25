@@ -16,10 +16,8 @@ public class HandManager : NetworkBehaviour
     [SerializeField] private GameObject _cardSlotPref;
 
     [SerializeField] private List<Card> _playerDeck = new();
-    [SerializeField] private Transform _gearSlotOne;
-    [SerializeField] private Transform _gearSlotTwo;
-    [SerializeField] private Gear _equipedGearOne;
-    [SerializeField] private Gear _equipedGearTwo;
+    [SerializeField] private Transform[] _gearSlots;
+    [SerializeField] private Gear[] _equipedGear;
 
     // ================ Setup ================
     #region Setup
@@ -31,6 +29,8 @@ public class HandManager : NetworkBehaviour
     private void Start()
     {
         _pcm = this.GetComponent<PlayerCardManager>();
+
+        _equipedGear = new Gear[2];
 
         SetupHand(_pcm.GetHandSize());
     }
@@ -169,58 +169,80 @@ public class HandManager : NetworkBehaviour
     #region Gear Management
     public void AddGearCard(int cardID, int gearSlot)
     {
-        GameObject newGear = null;
-        Gear newCardScript = null;
-
-        if (gearSlot == 1)
+        if(gearSlot != 1 && gearSlot != 2)
         {
-            newGear = Instantiate(CardDatabase.Instance.GetCard(cardID), _gearSlotOne);
-            newCardScript = newGear.GetComponent<Gear>();
-        }
-        else if (gearSlot == 2)
-        {
-            newGear = Instantiate(CardDatabase.Instance.GetCard(cardID), _gearSlotTwo);
-            newCardScript = newGear.GetComponent<Gear>();
+            Debug.LogError($"Given gear slot {gearSlot} out of bounds");
+            return;
         }
 
-        newCardScript.SetupPlayable();
-        EquipToSlot(gearSlot, newCardScript);
+        GameObject newGear = Instantiate(CardDatabase.Instance.GetCard(cardID), _gearSlots[gearSlot-1]);
+        Gear newGearCard = newGear.GetComponent<Gear>();
 
-        Debug.Log($"Equiping a gear card {newCardScript.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
+        newGearCard.SetupPlayable();
+        EquipToSlot(gearSlot, newGearCard);
+
+        Debug.Log($"Equiping a gear card {newGearCard.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
     }
 
     private void EquipToSlot(int gearSlot, Gear gear)
     {
         Debug.Log($"Equiping a gear to slot {gearSlot}");
-
-        if (gearSlot == 1)
-        {
-            _equipedGearOne = gear;
-            _equipedGearOne.OnEquip();
-        }
-        else if (gearSlot == 2)
-        {
-            _equipedGearTwo = gear;
-            _equipedGearTwo.OnEquip();
-        }
+        _equipedGear[gearSlot-1] = gear;
+        _equipedGear[gearSlot - 1].OnEquip();
     }
 
-    public bool CheckGearTagsFor(CardTag tag)
+    public void RemoveGearCard(int gearSlot)
+    {
+        if (gearSlot != 1 && gearSlot != 2)
+        {
+            Debug.LogError($"Given gear slot {gearSlot} out of bounds");
+            return;
+        }
+
+        Gear gearToRemove = _equipedGear[gearSlot - 1];
+        _equipedGear[gearSlot - 1] = null;
+        Destroy(gearToRemove.gameObject);
+
+        Debug.Log($"Unequipping a gear card from slot {gearSlot}");
+    }
+
+    public int CheckGearTagsFor(CardTag tag)
     {
         Debug.Log("Checking gear for tag " + tag);
-        if (_equipedGearOne != null && _equipedGearOne.HasTag(tag))
+
+        foreach (Gear gear in _equipedGear)
         {
-            Debug.Log("Found matching tag in slot 1");
-            return true;
-        }
-        else if (_equipedGearTwo != null && _equipedGearTwo.HasTag(tag))
-        {
-            Debug.Log("Found matching tag in slot 2");
-            return true;
+            if (gear != null && gear.HasTag(tag))
+            {
+                Debug.Log("Found matching tag on " + gear.GetCardName());
+                return gear.GetCardID();
+            }
         }
 
         Debug.Log("Did not find mathcing tag in either slot");
-        return false;
+        return 0;
+    }
+
+    public void UseGear(int gearID)
+    {
+        // Find gear
+        Gear gearUsed = null;
+        foreach (Gear gear in _equipedGear)
+        {
+            if (gear != null && gear.GetCardID() == gearID)
+            {
+                gearUsed = gear;
+                break;
+            }
+        }
+
+        if(gearUsed == null)
+        {
+            Debug.Log($"Gear {gearID} used not found!");
+            return;
+        }
+
+        gearUsed.OnUse();
     }
     #endregion
 }

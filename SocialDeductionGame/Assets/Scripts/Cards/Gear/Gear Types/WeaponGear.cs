@@ -7,6 +7,7 @@ public class WeaponGear : Gear
     // ========== Weapon Details ==========
     [Header("Weapon Stats")]
     [SerializeField] private int _durability;
+    private GearDurabilityVisual _durabilityVisual;
 
     // ========== Weapon Functions ==========
     public int GetDurability()
@@ -17,6 +18,17 @@ public class WeaponGear : Gear
     public void LowerDurability()
     {
         _durability--;
+
+        if(_durability <= 0)
+        {
+            Debug.Log($"Gear {_cardName} has broken!");
+            GetComponentInParent<GearSlot>().Unequip(_cardID);
+        }
+
+        if (_durabilityVisual)
+            _durabilityVisual.UpdateDurability(_durability);
+        else
+            Debug.LogError("_durabilityVisual not assinged!");
     }
 
     // ========== Override Functions ==========
@@ -25,7 +37,8 @@ public class WeaponGear : Gear
     {
         GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
-        cardVisual.GetComponent<GearDurabilityVisual>().Setup(true, _durability);
+        _durabilityVisual = cardVisual.GetComponent<GearDurabilityVisual>();
+        _durabilityVisual.Setup(true, _durability);
     }
 
     // Selectable card for foraging

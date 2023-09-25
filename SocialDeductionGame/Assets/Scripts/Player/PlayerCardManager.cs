@@ -16,8 +16,7 @@ public class PlayerCardManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netHandSize = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private List<int> _playerDeckIDs = new();
     [SerializeField] private bool _discardMode;
-    [SerializeField] private int _playerGearOne;
-    [SerializeField] private int _playerGearTwo;
+    [SerializeField] private int[] _playerGear;
     private int _gearSlotHovered;
 
     // ================ Setup ================
@@ -41,6 +40,8 @@ public class PlayerCardManager : NetworkBehaviour
     {
         _pData = gameObject.GetComponent<PlayerData>();
         _handManager = gameObject.GetComponent<HandManager>();
+
+        _playerGear = new int[2];
     }
 
     public override void OnDestroy()
@@ -367,6 +368,12 @@ public class PlayerCardManager : NetworkBehaviour
     [ServerRpc]
     public void EquipGearServerRPC(int gearSlot, int cardID, ServerRpcParams serverRpcParams = default)
     {
+        if (gearSlot != 1 && gearSlot != 2)
+        {
+            Debug.LogError($"Given gear slot {gearSlot} out of bounds");
+            return;
+        }
+
         // Get client data
         var clientId = serverRpcParams.Receive.SenderClientId;
         ClientRpcParams clientRpcParams = new ClientRpcParams
@@ -376,6 +383,13 @@ public class PlayerCardManager : NetworkBehaviour
                 TargetClientIds = new ulong[] { clientId }
             }
         };
+
+        // Test if gear slot already has something in it
+        if (_playerGear[gearSlot - 1] != 0)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Gear slot is full!");
+            return;
+        }
 
         // Test if networked deck contains the card that is being played
         if (_playerDeckIDs.Contains(cardID))
@@ -387,10 +401,7 @@ public class PlayerCardManager : NetworkBehaviour
             RemoveCardClientRpc(cardID, clientRpcParams);
 
             // Equip Card
-            if (gearSlot == 1)
-                _playerGearOne = cardID;
-            else if (gearSlot == 2)
-                _playerGearTwo = cardID;
+            _playerGear[gearSlot - 1] = cardID;
 
             EquipGearClientRpc(gearSlot, cardID, clientRpcParams);
         }
@@ -404,6 +415,55 @@ public class PlayerCardManager : NetworkBehaviour
     {
         // re-instantiate card
         _handManager.AddGearCard(cardID, gearSlot);
+    }
+
+    public void UnequipGear(int gearSlot, int gearID)
+    {
+        Debug.Log("Attempting to Unequip gear!");
+
+        if (gearSlot == 1 || gearSlot == 2)
+            UnequipGearServerRPC(gearSlot, gearID);
+        else
+            Debug.Log("Attempting to equip to non-existant gear slot");
+    }
+
+    [ServerRpc]
+    public void UnequipGearServerRPC(int gearSlot, int cardID, ServerRpcParams serverRpcParams = default)
+    {
+        if (gearSlot != 1 && gearSlot != 2)
+        {
+            Debug.LogError($"Given gear slot {gearSlot} out of bounds");
+            return;
+        }
+
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        // Test if gear slot contains the card that is being discarded
+        if (_playerGear[gearSlot - 1] == cardID)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Unequiping gear from slot 1");
+            _playerGear[gearSlot - 1] = 0;
+
+            UnequipGearClientRpc(gearSlot, clientRpcParams);
+        }
+        else
+            Debug.Log("<color=yellow>SERVER: </color>Gear slot did not contain card that is being unequipped");
+    }
+
+    // Instantiates the card prefab then calls its OnPlay function at the played location
+    [ClientRpc]
+    public void UnequipGearClientRpc(int gearSlot, ClientRpcParams clientRpcParams = default)
+    {
+        // re-instantiate card
+        _handManager.RemoveGearCard(gearSlot);
     }
     #endregion
 }

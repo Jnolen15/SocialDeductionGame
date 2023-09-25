@@ -22,4 +22,9 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         _pcm.EndHoveringGearSlot();
     }
+
+    public void Unequip(int gearID)
+    {
+        GetComponentInParent<PlayerCardManager>().UnequipGear(_gearSlot, gearID);
+    }
 }

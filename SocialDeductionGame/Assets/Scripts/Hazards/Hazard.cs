@@ -57,22 +57,28 @@ public abstract class Hazard : ScriptableObject
     #endregion
 
     // ========== OVERRIDE CLASSES ==========
-    public virtual void RunHazard(HandManager handMan)
+    public virtual bool RunHazard(HandManager handMan)
     {
         if (!TestForPrevention(handMan))
         {
             Debug.Log("<color=red>HAZARD: </color>Not prevented, invoking consequence");
             InvokeHazardConsequence();
+            return true;
         }
-        else
-            Debug.Log("<color=red>HAZARD: </color>Prevented, nothing happen");
+
+        Debug.Log("<color=red>HAZARD: </color>Prevented, nothing happen");
+        return false;
     }
 
     public virtual bool TestForPrevention(HandManager handMan)
     {
         // Tests to see if can be prevented by player gear
-        if (handMan.CheckGearTagsFor(_preventionTag))
+        int gearID = handMan.CheckGearTagsFor(_preventionTag);
+        if (gearID != 0)
+        {
+            handMan.UseGear(gearID);
             return true;
+        }
 
         return false;
     }
