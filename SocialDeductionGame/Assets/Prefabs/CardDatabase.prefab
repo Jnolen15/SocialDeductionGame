@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8930546550886285078
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8930546550886285081}
+  - component: {fileID: 8930546550886285080}
+  m_Layer: 0
+  m_Name: CardDatabase
+  m_TagString: cardDB
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8930546550886285081
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8930546550886285078}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8930546550886285080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8930546550886285078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1911c92003a83d34abc599b9f39fe78f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _globalCardList:
+  - CardID: 1001
+    CardObj: {fileID: 2180218720445251677, guid: dc9f3e5f2f1557244af0bb1077d194d5, type: 3}
+  - CardID: 1002
+    CardObj: {fileID: 7000249256201084715, guid: 6f9e6f28f7c4ab4498bc9735eb9d49a5, type: 3}
+  - CardID: 1003
+    CardObj: {fileID: 7395155199074010490, guid: 020a6e7d337ac034e82f65883d89656a, type: 3}
+  - CardID: 2001
+    CardObj: {fileID: 8127116550430777070, guid: 6b78df192db1a074daa8874033799b6b, type: 3}
+  - CardID: 2002
+    CardObj: {fileID: 7371062133208053496, guid: 167bc2baf2ee4a345b0c36217fc437d6, type: 3}
+  - CardID: 2003
+    CardObj: {fileID: 4431660846251608710, guid: cbb0943fc8655d346a7a66439d19678a, type: 3}
+  - CardID: 2004
+    CardObj: {fileID: 8127116550430777070, guid: 5e1b44defba36cf419b1d887d5a80fed, type: 3}
+  - CardID: 2005
+    CardObj: {fileID: 8127116550430777070, guid: 2183aadbff831f44fa4488c6b870fe78, type: 3}
+  - CardID: 2006
+    CardObj: {fileID: 8127116550430777070, guid: 0c2da1ebdf2c0e046a1d62a018723ba5, type: 3}
+  - CardID: 2007
+    CardObj: {fileID: 8127116550430777070, guid: 813591c53f6966a43bdb4b788deabc89, type: 3}
+  - CardID: 2008
+    CardObj: {fileID: 8127116550430777070, guid: 11fb6824c327c294488542d034006ff4, type: 3}
+  - CardID: 2009
+    CardObj: {fileID: 8127116550430777070, guid: a20501a5289c8fb4e92d1bf3c57cd0c2, type: 3}
+  - CardID: 3001
+    CardObj: {fileID: 8127116550430777070, guid: f2f1f518331c6104f8a98f937957c9b8, type: 3}
+  - CardID: 4001
+    CardObj: {fileID: 8127116550430777070, guid: 384bdfe87f5c5334ca2d835ba0f78a1e, type: 3}
+  - CardID: 4002
+    CardObj: {fileID: 9091030622661736120, guid: c9bc807831acca140897bfb015104e72, type: 3}
+  - CardID: 4003
+    CardObj: {fileID: 9091030622661736120, guid: 34a4ceaf8cc0d914f9c92c005f9477f1, type: 3}
+  _globalEventList:
+  - EventID: 1001
+    EventSO: {fileID: 11400000, guid: 7ab8ada28df80f24a8578185ad19188e, type: 2}
+  - EventID: 1002
+    EventSO: {fileID: 11400000, guid: 233856c9bafc04c42a279b49d98edb5b, type: 2}
+  - EventID: 1003
+    EventSO: {fileID: 11400000, guid: 46fd6eaed0198e04eaaa2470489ef73e, type: 2}
+  - EventID: 1004
+    EventSO: {fileID: 11400000, guid: eacce7d5d5ee5ba44bb36575152829d3, type: 2}
+  - EventID: 1005
+    EventSO: {fileID: 11400000, guid: d4e46f696d2c41243beca7d8c2310dec, type: 2}
+  _globalHazardList:
+  - HazardID: 1001
+    HazardSO: {fileID: 11400000, guid: d7013cf635e27144ebaee83fdd01f675, type: 2}
+  - HazardID: 1002
+    HazardSO: {fileID: 11400000, guid: 692f98ac031cd6f46b5b45572e2c2d7a, type: 2}
+  - HazardID: 1003
+    HazardSO: {fileID: 11400000, guid: 2ffa30ab5e35c5d4b9713acec14f3236, type: 2}
+  - HazardID: 1004
+    HazardSO: {fileID: 11400000, guid: 78dadb76ca191884d9331997af885bc7, type: 2}
+  - HazardID: 1005
+    HazardSO: {fileID: 11400000, guid: 1f766774b889ba448a49d50edb3afd6a, type: 2}
+  - HazardID: 1006
+    HazardSO: {fileID: 11400000, guid: 0b17a0caa8781604bbd1e6a72035c79e, type: 2}
+  - HazardID: 1007
+    HazardSO: {fileID: 11400000, guid: ffa663f557f6d414bb2f5d78c59aa12b, type: 2}

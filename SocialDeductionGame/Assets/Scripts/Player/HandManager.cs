@@ -38,9 +38,25 @@ public class HandManager : NetworkBehaviour
 
     // ================ Helpers ================
     #region Helpers
+    public int GetNumCardsHeld()
+    {
+        return _playerDeck.Count;
+    }
+
+    public int GetRandomHeldCard()
+    {
+        if (_playerDeck.Count == 0)
+            return 0;
+
+        return _playerDeck[Random.Range(0, _playerDeck.Count)].GetCardID();
+    }
+    #endregion
+
+    //================ Card Slots ================
+    #region Card Slots
     private void SetupHand(int handLimit)
     {
-        for(int i = 0; i < handLimit; i++)
+        for (int i = 0; i < handLimit; i++)
         {
             GameObject newSlot = Instantiate(_cardSlotPref, _handZone);
             newSlot.transform.SetAsFirstSibling();
@@ -80,7 +96,7 @@ public class HandManager : NetworkBehaviour
 
     private void AdjustSlots()
     {
-        foreach(GameObject slot in _cardSlots)
+        foreach (GameObject slot in _cardSlots)
         {
             slot.SetActive(false);
         }
@@ -94,11 +110,6 @@ public class HandManager : NetworkBehaviour
 
             _cardSlots[i].SetActive(true);
         }
-    }
-
-    public int GetNumCardsHeld()
-    {
-        return _playerDeck.Count;
     }
     #endregion
 
@@ -200,6 +211,9 @@ public class HandManager : NetworkBehaviour
         }
 
         Gear gearToRemove = _equipedGear[gearSlot - 1];
+
+        gearToRemove.OnUnequip();
+
         _equipedGear[gearSlot - 1] = null;
         Destroy(gearToRemove.gameObject);
 

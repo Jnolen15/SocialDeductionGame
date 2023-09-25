@@ -7,6 +7,7 @@ public class PlayerCardManager : NetworkBehaviour
 {
     // ================ Refrences ================
     private PlayerData _pData;
+    private PlayerHealth _pHealth;
     private HandManager _handManager;
     [SerializeField] private LayerMask _cardPlayableLayerMask;
     [SerializeField] private GameObject _cardPlayLocation;
@@ -39,6 +40,7 @@ public class PlayerCardManager : NetworkBehaviour
     void Start()
     {
         _pData = gameObject.GetComponent<PlayerData>();
+        _pHealth = gameObject.GetComponent<PlayerHealth>();
         _handManager = gameObject.GetComponent<HandManager>();
 
         _playerGear = new int[2];
@@ -58,6 +60,10 @@ public class PlayerCardManager : NetworkBehaviour
     // Triggered by CardManager's On Card Gained event, adds cards to players hand (server and client)
     public void GainCards(int[] cardIDs)
     {
+        // Maker sure player isn't dead
+        if (!_pHealth.IsLiving())
+            return;
+
         DrawCardsServerRPC(cardIDs);
     }
 
@@ -466,4 +472,29 @@ public class PlayerCardManager : NetworkBehaviour
         _handManager.RemoveGearCard(gearSlot);
     }
     #endregion
+
+    // ================ Other ================
+    public void DiscardRandom(int numToDiscard)
+    {
+        for(int i = 0; i < numToDiscard; i++)
+        {
+            Debug.Log("Discarding Random Card");
+            int cardID = _handManager.GetRandomHeldCard();
+            if(cardID != 0)
+                DiscardCardServerRPC(cardID);
+        }
+    }
+
+    public void LoseGear(int gearSlot)
+    {
+        Debug.Log("Discarding gear in slot " + gearSlot);
+
+        if (gearSlot == 1 || gearSlot == 2)
+        {
+            if(_playerGear[gearSlot-1] != 0)
+                UnequipGear(gearSlot, _playerGear[gearSlot-1]);
+        }
+        else
+            Debug.Log("Attempting to unequip to non-existant gear slot");
+    }
 }

@@ -10,7 +10,7 @@ public abstract class Gear : Card
         Debug.Log($"CARD {_cardName} EQUIPPED");
     }
 
-    public virtual void OnUnquip()
+    public virtual void OnUnequip()
     {
         Debug.Log($"CARD {_cardName} UNEQUIPPED");
     }

@@ -20,7 +20,7 @@ public class BasketGear : Gear
         Debug.Log($"CARD {GetCardName()} EQUIPPED");
     }
 
-    public override void OnUnquip()
+    public override void OnUnequip()
     {
         if (!_pcm)
             _pcm = gameObject.GetComponentInParent<PlayerCardManager>();

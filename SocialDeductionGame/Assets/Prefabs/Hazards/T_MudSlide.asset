@@ -9,13 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7dfd1edd268efc34db3a7aa5ab2e3cc0, type: 3}
-  m_Name: TestHigh
+  m_Script: {fileID: 11500000, guid: 02f64ab01f184d740936901b3072631c, type: 3}
+  m_Name: T_MudSlide
   m_EditorClassIdentifier: 
-  _hazardID: 1003
-  _hazardName: Test Hazard High
-  _hazardConsequences: This is a test of the emergency hazard system
+  _hazardID: 1007
+  _hazardName: Mud Slide
+  _hazardConsequences: Loose your gear
   _hazardArt: {fileID: 0}
-  _hazardType: 0
+  _hazardType: 1
   _dangerLevel: 2
-  _preventionTag: {fileID: 11400000, guid: 35452fc1dbae42a4cb948e670176e4eb, type: 2}
+  _preventionTag: {fileID: 0}
+  _gearSlots: 0100000002000000

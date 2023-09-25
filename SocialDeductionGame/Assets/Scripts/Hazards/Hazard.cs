@@ -5,27 +5,27 @@ using UnityEngine;
 public abstract class Hazard : ScriptableObject
 {
     [Header("Hazard ID")]
-    [SerializeField] private int _hazardID;
+    [SerializeField] protected int _hazardID;
 
     [Header("Hazard Details")]
-    [SerializeField] private string _hazardName;
+    [SerializeField] protected string _hazardName;
     [TextArea]
-    [SerializeField] private string _hazardConsequences;
-    [SerializeField] private Sprite _hazardArt;
+    [SerializeField] protected string _hazardConsequences;
+    [SerializeField] protected Sprite _hazardArt;
     public enum HazardType
     {
         Animal,
         Environmental
     }
-    [SerializeField] private HazardType _hazardType;
+    [SerializeField] protected HazardType _hazardType;
     public enum DangerLevel
     {
         Low,
         Medium,
         High
     }
-    [SerializeField] private DangerLevel _dangerLevel;
-    [SerializeField] private CardTag _preventionTag;
+    [SerializeField] protected DangerLevel _dangerLevel;
+    [SerializeField] protected CardTag _preventionTag;
 
 
     // ========== Getters ==========
@@ -72,6 +72,12 @@ public abstract class Hazard : ScriptableObject
 
     public virtual bool TestForPrevention(HandManager handMan)
     {
+        if(_preventionTag == null)
+        {
+            Debug.Log("Unpreventable hazard!");
+            return false;
+        }
+
         // Tests to see if can be prevented by player gear
         int gearID = handMan.CheckGearTagsFor(_preventionTag);
         if (gearID != 0)
