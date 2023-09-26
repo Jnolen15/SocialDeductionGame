@@ -392,10 +392,12 @@ public class PlayerCardManager : NetworkBehaviour
         };
 
         // Test if gear slot already has something in it
+        bool swap = false;
         if (_playerGear[gearSlot - 1] != 0)
         {
-            Debug.Log("<color=yellow>SERVER: </color>Gear slot is full!");
-            return;
+            Debug.Log("<color=yellow>SERVER: </color>Gear slot is full, Swapping!");
+            _playerGear[gearSlot - 1] = 0;
+            swap = true;
         }
 
         // Test if networked deck contains the card that is being played
@@ -410,7 +412,10 @@ public class PlayerCardManager : NetworkBehaviour
             // Equip Card
             _playerGear[gearSlot - 1] = cardID;
 
-            EquipGearClientRpc(gearSlot, cardID, clientRpcParams);
+            if(!swap)
+                EquipGearClientRpc(gearSlot, cardID, clientRpcParams);
+            else
+                SwapGearClientRpc(gearSlot, cardID, clientRpcParams);
         }
         else
             Debug.LogError($"{cardID} not found in player's networked deck!");
@@ -422,6 +427,13 @@ public class PlayerCardManager : NetworkBehaviour
     {
         // re-instantiate card
         _handManager.AddGearCard(cardID, gearSlot);
+    }
+
+    [ClientRpc]
+    public void SwapGearClientRpc(int gearSlot, int cardID, ClientRpcParams clientRpcParams = default)
+    {
+        // re-instantiate card
+        _handManager.UpdateGearCard(cardID, gearSlot);
     }
 
     public void UnequipGear(int gearSlot, int gearID)

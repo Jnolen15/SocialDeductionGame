@@ -299,6 +299,18 @@ public class HandManager : NetworkBehaviour
 
         Debug.Log($"Equiping a gear card {newGearCard.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
     }
+    
+    public void UpdateGearCard(int cardID, int gearSlot)
+    {
+        if(gearSlot != 1 && gearSlot != 2)
+        {
+            Debug.LogError($"Given gear slot {gearSlot} out of bounds");
+            return;
+        }
+
+        RemoveGearCard(gearSlot);
+        AddGearCard(cardID, gearSlot);
+    }
 
     private void EquipToSlot(int gearSlot, Gear gear)
     {
