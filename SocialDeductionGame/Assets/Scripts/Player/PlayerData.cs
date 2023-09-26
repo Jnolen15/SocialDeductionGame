@@ -31,7 +31,8 @@ public class PlayerData : NetworkBehaviour
         Saboteurs
     }
     private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private int _maxMP = 2;
+    [SerializeField] private int _defaultMP = 2;
+    [SerializeField] private NetworkVariable<int> _netMaxMP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netCurrentMP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _maxDanger = 10;
     [SerializeField] private int _morningDangerReductionVal = 3;
@@ -217,7 +218,13 @@ public class PlayerData : NetworkBehaviour
     // ==== MOVEMENT POINTS ====
     public void ResetMovementPoints()
     {
-        ModifyMovementPointsServerRPC(_maxMP, false);
+        if(_netMaxMP.Value == 0)
+        {
+            Debug.LogError("_netMaxMP == 0!");
+            ModifyMovementPointsServerRPC(_defaultMP, false);
+        }
+
+        ModifyMovementPointsServerRPC(_netMaxMP.Value, false);
     }
 
     public void SpendMovementPoint()
@@ -251,10 +258,33 @@ public class PlayerData : NetworkBehaviour
         // Clamp MP within bounds
         if (tempMP < 0)
             tempMP = 0;
-        else if (tempMP > _maxMP)
-            tempMP = _maxMP;
+        else if (tempMP > _netMaxMP.Value)
+            tempMP = _netMaxMP.Value;
 
         _netCurrentMP.Value = tempMP;
+    }
+
+    public void IncrementPlayerMaxMovement(int num)
+    {
+        IncrementPlayerMaxMovementServerRpc(num);
+    }
+
+    [ServerRpc]
+    private void IncrementPlayerMaxMovementServerRpc(int num, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        _netMaxMP.Value += num;
+        ModifyMovementPointsServerRPC(num, true);
+        Debug.Log($"<color=yellow>SERVER: </color> Incremented player {clientId}'s move speed by {num}");
     }
     #endregion
 
