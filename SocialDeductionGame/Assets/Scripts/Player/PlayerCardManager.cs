@@ -179,7 +179,7 @@ public class PlayerCardManager : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void DiscardCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
+    public void DiscardCardServerRPC(int cardID, bool removeFromHandManager, ServerRpcParams serverRpcParams = default)
     {
         // Get client data
         var clientId = serverRpcParams.Receive.SenderClientId;
@@ -200,7 +200,8 @@ public class PlayerCardManager : NetworkBehaviour
             _playerDeckIDs.Remove(cardID);
 
             // Update player client hand
-            RemoveCardClientRpc(cardID, clientRpcParams);
+            if(removeFromHandManager)
+                RemoveCardClientRpc(cardID, clientRpcParams);
         }
         else
             Debug.LogError($"{cardID} not found in player's networked deck!");
@@ -252,7 +253,7 @@ public class PlayerCardManager : NetworkBehaviour
         // If over discard zone
         if (_discardMode)
         {
-            DiscardCardServerRPC(playedCard.GetCardID());
+            DiscardCardServerRPC(playedCard.GetCardID(), true);
             return;
         }
 
@@ -481,7 +482,7 @@ public class PlayerCardManager : NetworkBehaviour
             Debug.Log("Discarding Random Card");
             int cardID = _handManager.GetRandomHeldCard();
             if(cardID != 0)
-                DiscardCardServerRPC(cardID);
+                DiscardCardServerRPC(cardID, true);
         }
     }
 

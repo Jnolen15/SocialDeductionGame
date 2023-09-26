@@ -8,16 +8,60 @@ public class HandManager : NetworkBehaviour
 {
     // Tracks the local verisions of player cards
     // A list of card's is controlled by the server in player data
-
     // ================ Refrences / Variables ================
     private PlayerCardManager _pcm;
     [SerializeField] private Transform _handZone;
-    [SerializeField] private List<GameObject> _cardSlots = new();
     [SerializeField] private GameObject _cardSlotPref;
-
-    [SerializeField] private List<Card> _playerDeck = new();
+    [SerializeField] private List<CardSlot> _playerDeck = new();
+    [SerializeField] private int numSlotsToDestroy;
     [SerializeField] private Transform[] _gearSlots;
     [SerializeField] private Gear[] _equipedGear;
+    public class CardSlot
+    {
+        public Transform Slot;
+        public Card HeldCard;
+
+        // Constructors
+        public CardSlot()
+        {
+            Slot = null;
+            HeldCard = null;
+        }
+
+        public CardSlot(Transform slot, Card newCard = null)
+        {
+            Slot = slot;
+            HeldCard = newCard;
+        }
+
+        // Methods
+        public Transform GetSlot()
+        {
+            return Slot;
+        }
+        public Card GetCard()
+        {
+            return HeldCard;
+        }
+
+        public bool HasCard()
+        {
+            if (HeldCard)
+                return true;
+
+            return false;
+        }
+
+        public void SlotCard(Card newCard)
+        {
+            HeldCard = newCard;
+        }
+
+        public void RemoveCard()
+        {
+            HeldCard = null;
+        }
+    }
 
     // ================ Setup ================
     #region Setup
@@ -30,8 +74,8 @@ public class HandManager : NetworkBehaviour
     {
         _pcm = this.GetComponent<PlayerCardManager>();
 
+        // Initialize gear and hand
         _equipedGear = new Gear[2];
-
         SetupHand(_pcm.GetHandSize());
     }
     #endregion
@@ -40,15 +84,28 @@ public class HandManager : NetworkBehaviour
     #region Helpers
     public int GetNumCardsHeld()
     {
-        return _playerDeck.Count;
+        int numCards = 0;
+        foreach (CardSlot slot in _playerDeck)
+        {
+            if (slot.HasCard())
+                numCards++;
+        }
+        return numCards;
     }
 
     public int GetRandomHeldCard()
     {
-        if (_playerDeck.Count == 0)
+        List<CardSlot> tempSlotList = new();
+        foreach (CardSlot slot in _playerDeck)
+        {
+            if (slot.HasCard())
+                tempSlotList.Add(slot);
+        }
+
+        if (tempSlotList.Count == 0)
             return 0;
 
-        return _playerDeck[Random.Range(0, _playerDeck.Count)].GetCardID();
+        return tempSlotList[Random.Range(0, tempSlotList.Count)].GetCard().GetCardID();
     }
     #endregion
 
@@ -58,15 +115,59 @@ public class HandManager : NetworkBehaviour
     {
         for (int i = 0; i < handLimit; i++)
         {
-            GameObject newSlot = Instantiate(_cardSlotPref, _handZone);
-            newSlot.transform.SetAsFirstSibling();
-            _cardSlots.Add(newSlot);
+            CreateNewCardSlot();
         }
     }
 
+    private CardSlot CreateNewCardSlot()
+    {
+        Transform newSlotPref = Instantiate(_cardSlotPref, _handZone).transform;
+        CardSlot newSlot = new CardSlot(newSlotPref);
+        _playerDeck.Add(newSlot);
+        return newSlot;
+    }
+
+    private void RemoveCardSlot()
+    {
+        // Note, its possible that this function could cause desync with lag
+        // Since it removes a card locally before confirming with the server it was removed
+        // But for now it works, but keep an eye on it for future
+
+        // Remove the first slot with no card
+        CardSlot slotToRemove = null;
+        foreach (CardSlot slot in _playerDeck)
+        {
+            if (!slot.HasCard())
+            {
+                slotToRemove = slot;
+                break;
+            }
+        }
+        // Remove last card slot if all slots have cards
+        if (slotToRemove == null)
+        {
+            slotToRemove = _playerDeck[_playerDeck.Count - 1];
+        }
+
+        // Remove card
+        if (slotToRemove.HasCard())
+        {
+            Debug.Log("Removing a slot with a card id " + slotToRemove.GetCard().GetCardID());
+
+            _pcm.DiscardCardServerRPC(slotToRemove.GetCard().GetCardID(), false);
+        }
+
+        // Remove slot
+        Debug.Log("Destroying a slot");
+        Destroy(slotToRemove.Slot.gameObject);
+        _playerDeck.Remove(slotToRemove);
+        slotToRemove = null;
+    }
+
+    // Adds or removes card slots
     public void UpdateHandSlots(int newSlotCount)
     {
-        int difference = (newSlotCount - _cardSlots.Count);
+        int difference = (newSlotCount - _playerDeck.Count);
 
         // Increment
         if (difference >= 1)
@@ -75,17 +176,17 @@ public class HandManager : NetworkBehaviour
 
             for (int i = 0; i < difference; i++)
             {
-                GameObject newSlot = Instantiate(_cardSlotPref, _handZone);
-                newSlot.transform.SetAsFirstSibling();
-                _cardSlots.Add(newSlot);
+                CreateNewCardSlot();
             }
         }
         // Decrement
         else if (difference <= -1)
         {
             Debug.Log("Removing hand slot(s)");
-
-            Debug.LogError("REMOVING SLOT NOT YET IMPLEMENTED");
+            for (int i = 0; i < difference*-1; i++)
+            {
+                RemoveCardSlot();
+            }
         }
         // The same
         else if (difference == 0)
@@ -94,67 +195,70 @@ public class HandManager : NetworkBehaviour
         }
     }
 
-    private void AdjustSlots()
+    private void AdjustSlots(CardSlot slot, bool bringFront)
     {
-        foreach (GameObject slot in _cardSlots)
-        {
-            slot.SetActive(false);
-        }
-
-        int diff = _pcm.GetHandSize() - GetNumCardsHeld();
-
-        for (int i = 0; i < diff; i++)
-        {
-            if (i >= _cardSlots.Count)
-                Debug.LogError("Error, not enough card slots");
-
-            _cardSlots[i].SetActive(true);
-        }
+        if(bringFront)
+            slot.GetSlot().SetAsFirstSibling();
+        else
+            slot.GetSlot().SetAsLastSibling();
     }
     #endregion
 
     // ================ Deck Management ================
     #region Deck Management
+    private CardSlot GetFirstEmptySlot()
+    {
+        foreach (CardSlot slot in _playerDeck)
+        {
+            if (!slot.HasCard())
+                return slot;
+        }
+
+        return null;
+    }
 
     public void AddCard(int cardID)
     {
-        GameObject newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), _handZone);
-        newCard.transform.SetAsFirstSibling();
-        Card newCardScript = newCard.GetComponent<Card>();
+        CardSlot slot = GetFirstEmptySlot();
 
-        _playerDeck.Add(newCardScript);
+        if(slot == null)
+        {
+            Debug.LogError("Attempting to add a card with no empty slots left!");
+            return;
+        }
 
-        newCardScript.SetupPlayable();
+        Card newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), slot.GetSlot()).GetComponent<Card>();
+        newCard.SetupPlayable();
+        slot.SlotCard(newCard);
 
-        Debug.Log($"Adding a card {newCardScript.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
+        Debug.Log($"Adding a card {newCard.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
 
-        AdjustSlots();
+        AdjustSlots(slot, true);
     }
 
     public void RemoveCard(int cardID)
     {
         Debug.Log($"Removing card with ID {cardID} from client {NetworkManager.Singleton.LocalClientId}");
 
-        Card cardToRemove = GetCardInDeck(cardID);
+        CardSlot cardToRemove = GetCardInDeck(cardID);
 
-        if (cardToRemove != null)
+        if (cardToRemove.HasCard())
         {
-            _playerDeck.Remove(cardToRemove);
-
-            Destroy(cardToRemove.gameObject);
-
-            AdjustSlots();
+            Destroy(cardToRemove.GetCard().gameObject);
+            cardToRemove.RemoveCard();
+            AdjustSlots(cardToRemove, false);
         }
         else
-            Debug.LogError($"{cardID} not found in player's local hand!");
+            Debug.Log($"{cardID} not found in player's local hand!");
+
     }
 
-    public Card GetCardInDeck(int cardID)
+    public CardSlot GetCardInDeck(int cardID)
     {
-        foreach (Card card in _playerDeck)
+        foreach (CardSlot slot in _playerDeck)
         {
-            if (card.GetCardID() == cardID)
-                return card;
+            if (slot.HasCard() && slot.GetCard().GetCardID() == cardID)
+                return slot;
         }
 
         return null;
@@ -163,15 +267,14 @@ public class HandManager : NetworkBehaviour
     public void DiscardHand()
     {
         // Clear list
-        _playerDeck.Clear();
-
-        // Destroy card objects
-        foreach (Transform child in _handZone)
+        foreach (CardSlot slot in _playerDeck)
         {
-            Destroy(child.gameObject);
+            if (slot.HasCard())
+            {
+                Destroy(slot.GetCard().gameObject);
+                slot.RemoveCard();
+            }
         }
-
-        AdjustSlots();
     }
 
     #endregion
