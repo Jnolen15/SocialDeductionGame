@@ -17,6 +17,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private GameObject _readyButton;
     [SerializeField] private GameObject _readyIndicator;
     [SerializeField] private GameObject _islandMap;
+    [SerializeField] private GameObject _craftingMenu;
     [SerializeField] private GameObject _introRole;
     [SerializeField] private TextMeshProUGUI _locationText;
     [SerializeField] private TextMeshProUGUI _healthText;
@@ -118,6 +119,14 @@ public class PlayerUI : MonoBehaviour
             roleText.text = "Saboteurs";
             roleText.color = Color.red;
         }
+    }
+
+    public void ToggleCraft()
+    {
+        if (!_playerHealth.IsLiving())
+            return;
+
+        _craftingMenu.SetActive(!_craftingMenu.activeSelf);
     }
 
     public void ToggleMap()

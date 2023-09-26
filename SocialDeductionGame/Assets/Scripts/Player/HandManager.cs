@@ -10,6 +10,7 @@ public class HandManager : NetworkBehaviour
     // A list of card's is controlled by the server in player data
     // ================ Refrences / Variables ================
     private PlayerCardManager _pcm;
+    private CraftingUI _craftingUI;
     [SerializeField] private Transform _handZone;
     [SerializeField] private GameObject _cardSlotPref;
     [SerializeField] private List<CardSlot> _playerDeck = new();
@@ -73,6 +74,7 @@ public class HandManager : NetworkBehaviour
     private void Start()
     {
         _pcm = this.GetComponent<PlayerCardManager>();
+        _craftingUI = this.GetComponentInChildren<CraftingUI>();
 
         // Initialize gear and hand
         _equipedGear = new Gear[2];
@@ -362,4 +364,53 @@ public class HandManager : NetworkBehaviour
         gearUsed.OnUse();
     }
     #endregion
+
+    // ================ Crafting ================
+    public void TryCraft(List<CardTag> requiredTags)
+    {
+        List<CardTag> tempTagList = requiredTags;
+        List<int> cardIds = new();
+        //int[] cardIds = new int[requiredTags.Count];
+
+        Debug.Log("<color=blue>CLIENT: </color>Attempting to craft, searching local deck for required tags");
+
+        // Look for them in local hand, then verify them in server
+        foreach (CardSlot slot in _playerDeck)
+        {
+            if (slot.HasCard() && tempTagList.Count != 0)
+            {
+                foreach(CardTag tag in tempTagList)
+                {
+                    if (slot.GetCard().HasTag(tag))
+                    {
+                        Debug.Log($"<color=blue>CLIENT: </color>Card {slot.GetCard().GetCardName()} had tag {tag}");
+                        cardIds.Add(slot.GetCard().GetCardID());
+                        tempTagList.Remove(tag);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Found all tags
+        if(tempTagList.Count == 0)
+        {
+            Debug.Log($"<color=blue>CLIENT: </color>Found all needed cards! Validating");
+            _pcm.ValidateAndDiscardCardsServerRpc(cardIds.ToArray());
+        }
+        else
+        {
+            Debug.Log($"<color=blue>CLIENT: </color>Player does not have needed cards");
+            CraftResults(false);
+        }
+    }
+
+    public void CraftResults(bool crafted)
+    {
+        if(!_craftingUI)
+            _craftingUI = this.GetComponentInChildren<CraftingUI>();
+
+        Debug.Log("<color=blue>CLIENT: </color>Crafted = " + crafted);
+        _craftingUI.Craft(crafted);
+    }
 }

@@ -474,6 +474,51 @@ public class PlayerCardManager : NetworkBehaviour
     }
     #endregion
 
+    // ================ Crafting ================
+    // This function is used when crafting and only called from Hand Manager
+    [ServerRpc]
+    public void ValidateAndDiscardCardsServerRpc(int[] cardIds, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        Debug.Log("<color=yellow>SERVER: </color>Verifying player has cards for crafting");
+
+        // Test if client has cards
+        bool hasCards = true;
+        List<int> cardIDs = new();
+        foreach(int id in cardIds)
+        {
+            if (_playerDeckIDs.Contains(id))
+                cardIDs.Add(id);
+            else
+                hasCards = false;
+        }
+
+        // If does have all cards, discard them
+        if (hasCards)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Verified player had cards, discarding");
+            foreach (int id in cardIDs)
+                DiscardCardServerRPC(id, true);
+        }
+
+        ValidateAndDiscardCardsClientRpc(hasCards, clientRpcParams);
+    }
+
+    [ClientRpc]
+    private void ValidateAndDiscardCardsClientRpc(bool crafted, ClientRpcParams clientRpcParams = default)
+    {
+        _handManager.CraftResults(crafted);
+    }
+
     // ================ Other ================
     public void DiscardRandom(int numToDiscard)
     {
