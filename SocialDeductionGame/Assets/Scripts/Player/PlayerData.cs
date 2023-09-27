@@ -167,6 +167,10 @@ public class PlayerData : NetworkBehaviour
     // Called by button
     public void ChangeLocation(string locationName)
     {
+        // Dont move if already at the same location
+        if (_netCurrentLocation.Value.ToString() == locationName)
+            return;
+
         if (GetMovementPoints() > 0)
             SpendMovementPoint();
         else

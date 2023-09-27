@@ -165,5 +165,11 @@ public class Forage : MonoBehaviour
         ClearCards();
         DealCards();
     }
+
+    public void Shutdown()
+    {
+        ClearCards();
+        CloseForageMenu();
+    }
     #endregion
 }

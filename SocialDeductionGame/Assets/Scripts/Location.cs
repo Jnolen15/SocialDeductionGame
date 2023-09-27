@@ -9,6 +9,7 @@ public class Location : MonoBehaviour
     [SerializeField] private GameObject _locationContent;
     [SerializeField] private GameObject _locationDecor;
     [SerializeField] private Transform _locationCamPos;
+    [SerializeField] private Forage _forage;
 
     private SeatManager _seatManager;
     private Camera _mainCam;
@@ -35,8 +36,19 @@ public class Location : MonoBehaviour
         _mainCam.transform.rotation = _locationCamPos.localToWorldMatrix.rotation;
     }
 
+    public void LocationShutdown()
+    {
+        if (!_forage)
+            return;
+
+        Debug.Log("Shutting down location " + gameObject.name);
+        _forage.Shutdown();
+    }
+
     public void DisableLocation()
     {
+        LocationShutdown();
+
         _locationContent.SetActive(false);
         _locationDecor.SetActive(false);
     }
