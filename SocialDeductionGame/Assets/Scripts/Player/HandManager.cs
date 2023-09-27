@@ -95,8 +95,9 @@ public class HandManager : NetworkBehaviour
         return numCards;
     }
 
-    public int GetRandomHeldCard()
+    public List<int> GetRandomHeldCards(int num)
     {
+        // Make a temp list of only slots with cards
         List<CardSlot> tempSlotList = new();
         foreach (CardSlot slot in _playerDeck)
         {
@@ -104,10 +105,28 @@ public class HandManager : NetworkBehaviour
                 tempSlotList.Add(slot);
         }
 
-        if (tempSlotList.Count == 0)
-            return 0;
+        // Return list
+        List<int> randomCards = new();
 
-        return tempSlotList[Random.Range(0, tempSlotList.Count)].GetCard().GetCardID();
+        // If no cards
+        if (tempSlotList.Count == 0)
+            return randomCards;
+
+        // Fill randomCards
+        for (int i = 0; i < num; i++)
+        {
+            if(tempSlotList.Count <= 0)
+            {
+                Debug.Log("Had less cards than the random ammount given");
+                break;
+            }
+
+            CardSlot randSlot = tempSlotList[Random.Range(0, tempSlotList.Count)];
+            randomCards.Add(randSlot.GetCard().GetCardID());
+            tempSlotList.Remove(randSlot);
+        }
+
+        return randomCards;
     }
     #endregion
 
@@ -155,8 +174,8 @@ public class HandManager : NetworkBehaviour
         if (slotToRemove.HasCard())
         {
             Debug.Log("Removing a slot with a card id " + slotToRemove.GetCard().GetCardID());
-
-            _pcm.DiscardCardServerRPC(slotToRemove.GetCard().GetCardID(), false);
+            int[] toDiscard = new int[] { slotToRemove.GetCard().GetCardID() };
+            _pcm.DiscardCardsServerRPC(toDiscard, false);
         }
 
         // Remove slot
@@ -244,7 +263,7 @@ public class HandManager : NetworkBehaviour
 
         CardSlot cardToRemove = GetCardInDeck(cardID);
 
-        if (cardToRemove.HasCard())
+        if (cardToRemove != null)
         {
             Destroy(cardToRemove.GetCard().gameObject);
             cardToRemove.RemoveCard();
@@ -265,20 +284,6 @@ public class HandManager : NetworkBehaviour
 
         return null;
     }
-
-    public void DiscardHand()
-    {
-        // Clear list
-        foreach (CardSlot slot in _playerDeck)
-        {
-            if (slot.HasCard())
-            {
-                Destroy(slot.GetCard().gameObject);
-                slot.RemoveCard();
-            }
-        }
-    }
-
     #endregion
 
     // ================ Gear Management ================

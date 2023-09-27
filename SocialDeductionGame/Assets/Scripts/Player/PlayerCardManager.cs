@@ -33,6 +33,7 @@ public class PlayerCardManager : NetworkBehaviour
 
         if (IsOwner)
         {
+            _netHandSize.OnValueChanged += UpdateHandSize;
             CardManager.OnCardsGained += GainCards;
         }
     }
@@ -48,25 +49,19 @@ public class PlayerCardManager : NetworkBehaviour
 
     public override void OnDestroy()
     {
-        CardManager.OnCardsGained -= GainCards;
+        if (IsOwner)
+        {
+            _netHandSize.OnValueChanged -= UpdateHandSize;
+            CardManager.OnCardsGained -= GainCards;
+        }
 
         // Always invoked the base 
         base.OnDestroy();
     }
     #endregion
 
-    // ================ Player Deck ================
-    #region Player Deck
-    // Triggered by CardManager's On Card Gained event, adds cards to players hand (server and client)
-    public void GainCards(int[] cardIDs)
-    {
-        // Maker sure player isn't dead
-        if (!_pHealth.IsLiving())
-            return;
-
-        DrawCardsServerRPC(cardIDs);
-    }
-
+    // ================ Player Deck Helpers ================
+    #region Deck Helpers
     public int GetDeckSize()
     {
         return _playerDeckIDs.Count;
@@ -86,41 +81,22 @@ public class PlayerCardManager : NetworkBehaviour
     {
         return _playerDeckIDs.Count;
     }
-
-    public void IncrementPlayerHandSize(int num)
-    {
-        IncrementPlayerHandSizeServerRpc(num);
-    }
-
-    [ServerRpc]
-    public void IncrementPlayerHandSizeServerRpc(int num, ServerRpcParams serverRpcParams = default)
-    {
-        // Get client data
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientId }
-            }
-        };
-
-        _netHandSize.Value += num;
-        Debug.Log($"<color=yellow>SERVER: </color> Incremented player {clientId}'s hand size");
-
-        IncrementPlayerHandSizeClientRpc(clientRpcParams);
-    }
-
-    [ClientRpc]
-    public void IncrementPlayerHandSizeClientRpc(ClientRpcParams clientRpcParams = default)
-    {
-        _handManager.UpdateHandSlots(_netHandSize.Value);
-        Debug.Log("<color=blue>CLIENT: </color> Incremented player hand size");
-    }
     #endregion
 
-    // ================ Card Add / Remove ================
-    #region Card Draw
+    // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= PLAYER DECK =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+    // ================ Card Add ================
+    #region Card Add
+    // ~~~~~~~~~~~ Local ~~~~~~~~~~~
+    public void GainCards(int[] cardIDs)
+    {
+        // Maker sure player isn't dead
+        if (!_pHealth.IsLiving())
+            return;
+
+        DrawCardsServerRPC(cardIDs);
+    }
+
+    // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
     [ServerRpc]
     private void DrawCardsServerRPC(int[] cardIDs, ServerRpcParams serverRpcParams = default)
     {
@@ -134,40 +110,50 @@ public class PlayerCardManager : NetworkBehaviour
             }
         };
 
+        List<int> cardsGiven = new();
+
         foreach (int id in cardIDs)
         {
             // Make sure hand is not full
             if (GetNumCardsHeldServer() >= _netHandSize.Value)
             {
                 Debug.Log("<color=yellow>SERVER: </color>Player " + clientId + "'s hand is full, cannot add more cards");
-                return;
+                break;
             }
 
             // Add to player networked deck
             _playerDeckIDs.Add(id);
 
-            // Update player hand
-            GiveCardClientRpc(id, clientRpcParams);
+            // Add to list to give to player
+            cardsGiven.Add(id);
         }
+
+        // Update player hand
+        GiveCardsClientRpc(cardsGiven.ToArray(), clientRpcParams);
     }
 
     [ClientRpc]
-    private void GiveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
+    private void GiveCardsClientRpc(int[] cardIDs, ClientRpcParams clientRpcParams = default)
     {
-        Debug.Log($"{NetworkManager.Singleton.LocalClientId} recieved a card with id {cardID}");
-
-        // Make sure hand is not full
-        if (GetNumCardsHeldClient() >= _netHandSize.Value)
+        foreach(int id in cardIDs)
         {
-            Debug.Log("<color=blue>CLIENT: </color>Player " + NetworkManager.Singleton.LocalClientId + "'s hand is full, cannot add more cards");
-            return;
-        }
+            // Make sure hand is not full
+            if (GetNumCardsHeldClient() >= _netHandSize.Value)
+            {
+                Debug.LogError("<color=blue>CLIENT: </color>Player " + NetworkManager.Singleton.LocalClientId + "'s hand is full, DESYNC!");
+                return;
+            }
 
-        _handManager.AddCard(cardID);
+            Debug.Log($"{NetworkManager.Singleton.LocalClientId} recieved a card with id {id}");
+
+            _handManager.AddCard(id);
+        }
     }
     #endregion
 
-    #region Card Discard
+    // ================ Card Remove ================
+    #region Card Remove
+    // ~~~~~~~~~~~ Local ~~~~~~~~~~~
     public void EnableDiscard()
     {
         _discardMode = true;
@@ -178,8 +164,20 @@ public class PlayerCardManager : NetworkBehaviour
         _discardMode = false;
     }
 
+    public void DiscardRandom(int numToDiscard)
+    {
+        Debug.Log($"Discarding {numToDiscard} random cards");
+
+        List<int> cardIDs = new(_handManager.GetRandomHeldCards(numToDiscard));
+        if (cardIDs.Count > 0)
+            DiscardCardsServerRPC(cardIDs.ToArray(), true);
+        else
+            Debug.Log("No cards to discard!");
+    }
+
+    // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
     [ServerRpc]
-    public void DiscardCardServerRPC(int cardID, bool removeFromHandManager, ServerRpcParams serverRpcParams = default)
+    public void DiscardCardsServerRPC(int[] cardIDs, bool removeFromHandManager, ServerRpcParams serverRpcParams = default)
     {
         // Get client data
         var clientId = serverRpcParams.Receive.SenderClientId;
@@ -191,32 +189,9 @@ public class PlayerCardManager : NetworkBehaviour
             }
         };
 
-        // Test if networked deck contains the card that is being played
-        if (_playerDeckIDs.Contains(cardID))
-        {
-            Debug.Log($"<color=yellow>SERVER: </color> removed card {cardID} from {clientId}");
-
-            // Remove from player's networked deck
-            _playerDeckIDs.Remove(cardID);
-
-            // Update player client hand
-            if(removeFromHandManager)
-                RemoveCardClientRpc(cardID, clientRpcParams);
-        }
-        else
-            Debug.LogError($"{cardID} not found in player's networked deck!");
+        DiscardCardsOnServer(cardIDs, removeFromHandManager, clientRpcParams);
     }
 
-    // Removes cards from the clients hand
-    [ClientRpc]
-    private void RemoveCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
-    {
-        Debug.Log($"{NetworkManager.Singleton.LocalClientId} removing card with ID {cardID}");
-
-        _handManager.RemoveCard(cardID);
-    }
-
-    // Discards all cards in players netwworked deck, and Hand Manager local deck
     [ServerRpc]
     public void DiscardHandServerRPC(ServerRpcParams serverRpcParams = default)
     {
@@ -230,35 +205,74 @@ public class PlayerCardManager : NetworkBehaviour
             }
         };
 
+        List<int> cardsRemoved = new(_playerDeckIDs);
+
         // Remove all cards from hand
         _playerDeckIDs.Clear();
 
         // Update player client hand
-        DiscardHandClientRpc(clientRpcParams);
+        RemoveCardsClientRpc(cardsRemoved.ToArray(), clientRpcParams);
     }
 
-    // Removes all cards from the clients hand locally
     [ClientRpc]
-    private void DiscardHandClientRpc(ClientRpcParams clientRpcParams = default)
+    private void RemoveCardsClientRpc(int[] cardIDs, ClientRpcParams clientRpcParams = default)
     {
-        _handManager.DiscardHand();
+        foreach (int id in cardIDs)
+        {
+            Debug.Log($"{NetworkManager.Singleton.LocalClientId} removing card with ID {id}");
+            _handManager.RemoveCard(id);
+        }
+    }
+
+    // ~~~~~~~~~~~ Server Only ~~~~~~~~~~~
+    private void DiscardCardsOnServer(int[] cardIDs, bool removeFromHandManager, ClientRpcParams clientRpcParams)
+    {
+        if (!IsServer)
+        {
+            Debug.LogError("DiscardCardsOnServer Not called from server!");
+            return;
+        }
+
+        List<int>cardsRemoved = new();
+
+        foreach (int id in cardIDs)
+        {
+            // Test if networked deck contains the card
+            if (_playerDeckIDs.Contains(id))
+            {
+                Debug.Log($"<color=yellow>SERVER: </color> removed card {id} from {clientRpcParams.Send.TargetClientIds.ToString()}");
+
+                // Remove from player's networked deck
+                _playerDeckIDs.Remove(id);
+
+                cardsRemoved.Add(id);
+            }
+            else
+                Debug.LogError($"{id} not found in player's networked deck!");
+        }
+
+        // Update player client hand
+        if (removeFromHandManager)
+            RemoveCardsClientRpc(cardsRemoved.ToArray(), clientRpcParams);
     }
     #endregion
 
-    // ================ Card Play ================
-    #region Card Play
+    // ================ Card Play / Validate ================
+    #region Card Play / Validate
+    // ~~~~~~~~~~~ Local ~~~~~~~~~~~
     // Tests if card is played onto a card playable object then calls player data server RPC to play the card
     public void TryCardPlay(Card playedCard)
     {
         // If over discard zone
         if (_discardMode)
         {
-            DiscardCardServerRPC(playedCard.GetCardID(), true);
+            int[] toDiscard = new int[] { playedCard.GetCardID() };
+            DiscardCardsServerRPC(toDiscard, true);
             return;
         }
 
         // If over gear slot
-        if(_gearSlotHovered != 0)
+        if (_gearSlotHovered != 0)
         {
             EquipGear(_gearSlotHovered, playedCard);
             return;
@@ -290,7 +304,7 @@ public class PlayerCardManager : NetworkBehaviour
             Debug.Log("Card not played on playable object");
     }
 
-    // Test if card is in deck, then removes it and calls player controller to play it
+    // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
     [ServerRpc]
     public void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
     {
@@ -307,11 +321,9 @@ public class PlayerCardManager : NetworkBehaviour
         // Test if networked deck contains the card that is being played
         if (_playerDeckIDs.Contains(cardID))
         {
-            // Remove from player's networked deck
-            _playerDeckIDs.Remove(cardID);
-
-            // Update player client hand
-            RemoveCardClientRpc(cardID, clientRpcParams);
+            // Discard the card
+            int[] toDiscard = new int[] { cardID };
+            DiscardCardsOnServer(toDiscard, true, clientRpcParams);
 
             // Play card
             ExecutePlayedCardClientRpc(cardID, clientRpcParams);
@@ -320,7 +332,6 @@ public class PlayerCardManager : NetworkBehaviour
             Debug.LogError($"{cardID} not found in player's networked deck!");
     }
 
-    // Instantiates the card prefab then calls its OnPlay function at the played location
     [ClientRpc]
     public void ExecutePlayedCardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
     {
@@ -342,10 +353,86 @@ public class PlayerCardManager : NetworkBehaviour
         }
     }
 
+    [ServerRpc]
+    public void ValidateAndDiscardCardsServerRpc(int[] cardIds, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        Debug.Log("<color=yellow>SERVER: </color>Verifying player has cards for crafting ", gameObject);
+
+        // Test if client has cards
+        bool hasCards = true;
+        List<int> cardIDs = new();
+        foreach (int id in cardIds)
+        {
+            if (_playerDeckIDs.Contains(id))
+                cardIDs.Add(id);
+            else
+                hasCards = false;
+        }
+
+        // If does have all cards, discard them
+        if (hasCards)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Verified player had cards, discarding");
+            DiscardCardsOnServer(cardIDs.ToArray(), true, clientRpcParams);
+        }
+
+        ValidateAndDiscardCardsClientRpc(hasCards, clientRpcParams);
+    }
+
+    [ClientRpc]
+    private void ValidateAndDiscardCardsClientRpc(bool crafted, ClientRpcParams clientRpcParams = default)
+    {
+        _handManager.CraftResults(crafted);
+    }
+    #endregion
+
+    // ================ Player Hand Size ================
+    #region Player Hand Size
+    // ~~~~~~~~~~~ Local ~~~~~~~~~~~
+    public void IncrementPlayerHandSize(int num)
+    {
+        IncrementPlayerHandSizeServerRpc(num);
+    }
+
+    private void UpdateHandSize(int prev, int cur)
+    {
+        Debug.Log($"<color=blue>CLIENT: </color> Adjusted player hand size. Was {prev}, now {cur}");
+
+        _handManager.UpdateHandSlots(cur);
+    }
+
+    // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
+    [ServerRpc]
+    public void IncrementPlayerHandSizeServerRpc(int num, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        _netHandSize.Value += num;
+        Debug.Log($"<color=yellow>SERVER: </color> Incremented player {clientId}'s hand size");
+    }
     #endregion
 
     // ================ Gear ================
     #region Gear
+    // ~~~~~~~~~~~ Local ~~~~~~~~~~~
     public void HoveringGearSlot(int gearNum)
     {
         _gearSlotHovered = gearNum;
@@ -372,6 +459,29 @@ public class PlayerCardManager : NetworkBehaviour
             Debug.Log("Attempting to equip to non-existant gear slot");
     }
 
+    public void UnequipGear(int gearSlot, int gearID)
+    {
+        Debug.Log("Attempting to Unequip gear!");
+
+        if (gearSlot == 1 || gearSlot == 2)
+            UnequipGearServerRPC(gearSlot, gearID);
+        else
+            Debug.Log("Attempting to equip to non-existant gear slot");
+    }
+
+    public void LoseGear(int gearSlot)
+    {
+        Debug.Log("Discarding gear in slot " + gearSlot);
+
+        if (gearSlot == 1 || gearSlot == 2)
+        {
+            UnequipGearServerRPC(gearSlot, 9999);
+        }
+        else
+            Debug.Log("Attempting to unequip to non-existant gear slot");
+    }
+
+    // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
     [ServerRpc]
     public void EquipGearServerRPC(int gearSlot, int cardID, ServerRpcParams serverRpcParams = default)
     {
@@ -391,7 +501,7 @@ public class PlayerCardManager : NetworkBehaviour
             }
         };
 
-        // Test if gear slot already has something in it
+        // Test if gear slot already has something in it, if so swap
         bool swap = false;
         if (_playerGear[gearSlot - 1] != 0)
         {
@@ -403,11 +513,9 @@ public class PlayerCardManager : NetworkBehaviour
         // Test if networked deck contains the card that is being played
         if (_playerDeckIDs.Contains(cardID))
         {
-            // Remove from player's networked deck
-            _playerDeckIDs.Remove(cardID);
-
-            // Update player client hand
-            RemoveCardClientRpc(cardID, clientRpcParams);
+            // Discard the card
+            int[] toDiscard = new int[] { cardID };
+            DiscardCardsOnServer(toDiscard, true, clientRpcParams);
 
             // Equip Card
             _playerGear[gearSlot - 1] = cardID;
@@ -421,7 +529,6 @@ public class PlayerCardManager : NetworkBehaviour
             Debug.LogError($"{cardID} not found in player's networked deck!");
     }
 
-    // Instantiates the card prefab then calls its OnPlay function at the played location
     [ClientRpc]
     public void EquipGearClientRpc(int gearSlot, int cardID, ClientRpcParams clientRpcParams = default)
     {
@@ -434,16 +541,6 @@ public class PlayerCardManager : NetworkBehaviour
     {
         // re-instantiate card
         _handManager.UpdateGearCard(cardID, gearSlot);
-    }
-
-    public void UnequipGear(int gearSlot, int gearID)
-    {
-        Debug.Log("Attempting to Unequip gear!");
-
-        if (gearSlot == 1 || gearSlot == 2)
-            UnequipGearServerRPC(gearSlot, gearID);
-        else
-            Debug.Log("Attempting to equip to non-existant gear slot");
     }
 
     [ServerRpc]
@@ -465,8 +562,8 @@ public class PlayerCardManager : NetworkBehaviour
             }
         };
 
-        // Test if gear slot contains the card that is being discarded
-        if (_playerGear[gearSlot - 1] == cardID)
+        // Test if gear slot contains the card that is being discarded (or 9999 for discard whatever)
+        if (_playerGear[gearSlot - 1] == cardID || cardID == 9999)
         {
             Debug.Log("<color=yellow>SERVER: </color>Unequiping gear from slot 1");
             _playerGear[gearSlot - 1] = 0;
@@ -477,82 +574,10 @@ public class PlayerCardManager : NetworkBehaviour
             Debug.Log("<color=yellow>SERVER: </color>Gear slot did not contain card that is being unequipped");
     }
 
-    // Instantiates the card prefab then calls its OnPlay function at the played location
     [ClientRpc]
     public void UnequipGearClientRpc(int gearSlot, ClientRpcParams clientRpcParams = default)
     {
-        // re-instantiate card
         _handManager.RemoveGearCard(gearSlot);
     }
     #endregion
-
-    // ================ Crafting ================
-    // This function is used when crafting and only called from Hand Manager
-    [ServerRpc]
-    public void ValidateAndDiscardCardsServerRpc(int[] cardIds, ServerRpcParams serverRpcParams = default)
-    {
-        // Get client data
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientId }
-            }
-        };
-
-        Debug.Log("<color=yellow>SERVER: </color>Verifying player has cards for crafting");
-
-        // Test if client has cards
-        bool hasCards = true;
-        List<int> cardIDs = new();
-        foreach(int id in cardIds)
-        {
-            if (_playerDeckIDs.Contains(id))
-                cardIDs.Add(id);
-            else
-                hasCards = false;
-        }
-
-        // If does have all cards, discard them
-        if (hasCards)
-        {
-            Debug.Log("<color=yellow>SERVER: </color>Verified player had cards, discarding");
-            foreach (int id in cardIDs)
-                DiscardCardServerRPC(id, true);
-        }
-
-        ValidateAndDiscardCardsClientRpc(hasCards, clientRpcParams);
-    }
-
-    [ClientRpc]
-    private void ValidateAndDiscardCardsClientRpc(bool crafted, ClientRpcParams clientRpcParams = default)
-    {
-        _handManager.CraftResults(crafted);
-    }
-
-    // ================ Other ================
-    public void DiscardRandom(int numToDiscard)
-    {
-        for(int i = 0; i < numToDiscard; i++)
-        {
-            Debug.Log("Discarding Random Card");
-            int cardID = _handManager.GetRandomHeldCard();
-            if(cardID != 0)
-                DiscardCardServerRPC(cardID, true);
-        }
-    }
-
-    public void LoseGear(int gearSlot)
-    {
-        Debug.Log("Discarding gear in slot " + gearSlot);
-
-        if (gearSlot == 1 || gearSlot == 2)
-        {
-            if(_playerGear[gearSlot-1] != 0)
-                UnequipGear(gearSlot, _playerGear[gearSlot-1]);
-        }
-        else
-            Debug.Log("Attempting to unequip to non-existant gear slot");
-    }
 }
