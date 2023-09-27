@@ -10,9 +10,14 @@ public class SeatManager : NetworkBehaviour
     [SerializeField] private List<Transform> _locationSeats = new();
     [SerializeField] private Dictionary<Transform, ulong> _seatDictionary = new();
 
-    [SerializeField] private NetworkList<ulong> _netPlayersAtLocation = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkList<ulong> _netPlayersAtLocation;
 
     // ================== Setup ==================
+    private void Awake()
+    {
+        _netPlayersAtLocation = new(writePerm: NetworkVariableWritePermission.Server);
+    }
+
     private void Start()
     {
         foreach(Transform seat in _locationSeats)
