@@ -334,6 +334,12 @@ public class HandManager : NetworkBehaviour
 
         Gear gearToRemove = _equipedGear[gearSlot - 1];
 
+        if (!gearToRemove)
+        {
+            Debug.Log("Gear slot empty, nothing to lose");
+            return;
+        }
+
         gearToRemove.OnUnequip();
 
         _equipedGear[gearSlot - 1] = null;
