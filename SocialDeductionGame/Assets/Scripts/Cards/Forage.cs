@@ -19,6 +19,7 @@ public class Forage : MonoBehaviour
     private HandManager _playerHandMan;
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _forageMenu;
+    [SerializeField] private GameObject _forageButton;
     //[SerializeField] private GameObject _redealButton;
     [SerializeField] private GameObject _hazardCloseButton;
     [SerializeField] private GameObject _hazardCardPref;
@@ -45,7 +46,20 @@ public class Forage : MonoBehaviour
 
     // ============== Functions ==============
     #region Functions
-    public void TestHazardThenDeal()
+    public void OpenForageMenu()
+    {
+        _forageButton.SetActive(false);
+        _forageMenu.SetActive(true);
+        TestHazardThenDeal();
+    }
+
+    private void CloseForageMenu()
+    {
+        _forageButton.SetActive(true);
+        _forageMenu.SetActive(false);
+    }
+
+    private void TestHazardThenDeal()
     {
         if (!HazardTest())
             DealCards();
@@ -139,11 +153,6 @@ public class Forage : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-    }
-
-    private void CloseForageMenu()
-    {
-        _forageMenu.SetActive(false);
     }
 
     private void IncrementDanger(int dangerInc)

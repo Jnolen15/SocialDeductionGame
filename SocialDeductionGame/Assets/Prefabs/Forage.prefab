@@ -560,7 +560,7 @@ MonoBehaviour:
   _tierThreeHazardThreshold: 8
   _cardZone: {fileID: 3238553329602390963}
   _forageMenu: {fileID: 3238553329238864837}
-  _redealButton: {fileID: 0}
+  _forageButton: {fileID: 4581074892960370356}
   _hazardCloseButton: {fileID: 7265481688996267181}
   _hazardCardPref: {fileID: 7376748315988548449, guid: 928f42358a7dd524e8052c7d9a135188, type: 3}
 --- !u!1 &4581074892960370356
@@ -685,21 +685,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3238553329238864837}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
       - m_Target: {fileID: 3238553330213436417}
         m_TargetAssemblyTypeName: Forage, Assembly-CSharp
-        m_MethodName: TestHazardThenDeal
+        m_MethodName: OpenForageMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
