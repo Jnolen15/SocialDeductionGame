@@ -31,10 +31,11 @@ public class PlayerUI : MonoBehaviour
 
     [Header("Other")]
     [SerializeField] private GameObject _readyButton;
+    [SerializeField] private Sprite _readyNormal;
+    [SerializeField] private Sprite _readySpeedUp;
     [SerializeField] private GameObject _islandMap;
     [SerializeField] private GameObject _craftingMenu;
     [SerializeField] private GameObject _introRole;
-    [SerializeField] private TextMeshProUGUI _locationText;
     [SerializeField] private TextMeshProUGUI _movementText;
     #endregion
 
@@ -213,14 +214,14 @@ public class PlayerUI : MonoBehaviour
     {
         //_readyIndicator.SetActive(true);
 
-        _readyButton.GetComponent<Image>().color = Color.green;
+        _readyButton.GetComponent<Image>().sprite = _readySpeedUp;
     }
 
     public void Unready()
     {
         //_readyIndicator.SetActive(false);
 
-        _readyButton.GetComponent<Image>().color = Color.red;
+        _readyButton.GetComponent<Image>().sprite = _readyNormal;
     }
 
     private void DisplayRole()
@@ -255,13 +256,6 @@ public class PlayerUI : MonoBehaviour
 
         _islandMap.SetActive(!_islandMap.activeSelf);
     }
-
-    public void UpdateLocationText(string location)
-    {
-        _locationText.text = location;
-    }
-
-    
 
     public void UpdateMovement(int prev, int current)
     {

@@ -202,7 +202,6 @@ public class PlayerData : NetworkBehaviour
         Debug.Log("Updating player location to " + location.ToString());
 
         _netCurrentLocation.Value = location;
-        _playerUI.UpdateLocationText(location.ToString());
     }
 
     private void ChangeLocation(LocationManager.LocationName newLocation)
