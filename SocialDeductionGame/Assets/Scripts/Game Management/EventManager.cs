@@ -10,10 +10,6 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private NightEventPicker _nightEventPickerMenu;
     [SerializeField] private NightEventResults _nightEventResults;
     [SerializeField] private NightEventRecapUI _nightEventRecap;
-    [SerializeField] private NightEventCardVisual _eventCardSmall;
-    [SerializeField] private NightEventCardVisual _eventCardLarge;
-    [SerializeField] private GameObject _eventFailText;
-    [SerializeField] private GameObject _eventPassText;
     [SerializeField] private Stockpile _stockpile;
 
     [SerializeField] private NetworkVariable<int> _netCurrentNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
@@ -21,11 +17,14 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netEarnedBonusNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
 
+    private GameInfoUI _gameInfoUI;
+
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
-        GameManager.OnStateForage += HideLargeCard;
+        _gameInfoUI = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponent<GameInfoUI>();
+
         GameManager.OnStateNight += DoEvent;
 
         if (IsServer)
@@ -38,7 +37,6 @@ public class EventManager : NetworkBehaviour
 
     private void OnDisable()
     {
-        GameManager.OnStateForage -= HideLargeCard;
         GameManager.OnStateNight -= DoEvent;
 
         if (IsServer)
@@ -52,37 +50,18 @@ public class EventManager : NetworkBehaviour
 
     // ================== UI ELEMENTS ==================
     #region UI Elements
-    // Updates night event card UI elements
     private void UpdateEventUI()
     {
-        _eventFailText.SetActive(false);
-        _eventPassText.SetActive(false);
-
-        _eventCardSmall.gameObject.SetActive(true);
-        _eventCardLarge.gameObject.SetActive(true);
-
-        _eventCardSmall.Setup(_netCurrentNightEventID.Value);
-        _eventCardLarge.Setup(_netCurrentNightEventID.Value);
+        _gameInfoUI.SetEvent(_netCurrentNightEventID.Value);
     }
 
     // Updates small event card with pass / fail text
     [ClientRpc]
     private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus)
     {
-        if(passed)
-            _eventPassText.SetActive(true);
-        else
-            _eventFailText.SetActive(true);
-
         // Show ressults
         _nightEventResults.gameObject.SetActive(true);
         _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, passed, bonus);
-    }
-
-    // Hides large event card from morning phase
-    private void HideLargeCard()
-    {
-        _eventCardLarge.gameObject.SetActive(false);
     }
     #endregion
 
