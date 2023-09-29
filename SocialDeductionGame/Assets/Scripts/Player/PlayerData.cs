@@ -16,8 +16,6 @@ public class PlayerData : NetworkBehaviour
 
     private LocationManager _locationManager;
     private EventManager _nightEventManger;
-
-    [SerializeField] private TextMeshProUGUI _teamText;
     #endregion
 
     // ================== Variables ==================
@@ -129,12 +127,7 @@ public class PlayerData : NetworkBehaviour
 
     private void UpdateTeamText(Team prev, Team current)
     {
-        _teamText.text = current.ToString();
-
-        if (current == Team.Survivors)
-            _teamText.color = Color.green;
-        else if (current == Team.Saboteurs)
-            _teamText.color = Color.red;
+        _playerUI.UpdateTeamText(current);
     }
 
     // Show night event choices if Saboteur, else show Recap

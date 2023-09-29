@@ -9,9 +9,9 @@ public class PlayerHealth : NetworkBehaviour
     private PlayerData _playerData;
 
     // Data
-    [SerializeField] private int _maxHP = 6;
+    [SerializeField] private int _maxHP;
     [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private int _maxHunger = 3;
+    [SerializeField] private int _maxHunger;
     [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
     public NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
 
@@ -65,8 +65,7 @@ public class PlayerHealth : NetworkBehaviour
     }
     #endregion
 
-    // FOR TESTING
-    /*private void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
             ModifyHealth(1);
@@ -79,7 +78,20 @@ public class PlayerHealth : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.H))
             ModifyHunger(-1);
-    }*/
+    }
+
+    // ===================== Helpers =====================
+    #region Helpers
+    public int GetMaxHP()
+    {
+        return _maxHP;
+    }
+
+    public int GetMaxHunger()
+    {
+        return _maxHunger;
+    }
+    #endregion
 
     // ==================== Health ====================
     #region Health

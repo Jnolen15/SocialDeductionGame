@@ -13,21 +13,29 @@ public class PlayerUI : MonoBehaviour
     private PlayerData _playerData;
     private PlayerHealth _playerHealth;
 
-    [Header("UI Refrences")]
+    [Header("Player Info")]
+    [SerializeField] private TextMeshProUGUI _nameText;
+    [SerializeField] private TextMeshProUGUI _teamText;
+    [SerializeField] private Image _healthFill;
+    [SerializeField] private Image _hungerFill;
+    [SerializeField] private Image _healthFlash;
+    [SerializeField] private Image _hungerFlash;
+    [SerializeField] private Image _healthIcon;
+    [SerializeField] private Image _hungerIcon;
+    [SerializeField] private List<Sprite> _healthIconStages;
+    [SerializeField] private List<Sprite> _hungerIconStages;
+    [SerializeField] private TextMeshProUGUI _dangerText;
+    [SerializeField] private Image _dangerIcon;
+    [SerializeField] private List<Sprite> _dangerIconStages;
+    [SerializeField] private GameObject _deathMessage;
+
+    [Header("Other")]
     [SerializeField] private GameObject _readyButton;
-    [SerializeField] private GameObject _readyIndicator;
     [SerializeField] private GameObject _islandMap;
     [SerializeField] private GameObject _craftingMenu;
     [SerializeField] private GameObject _introRole;
     [SerializeField] private TextMeshProUGUI _locationText;
-    [SerializeField] private TextMeshProUGUI _healthText;
-    [SerializeField] private TextMeshProUGUI _hungerText;
-    [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private TextMeshProUGUI _movementText;
-    [SerializeField] private TextMeshProUGUI _dangerText;
-    [SerializeField] private GameObject _deathMessage;
-    [SerializeField] private Image _healthFlashSprite;
-    [SerializeField] private Image _hungerFlashSprite;
     #endregion
 
     // ================== Setup ==================
@@ -64,6 +72,120 @@ public class PlayerUI : MonoBehaviour
     }
     #endregion
 
+    // ================== Player Info ==================
+    #region Player Info
+    public void UpdatePlayerNameText(FixedString32Bytes old, FixedString32Bytes current)
+    {
+        _nameText.text = current.ToString();
+    }
+
+    public void UpdateTeamText(PlayerData.Team current)
+    {
+        if (current == PlayerData.Team.Survivors)
+        {
+            _teamText.text = "S";
+            _teamText.color = Color.green;
+        }
+        else if (current == PlayerData.Team.Saboteurs)
+        {
+            _teamText.text = "T";
+            _teamText.color = Color.red;
+        }
+    }
+
+    private void UpdateHealth(float ModifiedAmmount, float newTotal)
+    {
+        // Changed flash
+        if (ModifiedAmmount == 0)
+            return;
+
+        if (ModifiedAmmount > 0)
+            _healthFlash.color = Color.green;
+        else if (ModifiedAmmount < 0)
+            _healthFlash.color = Color.red;
+
+        _healthFlash.DOFade(0.8f, 0.25f).SetEase(Ease.Flash).OnComplete(() => { _healthFlash.DOFade(0, 0.25f).SetEase(Ease.Flash); });
+
+        // Update Icon
+        if(newTotal <= 2) // 1 or 0
+        {
+            _healthIcon.sprite = _healthIconStages[2];
+            _healthFill.color = Color.red;
+        }
+        else if (newTotal >= _playerHealth.GetMaxHP()-1) // at or 1 below max
+        {
+            _healthIcon.sprite = _healthIconStages[0];
+            _healthFill.color = Color.green;
+        }
+        else // anything in between
+        {
+            _healthIcon.sprite = _healthIconStages[1];
+            _healthFill.color = Color.yellow;
+        }
+
+        // Update Fill ammount
+        _healthFill.fillAmount = (newTotal / _playerHealth.GetMaxHP());
+    }
+
+    private void UpdateHunger(float ModifiedAmmount, float newTotal)
+    {
+        // Changed flash
+        if (ModifiedAmmount == 0)
+            return;
+
+        if (ModifiedAmmount > 0)
+            _hungerFlash.color = Color.green;
+        else if (ModifiedAmmount < 0)
+            _hungerFlash.color = Color.red;
+
+        _hungerFlash.DOFade(0.8f, 0.25f).OnComplete(() => { _hungerFlash.DOFade(0, 0.25f); });
+
+        // Update Icon
+        if (newTotal <= 1) // 1 or 0
+        {
+            _hungerIcon.sprite = _hungerIconStages[2];
+            _hungerFill.color = Color.red;
+        }
+        else if (newTotal >= _playerHealth.GetMaxHunger() - 1) // at or 1 below max
+        {
+            _hungerIcon.sprite = _hungerIconStages[0];
+            _hungerFill.color = Color.green;
+        }
+        else // anything in between
+        {
+            _hungerIcon.sprite = _hungerIconStages[1];
+            _hungerFill.color = Color.yellow;
+        }
+
+        // Update Fill ammount
+        _hungerFill.fillAmount = (newTotal / _playerHealth.GetMaxHunger());
+    }
+
+    public void UpdateDanger(int prev, int current)
+    {
+        _dangerText.text = current.ToString();
+
+        // Should not hard code this (should have value refrences)
+        _dangerText.color = Color.green;
+        _dangerIcon.sprite = _dangerIconStages[2];
+        if (4 < current && current <= 8)
+        {
+            _dangerText.color = Color.yellow;
+            _dangerIcon.sprite = _dangerIconStages[1];
+        }
+        else if (8 < current)
+        {
+            _dangerIcon.sprite = _dangerIconStages[0];
+            _dangerText.color = Color.red;
+        }
+    }
+
+    private void DisplayDeathMessage()
+    {
+        _deathMessage.SetActive(true);
+    }
+    #endregion
+
     // ================== Misc UI ==================
     #region Misc UI
     public void StateChangeEvent()
@@ -72,10 +194,7 @@ public class PlayerUI : MonoBehaviour
             _introRole.SetActive(false);
     }
 
-    public void UpdatePlayerNameText(FixedString32Bytes old, FixedString32Bytes current)
-    {
-        _nameText.text = current.ToString();
-    }
+
 
     private void EnableReadyButton()
     {
@@ -92,14 +211,14 @@ public class PlayerUI : MonoBehaviour
 
     public void Ready()
     {
-        _readyIndicator.SetActive(true);
+        //_readyIndicator.SetActive(true);
 
         _readyButton.GetComponent<Image>().color = Color.green;
     }
 
     public void Unready()
     {
-        _readyIndicator.SetActive(false);
+        //_readyIndicator.SetActive(false);
 
         _readyButton.GetComponent<Image>().color = Color.red;
     }
@@ -142,56 +261,13 @@ public class PlayerUI : MonoBehaviour
         _locationText.text = location;
     }
 
-    private void UpdateHealth(float ModifiedAmmount, float newTotal)
-    {
-        if (ModifiedAmmount == 0)
-            return;
-
-        if (ModifiedAmmount > 0)
-            _healthFlashSprite.color = Color.green;
-        else if (ModifiedAmmount < 0)
-            _healthFlashSprite.color = Color.red;
-
-        _healthFlashSprite.DOFade(0.8f, 0.25f).SetEase(Ease.Flash).OnComplete(() => { _healthFlashSprite.DOFade(0, 0.25f).SetEase(Ease.Flash); });
-
-        _healthText.text = newTotal.ToString();
-    }
-
-    private void UpdateHunger(float ModifiedAmmount, float newTotal)
-    {
-        if (ModifiedAmmount == 0)
-            return;
-
-        if (ModifiedAmmount > 0)
-            _hungerFlashSprite.color = Color.green;
-        else if (ModifiedAmmount < 0)
-            _hungerFlashSprite.color = Color.red;
-
-        _hungerFlashSprite.DOFade(0.8f, 0.25f).OnComplete(() => { _hungerFlashSprite.DOFade(0, 0.25f); });
-
-        _hungerText.text = newTotal.ToString();
-    }
+    
 
     public void UpdateMovement(int prev, int current)
     {
         _movementText.text = "Movement: " + current;
     }
 
-    public void UpdateDanger(int prev, int current)
-    {
-        _dangerText.text = "Danger Level: " + current;
-
-        // Should not hard code this (should have value refrences)
-        _dangerText.color = Color.green;
-        if (4 < current && current <= 8)
-            _dangerText.color = Color.yellow;
-        else if (8 < current)
-            _dangerText.color = Color.red;
-    }
-
-    private void DisplayDeathMessage()
-    {
-        _deathMessage.SetActive(true);
-    }
+    
     #endregion
 }
