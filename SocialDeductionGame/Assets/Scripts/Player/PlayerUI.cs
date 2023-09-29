@@ -62,7 +62,7 @@ public class PlayerUI : MonoBehaviour
     {
         _playerData._netPlayerName.OnValueChanged -= UpdatePlayerNameText;
         GameManager.OnStateChange -= EnableReadyButton;
-        GameManager.OnStateChange += StateChangeEvent;
+        GameManager.OnStateChange -= StateChangeEvent;
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
         GameManager.OnStateIntro -= DisplayRole;
@@ -184,6 +184,10 @@ public class PlayerUI : MonoBehaviour
     private void DisplayDeathMessage()
     {
         _deathMessage.SetActive(true);
+
+        // Close Menus if player died
+        _islandMap.SetActive(false);
+        _craftingMenu.SetActive(false);
     }
     #endregion
 
@@ -193,9 +197,11 @@ public class PlayerUI : MonoBehaviour
     {
         if(_introRole != null && _introRole.activeInHierarchy)
             _introRole.SetActive(false);
+
+        // Close Menus on a state change
+        _islandMap.SetActive(false);
+        _craftingMenu.SetActive(false);
     }
-
-
 
     private void EnableReadyButton()
     {
@@ -212,15 +218,11 @@ public class PlayerUI : MonoBehaviour
 
     public void Ready()
     {
-        //_readyIndicator.SetActive(true);
-
         _readyButton.GetComponent<Image>().sprite = _readySpeedUp;
     }
 
     public void Unready()
     {
-        //_readyIndicator.SetActive(false);
-
         _readyButton.GetComponent<Image>().sprite = _readyNormal;
     }
 

@@ -19,7 +19,7 @@ public class Forage : MonoBehaviour
     private HandManager _playerHandMan;
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _forageMenu;
-    [SerializeField] private GameObject _redealButton;
+    //[SerializeField] private GameObject _redealButton;
     [SerializeField] private GameObject _hazardCloseButton;
     [SerializeField] private GameObject _hazardCardPref;
 
@@ -155,13 +155,13 @@ public class Forage : MonoBehaviour
     private void OpenHazardUI()
     {
         _hazardCloseButton.SetActive(true);
-        _redealButton.SetActive(false);
+        //_redealButton.SetActive(false);
     }
 
     public void CloseHazardAndDeal()
     {
         _hazardCloseButton.SetActive(false);
-        _redealButton.SetActive(true);
+        //_redealButton.SetActive(true);
         ClearCards();
         DealCards();
     }
