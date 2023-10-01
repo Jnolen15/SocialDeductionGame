@@ -48,7 +48,7 @@ public class PlayerData : NetworkBehaviour
             _netTeam.OnValueChanged += UpdateTeamText;
             _netCurrentMP.OnValueChanged += UpdateMovementPointUI;
             _netCurrentDanger.OnValueChanged += UpdateDangerLevelUI;
-            GameManager.OnStateNight += ShowEventChoices;
+            GameManager.OnStateNight += ShowEventRecap;
             GameManager.OnStateMorning += ResetMovementPoints;
             GameManager.OnStateMorning += MorningDangerReduction;
             Forage.OnDangerIncrement += ModifyDangerLevel;
@@ -75,7 +75,7 @@ public class PlayerData : NetworkBehaviour
         _netTeam.OnValueChanged -= UpdateTeamText;
         _netCurrentMP.OnValueChanged -= UpdateMovementPointUI;
         _netCurrentDanger.OnValueChanged -= UpdateDangerLevelUI;
-        GameManager.OnStateNight -= ShowEventChoices;
+        GameManager.OnStateNight -= ShowEventRecap;
         GameManager.OnStateMorning -= ResetMovementPoints;
         GameManager.OnStateMorning -= MorningDangerReduction;
         Forage.OnDangerIncrement -= ModifyDangerLevel;
@@ -134,10 +134,10 @@ public class PlayerData : NetworkBehaviour
     }
 
     // Show night event choices if Saboteur, else show Recap
-    private void ShowEventChoices()
+    private void ShowEventRecap()
     {
         if (_netTeam.Value == Team.Saboteurs)
-            _nightEventManger.OpenNightEventPicker();
+            _nightEventManger.ShowNightEventPicker();
         else if (_playerHealth.IsLiving())
             _nightEventManger.ShowRecap();
     }

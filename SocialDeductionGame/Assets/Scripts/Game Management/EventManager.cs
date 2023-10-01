@@ -33,6 +33,7 @@ public class EventManager : NetworkBehaviour
             GameManager.OnStateMorning += SetupNewEventServerRpc;
             GameManager.OnSetup += PickRandomEvent;
             GameManager.OnStateEvening += TestEvent;
+            GameManager.OnStateNight += OpenNightEventPicker;
         }
     }
 
@@ -45,6 +46,7 @@ public class EventManager : NetworkBehaviour
             GameManager.OnStateMorning -= SetupNewEventServerRpc;
             GameManager.OnSetup -= PickRandomEvent;
             GameManager.OnStateEvening -= TestEvent;
+            GameManager.OnStateNight -= OpenNightEventPicker;
         }
     }
     #endregion
@@ -70,8 +72,14 @@ public class EventManager : NetworkBehaviour
     #region Player Night Event Choice Menu
     public void OpenNightEventPicker()
     {
-        _nightEventPickerMenu.gameObject.SetActive(true);
-        _nightEventPickerMenu.DealOptions(_netPreviousNightEventID.Value);
+        Debug.Log("<color=yellow>SERVER: </color> OpenNightEventPicker");
+
+        _nightEventPickerMenu.DealOptionsServerRpc(_netPreviousNightEventID.Value);
+    }
+
+    public void ShowNightEventPicker()
+    {
+        _nightEventPickerMenu.ShowMenu();
     }
 
     public void ShowRecap()

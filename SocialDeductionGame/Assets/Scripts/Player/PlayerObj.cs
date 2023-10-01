@@ -45,6 +45,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _netTookFromFire.OnValueChanged -= UpdateCampfireIcon;
         _netIsReady.OnValueChanged -= UpdateReadyIcon;
 
+        GameManager.OnStateIntro -= UpdateNameSaboColor;
+
         if (IsOwner)
         {
             GameManager.OnStateMorning -= ToggleCampfireIconOff;
@@ -54,6 +56,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public override void OnNetworkSpawn()
     {
+        GameManager.OnStateIntro += UpdateNameSaboColor;
+
         if (IsOwner)
         {
             GameManager.OnStateMorning += ToggleCampfireIconOff;
@@ -78,6 +82,16 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     }
 
     // ================== Info ==================
+    //
+    private void UpdateNameSaboColor()
+    {
+        if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs && !IsOwner
+                && GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        {
+            _namePlate.color = Color.red;
+        }
+    }
+
     private void UpdateNamePlate(FixedString32Bytes prev, FixedString32Bytes next)
     {
         _namePlate.text = next.ToString();

@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class NightEventSelectable : MonoBehaviour
 {
     // ================== Refrences ==================
     private NightEventCardVisual _event;
     private NightEventPicker _eventPicker;
+    [SerializeField] private TextMeshProUGUI _voteText; 
     // ================== Variables ==================
     private bool _eventSelected;
 
@@ -34,6 +36,11 @@ public class NightEventSelectable : MonoBehaviour
             _eventPicker.SelectEvent(_event.GetEventID());
             transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
         }
+    }
+
+    public void UpdateVotes(int numVotes)
+    {
+        _voteText.text = numVotes.ToString();
     }
 
     public void Deselect()

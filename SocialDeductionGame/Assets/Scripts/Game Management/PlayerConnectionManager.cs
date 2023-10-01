@@ -24,6 +24,7 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     #region Variables and Refrences
+    [SerializeField] private int _numSaboteurs;
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netNumLivingPlayers = new(writePerm: NetworkVariableWritePermission.Server);
@@ -158,7 +159,7 @@ public class PlayerConnectionManager : NetworkBehaviour
 
             GameManager.OnSetup -= AssignRoles;
         }
-
+        base.OnNetworkDespawn();
     }
     #endregion
 
@@ -459,9 +460,26 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color>Assigning player roles");
 
-        // Pick one random player and assign them to team Saboteurs
-        ulong rand = _playerDict.Keys.ToArray()[(int)Random.Range(0, _playerDict.Keys.Count)];
-        _playerDict[rand].SetTeam(PlayerData.Team.Saboteurs);
+        // Pick X random players and assign them to team Saboteurs
+        List<ulong> playerIDs = new(_playerDict.Keys);
+        for(int i = 0; i < _numSaboteurs; i++)
+        {
+            ulong rand = 99;
+
+            if (playerIDs.Count > 0)
+                rand = playerIDs[(int)Random.Range(0, playerIDs.Count)];
+
+            if (rand == 99)
+            {
+                Debug.Log("<color=yellow>SERVER: </color>Less players than number of sabos");
+                break;
+            }
+
+            _playerDict[rand].SetTeam(PlayerData.Team.Saboteurs);
+            playerIDs.Remove(rand);
+
+            Debug.Log($"<color=yellow>SERVER: </color>Assinging player {rand} to team saboteur");
+        }
     }
     #endregion
 
