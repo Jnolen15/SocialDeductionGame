@@ -9,6 +9,8 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     // Variables
     [SerializeField] private CardTag _cardTagAccepted;
     [SerializeField] private NetworkVariable<float> _netServingsStored = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private float _takeBufferTimeMax;
+    private float _takeBufferTimer;
     public enum State
     {
         Extinguished,
@@ -54,6 +56,13 @@ public class Campfire : NetworkBehaviour, ICardPlayable
 
         // Always invoked the base 
         base.OnDestroy();
+    }
+
+    // ================== Update ==================
+    private void Update()
+    {
+        if (_takeBufferTimer > 0)
+            _takeBufferTimer -= Time.deltaTime;
     }
 
     // ================== Text ==================
@@ -115,10 +124,18 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         if (!playa.GetComponent<PlayerHealth>().IsLiving())
             return;
 
+        if (_takeBufferTimer > 0)
+        {
+            Debug.Log("On Cooldown, cant take food");
+            return;
+        }
+
         if (_netServingsStored.Value < ammount)
             return;
 
         Debug.Log("<color=blue>CLIENT: </color>Taking food from fire. Servings: " + ammount);
+
+        _takeBufferTimer = _takeBufferTimeMax;
 
         AddFoodServerRpc(-ammount);
 

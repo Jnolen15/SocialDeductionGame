@@ -30803,8 +30803,17 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
+      time: 0.1
+      value: 0.25
+      inSlope: 1.9352927
+      outSlope: 1.9352927
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
       time: 1
-      value: 2
+      value: 3
       inSlope: 3.9854445
       outSlope: 3.9854445
       tangentMode: 0
@@ -30851,6 +30860,8 @@ MonoBehaviour:
   _stockpile: {fileID: 71632897}
   _netCurrentNightEventID:
     m_InternalValue: 1001
+  _netNumEventPlayers:
+    m_InternalValue: 0
   _netPreviousNightEventID:
     m_InternalValue: 0
   _netPassedNightEvent:
