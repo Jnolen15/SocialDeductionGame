@@ -12,6 +12,7 @@ public class PlayerData : NetworkBehaviour
     private HandManager _handManager;
     private PlayerCardManager _playerCardManager;
     private PlayerHealth _playerHealth;
+    private PlayerObj _playerObj;
     [SerializeField] private PlayerUI _playerUI;
 
     private LocationManager _locationManager;
@@ -85,6 +86,7 @@ public class PlayerData : NetworkBehaviour
         _handManager = gameObject.GetComponent<HandManager>();
         _playerCardManager = gameObject.GetComponent<PlayerCardManager>();
         _playerHealth = gameObject.GetComponent<PlayerHealth>();
+        _playerObj = gameObject.GetComponentInChildren<PlayerObj>();
 
         ResetMovementPoints();
 
@@ -150,6 +152,7 @@ public class PlayerData : NetworkBehaviour
     #region Player Readying
     public void ReadyPlayer()
     {
+        _playerObj.ToggleReadyIconActive();
         PlayerConnectionManager.Instance.ReadyPlayer();
     }
     #endregion

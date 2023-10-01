@@ -15,7 +15,7 @@ public class NightEventCardVisual : MonoBehaviour
     private int _heldEventID;
 
     // ================== Setup ==================
-    public void Setup(int eventID)
+    public void Setup(int eventID, int playerNum)
     {
         // Clear tags (in case of reused card assets)
         foreach (Transform t in _eventTagIconSlot)
@@ -28,9 +28,9 @@ public class NightEventCardVisual : MonoBehaviour
         _heldEventID = eventID;
         NightEvent eventData = CardDatabase.Instance.GetEvent(eventID);
         _eventTitle.text = eventData.GetEventName();
-        _eventRequiredNum.text = eventData.GetSuccessPoints(PlayerConnectionManager.Instance.GetNumLivingPlayers()) + " = ";
+        _eventRequiredNum.text = eventData.GetSuccessPoints(playerNum) + " = ";
         _eventConsequences.text = "Fail: " + eventData.GetEventConsequences();
-        _eventBonuses.text = $"Bonus: Add {eventData.SPBonusCalculation(PlayerConnectionManager.Instance.GetNumConnectedPlayers())} additional cards to {eventData.GetEventBonuses()}";
+        _eventBonuses.text = $"Bonus: Add {eventData.SPBonusCalculation(playerNum)} additional cards to {eventData.GetEventBonuses()}";
         foreach (CardTag t in eventData.GetRequiredCardTags())
         {
             TagIcon icon = Instantiate(_eventTagIconPref, _eventTagIconSlot).GetComponent<TagIcon>();

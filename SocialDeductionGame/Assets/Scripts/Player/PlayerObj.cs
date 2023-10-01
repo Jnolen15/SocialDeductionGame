@@ -13,6 +13,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private TextMeshPro _namePlate;
     [SerializeField] private GameObject _deathIndicator;
     [SerializeField] private GameObject _campfireIcon;
+    [SerializeField] private GameObject _readyIcon;
     [SerializeField] private Transform _character;
     [SerializeField] private List<Material> _characterMatList = new();
 
@@ -21,6 +22,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private NetworkVariable<int> _netCharacterIndex = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> _netCharacterMatIndex = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> _netTookFromFire = new(writePerm: NetworkVariableWritePermission.Owner);
+    private NetworkVariable<bool> _netIsReady = new(writePerm: NetworkVariableWritePermission.Owner);
 
     // ================== Setup ==================
     private void OnEnable()
@@ -32,6 +34,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _playerHealth._netIsLiving.OnValueChanged += UpdateDeathIndicator;
 
         _netTookFromFire.OnValueChanged += UpdateCampfireIcon;
+        _netIsReady.OnValueChanged += UpdateReadyIcon;
     }
 
     private void OnDisable()
@@ -40,9 +43,13 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _playerHealth._netIsLiving.OnValueChanged -= UpdateDeathIndicator;
 
         _netTookFromFire.OnValueChanged -= UpdateCampfireIcon;
-        
+        _netIsReady.OnValueChanged -= UpdateReadyIcon;
+
         if (IsOwner)
+        {
             GameManager.OnStateMorning -= ToggleCampfireIconOff;
+            GameManager.OnStateChange -= ToggleReadyIconIconOff;
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -50,6 +57,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         if (IsOwner)
         {
             GameManager.OnStateMorning += ToggleCampfireIconOff;
+            GameManager.OnStateChange += ToggleReadyIconIconOff;
         }
     }
 
@@ -93,6 +101,23 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
             return true;
 
         return false;
+    }
+
+    // ================== Ready ==================
+    public void ToggleReadyIconActive()
+    {
+        _netIsReady.Value = true;
+    }
+
+    public void ToggleReadyIconIconOff()
+    {
+        Debug.Log("Toggling ready icon off");
+        _netIsReady.Value = false;
+    }
+
+    private void UpdateReadyIcon(bool prev, bool next)
+    {
+        _readyIcon.SetActive(next);
     }
 
     // ================== Food ==================

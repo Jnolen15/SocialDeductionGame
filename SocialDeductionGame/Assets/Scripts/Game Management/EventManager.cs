@@ -13,6 +13,7 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private Stockpile _stockpile;
 
     [SerializeField] private NetworkVariable<int> _netCurrentNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netNumEventPlayers = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netPreviousNightEventID = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netEarnedBonusNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
@@ -52,7 +53,7 @@ public class EventManager : NetworkBehaviour
     #region UI Elements
     private void UpdateEventUI()
     {
-        _gameInfoUI.SetEvent(_netCurrentNightEventID.Value);
+        _gameInfoUI.SetEvent(_netCurrentNightEventID.Value, _netNumEventPlayers.Value);
     }
 
     // Updates small event card with pass / fail text
@@ -61,7 +62,7 @@ public class EventManager : NetworkBehaviour
     {
         // Show ressults
         _nightEventResults.gameObject.SetActive(true);
-        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, passed, bonus);
+        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus);
     }
     #endregion
 
@@ -76,7 +77,7 @@ public class EventManager : NetworkBehaviour
     public void ShowRecap()
     {
         _nightEventRecap.gameObject.SetActive(true);
-        _nightEventRecap.Setup(_netPreviousNightEventID.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
+        _nightEventRecap.Setup(_netPreviousNightEventID.Value, _netNumEventPlayers.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
     }
     #endregion
 
@@ -90,6 +91,10 @@ public class EventManager : NetworkBehaviour
             return;
 
         _netCurrentNightEventID.Value = eventID;
+
+        _netNumEventPlayers.Value = PlayerConnectionManager.Instance.GetNumLivingPlayers();
+
+        Debug.Log($"<color=yellow>SERVER: </color>Setting event {_netCurrentNightEventID.Value} on player count {_netNumEventPlayers.Value}");
     }
 
     private void PickRandomEvent()
@@ -245,7 +250,7 @@ public class EventManager : NetworkBehaviour
             }
         }
 
-        int spRequirement = nEvent.GetSuccessPoints(PlayerConnectionManager.Instance.GetNumLivingPlayers());
+        int spRequirement = nEvent.GetSuccessPoints(_netNumEventPlayers.Value);
         // If number of points >= number of required points, success
         if (successPoints >= spRequirement)
         {
@@ -254,7 +259,7 @@ public class EventManager : NetworkBehaviour
 
             // If number of points >= extra bonus
             // Extra bonus calculated with number of connected players not living players
-            if ((successPoints - spRequirement) >= nEvent.SPBonusCalculation(PlayerConnectionManager.Instance.GetNumConnectedPlayers()))
+            if ((successPoints - spRequirement) >= nEvent.SPBonusCalculation(_netNumEventPlayers.Value))
             {
                 Debug.Log("<color=yellow>SERVER: </color>Earned Bonus!");
                 _netEarnedBonusNightEvent.Value = true;

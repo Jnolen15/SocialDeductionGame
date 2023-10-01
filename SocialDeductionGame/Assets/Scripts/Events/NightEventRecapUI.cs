@@ -21,9 +21,9 @@ public class NightEventRecapUI : MonoBehaviour
         GameManager.OnStateMorning -= CloseRecap;
     }
 
-    public void Setup(int eventID, bool passed, bool bonus)
+    public void Setup(int eventID, int playerNum, bool passed, bool bonus)
     {
-        _eventCard.Setup(eventID);
+        _eventCard.Setup(eventID, playerNum);
 
         NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
         if (passed)

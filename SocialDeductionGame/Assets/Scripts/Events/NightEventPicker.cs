@@ -33,7 +33,7 @@ public class NightEventPicker : MonoBehaviour
         foreach (int eventID in randEvents)
         {
             GameObject eventCard = Instantiate(_eventSelectable, _eventCardArea);
-            eventCard.GetComponent<NightEventCardVisual>().Setup(eventID);
+            eventCard.GetComponent<NightEventCardVisual>().Setup(eventID, PlayerConnectionManager.Instance.GetNumLivingPlayers());
             AddToList(eventCard.GetComponent<NightEventSelectable>());
             Debug.Log("<color=blue>CLIENT: </color>Made new event card " + eventCard.name);
         }

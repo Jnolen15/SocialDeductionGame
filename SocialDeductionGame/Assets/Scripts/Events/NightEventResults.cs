@@ -18,12 +18,12 @@ public class NightEventResults : MonoBehaviour
     [SerializeField] private GameObject _playerNamePref;
 
     // ================== Setup ==================
-    public void DisplayResults(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus)
+    public void DisplayResults(int[] cardIDs, ulong[] contributorIDS, int eventID, int playerNum, bool passed, bool bonus)
     {
         ClearBoard();
 
         // Set up event card
-        _nightEventCard.Setup(eventID);
+        _nightEventCard.Setup(eventID, playerNum);
 
         // Pass / Fail Text
         _eventPassText.SetActive(false);

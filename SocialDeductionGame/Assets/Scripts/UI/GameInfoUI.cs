@@ -117,17 +117,17 @@ public class GameInfoUI : MonoBehaviour
     #endregion
 
     #region Event Info
-    public void SetEvent(int eventID)
+    public void SetEvent(int eventID, int playerNum)
     {
         Debug.Log("Updating event UI info");
 
         _currentNightEventID = eventID;
 
-        UpdateEventThumbnail();
-        UpdateEventCard();
+        UpdateEventThumbnail(playerNum);
+        UpdateEventCard(playerNum);
     }
 
-    private void UpdateEventThumbnail()
+    private void UpdateEventThumbnail(int playerNum)
     {
         // Clear tags (in case of reused card assets)
         foreach (Transform t in _eventThumbnailTagIconSlot)
@@ -139,7 +139,7 @@ public class GameInfoUI : MonoBehaviour
         // Setup new
         NightEvent eventData = CardDatabase.Instance.GetEvent(_currentNightEventID);
         _eventThumbnailTitle.text = eventData.GetEventName();
-        _eventThumbnailRequiredNum.text = eventData.GetSuccessPoints(PlayerConnectionManager.Instance.GetNumLivingPlayers()) + " = ";
+        _eventThumbnailRequiredNum.text = eventData.GetSuccessPoints(playerNum) + " = ";
         foreach (CardTag t in eventData.GetRequiredCardTags())
         {
             TagIcon icon = Instantiate(_eventTagIconPref, _eventThumbnailTagIconSlot).GetComponent<TagIcon>();
@@ -147,13 +147,13 @@ public class GameInfoUI : MonoBehaviour
         }
     }
 
-    private void UpdateEventCard()
+    private void UpdateEventCard(int playerNum)
     {
         //_eventCardSmall.gameObject.SetActive(true);
         _eventCardLarge.gameObject.SetActive(true);
 
-        _eventCardSmall.Setup(_currentNightEventID);
-        _eventCardLarge.Setup(_currentNightEventID);
+        _eventCardSmall.Setup(_currentNightEventID, playerNum);
+        _eventCardLarge.Setup(_currentNightEventID, playerNum);
     }
 
     public void ToggleSmallCard()
