@@ -144,8 +144,6 @@ public class PlayerConnectionManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayerPrefabs;
-
-            GameManager.OnSetup += AssignRoles;
         }
     }
 
@@ -156,8 +154,6 @@ public class PlayerConnectionManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayerPrefabs;
-
-            GameManager.OnSetup -= AssignRoles;
         }
         base.OnNetworkDespawn();
     }
@@ -263,6 +259,9 @@ public class PlayerConnectionManager : NetworkBehaviour
             // Update player living tracker
             _netNumLivingPlayers.Value++;
         }
+
+        //Assign player teams
+        AssignRoles();
 
         // Finish Setup Event
         OnPlayerSetupComplete?.Invoke();
