@@ -152,7 +152,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8195182935889675956
 RectTransform:
   m_ObjectHideFlags: 0
@@ -219,6 +219,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 422876934721851994, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 152
+      objectReference: {fileID: 0}
+    - target: {fileID: 422876934721851994, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -126
+      objectReference: {fileID: 0}
     - target: {fileID: 5427489456640813846, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -305,7 +313,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5427489456640813847, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
       propertyPath: m_Name
-      value: UIGearCardVisual Variant
+      value: UIGearCardVisual
       objectReference: {fileID: 0}
     - target: {fileID: 5810370142698414227, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
       propertyPath: m_Sprite

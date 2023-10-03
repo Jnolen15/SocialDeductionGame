@@ -7,6 +7,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4726086233706364256, guid: 72846bb83a6547a4d9685954028794ba, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9000991329413360746, guid: 72846bb83a6547a4d9685954028794ba, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -142,7 +146,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 2144589954915318719}
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
@@ -168,5 +172,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f37d540b80f84d48aa7898df277313b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2144589954915318719 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7429028259676694511, guid: 72846bb83a6547a4d9685954028794ba, type: 3}
+  m_PrefabInstance: {fileID: 8852432981559024720}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 446939417493041211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

@@ -19,7 +19,6 @@ public class HandMinimizer : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     // =================== Function ===================
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("Pointer Entered");
         _hovering = true;
         _bufferTimer = _bufferTimerMax;
 
@@ -31,8 +30,6 @@ public class HandMinimizer : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         if (_minimized)
             return;
-
-        Debug.Log("Pointer Exit");
 
         _hovering = false;
         _bufferTimer = _bufferTimerMax;
