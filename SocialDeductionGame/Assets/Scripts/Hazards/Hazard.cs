@@ -72,18 +72,37 @@ public abstract class Hazard : ScriptableObject
 
     public virtual bool TestForPrevention(HandManager handMan)
     {
-        if(_preventionTag == null)
+        if(_dangerLevel == DangerLevel.High)
         {
-            Debug.Log("Unpreventable hazard!");
+            Debug.Log("High danger! Unpreventable hazard!");
             return false;
         }
 
         // Tests to see if can be prevented by player gear
-        int gearID = handMan.CheckGearTagsFor(_preventionTag);
+        int gearID = 0;
+        if (_preventionTag != null)
+        {
+            gearID = handMan.CheckGearTagsFor(_preventionTag);
+            if (gearID != 0)
+            {
+                handMan.UseGear(gearID);
+                return true;
+            }
+        }
+
+        // Tests to see if can be prevented with Talisman of protection
+        gearID = handMan.CheckGearTagsFor("Protection");
         if (gearID != 0)
         {
-            handMan.UseGear(gearID);
-            return true;
+            // 1/3 chance success
+            int rand = Random.Range(1, 4);
+            Debug.Log("Rolling for talisman of protection: " + rand);
+            if(rand == 1)
+            {
+                Debug.Log("Roll == 1. Success!");
+                handMan.UseGear(gearID);
+                return true;
+            }
         }
 
         return false;

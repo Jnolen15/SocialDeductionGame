@@ -348,6 +348,23 @@ public class HandManager : NetworkBehaviour
         Debug.Log($"Unequipping a gear card from slot {gearSlot}");
     }
 
+    public int CheckGearTagsFor(string tag)
+    {
+        Debug.Log("Checking gear for tag " + tag);
+
+        foreach (Gear gear in _equipedGear)
+        {
+            if (gear != null && gear.HasTag(tag))
+            {
+                Debug.Log("Found matching tag on " + gear.GetCardName());
+                return gear.GetCardID();
+            }
+        }
+
+        Debug.Log("Did not find mathcing tag in either slot");
+        return 0;
+    }
+
     public int CheckGearTagsFor(CardTag tag)
     {
         Debug.Log("Checking gear for tag " + tag);
