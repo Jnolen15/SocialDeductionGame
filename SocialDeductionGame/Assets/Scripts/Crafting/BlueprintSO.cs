@@ -9,6 +9,8 @@ public class BlueprintSO : ScriptableObject
     [Header("Data")]
     [SerializeField] private int _craftedCardID;
     [SerializeField] private string _craftedCardName;
+    [TextArea]
+    [SerializeField] private string _craftedCardDescription;
     [Header("Components")]
     [SerializeField] private List<CardTag> _componentTags;
 
@@ -21,6 +23,11 @@ public class BlueprintSO : ScriptableObject
     public string GetCardName()
     {
         return _craftedCardName;
+    }
+
+    public string GetCardDescription()
+    {
+        return _craftedCardDescription;
     }
 
     public List<CardTag> GetCardComponents()

@@ -9,6 +9,7 @@ public class CraftingUI : MonoBehaviour
     [SerializeField] private Transform _blueprintZone;
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _blueprintEntryPref;
+    [SerializeField] private TextMeshProUGUI _description;
     [SerializeField] private GameObject _cantCraftMessage;
     [SerializeField] private List<BlueprintSO> _blueprints;
     private HandManager _handMan;
@@ -42,8 +43,11 @@ public class CraftingUI : MonoBehaviour
          Destroy(_cardZone.GetChild(0).gameObject);
 
         _cantCraftMessage.SetActive(false);
+        _description.gameObject.SetActive(true);
 
         _currentBlueprint = blueprint;
+
+        _description.text = blueprint.GetCardDescription();
 
         Card newCard = Instantiate(CardDatabase.Instance.GetCard(_currentBlueprint.GetCardID()), _cardZone).GetComponent<Card>();
         newCard.SetupUI();
