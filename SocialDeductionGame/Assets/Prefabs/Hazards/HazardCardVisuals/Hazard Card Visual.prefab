@@ -480,8 +480,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281058281
-  m_fontColor: {r: 0.91372555, g: 0.76470596, b: 0.16862746, a: 1}
+    rgba: 4283421376
+  m_fontColor: {r: 0.75294125, g: 0.8235295, b: 0.30980393, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -612,7 +612,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a7f62a65fb01fc548bee21a864ba25a5, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9217ce9bbb1dfd141b1b80a3b6973772, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -634,12 +634,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcdad7c47331fca42a86a284c3c88365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _cardLow: {fileID: 21300000, guid: 9217ce9bbb1dfd141b1b80a3b6973772, type: 3}
+  _cardMed: {fileID: 21300000, guid: 2a815a2da411805448faf86f8a2d604a, type: 3}
+  _cardHigh: {fileID: 21300000, guid: a4793dc6447b6964587bf63971601e81, type: 3}
+  _colorLow: {r: 0.75294125, g: 0.8235295, b: 0.30980393, a: 1}
+  _colorMed: {r: 0.91372555, g: 0.76470596, b: 0.16078432, a: 1}
+  _colorHigh: {r: 0.85098046, g: 0.454902, b: 0.09411766, a: 1}
   _hazardCard: {fileID: 9009055430127707214}
   _slash: {fileID: 7638627770522875502}
   _hazardTitle: {fileID: 4687083019525409765}
   _hazardConsequences: {fileID: 3330637909737349414}
   _hazardType: {fileID: 2518587431851161040}
-  _hazardDangerLevel: {fileID: 2481128564581834870}
 --- !u!1 &7638627770522875502
 GameObject:
   m_ObjectHideFlags: 0

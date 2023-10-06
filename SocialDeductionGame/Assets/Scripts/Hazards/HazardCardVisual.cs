@@ -7,12 +7,20 @@ using UnityEngine.UI;
 public class HazardCardVisual : MonoBehaviour
 {
     // ================== Refrences ==================
+    [Header("variables")]
+    [SerializeField] private Sprite _cardLow;
+    [SerializeField] private Sprite _cardMed;
+    [SerializeField] private Sprite _cardHigh;
+    [SerializeField] private Color _colorLow;
+    [SerializeField] private Color _colorMed;
+    [SerializeField] private Color _colorHigh;
+
+    [Header("Refrences")]
     [SerializeField] private Image _hazardCard;
     [SerializeField] private GameObject _slash;
     [SerializeField] private TextMeshProUGUI _hazardTitle;
     [SerializeField] private TextMeshProUGUI _hazardConsequences;
     [SerializeField] private TextMeshProUGUI _hazardType;
-    [SerializeField] private TextMeshProUGUI _hazardDangerLevel;
     private int _heldHazardID;
     private Hazard _hazardData;
 
@@ -25,13 +33,22 @@ public class HazardCardVisual : MonoBehaviour
         _hazardConsequences.text = _hazardData.GetHazardConsequences();
         _hazardType.text = _hazardData.GetHazardType().ToString();
         Hazard.DangerLevel dangerLevel = _hazardData.GetHazardDangerLevel();
-        _hazardDangerLevel.text = dangerLevel.ToString();
+
         if (dangerLevel == Hazard.DangerLevel.Low)
-            _hazardDangerLevel.color = Color.green;
+        {
+            _hazardCard.sprite = _cardLow;
+            _hazardTitle.color = _colorLow;
+        }
         else if (dangerLevel == Hazard.DangerLevel.Medium)
-            _hazardDangerLevel.color = Color.yellow;
+        {
+            _hazardCard.sprite = _cardMed;
+            _hazardTitle.color = _colorMed;
+        }
         else if (dangerLevel == Hazard.DangerLevel.High)
-            _hazardDangerLevel.color = Color.red;
+        {
+            _hazardCard.sprite = _cardHigh;
+            _hazardTitle.color = _colorHigh;
+        }
     }
 
     public int GetHazardID()
