@@ -15,7 +15,8 @@ public class PlayerUI : MonoBehaviour
 
     [Header("Player Info")]
     [SerializeField] private TextMeshProUGUI _nameText;
-    [SerializeField] private TextMeshProUGUI _teamText;
+    [SerializeField] private GameObject _saboIcon;
+    [SerializeField] private GameObject _survivorIcon;
     [SerializeField] private Image _healthFill;
     [SerializeField] private Image _hungerFill;
     [SerializeField] private Image _healthFlash;
@@ -80,17 +81,17 @@ public class PlayerUI : MonoBehaviour
         _nameText.text = current.ToString();
     }
 
-    public void UpdateTeamText(PlayerData.Team current)
+    public void UpdateTeam(PlayerData.Team current)
     {
         if (current == PlayerData.Team.Survivors)
         {
-            _teamText.text = "S";
-            _teamText.color = Color.green;
+            _saboIcon.SetActive(false);
+            _survivorIcon.SetActive(true);
         }
         else if (current == PlayerData.Team.Saboteurs)
         {
-            _teamText.text = "T";
-            _teamText.color = Color.red;
+            _saboIcon.SetActive(true);
+            _survivorIcon.SetActive(false);
         }
     }
 

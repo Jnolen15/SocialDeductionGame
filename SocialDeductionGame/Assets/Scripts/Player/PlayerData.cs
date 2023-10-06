@@ -130,7 +130,7 @@ public class PlayerData : NetworkBehaviour
     private void UpdateTeamText(Team prev, Team current)
     {
         if(_playerUI != null)
-            _playerUI.UpdateTeamText(current);
+            _playerUI.UpdateTeam(current);
     }
 
     // Show night event choices if Saboteur, else show Recap
