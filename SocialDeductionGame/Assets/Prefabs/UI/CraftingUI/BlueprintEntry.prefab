@@ -126,7 +126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78221786, g: 0.8867924, b: 0.87517303, a: 1}
+  m_Color: {r: 0.5803922, g: 0.654902, b: 0.6784314, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -159,6 +159,8 @@ MonoBehaviour:
   _cardNameText: {fileID: 6003320275608838088}
   _componentTagZone: {fileID: 3426528607165497698}
   _tagIconPref: {fileID: 4149520717643752826, guid: e7001b9eab0ab2c4293b955863b7346f, type: 3}
+  _defaultColor: {r: 0.5803922, g: 0.654902, b: 0.6784314, a: 1}
+  _selectedColor: {r: 0.5254902, g: 0.6156863, b: 0.16078432, a: 1}
 --- !u!114 &9184150609578288780
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -263,8 +265,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4280492835
+  m_fontColor: {r: 0.13725491, g: 0.13725491, b: 0.13725491, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

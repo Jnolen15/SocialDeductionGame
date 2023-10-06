@@ -11,6 +11,8 @@ public class BlueprintEntry : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _cardNameText;
     [SerializeField] private Transform _componentTagZone;
     [SerializeField] private GameObject _tagIconPref;
+    [SerializeField] private Color _defaultColor;
+    [SerializeField] private Color _selectedColor;
     private CraftingUI _craftingUI;
     // =============== Variables ===============
     private BlueprintSO _blueprint;
@@ -22,8 +24,6 @@ public class BlueprintEntry : MonoBehaviour
     private void Start()
     {
         OnSelect += Deselect;
-
-        _craftingUI = GetComponentInParent<CraftingUI>();
     }
 
     private void OnDestroy()
@@ -31,9 +31,10 @@ public class BlueprintEntry : MonoBehaviour
         OnSelect -= Deselect;
     }
 
-    public void Setup(BlueprintSO blueprint)
+    public void Setup(BlueprintSO blueprint, CraftingUI craftingUI)
     {
         _blueprint = blueprint;
+        _craftingUI = craftingUI;
 
         _cardNameText.text = _blueprint.GetCardName();
 
@@ -50,7 +51,7 @@ public class BlueprintEntry : MonoBehaviour
         OnSelect?.Invoke();
 
         transform.localScale = new Vector3(1.05f, 1.05f, 1.05f);
-        _cardNameText.color = Color.blue;
+        _background.color = _selectedColor;
 
         _craftingUI.SelectBlueprint(_blueprint);
     }
@@ -58,6 +59,6 @@ public class BlueprintEntry : MonoBehaviour
     public void Deselect()
     {
         transform.localScale = Vector3.one;
-        _cardNameText.color = Color.white;
+        _background.color = _defaultColor;
     }
 }

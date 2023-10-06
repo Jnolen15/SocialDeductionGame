@@ -8,7 +8,9 @@ public class CraftingUI : MonoBehaviour
     // =============== Refrences ===============
     [SerializeField] private Transform _blueprintZone;
     [SerializeField] private Transform _cardZone;
+    [SerializeField] private Transform _recourcesZone;
     [SerializeField] private GameObject _blueprintEntryPref;
+    [SerializeField] private GameObject _resourceRequirementPref;
     [SerializeField] private TextMeshProUGUI _description;
     [SerializeField] private GameObject _cantCraftMessage;
     [SerializeField] private List<BlueprintSO> _blueprints;
@@ -29,18 +31,33 @@ public class CraftingUI : MonoBehaviour
 
     public void Setup()
     {
+        if(_blueprints.Count == 0)
+        {
+            Debug.LogError("NO BLUEPRINTS!");
+            return;
+        }
+
+
         foreach (BlueprintSO blueprint in _blueprints)
         {
             BlueprintEntry blueprintEntry = Instantiate(_blueprintEntryPref, _blueprintZone).GetComponent<BlueprintEntry>();
-            blueprintEntry.Setup(blueprint);
+            blueprintEntry.Setup(blueprint, this);
         }
+
+        // Select first blueprint by default
+        _blueprintZone.transform.GetChild(0).gameObject.GetComponent<BlueprintEntry>().Select();
     }
 
     // =============== Functions ===============
     public void SelectBlueprint(BlueprintSO blueprint)
     {
         if(_cardZone.childCount > 0)
-         Destroy(_cardZone.GetChild(0).gameObject);
+            Destroy(_cardZone.GetChild(0).gameObject);
+
+        foreach (Transform child in _recourcesZone)
+        {
+            Destroy(child.gameObject);
+        }
 
         _cantCraftMessage.SetActive(false);
         _description.gameObject.SetActive(true);
@@ -51,6 +68,12 @@ public class CraftingUI : MonoBehaviour
 
         Card newCard = Instantiate(CardDatabase.Instance.GetCard(_currentBlueprint.GetCardID()), _cardZone).GetComponent<Card>();
         newCard.SetupUI();
+
+        foreach (CardTag tag in blueprint.GetCardComponents())
+        {
+            ResourceRequirement resourceRequirement = Instantiate(_resourceRequirementPref, _recourcesZone).GetComponent<ResourceRequirement>();
+            resourceRequirement.Setup(tag);
+        }
     }
 
     public void AttemptCraft()
