@@ -20,9 +20,10 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     [SerializeField] private State _state;
 
     // Refrences
-    [SerializeField] private TextMeshPro _servingsText;
+    [SerializeField] private TextMeshProUGUI _servingsText;
     [SerializeField] private TextMeshPro _stateText;
     [SerializeField] private GameObject _foodMenu;
+    [SerializeField] private GameObject _flameObj;
     private CardManager _cardManager;
 
 
@@ -38,7 +39,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
 
     public override void OnNetworkSpawn()
     {
-        _servingsText.text = "Servings: " + _netServingsStored.Value;
+        _servingsText.text = "Food In Fire: " + _netServingsStored.Value;
     }
 
     private void Start()
@@ -98,6 +99,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     {
         _state = State.Extinguished;
         _stateText.text = _state.ToString();
+        _flameObj.SetActive(false);
         _foodMenu.SetActive(false);
     }
 
@@ -105,12 +107,14 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     {
         _state = State.Cooking;
         _stateText.text = _state.ToString();
+        _flameObj.SetActive(true);
     }
 
     public void SetStateFoodReady()
     {
         _state = State.FoodReady;
         _stateText.text = _state.ToString();
+        _flameObj.SetActive(true);
         _foodMenu.SetActive(true);
     }
     #endregion
