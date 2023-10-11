@@ -36,7 +36,7 @@ public class WeaponGear : Gear
     public override void SetupPlayable()
     {
         GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _cardArtAdjustments, _tags);
         _durabilityVisual = cardVisual.GetComponent<GearDurabilityVisual>();
         _durabilityVisual.Setup(true, _durability);
     }
@@ -45,7 +45,7 @@ public class WeaponGear : Gear
     public override void SetupSelectable()
     {
         GameObject cardVisual = Instantiate(_cardSelectablePrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _cardArtAdjustments, _tags);
         cardVisual.GetComponent<GearDurabilityVisual>().Setup(true, _durability);
     }
 
@@ -53,7 +53,7 @@ public class WeaponGear : Gear
     public override void SetupUI()
     {
         GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _cardArtAdjustments, _tags);
         cardVisual.GetComponent<GearDurabilityVisual>().Setup(true, _durability);
     }
 
