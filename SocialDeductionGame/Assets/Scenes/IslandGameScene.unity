@@ -531,7 +531,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.08627451, g: 0.1764706, b: 0.3137255, a: 1}
+  m_Color: {r: 0.14901961, g: 0.14117648, b: 0.22352943, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2504,7 +2504,7 @@ RectTransform:
   m_GameObject: {fileID: 83175669}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 311053691}
@@ -21383,7 +21383,7 @@ RectTransform:
   m_GameObject: {fileID: 885360101}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5999957, y: 0.5999957, z: 0.5999957}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1090956495}
@@ -21391,7 +21391,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: -30, y: 180.00002}
+  m_AnchoredPosition: {x: -30, y: 160}
   m_SizeDelta: {x: 259, y: 175}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &885360103
@@ -22357,15 +22357,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5171290359514187376, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5171290359514187376, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5171290359514187376, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5171290359514187376, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
       propertyPath: m_LocalPosition.x
@@ -45947,7 +45947,7 @@ RectTransform:
   m_GameObject: {fileID: 1908302229}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.3999957, y: 1.3999957, z: 1.3999957}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 25240302}

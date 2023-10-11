@@ -14,6 +14,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private GameObject _deathIndicator;
     [SerializeField] private GameObject _campfireIcon;
     [SerializeField] private GameObject _readyIcon;
+    [SerializeField] private GameObject _saboIcon;
     [SerializeField] private Transform _character;
     [SerializeField] private List<Material> _characterMatList = new();
 
@@ -85,10 +86,13 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     //
     private void UpdateNameSaboColor()
     {
-        if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs && !IsOwner
+        if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs
                 && GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
         {
-            _namePlate.color = Color.red;
+            if(!IsOwner)
+                _namePlate.color = Color.red;
+
+            _saboIcon.SetActive(true);
         }
     }
 
