@@ -36,8 +36,8 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [Header("Win Settings")]
     [SerializeField] private int _numDaysTillRescue;
-    [Header("Cheats")]
-    [SerializeField] private bool _testForWin;
+    [Header("Cheats: False by default")]
+    [SerializeField] private bool _dontTestWin;
     [SerializeField] private bool _doCheats;
 
     private LocationManager _locationManager;
@@ -82,6 +82,10 @@ public class GameManager : NetworkBehaviour
         _locationManager = this.GetComponent<LocationManager>();
 
         _netCurrentGameState.OnValueChanged += UpdateGameState;
+
+        // CHEATS
+        _dontTestWin = LogViewer.Instance.GetTestForWin();
+        _doCheats = LogViewer.Instance.GetDoCheats();
 
         if (IsServer)
         {
@@ -281,7 +285,7 @@ public class GameManager : NetworkBehaviour
     // Check for game end via survivor win
     private void CheckSurvivorWin()
     {
-        if (!_testForWin)
+        if (_dontTestWin)
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> Checking Survivor Win");
@@ -305,7 +309,7 @@ public class GameManager : NetworkBehaviour
     // Check for game end via Saboteur win
     private void CheckSaboteurWin()
     {
-        if (!_testForWin)
+        if (_dontTestWin)
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> Checking Saboteur Win");
