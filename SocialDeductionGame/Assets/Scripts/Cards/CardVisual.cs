@@ -15,7 +15,7 @@ public class CardVisual : MonoBehaviour
     [SerializeField] private Transform _tagIconSlot;
 
     // ================== Setup ==================
-    public void Setup(string name, string description, Sprite art, Vector3 artAdjust, List<CardTag> tags)
+    public void Setup(string name, string description, Sprite art, Vector3 artAdjust, Vector2 artDimensions, List<CardTag> tags)
     {
         _cardName.text = name;
         _cardDescription.text = description;
@@ -23,6 +23,8 @@ public class CardVisual : MonoBehaviour
         if(art != null)
         {
             _cardSprite.sprite = art;
+            if(artDimensions.x != 0 && artDimensions.y != 0)
+                _cardSprite.rectTransform.sizeDelta = artDimensions;
             _cardSprite.transform.localScale = new Vector3(artAdjust.x, artAdjust.x, artAdjust.x);
             _cardSprite.transform.localPosition = new Vector3(0, artAdjust.y, 0);
             _cardSprite.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, artAdjust.z));
