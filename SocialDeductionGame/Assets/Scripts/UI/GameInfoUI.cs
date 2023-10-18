@@ -20,15 +20,6 @@ public class GameInfoUI : MonoBehaviour
     [SerializeField] private Sprite _eveningTimerSprite;
     [SerializeField] private Sprite _nightTimerSprite;
 
-    [Header("Event Refrences")]
-    [SerializeField] private GameObject _eventTagIconPref;
-    [SerializeField] private TextMeshProUGUI _eventThumbnailTitle;
-    [SerializeField] private TextMeshProUGUI _eventThumbnailRequiredNum;
-    [SerializeField] private Transform _eventThumbnailTagIconSlot;
-    [SerializeField] private NightEventCardVisual _eventCardSmall;
-    [SerializeField] private NightEventCardVisual _eventCardLarge;
-    private int _currentNightEventID;
-
     [Header("Quit Menu")]
     [SerializeField] private GameObject _quitMenu;
 
@@ -37,13 +28,11 @@ public class GameInfoUI : MonoBehaviour
     private void Awake()
     {
         GameManager.OnStateChange += UpdateStateUI;
-        GameManager.OnStateForage += HideLargeCard;
     }
 
     private void OnDisable()
     {
         GameManager.OnStateChange -= UpdateStateUI;
-        GameManager.OnStateForage -= HideLargeCard;
     }
     #endregion
 
@@ -114,57 +103,5 @@ public class GameInfoUI : MonoBehaviour
     {
         _dayText.text = "Day: " + GameManager.Instance.GetCurrentDay().ToString();
     }
-    #endregion
-
-    #region Event Info
-    public void SetEvent(int eventID, int playerNum)
-    {
-        Debug.Log("Updating event UI info");
-
-        _currentNightEventID = eventID;
-
-        UpdateEventThumbnail(playerNum);
-        UpdateEventCard(playerNum);
-    }
-
-    private void UpdateEventThumbnail(int playerNum)
-    {
-        // Clear tags (in case of reused card assets)
-        foreach (Transform t in _eventThumbnailTagIconSlot)
-        {
-            if (t != _eventThumbnailTagIconSlot.GetChild(0))
-                Destroy(t.gameObject);
-        }
-
-        // Setup new
-        NightEvent eventData = CardDatabase.Instance.GetEvent(_currentNightEventID);
-        _eventThumbnailTitle.text = eventData.GetEventName();
-        _eventThumbnailRequiredNum.text = eventData.GetSuccessPoints(playerNum) + " = ";
-        foreach (CardTag t in eventData.GetRequiredCardTags())
-        {
-            TagIcon icon = Instantiate(_eventTagIconPref, _eventThumbnailTagIconSlot).GetComponent<TagIcon>();
-            icon.SetupIcon(t.visual, t.name);
-        }
-    }
-
-    private void UpdateEventCard(int playerNum)
-    {
-        //_eventCardSmall.gameObject.SetActive(true);
-        _eventCardLarge.gameObject.SetActive(true);
-
-        _eventCardSmall.Setup(_currentNightEventID, playerNum);
-        _eventCardLarge.Setup(_currentNightEventID, playerNum);
-    }
-
-    public void ToggleSmallCard()
-    {
-        _eventCardSmall.gameObject.SetActive(!_eventCardSmall.gameObject.activeSelf);
-    }
-
-    private void HideLargeCard()
-    {
-        _eventCardLarge.gameObject.SetActive(false);
-    }
-
     #endregion
 }

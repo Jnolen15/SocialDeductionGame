@@ -49,6 +49,7 @@ public class LogViewer : MonoBehaviour
 
         UpdateDontTestWinButton();
         UpdateDoCheatsButton();
+        UpdateLocalTestModeButton();
     }
 
     void OnDisable()

@@ -18,13 +18,13 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netEarnedBonusNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
 
-    private GameInfoUI _gameInfoUI;
+    private NightEventThumbnail _nightEventThumbnail;
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
-        _gameInfoUI = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponent<GameInfoUI>();
+        _nightEventThumbnail = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponentInChildren<NightEventThumbnail>();
 
         GameManager.OnStateNight += DoEvent;
 
@@ -55,14 +55,16 @@ public class EventManager : NetworkBehaviour
     #region UI Elements
     private void UpdateEventUI()
     {
-        _gameInfoUI.SetEvent(_netCurrentNightEventID.Value, _netNumEventPlayers.Value);
+        _nightEventThumbnail.SetEvent(_netCurrentNightEventID.Value, _netNumEventPlayers.Value);
     }
 
     // Updates small event card with pass / fail text
     [ClientRpc]
     private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus)
     {
-        // Show ressults
+        _nightEventThumbnail.SetEventResults(passed);
+
+        // Show results
         _nightEventResults.gameObject.SetActive(true);
         _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus);
     }
