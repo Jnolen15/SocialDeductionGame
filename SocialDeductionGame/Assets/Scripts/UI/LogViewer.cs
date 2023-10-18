@@ -13,10 +13,12 @@ public class LogViewer : MonoBehaviour
     [SerializeField] private Transform _shown;
     private bool _isShown;
 
+    [SerializeField] private GameObject _localTestModeButton;
     [SerializeField] private GameObject _dontTestWinButton;
     [SerializeField] private GameObject _doCheatsButton;
 
     [Header("Cheats")]
+    [SerializeField] private bool _localTestMode;
     [SerializeField] private bool _dontTestWin;
     [SerializeField] private bool _doCheats;
 
@@ -26,7 +28,7 @@ public class LogViewer : MonoBehaviour
     private void InitializeSingleton()
     {
         if (Instance != null && Instance != this)
-            Destroy(this);
+            Destroy(gameObject);
         else
             Instance = this;
 
@@ -84,6 +86,7 @@ public class LogViewer : MonoBehaviour
             _logPannel.transform.position = _shown.position;
     }
 
+    // Cheat buttons
     public void ToggleDontTestWin()
     {
         _dontTestWin = !_dontTestWin;
@@ -111,6 +114,20 @@ public class LogViewer : MonoBehaviour
         else
             _doCheatsButton.GetComponent<Image>().color = Color.red;
     }
+
+    public void ToggleLocalTestMode()
+    {
+        _localTestMode = !_localTestMode;
+        UpdateLocalTestModeButton();
+    }
+
+    public void UpdateLocalTestModeButton()
+    {
+        if (_localTestMode)
+            _localTestModeButton.GetComponent<Image>().color = Color.green;
+        else
+            _localTestModeButton.GetComponent<Image>().color = Color.red;
+    }
     #endregion
 
     // ==================== Script Interaction ====================
@@ -122,5 +139,10 @@ public class LogViewer : MonoBehaviour
     public bool GetDoCheats()
     {
         return _doCheats;
+    }
+
+    public bool GetLocalTestMode()
+    {
+        return _localTestMode;
     }
 }

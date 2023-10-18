@@ -35,7 +35,7 @@ public class LobbyManager : MonoBehaviour
     #region Variables
     private const string KEY_RELAY_JOIN_CODE = "KeyRelayJoinCode";
 
-    [SerializeField] private bool _enableTestMode;
+    [SerializeField] private bool _localTestMode;
     private Lobby _joinedLobby;
     private float _hearthbeatTimer;
     private float _listRefreshTimer;
@@ -56,6 +56,8 @@ public class LobbyManager : MonoBehaviour
     #region Setup
     private void Awake()
     {
+        _localTestMode = LogViewer.Instance.GetLocalTestMode();
+
         InitializeSingleton();
 
         InitializeUnityAuthentication();
@@ -67,7 +69,7 @@ public class LobbyManager : MonoBehaviour
         {
             InitializationOptions initializationOptions = new();
 
-            if (_enableTestMode)
+            if (_localTestMode)
             {
                 Debug.Log("TEST MODE ENABLED: Random profile assignemnet");
                 initializationOptions.SetProfile(Random.Range(0, 1000000).ToString());
