@@ -53,7 +53,6 @@ public class PlayerUI : MonoBehaviour
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
         GameManager.OnStateIntro += DisplayRole;
-        GameManager.OnStateForage += ToggleMap;
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
         PlayerHealth.OnDeath += DisplayDeathMessage;
@@ -67,7 +66,6 @@ public class PlayerUI : MonoBehaviour
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
         GameManager.OnStateIntro -= DisplayRole;
-        GameManager.OnStateForage -= ToggleMap;
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= DisplayDeathMessage;
@@ -254,7 +252,7 @@ public class PlayerUI : MonoBehaviour
 
     public void ToggleMap()
     {
-        if (!_playerHealth.IsLiving() || GameManager.Instance.GetCurrentGameState() != GameManager.GameState.Midday)
+        if (!_playerHealth.IsLiving() || GameManager.Instance.GetCurrentGameState() != GameManager.GameState.Morning)
             return;
 
         _islandMap.SetActive(!_islandMap.activeSelf);

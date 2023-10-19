@@ -25,13 +25,11 @@ public class GameManager : NetworkBehaviour
     [Header("State Timers")]
     [SerializeField] private float _introTimerMax;
     [SerializeField] private float _morningTimerMax;
-    [SerializeField] private float _middayTimerMax;
     [SerializeField] private float _afternoonTimerMax;
     [SerializeField] private float _eveningTimerMax;
     [SerializeField] private float _nightTimerMax;
     [SerializeField] private NetworkVariable<float> _netIntroTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netMorningTimer = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private NetworkVariable<float> _netMiddayTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
@@ -51,7 +49,6 @@ public class GameManager : NetworkBehaviour
         Pregame,    // Wait for players to load, make prefabs
         Intro,      // Assign roles and seats, game intro
         Morning,    // Show new night event
-        Midday,   // Pick location, pick cards
         Afternoon,  // Add resources to stash / fire
         Evening,    // Results of night event contribution, take food from fire, vote to exile
         Night       // Summary of night event effects / effects happen, saboteur picks new night event
@@ -71,7 +68,6 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateAction OnSetup;
     public static event ChangeStateAction OnStateIntro;
     public static event ChangeStateAction OnStateMorning;
-    public static event ChangeStateAction OnStateForage;
     public static event ChangeStateAction OnStateAfternoon;
     public static event ChangeStateAction OnStateEvening;
     public static event ChangeStateAction OnStateNight;
@@ -142,14 +138,6 @@ public class GameManager : NetworkBehaviour
                 if (_netMorningTimer.Value <= 0)
                 {
                     Debug.Log($"<color=yellow>SERVER: </color> Morning Timer up, Progressing");
-                    ProgressState();
-                }
-                break;
-            case GameState.Midday:
-                _netMiddayTimer.Value -= (Time.deltaTime * CalculateTimerMod());
-                if (_netMiddayTimer.Value <= 0)
-                {
-                    Debug.Log($"<color=yellow>SERVER: </color> Midday Timer up, Progressing");
                     ProgressState();
                 }
                 break;
@@ -253,10 +241,6 @@ public class GameManager : NetworkBehaviour
                     CheckSurvivorWin();
                 }
                 OnStateMorning?.Invoke();
-                break;
-            case GameState.Midday:
-                if (IsServer) _netMiddayTimer.Value = _middayTimerMax;
-                OnStateForage?.Invoke();
                 break;
             case GameState.Afternoon:
                 if(IsServer) _netAfternoonTimer.Value = _afternoonTimerMax;
@@ -375,8 +359,6 @@ public class GameManager : NetworkBehaviour
                 return 1 - (_netIntroTimer.Value / _introTimerMax);
             case GameState.Morning:
                 return 1 - (_netMorningTimer.Value / _morningTimerMax);
-            case GameState.Midday:
-                return 1 - (_netMiddayTimer.Value / _middayTimerMax);
             case GameState.Afternoon:
                 return 1 - (_netAfternoonTimer.Value / _afternoonTimerMax);
             case GameState.Evening:

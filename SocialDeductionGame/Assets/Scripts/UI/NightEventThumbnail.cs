@@ -22,11 +22,13 @@ public class NightEventThumbnail : MonoBehaviour
     // =================== Setup ===================
     private void OnEnable()
     {
+        GameManager.OnStateMorning += Expand;
         GameManager.OnStateNight += ClearEventResults;
     }
 
     private void OnDisable()
     {
+        GameManager.OnStateMorning -= Expand;
         GameManager.OnStateNight -= ClearEventResults;
     }
 
@@ -66,6 +68,12 @@ public class NightEventThumbnail : MonoBehaviour
     private void UpdateEventCard(int playerNum)
     {
         _eventCardSmall.Setup(_currentNightEventID, playerNum);
+    }
+
+    private void Expand()
+    {
+        _expanded = false;
+        ToggleExpanded();
     }
 
     public void ToggleExpanded()

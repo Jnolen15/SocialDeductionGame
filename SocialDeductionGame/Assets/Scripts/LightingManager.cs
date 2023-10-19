@@ -53,7 +53,7 @@ public class LightingManager : MonoBehaviour
             return;
 
         LightPreset preset = _dayLightPreset;
-        if (curState == GameManager.GameState.Morning || curState == GameManager.GameState.Midday)
+        if (curState == GameManager.GameState.Morning)
             preset = _dayLightPreset;
         else if (curState == GameManager.GameState.Afternoon)
             preset = _afternoonLightPreset;
