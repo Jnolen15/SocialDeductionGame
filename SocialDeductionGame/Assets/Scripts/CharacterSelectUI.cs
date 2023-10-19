@@ -13,6 +13,7 @@ public class CharacterSelectUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _lobbyName;
     [SerializeField] private TextMeshProUGUI _lobbyCode;
     [SerializeField] private TextMeshProUGUI _joinedPlayers;
+    [SerializeField] private GameObject _loadScreen;
     private bool _localPlayerReady;
 
     // ============== Setup ==============
@@ -20,6 +21,7 @@ public class CharacterSelectUI : MonoBehaviour
     {
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
+        PlayerConnectionManager.OnAllPlayersReadyAlertClients += ShowLoad;
     }
 
     private void Start()
@@ -31,6 +33,7 @@ public class CharacterSelectUI : MonoBehaviour
     {
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
+        PlayerConnectionManager.OnAllPlayersReadyAlertClients -= ShowLoad;
     }
 
     // ============== Functions ==============
@@ -75,5 +78,10 @@ public class CharacterSelectUI : MonoBehaviour
         texteditor.text = _lobbyCode.text;
         texteditor.SelectAll();
         texteditor.Copy();
+    }
+
+    private void ShowLoad()
+    {
+        _loadScreen.SetActive(true);
     }
 }

@@ -21,6 +21,7 @@ public class GameManager : NetworkBehaviour
     #endregion
 
     // ================== Refrences ==================
+    #region Variables, Refrences and Events
     [Header("State Timers")]
     [SerializeField] private float _introTimerMax;
     [SerializeField] private float _morningTimerMax;
@@ -36,9 +37,11 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [Header("Win Settings")]
     [SerializeField] private int _numDaysTillRescue;
-    [Header("Cheats: False by default")]
-    [SerializeField] private bool _dontTestWin;
-    [SerializeField] private bool _doCheats;
+    [Header("Transition Screens")]
+    [SerializeField] public GameObject _waitingForPlayersTS;
+
+    private bool _dontTestWin;
+    private bool _doCheats;
 
     private LocationManager _locationManager;
 
@@ -74,6 +77,7 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateAction OnStateNight;
 
     public static event Action<bool> OnGameEnd;
+    #endregion
 
     // ================== Setup ==================
     #region Setup
@@ -239,6 +243,7 @@ public class GameManager : NetworkBehaviour
                 }
                 OnStateIntro?.Invoke();
                 _locationManager.SetInitialLocation();
+                HideWaitingForPlayersTS();
                 break;
             case GameState.Morning:
                 if (IsServer)
@@ -276,6 +281,14 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color> Incrementing Day");
         _netDay.Value++;
+    }
+    #endregion
+
+    // ================== State Transitions ==================
+    #region State Transitions
+    private void HideWaitingForPlayersTS()
+    {
+        _waitingForPlayersTS.SetActive(false);
     }
     #endregion
 

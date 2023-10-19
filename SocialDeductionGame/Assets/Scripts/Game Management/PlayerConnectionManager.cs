@@ -125,6 +125,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     public static event PlayerReadyAction OnPlayerReady;
     public static event PlayerReadyAction OnPlayerUnready;
     public static event PlayerReadyAction OnAllPlayersReady;
+    public static event PlayerReadyAction OnAllPlayersReadyAlertClients;
     public static event PlayerReadyAction OnPlayerSetupComplete;
     #endregion
 
@@ -402,18 +403,22 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        // Check if all players ready
+        // Test in game
         if (SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
         {
             // If in game scene check against number of living players
             if (_netPlayersReadied.Value >= GetNumLivingPlayers())
                 AllPlayersReady();
         }
+        // Test out of game, AKA character select
         else
         {
             // Otherwise check against total connected players
             if (_netPlayersReadied.Value >= GetNumConnectedPlayers())
+            {
                 AllPlayersReady();
+                AlertClientsAllPlayersReadyClientRpc();
+            }
         }
     }
 
@@ -428,6 +433,12 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         // Send event
         OnAllPlayersReady?.Invoke();
+    }
+
+    [ClientRpc]
+    private void AlertClientsAllPlayersReadyClientRpc()
+    {
+        OnAllPlayersReadyAlertClients?.Invoke();
     }
 
     public int GetNumReadyPlayers()
