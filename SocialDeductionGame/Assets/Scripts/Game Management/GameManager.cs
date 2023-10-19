@@ -28,15 +28,15 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private float _afternoonTimerMax;
     [SerializeField] private float _eveningTimerMax;
     [SerializeField] private float _nightTimerMax;
+    [SerializeField] private float _transitionTimerMax;
     [SerializeField] private NetworkVariable<float> _netIntroTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netMorningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<float> _netTransitionTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [Header("Win Settings")]
     [SerializeField] private int _numDaysTillRescue;
-    [Header("Transition Screens")]
-    [SerializeField] public GameObject _waitingForPlayersTS;
 
     private bool _dontTestWin;
     private bool _doCheats;
@@ -49,9 +49,13 @@ public class GameManager : NetworkBehaviour
         Pregame,    // Wait for players to load, make prefabs
         Intro,      // Assign roles and seats, game intro
         Morning,    // Show new night event
+        AfternoonTransition,
         Afternoon,  // Add resources to stash / fire
+        EveningTransition,
         Evening,    // Results of night event contribution, take food from fire, vote to exile
-        Night       // Summary of night event effects / effects happen, saboteur picks new night event
+        NightTransition,
+        Night,      // Summary of night event effects / effects happen, saboteur picks new night event
+        MorningTransition
     }
     [Header("Current State")]
     [SerializeField] private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
@@ -63,14 +67,15 @@ public class GameManager : NetworkBehaviour
     private bool _pregameComplete = false;
 
     // ================== Events ==================
-    public delegate void ChangeStateAction();
+    public delegate void ChangeStateAction(GameState prev, GameState current);
     public static event ChangeStateAction OnStateChange;
-    public static event ChangeStateAction OnSetup;
-    public static event ChangeStateAction OnStateIntro;
-    public static event ChangeStateAction OnStateMorning;
-    public static event ChangeStateAction OnStateAfternoon;
-    public static event ChangeStateAction OnStateEvening;
-    public static event ChangeStateAction OnStateNight;
+    public delegate void ChangeStateToAction();
+    public static event ChangeStateToAction OnSetup;
+    public static event ChangeStateToAction OnStateIntro;
+    public static event ChangeStateToAction OnStateMorning;
+    public static event ChangeStateToAction OnStateAfternoon;
+    public static event ChangeStateToAction OnStateEvening;
+    public static event ChangeStateToAction OnStateNight;
 
     public static event Action<bool> OnGameEnd;
     #endregion
@@ -126,46 +131,31 @@ public class GameManager : NetworkBehaviour
             case 0:
                 break;
             case GameState.Intro:
-                _netIntroTimer.Value -= (Time.deltaTime * CalculateTimerMod());
-                if (_netIntroTimer.Value <= 0)
-                {
-                    Debug.Log($"<color=yellow>SERVER: </color> Intro Timer up, Progressing");
-                    ProgressState();
-                }
+                RunTimer(_netIntroTimer);
                 break;
             case GameState.Morning:
-                _netMorningTimer.Value -= (Time.deltaTime * CalculateTimerMod());
-                if (_netMorningTimer.Value <= 0)
-                {
-                    Debug.Log($"<color=yellow>SERVER: </color> Morning Timer up, Progressing");
-                    ProgressState();
-                }
+                RunTimer(_netMorningTimer);
+                break;
+            case GameState.AfternoonTransition:
+                RunTimer(_netTransitionTimer);
                 break;
             case GameState.Afternoon:
-                _netAfternoonTimer.Value -= (Time.deltaTime * CalculateTimerMod());
-                if (_netAfternoonTimer.Value <= 0)
-                {
-                    Debug.Log($"<color=yellow>SERVER: </color> Afternoon Timer up, Progressing");
-                    ProgressState();
-                }
+                RunTimer(_netAfternoonTimer);
+                break;
+            case GameState.EveningTransition:
+                RunTimer(_netTransitionTimer);
                 break;
             case GameState.Evening:
-                _netEveningTimer.Value -= (Time.deltaTime * CalculateTimerMod());
-                //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
-                if (_netEveningTimer.Value <= 0)
-                {
-                    Debug.Log($"<color=yellow>SERVER: </color> Night Timer up, Progressing");
-                    ProgressState();
-                }
+                RunTimer(_netEveningTimer);
+                break;
+            case GameState.NightTransition:
+                RunTimer(_netTransitionTimer);
                 break;
             case GameState.Night:
-                _netNightTimer.Value -= (Time.deltaTime * CalculateTimerMod());
-                //Debug.Log($"Percent players ready: {percentReady} Player bonus: {_playerReadyTimerModCurve.Evaluate(percentReady)} current mod val: {modVal}");
-                if (_netNightTimer.Value <= 0)
-                {
-                    Debug.Log($"<color=yellow>SERVER: </color> Night Timer up, Progressing");
-                    ProgressState();
-                }
+                RunTimer(_netNightTimer);
+                break;
+            case GameState.MorningTransition:
+                RunTimer(_netTransitionTimer);
                 break;
         }
 
@@ -176,6 +166,16 @@ public class GameManager : NetworkBehaviour
 
             if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
                 _netCurrentGameState.Value = 0;
+        }
+    }
+
+    private void RunTimer(NetworkVariable<float> timer)
+    {
+        timer.Value -= (Time.deltaTime * CalculateTimerMod());
+        if (timer.Value <= 0)
+        {
+            Debug.Log($"<color=yellow>SERVER: </color> {timer} Timer up, Progressing");
+            ProgressState();
         }
     }
 
@@ -216,7 +216,7 @@ public class GameManager : NetworkBehaviour
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> Updating Game State to " + current.ToString());
-        OnStateChange?.Invoke();
+        OnStateChange?.Invoke(prev, current);
 
         if (IsServer && current != GameState.Intro)
             CheckSaboteurWin();
@@ -231,7 +231,6 @@ public class GameManager : NetworkBehaviour
                 }
                 OnStateIntro?.Invoke();
                 _locationManager.SetInitialLocation();
-                HideWaitingForPlayersTS();
                 break;
             case GameState.Morning:
                 if (IsServer)
@@ -242,18 +241,30 @@ public class GameManager : NetworkBehaviour
                 }
                 OnStateMorning?.Invoke();
                 break;
+            case GameState.AfternoonTransition:
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
+                break;
             case GameState.Afternoon:
                 if(IsServer) _netAfternoonTimer.Value = _afternoonTimerMax;
                 _locationManager.ForceLocation(LocationManager.LocationName.Camp);
                 OnStateAfternoon?.Invoke();
                 break;
+            case GameState.EveningTransition:
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
+                break;
             case GameState.Evening:
                 if (IsServer) _netEveningTimer.Value = _eveningTimerMax;
                 OnStateEvening?.Invoke();
                 break;
+            case GameState.NightTransition:
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
+                break;
             case GameState.Night:
                 if (IsServer) _netNightTimer.Value = _nightTimerMax;
                 OnStateNight?.Invoke();
+                break;
+            case GameState.MorningTransition:
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
                 break;
         }
     }
@@ -265,14 +276,6 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color> Incrementing Day");
         _netDay.Value++;
-    }
-    #endregion
-
-    // ================== State Transitions ==================
-    #region State Transitions
-    private void HideWaitingForPlayersTS()
-    {
-        _waitingForPlayersTS.SetActive(false);
     }
     #endregion
 

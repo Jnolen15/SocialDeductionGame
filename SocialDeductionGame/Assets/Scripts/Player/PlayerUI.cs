@@ -192,7 +192,7 @@ public class PlayerUI : MonoBehaviour
 
     // ================== Misc UI ==================
     #region Misc UI
-    public void StateChangeEvent()
+    public void StateChangeEvent(GameManager.GameState prev, GameManager.GameState current)
     {
         if(_introRole != null && _introRole.activeInHierarchy)
             _introRole.SetActive(false);
@@ -202,7 +202,7 @@ public class PlayerUI : MonoBehaviour
         _craftingMenu.SetActive(false);
     }
 
-    private void EnableReadyButton()
+    private void EnableReadyButton(GameManager.GameState prev, GameManager.GameState current)
     {
         if (!_playerHealth.IsLiving())
             return;

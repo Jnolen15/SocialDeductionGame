@@ -127,7 +127,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _netIsReady.Value = true;
     }
 
-    public void ToggleReadyIconIconOff()
+    public void ToggleReadyIconIconOff(GameManager.GameState prev, GameManager.GameState current)
     {
         Debug.Log("Toggling ready icon off");
         _netIsReady.Value = false;

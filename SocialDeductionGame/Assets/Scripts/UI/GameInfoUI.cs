@@ -74,11 +74,11 @@ public class GameInfoUI : MonoBehaviour
     }
 
     #region Day Info
-    private void UpdateStateUI()
+    private void UpdateStateUI(GameManager.GameState prev, GameManager.GameState current)
     {
-        _gameStateText.text = GameManager.Instance.GetCurrentGameState().ToString();
+        _gameStateText.text = current.ToString();
 
-        switch (GameManager.Instance.GetCurrentGameState())
+        switch (current)
         {
             case GameManager.GameState.Morning:
                 _stateTimerBackground.sprite = _morningTimerSprite;

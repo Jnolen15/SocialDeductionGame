@@ -46,18 +46,18 @@ public class LightingManager : MonoBehaviour
         GameManager.OnStateChange -= UpdateLighting;
     }
 
-    private void UpdateLighting()
+    private void UpdateLighting(GameManager.GameState prev, GameManager.GameState current)
     {
-        GameManager.GameState curState = GameManager.Instance.GetCurrentGameState();
-        if (curState == GameManager.GameState.Pregame)
+        if (current == GameManager.GameState.Pregame)
             return;
 
         LightPreset preset = _dayLightPreset;
-        if (curState == GameManager.GameState.Morning)
+        if (current == GameManager.GameState.Morning || current == GameManager.GameState.AfternoonTransition)
             preset = _dayLightPreset;
-        else if (curState == GameManager.GameState.Afternoon)
+        else if (current == GameManager.GameState.Afternoon || current == GameManager.GameState.EveningTransition)
             preset = _afternoonLightPreset;
-        else if (curState == GameManager.GameState.Evening || curState == GameManager.GameState.Night)
+        else if (current == GameManager.GameState.Evening || current == GameManager.GameState.NightTransition 
+                || current == GameManager.GameState.Night || current == GameManager.GameState.MorningTransition)
             preset = _nightLightPreset;
 
         //Set ambient and fog
