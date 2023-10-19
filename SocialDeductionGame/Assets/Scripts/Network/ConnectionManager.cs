@@ -46,6 +46,8 @@ public class ConnectionManager : NetworkBehaviour
     {
         NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApproval;
         NetworkManager.Singleton.StartHost();
+
+        LobbyManager.Instance.JoinLobbyVivoxChannel();
     }
 
     public void JoinGame()
@@ -54,6 +56,8 @@ public class ConnectionManager : NetworkBehaviour
 
         NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_ClientDisconnect;
         NetworkManager.Singleton.StartClient();
+
+        LobbyManager.Instance.JoinLobbyVivoxChannel();
     }
 
     private void NetworkManager_ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
