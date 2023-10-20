@@ -42,8 +42,6 @@ public class LobbyManager : MonoBehaviour
     private float _hearthbeatTimer;
     private float _listRefreshTimer;
 
-    public VivoxSetup _vivoxSetup;
-
     public delegate void LobbyAction();
     public static event LobbyAction OnStartCreateLobby;
     public static event LobbyAction OnFailCreateLobby;
@@ -61,8 +59,6 @@ public class LobbyManager : MonoBehaviour
     private void Awake()
     {
         _localTestMode = LogViewer.Instance.GetLocalTestMode();
-
-        _vivoxSetup = this.GetComponent<VivoxSetup>();
 
         InitializeSingleton();
 
@@ -85,7 +81,7 @@ public class LobbyManager : MonoBehaviour
 
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
-            _vivoxSetup.VivoxLogin();
+            VivoxManager.Instance.VivoxLogin();
         } else
         {
             Debug.Log("Unity Services already initialized!");
@@ -329,10 +325,7 @@ public class LobbyManager : MonoBehaviour
             await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
 
             // Disconnect from vivox channel
-            if (_vivoxSetup)
-                _vivoxSetup.LeaveLobbyChannel();
-            else
-                Debug.LogError("Vivox setup null refrnece");
+            VivoxManager.Instance.LeaveLobbyChannel();
 
             _joinedLobby = null;
         }
@@ -354,10 +347,7 @@ public class LobbyManager : MonoBehaviour
             await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, AuthenticationService.Instance.PlayerId);
 
             // Disconnect from vivox channel
-            if (_vivoxSetup)
-                _vivoxSetup.LeaveLobbyChannel();
-            else
-                Debug.LogError("Vivox setup null refrnece");
+            VivoxManager.Instance.LeaveLobbyChannel();
 
             _joinedLobby = null;
         }
@@ -388,12 +378,14 @@ public class LobbyManager : MonoBehaviour
     #endregion
 
     // ============== Vivox =============
+    // Join in game positional and lobby channels
     public void JoinLobbyVivoxChannel()
     {
-        if (_vivoxSetup)
-            _vivoxSetup.JoinVivoxChannel(_joinedLobby.Id);
-        else
-            Debug.LogError("Vivox setup null refrnece");
+        // Positional first (documention says always positional first)
+        VivoxManager.Instance.JoinWorldChannel(_joinedLobby.Id);
+
+        // Lobby channel
+        VivoxManager.Instance.JoinLobbyChannel(_joinedLobby.Id);
     }
 
     // ============== Helpers =============
