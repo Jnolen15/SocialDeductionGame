@@ -3097,6 +3097,7 @@ GameObject:
   - component: {fileID: 214096035922367678}
   - component: {fileID: -531654323873241125}
   - component: {fileID: 7396467555879967249}
+  - component: {fileID: 5818686872648605773}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -3292,6 +3293,19 @@ MonoBehaviour:
   - {fileID: 8201176300363492241}
   - {fileID: 8833414316130185404}
   _equipedGear: []
+--- !u!114 &5818686872648605773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3533476098479759937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b117478e080ffbf4fb2152f458034b38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerSpeaker: {fileID: 3031519131279456435}
 --- !u!1 &3657567037985154034
 GameObject:
   m_ObjectHideFlags: 0
