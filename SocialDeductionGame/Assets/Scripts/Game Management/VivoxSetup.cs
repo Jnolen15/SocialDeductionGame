@@ -23,6 +23,13 @@ public class VivoxSetup : MonoBehaviour
         //DontDestroyOnLoad(this.gameObject);
     }
 
+    private void OnDestroy()
+    {
+        // Leave voice if going direct to main menu.
+        // This for sure has to be fixed in a better way at some point
+        LeaveLobbyChannel();
+    }
+
     // ============== Vivox ==============
     #region Vivox
     public void VivoxLogin()
@@ -38,7 +45,6 @@ public class VivoxSetup : MonoBehaviour
         Account account = new Account(AuthenticationService.Instance.PlayerId);
 
         LoginSession = VivoxService.Instance.Client.GetLoginSession(account);
-        //LoginSession.PropertyChanged += VivoxLoginSession_PropertyChanged;
 
         LoginSession.BeginLogin(LoginSession.GetLoginToken(), SubscriptionMode.Accept, null, null, null, result =>
         {
@@ -49,7 +55,7 @@ public class VivoxSetup : MonoBehaviour
 
                 Debug.Log("<color=green>VIVOX: </color>login complete!");
             }
-            catch (System.Exception e)
+            catch (VivoxApiException e)
             {
                 // Unbind any login session-related events you might be subscribed to.
                 // Handle error
@@ -65,27 +71,6 @@ public class VivoxSetup : MonoBehaviour
             // Reference LoginSession_PropertyChanged()
         });
     }
-
-    // For this example, we immediately join a channel after LoginState changes to LoginState.LoggedIn.
-    // In an actual game, when to join a channel will vary by implementation.
-    /*private void VivoxLoginSession_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        var loginSession = (ILoginSession)sender;
-        if (e.PropertyName == "State")
-        {
-            if (loginSession.State == LoginState.LoggedIn)
-            {
-                bool connectAudio = true;
-                bool connectText = true;
-
-                // This puts you into an echo channel where you can hear yourself speaking.
-                // If you can hear yourself, then everything is working and you are ready to integrate Vivox into your project.
-                JoinVivoxChannel("TestChannel", ChannelType.Echo, connectAudio, connectText);
-                // To test with multiple users, try joining a non-positional channel.
-                //JoinVivoxChannel("MultipleUserTestChannel", ChannelType.NonPositional, connectAudio, connectText);
-            }
-        }
-    }*/
 
     public void JoinVivoxChannel(string lobbyId)
     {
@@ -117,8 +102,10 @@ public class VivoxSetup : MonoBehaviour
                 }
 
                 _channelSession.EndConnect(result);
+
+                Debug.Log("<color=green>VIVOX: </color>Join Vivox lobby channel " + channel.Name);
             }
-            catch (System.Exception e)
+            catch (VivoxApiException e)
             {
                 Debug.LogError($"<color=green>VIVOX: </color>Could not connect to channel: {e.Message}");
                 return;

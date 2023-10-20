@@ -328,6 +328,12 @@ public class LobbyManager : MonoBehaviour
 
             await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
 
+            // Disconnect from vivox channel
+            if (_vivoxSetup)
+                _vivoxSetup.LeaveLobbyChannel();
+            else
+                Debug.LogError("Vivox setup null refrnece");
+
             _joinedLobby = null;
         }
         catch (LobbyServiceException e)

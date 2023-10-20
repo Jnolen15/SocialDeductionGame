@@ -30,7 +30,17 @@ public class HostDisconnectedUI : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        ConnectionManager.Instance.Shutdown();
+        // Note, not entirely sure if this is right.
+        // The lobby stops existing when entered a game so only try to disconnect from it in character select scene
+
+        if (SceneLoader.IsInScene(SceneLoader.Scene.CharacterSelectScene))
+        {
+            LobbyManager.Instance.DisconnectFromLobby();
+        }
+        else
+        {
+            ConnectionManager.Instance.Shutdown();
+        }
 
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
