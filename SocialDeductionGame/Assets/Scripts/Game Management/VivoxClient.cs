@@ -8,6 +8,11 @@ public class VivoxClient : NetworkBehaviour
     // ================== Refrences ==================
     [SerializeField] private Transform _playerSpeaker;
     [SerializeField] private Vector3 _cachedPos;
+    [SerializeField] private bool _deathMuted;
+
+    public delegate void SpeakingAction();
+    public static event SpeakingAction OnBeginSpeaking;
+    public static event SpeakingAction OnEndSpeaking;
 
     // ================== Setup ==================
     #region Setup
@@ -18,7 +23,7 @@ public class VivoxClient : NetworkBehaviour
             // THIS IS TEMP! FIND A BETTER PLACE FOR IT
             //VivoxManager.Instance.LeaveLobbyChannel();
 
-            WorldVoiceActive();
+            PlayerHealth.OnDeath += DeathMute;
         }
         else
         {
@@ -35,10 +40,12 @@ public class VivoxClient : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        // ?
+        PlayerHealth.OnDeath -= DeathMute;
     }
+    #endregion
 
     // ================== Function ==================
+    #region Function
     private void Update()
     {
         if (_cachedPos != this.transform.position)
@@ -46,17 +53,32 @@ public class VivoxClient : NetworkBehaviour
             _cachedPos = this.transform.position;
             Update3DPosition(this.transform);
         }
+
+        if (_deathMuted)
+            return;
+
+        if (Input.GetButtonDown("PTT"))
+        {
+            VivoxManager.Instance.SetTransmissionAll();
+            OnBeginSpeaking?.Invoke();
+        }
+        else if (Input.GetButtonUp("PTT"))
+        {
+            VivoxManager.Instance.SetTransmissionNone();
+            OnEndSpeaking?.Invoke();
+        }
     }
 
-    private void WorldVoiceActive()
-    {
-        Debug.Log("Call to Vivox manager to set transmission to all", gameObject);
-        VivoxManager.Instance.SetTransmissionAll();
-    }
-
-    void Update3DPosition(Transform transform)
+    private void Update3DPosition(Transform transform)
     {
         VivoxManager.Instance.UpdateWorldChannelPosition(Camera.main.transform, transform);
+    }
+
+    private void DeathMute()
+    {
+        _deathMuted = true;
+        VivoxManager.Instance.SetTransmissionNone();
+        OnEndSpeaking?.Invoke();
     }
     #endregion
 }

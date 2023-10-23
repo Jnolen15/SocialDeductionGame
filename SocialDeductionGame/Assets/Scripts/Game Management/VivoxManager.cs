@@ -241,10 +241,16 @@ public class VivoxManager : MonoBehaviour
         Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to all");
         LoginSession.SetTransmissionMode(TransmissionMode.All);
 
-        foreach (ChannelId id in LoginSession.TransmittingChannels)
+        /*foreach (ChannelId id in LoginSession.TransmittingChannels)
         {
             Debug.Log("<color=green>VIVOX: </color>IN CHANNEL " + id);
-        }
+        }*/
+    }
+
+    public void SetTransmissionNone()
+    {
+        Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to none");
+        LoginSession.SetTransmissionMode(TransmissionMode.None);
     }
 
     public void UpdateWorldChannelPosition(Transform listener, Transform speaker)
