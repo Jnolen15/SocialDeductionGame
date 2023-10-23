@@ -5,6 +5,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Vivox;
 using VivoxUnity;
 using System.Threading.Tasks;
+using System;
 
 public class VivoxManager : MonoBehaviour
 {
@@ -27,6 +28,7 @@ public class VivoxManager : MonoBehaviour
     private bool _isMidInitialize;
     private bool _hasInitialized;
 
+    private Client _client;
     public ILoginSession LoginSession;
     private IChannelSession _lobbyChannelSession = null;
     private IChannelSession _worldChannelSession = null;
@@ -69,7 +71,8 @@ public class VivoxManager : MonoBehaviour
 
         Account account = new Account(AuthenticationService.Instance.PlayerId);
 
-        LoginSession = VivoxService.Instance.Client.GetLoginSession(account);
+        _client = VivoxService.Instance.Client;
+        LoginSession = _client.GetLoginSession(account);
 
         LoginSession.BeginLogin(LoginSession.GetLoginToken(), SubscriptionMode.Accept, null, null, null, result =>
         {
@@ -261,6 +264,26 @@ public class VivoxManager : MonoBehaviour
 
         _worldChannelSession.Set3DPosition(speaker.position, listener.position,
                 listener.forward, listener.up);
+    }
+    #endregion
+
+    // ============== Settings ==============
+    #region Settings
+    public void AdjustInputVolume(int value)
+    {
+        IAudioDevices devices = _client.AudioInputDevices;
+
+        if (value > 50)
+            value = 50;
+        else if (value < -50)
+            value = -50;
+
+        // Refresh list of devices to have it up to date
+        var ar = devices.BeginRefresh(new AsyncCallback((IAsyncResult result) =>
+        {
+            // Set the volume for the device
+            devices.VolumeAdjustment = value;
+        }));
     }
     #endregion
 
