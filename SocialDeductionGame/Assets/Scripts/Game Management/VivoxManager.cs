@@ -51,6 +51,8 @@ public class VivoxManager : MonoBehaviour
         // This for sure has to be fixed in a better way at some point
         //LeaveLobbyChannel();
         //LeaveWorldChannel();
+
+        _worldChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
     }
 
     // ============== Login ==============
@@ -149,7 +151,10 @@ public class VivoxManager : MonoBehaviour
                 if (channelSessionName == ChannelSeshName.Lobby)
                     _lobbyChannelSession = channelSession;
                 else if (channelSessionName == ChannelSeshName.World)
+                {
                     _worldChannelSession = channelSession;
+                    _worldChannelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
+                }
 
                 Debug.Log("<color=green>VIVOX: </color>Joined Vivox channel " + channel.Name);
             }
@@ -230,6 +235,7 @@ public class VivoxManager : MonoBehaviour
     #endregion
 
     // ============== Other ==============
+    #region Other
     public void SetTransmissionAll()
     {
         Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to all");
@@ -249,5 +255,48 @@ public class VivoxManager : MonoBehaviour
 
         _worldChannelSession.Set3DPosition(speaker.position, listener.position,
                 listener.forward, listener.up);
+    }
+    #endregion
+
+    // ============== DEBUG ==============
+    private void OnParticipantValueUpdated(object sender, ValueEventArg<string, IParticipant> valueEventArg)
+    {
+        ValidateArgs(new object[] { sender, valueEventArg }); //see code from earlier in post
+
+        var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;
+        var participant = source[valueEventArg.Key];
+
+        string username = valueEventArg.Value.Account.Name;
+        ChannelId channel = valueEventArg.Value.ParentChannelSession.Key;
+        string property = valueEventArg.PropertyName;
+
+        switch (property)
+        {
+            case "LocalMute":
+                {
+                    /*if (username != accountId.Name) //can't local mute yourself, so don't check for it
+                    {
+                        //update their muted image
+                    }*/
+                    break;
+                }
+            case "SpeechDetected":
+                {
+                    //update speaking indicator image
+                    //Debug.Log($"<color=green>VIVOX: </color>Detecting player {PlayerConnectionManager.Instance.GetLocalPlayersID()} speach");
+                    break;
+                }
+            default:
+                break;
+        }
+    }
+
+    private static void ValidateArgs(object[] objs)
+    {
+        foreach (var obj in objs)
+        {
+            if (obj == null)
+                throw new System.ArgumentNullException(obj.GetType().ToString(), "Specify a non-null/non-empty argument.");
+        }
     }
 }

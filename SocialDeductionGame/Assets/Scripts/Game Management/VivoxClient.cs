@@ -15,11 +15,13 @@ public class VivoxClient : NetworkBehaviour
     {
         if (IsOwner)
         {
-            GameManager.OnSetup += WorldVoiceActive;
+            // THIS IS TEMP! FIND A BETTER PLACE FOR IT
+            //VivoxManager.Instance.LeaveLobbyChannel();
+
+            WorldVoiceActive();
         }
         else
         {
-            //Destroy(this);
             enabled = false;
         }
     }
@@ -33,7 +35,7 @@ public class VivoxClient : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        GameManager.OnSetup -= WorldVoiceActive;
+        // ?
     }
 
     // ================== Function ==================
@@ -48,6 +50,7 @@ public class VivoxClient : NetworkBehaviour
 
     private void WorldVoiceActive()
     {
+        Debug.Log("Call to Vivox manager to set transmission to all", gameObject);
         VivoxManager.Instance.SetTransmissionAll();
     }
 
