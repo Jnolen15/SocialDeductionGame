@@ -8,6 +8,7 @@ using VivoxUnity;
 public class VoiceSettings : MonoBehaviour
 {
     // =================== Refrences ===================
+    [SerializeField] private Slider _inputVolSlider;
     [SerializeField] private TMP_Dropdown _inputDropdown;
     [SerializeField] private TMP_Dropdown _outputDropdown;
 
@@ -20,6 +21,8 @@ public class VoiceSettings : MonoBehaviour
     {
         SetupInputOptions();
         SetupOutputOptions();
+
+        _inputVolSlider.value = PlayerPrefs.GetFloat("InputVol");
     }
 
     private void SetupInputOptions()
@@ -67,6 +70,9 @@ public class VoiceSettings : MonoBehaviour
     public void OnInputSliderChanged(float value)
     {
         Debug.Log("Adjusting input volume to " + value);
+
+        PlayerPrefs.SetFloat("InputVol", value);
+
         VivoxManager.Instance.AdjustInputVolume((int)value);
     }
 
