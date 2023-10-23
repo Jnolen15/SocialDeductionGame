@@ -265,6 +265,11 @@ public class VivoxManager : MonoBehaviour
         _worldChannelSession.Set3DPosition(speaker.position, listener.position,
                 listener.forward, listener.up);
     }
+
+    public Client GetClientData()
+    {
+        return _client;
+    }
     #endregion
 
     // ============== Settings ==============
@@ -284,6 +289,40 @@ public class VivoxManager : MonoBehaviour
             // Set the volume for the device
             devices.VolumeAdjustment = value;
         }));
+    }
+
+    public void SetInputDevice(IAudioDevice targetInput = null)
+    {
+        IAudioDevices inputDevices = _client.AudioInputDevices;
+        if (targetInput != null && targetInput != _client.AudioInputDevices.ActiveDevice)
+        {
+            Debug.Log("<color=green>VIVOX: </color>Swapping Input device " + targetInput.Name);
+
+            _client.AudioInputDevices.BeginSetActiveDevice(targetInput, ar =>
+            {
+                if (ar.IsCompleted)
+                {
+                    _client.AudioInputDevices.EndSetActiveDevice(ar);
+                }
+            });
+        }
+    }
+
+    public void SetOutputDevice(IAudioDevice targetOutput = null)
+    {
+        IAudioDevices outputDevices = _client.AudioOutputDevices;
+        if (targetOutput != null && targetOutput != _client.AudioOutputDevices.ActiveDevice)
+        {
+            Debug.Log("<color=green>VIVOX: </color>Swapping Output device " + targetOutput.Name);
+
+            _client.AudioOutputDevices.BeginSetActiveDevice(targetOutput, ar =>
+            {
+                if (ar.IsCompleted)
+                {
+                    _client.AudioOutputDevices.EndSetActiveDevice(ar);
+                }
+            });
+        }
     }
     #endregion
 
