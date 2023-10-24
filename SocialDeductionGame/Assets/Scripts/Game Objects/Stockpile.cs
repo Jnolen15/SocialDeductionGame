@@ -7,7 +7,8 @@ using TMPro;
 public class Stockpile : NetworkBehaviour, ICardPlayable
 {
     // ================== Refrences ==================
-    [SerializeField] private TextMeshPro _numCards;
+    [SerializeField] private GameObject _numCardsPannel;
+    [SerializeField] private TextMeshProUGUI _numCards;
 
     // ================== Variables ==================
     [SerializeField] private bool _acceptingCards;
@@ -20,6 +21,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     {
         _netCardsInStockpile.OnValueChanged += UpdateCardsText;
 
+        GameManager.OnStateIntro += SetNumVisible;
         GameManager.OnStateMorning += ClearAll;
         GameManager.OnStateAfternoon += ToggleAcceptingCards;
         GameManager.OnStateEvening += ToggleAcceptingCards;
@@ -29,6 +31,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     {
         _netCardsInStockpile.OnValueChanged -= UpdateCardsText;
 
+        GameManager.OnStateIntro -= SetNumVisible;
         GameManager.OnStateMorning -= ClearAll;
         GameManager.OnStateAfternoon -= ToggleAcceptingCards;
         GameManager.OnStateEvening -= ToggleAcceptingCards;
@@ -38,11 +41,16 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     }
 
     // ================== Text ==================
-    private void UpdateCardsText(int prev, int next)
+    private void SetNumVisible()
     {
-        _numCards.text = "Cards: " + next;
+        if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+            _numCardsPannel.SetActive(true);
     }
 
+    private void UpdateCardsText(int prev, int next)
+    {
+        _numCards.text = next.ToString();
+    }
 
     // ================== Interface ==================
     // Stockpile accepts any card types ATM
@@ -52,7 +60,8 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     }
 
 
-    // ================== Functions ==================
+    // ================== Cards ==================
+    #region Cards
     // only accepts cards during afternoon phase
     private void ToggleAcceptingCards()
     {
@@ -63,7 +72,6 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     {
         _stockpileCardIDs.Clear();
         _contributorIDs.Clear();
-        //_netCardsInStockpile.Value = 0;
     }
 
     public void AddCard(int cardID, ulong playerID)
@@ -71,6 +79,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         AddCardsServerRpc(cardID, playerID);
     }
 
+    // Add card and player ID to server
     [ServerRpc(RequireOwnership = false)]
     public void AddCardsServerRpc(int cardID, ulong playerID)
     {
@@ -79,7 +88,10 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
             _contributorIDs.Add(playerID);
         _netCardsInStockpile.Value++;
     }
+    #endregion
 
+    // ================== Helpers ==================
+    #region Helpers
     public int GetNumCards()
     {
         return _netCardsInStockpile.Value;
@@ -105,4 +117,5 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         _contributorIDs.Sort(); // Sorts list so it isnt in order of who contributed first
         return _contributorIDs.ToArray();
     }
+    #endregion
 }
