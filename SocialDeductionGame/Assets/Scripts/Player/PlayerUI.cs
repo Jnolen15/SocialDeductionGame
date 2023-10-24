@@ -23,6 +23,8 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private Image _hungerFlash;
     [SerializeField] private Image _healthIcon;
     [SerializeField] private Image _hungerIcon;
+    [SerializeField] private TextMeshProUGUI _healthNum;
+    [SerializeField] private TextMeshProUGUI _hungerNum;
     [SerializeField] private List<Sprite> _healthIconStages;
     [SerializeField] private List<Sprite> _hungerIconStages;
     [SerializeField] private TextMeshProUGUI _dangerText;
@@ -132,6 +134,9 @@ public class PlayerUI : MonoBehaviour
 
         // Update Fill ammount
         _healthFill.fillAmount = (newTotal / _playerHealth.GetMaxHP());
+
+        // Update number
+        _healthNum.text = newTotal.ToString();
     }
 
     private void UpdateHunger(float ModifiedAmmount, float newTotal)
@@ -166,6 +171,9 @@ public class PlayerUI : MonoBehaviour
 
         // Update Fill ammount
         _hungerFill.fillAmount = (newTotal / _playerHealth.GetMaxHunger());
+
+        // Update number
+        _hungerNum.text = newTotal.ToString();
     }
 
     public void UpdateDanger(int prev, int current)
