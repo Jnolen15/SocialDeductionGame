@@ -18,7 +18,7 @@ public class ConnectionManager : NetworkBehaviour
     private void InitializeSingleton()
     {
         if (Instance != null && Instance != this)
-            Destroy(this);
+            Destroy(gameObject);
         else
             Instance = this;
 

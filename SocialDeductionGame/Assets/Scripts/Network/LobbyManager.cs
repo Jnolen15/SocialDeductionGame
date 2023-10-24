@@ -25,7 +25,7 @@ public class LobbyManager : MonoBehaviour
     private void InitializeSingleton()
     {
         if (Instance != null && Instance != this)
-            Destroy(this);
+            Destroy(gameObject);
         else
             Instance = this;
 
@@ -49,6 +49,8 @@ public class LobbyManager : MonoBehaviour
     public static event LobbyAction OnFailQuickJoin;
     public static event LobbyAction OnStartCodeJoin;
     public static event LobbyAction OnFailCodeJoin;
+    public static event LobbyAction OnLoginComplete;
+    public static event LobbyAction OnAlreadyLoggedIn;
 
     public delegate void LobbyListAction(List<Lobby> lobbyList);
     public static event LobbyListAction OnLobbyListChanged;
@@ -61,7 +63,10 @@ public class LobbyManager : MonoBehaviour
         _localTestMode = LogViewer.Instance.GetLocalTestMode();
 
         InitializeSingleton();
+    }
 
+    private void Start()
+    {
         InitializeUnityAuthentication();
     }
 
@@ -82,8 +87,11 @@ public class LobbyManager : MonoBehaviour
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
             VivoxManager.Instance.VivoxLogin();
+
+            OnLoginComplete?.Invoke();
         } else
         {
+            OnAlreadyLoggedIn?.Invoke();
             Debug.Log("Unity Services already initialized!");
         }
     }
@@ -147,7 +155,7 @@ public class LobbyManager : MonoBehaviour
         HandleHeartbeat();
 
         // Auto-Refresh lobby list
-        if (!SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
+        if (SceneLoader.IsInScene(SceneLoader.Scene.LobbyScene))
         {
             if (_joinedLobby == null && AuthenticationService.Instance.IsSignedIn)
             {

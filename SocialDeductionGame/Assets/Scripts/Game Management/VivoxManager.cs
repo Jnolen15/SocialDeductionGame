@@ -15,7 +15,7 @@ public class VivoxManager : MonoBehaviour
     private void InitializeSingleton()
     {
         if (Instance != null && Instance != this)
-            Destroy(this);
+            Destroy(gameObject);
         else
             Instance = this;
 
@@ -39,6 +39,10 @@ public class VivoxManager : MonoBehaviour
         World,
         Sabo
     }
+
+    public delegate void VivoxAction();
+    public static event VivoxAction OnLoginSuccess;
+    public static event VivoxAction OnLoginFailure;
     #endregion
 
     // ============== Setup ==============
@@ -53,8 +57,6 @@ public class VivoxManager : MonoBehaviour
         // This for sure has to be fixed in a better way at some point
         //LeaveLobbyChannel();
         //LeaveWorldChannel();
-
-        _worldChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
     }
 
     // ============== Login ==============
@@ -80,13 +82,14 @@ public class VivoxManager : MonoBehaviour
             {
                 LoginSession.EndLogin(result);
                 _hasInitialized = true;
-
+                OnLoginSuccess?.Invoke();
                 Debug.Log("<color=green>VIVOX: </color>login complete!");
             }
             catch (VivoxApiException e)
             {
                 // Unbind any login session-related events you might be subscribed to.
                 // Handle error
+                OnLoginFailure?.Invoke();
                 Debug.LogError($"<color=green>VIVOX: </color>Could not login: {e.Message}");
                 return;
             }
@@ -175,6 +178,8 @@ public class VivoxManager : MonoBehaviour
     public void LeaveWorldChannel()
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox world channel!");
+
+        _worldChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
 
         LeaveChannel(_worldChannelSession);
     }
