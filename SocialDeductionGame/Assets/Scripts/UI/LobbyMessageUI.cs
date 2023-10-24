@@ -20,6 +20,7 @@ public class LobbyMessageUI : MonoBehaviour
         LobbyManager.OnFailQuickJoin += FailQuickJoinMessage;
         LobbyManager.OnStartCodeJoin += StartCodeJoinMessage;
         LobbyManager.OnFailCodeJoin += FailCodeJoinMessage;
+        VivoxManager.OnLoginFailure += VivoxLoginfail;
         Hide();
     }
 
@@ -33,6 +34,7 @@ public class LobbyMessageUI : MonoBehaviour
         LobbyManager.OnFailQuickJoin -= FailQuickJoinMessage;
         LobbyManager.OnStartCodeJoin -= StartCodeJoinMessage;
         LobbyManager.OnFailCodeJoin -= FailCodeJoinMessage;
+        VivoxManager.OnLoginFailure -= VivoxLoginfail;
     }
 
     // ============== UI Functions ==============
@@ -85,6 +87,11 @@ public class LobbyMessageUI : MonoBehaviour
     public void FailCodeJoinMessage()
     {
         DisplayMessage("Failed to join lobby!");
+    }
+
+    public void VivoxLoginfail()
+    {
+        DisplayMessage("Vivox login failure! Voice funtion will not work, restart game.");
     }
 
     private void Show()

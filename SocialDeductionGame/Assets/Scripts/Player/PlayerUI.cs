@@ -32,12 +32,15 @@ public class PlayerUI : MonoBehaviour
 
     [Header("Other")]
     [SerializeField] private GameObject _readyButton;
+    [SerializeField] private GameObject _readyButtonIcon;
     [SerializeField] private Sprite _readyNormal;
     [SerializeField] private Sprite _readySpeedUp;
     [SerializeField] private GameObject _islandMap;
     [SerializeField] private GameObject _craftingMenu;
     [SerializeField] private GameObject _introRole;
     [SerializeField] private TextMeshProUGUI _movementText;
+    [SerializeField] private GameObject _speakingIndicator;
+    [SerializeField] private GameObject _mutedIndicator;
     #endregion
 
     // ================== Setup ==================
@@ -55,7 +58,9 @@ public class PlayerUI : MonoBehaviour
         GameManager.OnStateIntro += DisplayRole;
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
-        PlayerHealth.OnDeath += DisplayDeathMessage;
+        PlayerHealth.OnDeath += OnDeath;
+        VivoxClient.OnBeginSpeaking += SpeakingIndicatorOn;
+        VivoxClient.OnEndSpeaking += SpeakingIndicatorOff;
     }
 
     private void OnDisable()
@@ -68,7 +73,9 @@ public class PlayerUI : MonoBehaviour
         GameManager.OnStateIntro -= DisplayRole;
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
-        PlayerHealth.OnDeath -= DisplayDeathMessage;
+        PlayerHealth.OnDeath -= OnDeath;
+        VivoxClient.OnBeginSpeaking -= SpeakingIndicatorOn;
+        VivoxClient.OnEndSpeaking -= SpeakingIndicatorOff;
     }
     #endregion
 
@@ -180,9 +187,13 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
-    private void DisplayDeathMessage()
+    private void OnDeath()
     {
+        DisableReadyButton();
+
         _deathMessage.SetActive(true);
+
+        MutedIndicatorOn();
 
         // Close Menus if player died
         _islandMap.SetActive(false);
@@ -207,7 +218,7 @@ public class PlayerUI : MonoBehaviour
         if (!_playerHealth.IsLiving())
             return;
 
-        _readyButton.SetActive(true);
+        _readyButtonIcon.SetActive(true);
     }
 
     public void DisableReadyButton()
@@ -217,12 +228,12 @@ public class PlayerUI : MonoBehaviour
 
     public void Ready()
     {
-        _readyButton.GetComponent<Image>().sprite = _readySpeedUp;
+        _readyButtonIcon.GetComponent<Image>().sprite = _readySpeedUp;
     }
 
     public void Unready()
     {
-        _readyButton.GetComponent<Image>().sprite = _readyNormal;
+        _readyButtonIcon.GetComponent<Image>().sprite = _readyNormal;
     }
 
     private void DisplayRole()
@@ -263,6 +274,26 @@ public class PlayerUI : MonoBehaviour
         _movementText.text = "Movement: " + current;
     }
 
+    public void SpeakingIndicatorOn()
+    {
+        _speakingIndicator.SetActive(true);
+    }
+
+    public void SpeakingIndicatorOff()
+    {
+        _speakingIndicator.SetActive(false);
+    }
     
+    public void MutedIndicatorOn()
+    {
+        _mutedIndicator.SetActive(true);
+        _speakingIndicator.SetActive(false);
+    }
+
+    public void MutedIndicatorOff()
+    {
+        _mutedIndicator.SetActive(false);
+    }
+
     #endregion
 }

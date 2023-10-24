@@ -15,6 +15,8 @@ public class PlayerHealth : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
     public NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
 
+    private bool _doCheats;
+
     // Events
     public delegate void ValueModified(float ModifiedAmmount, float newTotal);
     public static event ValueModified OnHealthModified;
@@ -35,6 +37,8 @@ public class PlayerHealth : NetworkBehaviour
             _netCurrentHP.OnValueChanged += HealthChanged;
             _netCurrentHunger.OnValueChanged += HungerChanged;
             _netIsLiving.OnValueChanged += Die;
+
+            _doCheats = LogViewer.Instance.GetDoCheats();
         }
 
         if (IsServer)
@@ -67,6 +71,9 @@ public class PlayerHealth : NetworkBehaviour
 
     private void Update()
     {
+        if (!_doCheats)
+            return;
+
         if (Input.GetKeyDown(KeyCode.T))
             ModifyHealth(1);
 

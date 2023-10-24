@@ -348,7 +348,6 @@ public class PlayerData : NetworkBehaviour
 
         // Deal with ready for this round
         //ReadyPlayer();
-        _playerUI.DisableReadyButton();
     }
     #endregion
 }

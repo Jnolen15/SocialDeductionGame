@@ -11,6 +11,8 @@ using Unity.Services.Relay.Models;
 using System.Threading.Tasks;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
+using Unity.Services.Vivox;
+using VivoxUnity;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -23,7 +25,7 @@ public class LobbyManager : MonoBehaviour
     private void InitializeSingleton()
     {
         if (Instance != null && Instance != this)
-            Destroy(this);
+            Destroy(gameObject);
         else
             Instance = this;
 
@@ -47,6 +49,8 @@ public class LobbyManager : MonoBehaviour
     public static event LobbyAction OnFailQuickJoin;
     public static event LobbyAction OnStartCodeJoin;
     public static event LobbyAction OnFailCodeJoin;
+    public static event LobbyAction OnLoginComplete;
+    public static event LobbyAction OnAlreadyLoggedIn;
 
     public delegate void LobbyListAction(List<Lobby> lobbyList);
     public static event LobbyListAction OnLobbyListChanged;
@@ -59,7 +63,10 @@ public class LobbyManager : MonoBehaviour
         _localTestMode = LogViewer.Instance.GetLocalTestMode();
 
         InitializeSingleton();
+    }
 
+    private void Start()
+    {
         InitializeUnityAuthentication();
     }
 
@@ -78,8 +85,13 @@ public class LobbyManager : MonoBehaviour
             await UnityServices.InitializeAsync(initializationOptions);
 
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+            VivoxManager.Instance.VivoxLogin();
+
+            OnLoginComplete?.Invoke();
         } else
         {
+            OnAlreadyLoggedIn?.Invoke();
             Debug.Log("Unity Services already initialized!");
         }
     }
@@ -143,7 +155,7 @@ public class LobbyManager : MonoBehaviour
         HandleHeartbeat();
 
         // Auto-Refresh lobby list
-        if (!SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
+        if (SceneLoader.IsInScene(SceneLoader.Scene.LobbyScene))
         {
             if (_joinedLobby == null && AuthenticationService.Instance.IsSignedIn)
             {
@@ -320,6 +332,9 @@ public class LobbyManager : MonoBehaviour
 
             await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
 
+            // Disconnect from vivox channel
+            VivoxManager.Instance.LeaveLobbyChannel();
+
             _joinedLobby = null;
         }
         catch (LobbyServiceException e)
@@ -339,6 +354,9 @@ public class LobbyManager : MonoBehaviour
 
             await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, AuthenticationService.Instance.PlayerId);
 
+            // Disconnect from vivox channel
+            VivoxManager.Instance.LeaveLobbyChannel();
+
             _joinedLobby = null;
         }
         catch (LobbyServiceException e)
@@ -357,13 +375,49 @@ public class LobbyManager : MonoBehaviour
             Debug.Log("<color=yellow>SERVER: </color>Kicking player: " + playerID);
 
             await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, playerID);
+
+            // Remove that player from lobby voice?
         }
         catch (LobbyServiceException e)
         {
             Debug.LogError(e);
         }
     }
+
+    // For some reason it says lobby event stuff is not defined, but it should be in this version? I'm really not sure why
+    /*private async void SubscribeToLobbyEvents()
+    {
+        var callbacks = new LobbyEventCallbacks();
+        callbacks.LobbyChanged += OnLobbyChanged;
+        callbacks.KickedFromLobby += OnKickedFromLobby;
+        callbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
+        try
+        {
+            m_LobbyEvents = await Lobbies.Instance.SubscribeToLobbyEventsAsync(m_Lobby.Id, callbacks);
+        }
+        catch (LobbyServiceException ex)
+        {
+            switch (ex.Reason)
+            {
+                case LobbyExceptionReason.AlreadySubscribedToLobby: Debug.LogWarning($"Already subscribed to lobby[{m_Lobby.Id}]. We did not need to try and subscribe again. Exception Message: {ex.Message}"); break;
+                case LobbyExceptionReason.SubscriptionToLobbyLostWhileBusy: Debug.LogError($"Subscription to lobby events was lost while it was busy trying to subscribe. Exception Message: {ex.Message}"); throw;
+                case LobbyExceptionReason.LobbyEventServiceConnectionError: Debug.LogError($"Failed to connect to lobby events. Exception Message: {ex.Message}"); throw;
+                default: throw;
+            }
+        }
+    }*/
     #endregion
+
+    // ============== Vivox =============
+    // Join in game positional and lobby channels
+    public void JoinLobbyVivoxChannel()
+    {
+        // Positional first (documention says always positional first)
+        VivoxManager.Instance.JoinWorldChannel(_joinedLobby.Id);
+
+        // Lobby channel
+        VivoxManager.Instance.JoinLobbyChannel(_joinedLobby.Id);
+    }
 
     // ============== Helpers =============
     #region Helpers

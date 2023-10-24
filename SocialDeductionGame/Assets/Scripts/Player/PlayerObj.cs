@@ -15,6 +15,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private GameObject _campfireIcon;
     [SerializeField] private GameObject _readyIcon;
     [SerializeField] private GameObject _saboIcon;
+    [SerializeField] private GameObject _speakingIcon;
     [SerializeField] private Transform _character;
     [SerializeField] private List<Material> _characterMatList = new();
 
@@ -24,8 +25,23 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private NetworkVariable<int> _netCharacterMatIndex = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> _netTookFromFire = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> _netIsReady = new(writePerm: NetworkVariableWritePermission.Owner);
+    private NetworkVariable<bool> _netSpeaking = new(writePerm: NetworkVariableWritePermission.Owner);
 
     // ================== Setup ==================
+    public override void OnNetworkSpawn()
+    {
+        GameManager.OnStateIntro += UpdateNameSaboColor;
+
+        if (IsOwner)
+        {
+            GameManager.OnStateMorning += ToggleCampfireIconOff;
+            GameManager.OnStateChange += ToggleReadyIconIconOff;
+
+            VivoxClient.OnBeginSpeaking += ToggleSpeakingIconActive;
+            VivoxClient.OnEndSpeaking += ToggleSpeakingIconOff;
+        }
+    }
+
     private void OnEnable()
     {
         _playerHealth = GetComponentInParent<PlayerHealth>();
@@ -36,6 +52,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
         _netTookFromFire.OnValueChanged += UpdateCampfireIcon;
         _netIsReady.OnValueChanged += UpdateReadyIcon;
+        _netSpeaking.OnValueChanged += UpdateSpeakingIcon;
     }
 
     private void OnDisable()
@@ -45,6 +62,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
         _netTookFromFire.OnValueChanged -= UpdateCampfireIcon;
         _netIsReady.OnValueChanged -= UpdateReadyIcon;
+        _netSpeaking.OnValueChanged -= UpdateSpeakingIcon;
 
         GameManager.OnStateIntro -= UpdateNameSaboColor;
 
@@ -52,17 +70,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         {
             GameManager.OnStateMorning -= ToggleCampfireIconOff;
             GameManager.OnStateChange -= ToggleReadyIconIconOff;
-        }
-    }
 
-    public override void OnNetworkSpawn()
-    {
-        GameManager.OnStateIntro += UpdateNameSaboColor;
-
-        if (IsOwner)
-        {
-            GameManager.OnStateMorning += ToggleCampfireIconOff;
-            GameManager.OnStateChange += ToggleReadyIconIconOff;
+            VivoxClient.OnBeginSpeaking -= ToggleSpeakingIconActive;
+            VivoxClient.OnEndSpeaking -= ToggleSpeakingIconOff;
         }
     }
 
@@ -121,7 +131,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         return false;
     }
 
-    // ================== Ready ==================
+    // ================== Icons ==================
+    #region Icons
     public void ToggleReadyIconActive()
     {
         _netIsReady.Value = true;
@@ -138,19 +149,6 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _readyIcon.SetActive(next);
     }
 
-    // ================== Food ==================
-    public void Eat(float servings, int hpGain = 0)
-    {
-        if (!IsOwner)
-            return;
-
-        _playerHealth.ModifyHunger(servings);
-
-        if (hpGain > 0)
-            _playerHealth.ModifyHealth(hpGain);
-    }
-
-    // These two campfire toggle functions are a quick and dirty bandaid solution. Fix later.
     public void ToggleCampfireIconActive()
     {
         _netTookFromFire.Value = true;
@@ -165,5 +163,34 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private void UpdateCampfireIcon(bool prev, bool next)
     {
         _campfireIcon.SetActive(next);
+    }
+
+    public void ToggleSpeakingIconActive()
+    {
+        _netSpeaking.Value = true;
+    }
+
+    public void ToggleSpeakingIconOff()
+    {
+        Debug.Log("Toggling campfire icon off");
+        _netSpeaking.Value = false;
+    }
+
+    private void UpdateSpeakingIcon(bool prev, bool next)
+    {
+        _speakingIcon.SetActive(next);
+    }
+    #endregion
+
+    // ================== Food ==================
+    public void Eat(float servings, int hpGain = 0)
+    {
+        if (!IsOwner)
+            return;
+
+        _playerHealth.ModifyHunger(servings);
+
+        if (hpGain > 0)
+            _playerHealth.ModifyHealth(hpGain);
     }
 }
