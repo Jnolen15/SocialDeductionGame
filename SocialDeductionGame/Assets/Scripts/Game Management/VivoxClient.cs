@@ -8,9 +8,9 @@ public class VivoxClient : NetworkBehaviour
     // ================== Refrences ==================
     [SerializeField] private Transform _playerSpeaker;
     [SerializeField] private Vector3 _cachedPos;
-    [SerializeField] private bool _deathMuted;
+    [SerializeField] private bool _deathChannel;
 
-    public delegate void SpeakingAction();
+    public delegate void SpeakingAction(VivoxManager.ChannelSeshName channelName);
     public static event SpeakingAction OnBeginSpeaking;
     public static event SpeakingAction OnEndSpeaking;
 
@@ -23,7 +23,8 @@ public class VivoxClient : NetworkBehaviour
             // THIS IS TEMP! FIND A BETTER PLACE FOR IT
             //VivoxManager.Instance.LeaveLobbyChannel();
 
-            PlayerHealth.OnDeath += DeathMute;
+            PlayerHealth.OnDeath += TransitionDeathSpeak;
+            VivoxManager.OnDeathChannelJoined += JoinedDeathChannel;
         }
         else
         {
@@ -40,7 +41,8 @@ public class VivoxClient : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        PlayerHealth.OnDeath -= DeathMute;
+        PlayerHealth.OnDeath -= TransitionDeathSpeak;
+        VivoxManager.OnDeathChannelJoined -= JoinedDeathChannel;
     }
     #endregion
 
@@ -54,18 +56,25 @@ public class VivoxClient : NetworkBehaviour
             Update3DPosition(this.transform);
         }
 
-        if (_deathMuted)
-            return;
+        if (_deathChannel)
+        {
+            PushToTalk(VivoxManager.ChannelSeshName.Death);
+        }
+        else
+            PushToTalk(VivoxManager.ChannelSeshName.World);
+    }
 
+    private void PushToTalk(VivoxManager.ChannelSeshName channel)
+    {
         if (Input.GetButtonDown("PTT"))
         {
-            VivoxManager.Instance.SetTransmissionAll();
-            OnBeginSpeaking?.Invoke();
+            VivoxManager.Instance.SetTransmissionChannel(channel);
+            OnBeginSpeaking?.Invoke(channel);
         }
         else if (Input.GetButtonUp("PTT"))
         {
             VivoxManager.Instance.SetTransmissionNone();
-            OnEndSpeaking?.Invoke();
+            OnEndSpeaking?.Invoke(channel);
         }
     }
 
@@ -74,11 +83,17 @@ public class VivoxClient : NetworkBehaviour
         VivoxManager.Instance.UpdateWorldChannelPosition(Camera.main.transform, transform);
     }
 
-    private void DeathMute()
+    private void TransitionDeathSpeak()
     {
-        _deathMuted = true;
         VivoxManager.Instance.SetTransmissionNone();
-        OnEndSpeaking?.Invoke();
+        OnEndSpeaking?.Invoke(VivoxManager.ChannelSeshName.World);
+        VivoxManager.Instance.JoinDeathChannel();
+    }
+
+    private void JoinedDeathChannel()
+    {
+        _deathChannel = true;
+        Debug.Log("<color=green>VIVOX: </color>Now speaking in death channel");
     }
     #endregion
 }

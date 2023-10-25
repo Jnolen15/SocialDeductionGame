@@ -30,19 +30,23 @@ public class VivoxManager : MonoBehaviour
 
     private Client _client;
     public ILoginSession LoginSession;
+    private string _lobbyID;
     private IChannelSession _lobbyChannelSession = null;
     private IChannelSession _worldChannelSession = null;
+    private IChannelSession _deathChannelSession = null;
 
     public enum ChannelSeshName
     {
         Lobby,
         World,
+        Death,
         Sabo
     }
 
     public delegate void VivoxAction();
     public static event VivoxAction OnLoginSuccess;
     public static event VivoxAction OnLoginFailure;
+    public static event VivoxAction OnDeathChannelJoined;
     #endregion
 
     // ============== Setup ==============
@@ -57,6 +61,7 @@ public class VivoxManager : MonoBehaviour
         // This for sure has to be fixed in a better way at some point
         //LeaveLobbyChannel();
         //LeaveWorldChannel();
+        //LeaveDeathChannel();
     }
 
     // ============== Login ==============
@@ -121,10 +126,22 @@ public class VivoxManager : MonoBehaviour
     {
         Debug.Log("<color=green>VIVOX: </color>Attempting to join Vivox lobby channel!");
 
+        _lobbyID = lobbyId;
+
         ChannelType lobbyChannelType = ChannelType.NonPositional;
         Channel lobbyChannel = new Channel(lobbyId + "_lobby", lobbyChannelType, null);
 
         JoinVivoxChannel(lobbyChannel, true, ChannelSeshName.Lobby);
+    }
+
+    public void JoinDeathChannel()
+    {
+        Debug.Log("<color=green>VIVOX: </color>Attempting to join Vivox death channel!");
+
+        ChannelType deathChannelType = ChannelType.NonPositional;
+        Channel deathChannel = new Channel(_lobbyID + "_death", deathChannelType, null);
+
+        JoinVivoxChannel(deathChannel, false, ChannelSeshName.Death);
     }
 
     public void JoinVivoxChannel(Channel channel, bool switchTransmission, ChannelSeshName channelSessionName)
@@ -161,6 +178,11 @@ public class VivoxManager : MonoBehaviour
                     _worldChannelSession = channelSession;
                     _worldChannelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
                 }
+                else if (channelSessionName == ChannelSeshName.Death)
+                {
+                    _deathChannelSession = channelSession;
+                    OnDeathChannelJoined?.Invoke();
+                }
 
                 Debug.Log("<color=green>VIVOX: </color>Joined Vivox channel " + channel.Name);
             }
@@ -189,6 +211,13 @@ public class VivoxManager : MonoBehaviour
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox lobby channel!");
 
         LeaveChannel(_lobbyChannelSession);
+    }
+
+    public void LeaveDeathChannel()
+    {
+        Debug.Log("<color=green>VIVOX: </color>Leaving Vivox death channel!");
+
+        LeaveChannel(_deathChannelSession);
     }
 
     public void LeaveChannel(IChannelSession channelSession)
@@ -253,6 +282,23 @@ public class VivoxManager : MonoBehaviour
         {
             Debug.Log("<color=green>VIVOX: </color>IN CHANNEL " + id);
         }*/
+    }
+
+    public void SetTransmissionChannel(ChannelSeshName channelName)
+    {
+        Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to single " + channelName);
+        if(channelName == ChannelSeshName.World)
+        {
+            LoginSession.SetTransmissionMode(TransmissionMode.Single, _worldChannelSession.Channel);
+        }
+        else if (channelName == ChannelSeshName.Death)
+        {
+            LoginSession.SetTransmissionMode(TransmissionMode.Single, _deathChannelSession.Channel);
+        }
+        else
+        {
+            Debug.Log("<color=green>VIVOX: </color>Channel not set or recognized in SetTransmissionChannel");
+        }
     }
 
     public void SetTransmissionNone()

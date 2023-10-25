@@ -767,7 +767,7 @@ GameObject:
   - component: {fileID: 5903534730493196788}
   - component: {fileID: 18629100402346485}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: VoiceActiveText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3519,7 +3519,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerSpeaker: {fileID: 3031519131279456435}
   _cachedPos: {x: 0, y: 0, z: 0}
-  _deathMuted: 0
+  _deathChannel: 0
 --- !u!1 &3657567037985154034
 GameObject:
   m_ObjectHideFlags: 0
@@ -12763,6 +12763,7 @@ MonoBehaviour:
   _introRole: {fileID: 2050469909241539794}
   _movementText: {fileID: 3572763046728829125}
   _speakingIndicator: {fileID: 4160494800307920920}
+  _speakingIndicatorText: {fileID: 18629100402346485}
   _mutedIndicator: {fileID: 9105431615812073099}
 --- !u!1 &8988477137829877808
 GameObject:

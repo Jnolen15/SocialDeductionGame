@@ -120,7 +120,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     {
         _deathIndicator.SetActive(!next);
 
-        _model.gameObject.GetComponent<SkinnedMeshRenderer>().material = _ghostMat;
+        if(_model)
+            _model.gameObject.GetComponent<SkinnedMeshRenderer>().material = _ghostMat;
     }
 
     // ================== Interface ==================
@@ -169,12 +170,12 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _campfireIcon.SetActive(next);
     }
 
-    public void ToggleSpeakingIconActive()
+    public void ToggleSpeakingIconActive(VivoxManager.ChannelSeshName channel)
     {
         _netSpeaking.Value = true;
     }
 
-    public void ToggleSpeakingIconOff()
+    public void ToggleSpeakingIconOff(VivoxManager.ChannelSeshName channel)
     {
         Debug.Log("Toggling campfire icon off");
         _netSpeaking.Value = false;

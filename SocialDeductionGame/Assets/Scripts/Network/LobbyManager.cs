@@ -417,6 +417,9 @@ public class LobbyManager : MonoBehaviour
 
         // Lobby channel
         VivoxManager.Instance.JoinLobbyChannel(_joinedLobby.Id);
+        
+        // Death channel
+        //VivoxManager.Instance.JoinDeathChannel(_joinedLobby.Id);
     }
 
     // ============== Helpers =============

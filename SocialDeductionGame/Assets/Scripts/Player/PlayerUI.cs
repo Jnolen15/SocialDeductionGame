@@ -42,6 +42,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private GameObject _introRole;
     [SerializeField] private TextMeshProUGUI _movementText;
     [SerializeField] private GameObject _speakingIndicator;
+    [SerializeField] private TextMeshProUGUI _speakingIndicatorText;
     [SerializeField] private GameObject _mutedIndicator;
     #endregion
 
@@ -201,7 +202,7 @@ public class PlayerUI : MonoBehaviour
 
         _deathMessage.SetActive(true);
 
-        MutedIndicatorOn();
+        //MutedIndicatorOn();
 
         // Close Menus if player died
         _islandMap.SetActive(false);
@@ -282,12 +283,28 @@ public class PlayerUI : MonoBehaviour
         _movementText.text = "Movement: " + current;
     }
 
-    public void SpeakingIndicatorOn()
+    public void SpeakingIndicatorOn(VivoxManager.ChannelSeshName channel)
     {
         _speakingIndicator.SetActive(true);
+
+        if (channel == VivoxManager.ChannelSeshName.World)
+        {
+            _speakingIndicatorText.text = "World";
+            _speakingIndicatorText.color = Color.white;
+        }
+        else if(channel == VivoxManager.ChannelSeshName.Death)
+        {
+            _speakingIndicatorText.text = "Death";
+            _speakingIndicatorText.color = Color.blue;
+        }
+        else
+        {
+            _speakingIndicatorText.text = channel.ToString();
+            _speakingIndicatorText.color = Color.white;
+        }
     }
 
-    public void SpeakingIndicatorOff()
+    public void SpeakingIndicatorOff(VivoxManager.ChannelSeshName channel)
     {
         _speakingIndicator.SetActive(false);
     }
