@@ -168,12 +168,16 @@ public class PlayerData : NetworkBehaviour
         if (_netCurrentLocation.Value.ToString() == locationName)
             return;
 
-        if (GetMovementPoints() > 0)
-            SpendMovementPoint();
-        else
+        // Only spend movement if living, dead can move freely
+        if (_playerHealth.IsLiving())
         {
-            Debug.Log("<color=blue>CLIENT: </color>Cannot move, no points!");
-            return;
+            if (GetMovementPoints() > 0)
+                SpendMovementPoint();
+            else
+            {
+                Debug.Log("<color=blue>CLIENT: </color>Cannot move, no points!");
+                return;
+            }
         }
 
         LocationManager.LocationName newLocation;

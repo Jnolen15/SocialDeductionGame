@@ -271,7 +271,7 @@ public class PlayerUI : MonoBehaviour
 
     public void ToggleMap()
     {
-        if (!_playerHealth.IsLiving() || GameManager.Instance.GetCurrentGameState() != GameManager.GameState.Morning)
+        if (GameManager.Instance.GetCurrentGameState() != GameManager.GameState.Morning)
             return;
 
         _islandMap.SetActive(!_islandMap.activeSelf);

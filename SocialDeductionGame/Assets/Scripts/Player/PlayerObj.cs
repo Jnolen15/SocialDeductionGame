@@ -18,6 +18,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private GameObject _speakingIcon;
     [SerializeField] private Transform _character;
     [SerializeField] private List<Material> _characterMatList = new();
+    [SerializeField] private Material _ghostMat;
+    private GameObject _model;
 
     // ================== Variables ==================
     [SerializeField] private List<CardTag> _cardTagsAccepted = new();
@@ -48,7 +50,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _playerData = GetComponentInParent<PlayerData>();
 
         _playerData._netPlayerName.OnValueChanged += UpdateNamePlate;
-        _playerHealth._netIsLiving.OnValueChanged += UpdateDeathIndicator;
+        _playerHealth._netIsLiving.OnValueChanged += OnLivingChanged;
 
         _netTookFromFire.OnValueChanged += UpdateCampfireIcon;
         _netIsReady.OnValueChanged += UpdateReadyIcon;
@@ -58,7 +60,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private void OnDisable()
     {
         _playerData._netPlayerName.OnValueChanged -= UpdateNamePlate;
-        _playerHealth._netIsLiving.OnValueChanged -= UpdateDeathIndicator;
+        _playerHealth._netIsLiving.OnValueChanged -= OnLivingChanged;
 
         _netTookFromFire.OnValueChanged -= UpdateCampfireIcon;
         _netIsReady.OnValueChanged -= UpdateReadyIcon;
@@ -85,11 +87,11 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _character.GetChild(0).gameObject.SetActive(false);
 
         // Set correct model active
-        Transform model = _character.GetChild(styleIndex);
-        model.gameObject.SetActive(true);
+        _model = _character.GetChild(styleIndex).gameObject;
+        _model.SetActive(true);
 
         // Set Material
-        model.gameObject.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[materialIndex];
+        _model.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[materialIndex];
     }
 
     // ================== Info ==================
@@ -114,9 +116,11 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
             _namePlate.color = Color.green;
     }
 
-    private void UpdateDeathIndicator(bool prev, bool next)
+    private void OnLivingChanged(bool prev, bool next)
     {
         _deathIndicator.SetActive(!next);
+
+        _model.gameObject.GetComponent<SkinnedMeshRenderer>().material = _ghostMat;
     }
 
     // ================== Interface ==================
