@@ -48,6 +48,7 @@ public class ConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.StartHost();
 
         LobbyManager.Instance.JoinLobbyVivoxChannel();
+        LobbyManager.Instance.CreateLobbyData();
     }
 
     public void JoinGame()
@@ -58,6 +59,7 @@ public class ConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.StartClient();
 
         LobbyManager.Instance.JoinLobbyVivoxChannel();
+        LobbyManager.Instance.CreateLobbyData();
     }
 
     private void NetworkManager_ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)

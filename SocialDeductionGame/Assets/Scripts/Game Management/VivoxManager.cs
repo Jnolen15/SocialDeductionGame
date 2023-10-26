@@ -313,8 +313,15 @@ public class VivoxManager : MonoBehaviour
                     ", " + speaker.position.y + ", " + speaker.position.z +
                     "Listener: " + listener.position.x +  ", " + listener.position.y + ", " + listener.position.z);
 
-        _worldChannelSession.Set3DPosition(speaker.position, listener.position,
-                listener.forward, listener.up);
+        if(_worldChannelSession.AudioState == ConnectionState.Connected)
+        {
+            _worldChannelSession.Set3DPosition(speaker.position, listener.position,
+                                                listener.forward, listener.up);
+        }
+        else
+        {
+            Debug.LogError("Tried to set world channel position but was not yet connected to world channel, state: " + _worldChannelSession.AudioState);
+        }
     }
 
     public Client GetClientData()

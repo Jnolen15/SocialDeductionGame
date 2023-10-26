@@ -36,11 +36,13 @@ public class LobbyManager : MonoBehaviour
     // ============== Variables ==============
     #region Variables
     private const string KEY_RELAY_JOIN_CODE = "KeyRelayJoinCode";
+    private const string KEY_NUM_SABOTEURS = "KeyNumSaboteurs";
 
     [SerializeField] private bool _localTestMode;
     private Lobby _joinedLobby;
     private float _hearthbeatTimer;
     private float _listRefreshTimer;
+    private LobbyData _joinedLobbyData;
 
     public delegate void LobbyAction();
     public static event LobbyAction OnStartCreateLobby;
@@ -54,6 +56,9 @@ public class LobbyManager : MonoBehaviour
 
     public delegate void LobbyListAction(List<Lobby> lobbyList);
     public static event LobbyListAction OnLobbyListChanged;
+
+    public delegate void LobbyDataAction(LobbyData data);
+    public static event LobbyDataAction OnLobbySendData;
     #endregion
 
     // ============== Setup =============
@@ -99,11 +104,11 @@ public class LobbyManager : MonoBehaviour
 
     // ============== Relay =============
     #region Relay
-    private async Task<Allocation> AllocateRelay()
+    private async Task<Allocation> AllocateRelay(int maxplayers)
     {
         try
         {
-            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(_joinedLobby.MaxPlayers - 1);
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxplayers);
 
             return allocation;
         }
@@ -210,27 +215,25 @@ public class LobbyManager : MonoBehaviour
 
     }
 
-    public async void CreateLobby(string lobbyName, bool isPrivate)
+    public async void CreateLobby(LobbyData lobbyData)
     {
         OnStartCreateLobby?.Invoke();
 
         try
         {
-            _joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, 8, new CreateLobbyOptions
-            {
-                IsPrivate = isPrivate,
-            });
-
-            Allocation allocation = await AllocateRelay();
+            Allocation allocation = await AllocateRelay(lobbyData.MaxPlayers);
             string relayJoinCode = await GetRelayJoinCode(allocation);
 
-            await LobbyService.Instance.UpdateLobbyAsync(_joinedLobby.Id, new UpdateLobbyOptions
+            var options = new CreateLobbyOptions
             {
-                Data = new Dictionary<string, DataObject>
-                {
-                    { KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) }
-                }
-            });
+                IsPrivate = lobbyData.IsPrivate,
+                Data = new Dictionary<string, DataObject> {
+                    { KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) },
+                    { KEY_NUM_SABOTEURS, new DataObject(DataObject.VisibilityOptions.Member, lobbyData.NumSabos) },
+                },
+            };
+
+            _joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyData.Name, lobbyData.MaxPlayers, options);
 
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation, "dtls"));
 
@@ -239,7 +242,7 @@ public class LobbyManager : MonoBehaviour
         }
         catch (LobbyServiceException e)
         {
-            OnFailCreateLobby();
+            OnFailCreateLobby?.Invoke();
             Debug.LogError(e);
         }
     }
@@ -383,32 +386,48 @@ public class LobbyManager : MonoBehaviour
             Debug.LogError(e);
         }
     }
+    #endregion
 
-    // For some reason it says lobby event stuff is not defined, but it should be in this version? I'm really not sure why
+    #region Lobby Events
     /*private async void SubscribeToLobbyEvents()
     {
         var callbacks = new LobbyEventCallbacks();
         callbacks.LobbyChanged += OnLobbyChanged;
-        callbacks.KickedFromLobby += OnKickedFromLobby;
-        callbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
+        //callbacks.KickedFromLobby += OnKickedFromLobby;
+        //callbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
         try
         {
-            m_LobbyEvents = await Lobbies.Instance.SubscribeToLobbyEventsAsync(m_Lobby.Id, callbacks);
+            _lobbyEvents = await Lobbies.Instance.SubscribeToLobbyEventsAsync(_joinedLobby.Id, callbacks);
         }
         catch (LobbyServiceException ex)
         {
             switch (ex.Reason)
             {
-                case LobbyExceptionReason.AlreadySubscribedToLobby: Debug.LogWarning($"Already subscribed to lobby[{m_Lobby.Id}]. We did not need to try and subscribe again. Exception Message: {ex.Message}"); break;
+                case LobbyExceptionReason.AlreadySubscribedToLobby: Debug.LogWarning($"Already subscribed to lobby[{_joinedLobby.Id}]. We did not need to try and subscribe again. Exception Message: {ex.Message}"); break;
                 case LobbyExceptionReason.SubscriptionToLobbyLostWhileBusy: Debug.LogError($"Subscription to lobby events was lost while it was busy trying to subscribe. Exception Message: {ex.Message}"); throw;
                 case LobbyExceptionReason.LobbyEventServiceConnectionError: Debug.LogError($"Failed to connect to lobby events. Exception Message: {ex.Message}"); throw;
                 default: throw;
             }
         }
+    }
+
+    private void OnLobbyChanged(ILobbyChanges changes)
+    {
+        if (changes.LobbyDeleted)
+        {
+            // Handle lobby being deleted
+            // Calling changes.ApplyToLobby will log a warning and do nothing
+        }
+        else
+        {
+            changes.ApplyToLobby(_joinedLobby);
+        }
+        // Refresh the UI in some way
     }*/
     #endregion
 
     // ============== Vivox =============
+    #region Vivox
     // Join in game positional and lobby channels
     public void JoinLobbyVivoxChannel()
     {
@@ -421,6 +440,7 @@ public class LobbyManager : MonoBehaviour
         // Death channel
         //VivoxManager.Instance.JoinDeathChannel(_joinedLobby.Id);
     }
+    #endregion
 
     // ============== Helpers =============
     #region Helpers
@@ -432,6 +452,34 @@ public class LobbyManager : MonoBehaviour
     public Lobby GetLobby()
     {
         return _joinedLobby;
+    }
+
+    public void CreateLobbyData()
+    {
+        if (_joinedLobby == null)
+        {
+            Debug.LogError("_joinedLobby is null, cant send data!");
+            return;
+        }
+
+        Debug.Log("Creating Lobby Data");
+        Debug.Log("Number of saboteurs: " + _joinedLobby.Data[KEY_NUM_SABOTEURS].Value);
+
+        _joinedLobbyData = new LobbyData
+        {
+            Name = _joinedLobby.Name,
+            IsPrivate = _joinedLobby.IsPrivate,
+            MaxPlayers = 6,
+            NumSabos = _joinedLobby.Data[KEY_NUM_SABOTEURS].Value,
+            NumDays = 9
+        };
+
+        SendLobbyData();
+    }
+
+    public void SendLobbyData()
+    {
+        OnLobbySendData?.Invoke(_joinedLobbyData);
     }
     #endregion
 }

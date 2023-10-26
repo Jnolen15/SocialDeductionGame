@@ -5,6 +5,7 @@ using Unity.Netcode;
 using TMPro;
 using Unity.Collections;
 using System.Linq;
+using Unity.Services.Lobbies.Models;
 
 public class PlayerConnectionManager : NetworkBehaviour
 {
@@ -24,7 +25,7 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     #region Variables and Refrences
-    [SerializeField] private int _numSaboteurs;
+    private int _numSaboteurs;
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netNumLivingPlayers = new(writePerm: NetworkVariableWritePermission.Server);
@@ -145,6 +146,7 @@ public class PlayerConnectionManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayerPrefabs;
+            LobbyManager.OnLobbySendData += UpdateLobbyData;
         }
     }
 
@@ -155,6 +157,7 @@ public class PlayerConnectionManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayerPrefabs;
+            LobbyManager.OnLobbySendData -= UpdateLobbyData;
         }
         base.OnNetworkDespawn();
     }
@@ -198,6 +201,12 @@ public class PlayerConnectionManager : NetworkBehaviour
         TestAllPlayersReady();
 
         OnPlayerDisconnect?.Invoke(clientID);
+    }
+
+    private void UpdateLobbyData(LobbyData data)
+    {
+        _numSaboteurs = int.Parse(data.NumSabos);
+        Debug.Log("PlayerConnectionManager: Updated Num Sabos " + _numSaboteurs);
     }
     #endregion
 
@@ -468,7 +477,13 @@ public class PlayerConnectionManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        Debug.Log("<color=yellow>SERVER: </color>Assigning player roles");
+        if(_numSaboteurs == 0)
+        {
+            Debug.LogError("LobbyManager: Number of Saboteurs is 0!");
+            return;
+        }
+
+        Debug.Log("<color=yellow>SERVER: </color>Assigning player roles. Sabos: " + _numSaboteurs);
 
         // Pick X random players and assign them to team Saboteurs
         List<ulong> playerIDs = new(_playerDict.Keys);
