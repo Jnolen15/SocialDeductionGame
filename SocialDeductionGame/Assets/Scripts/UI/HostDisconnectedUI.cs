@@ -42,6 +42,8 @@ public class HostDisconnectedUI : MonoBehaviour
             ConnectionManager.Instance.Shutdown();
         }
 
+        VivoxManager.Instance.LeaveAll();
+
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
 

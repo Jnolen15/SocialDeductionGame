@@ -220,6 +220,13 @@ public class VivoxManager : MonoBehaviour
         LeaveChannel(_deathChannelSession);
     }
 
+    public void LeaveAll()
+    {
+        LeaveChannel(_lobbyChannelSession);
+        LeaveChannel(_deathChannelSession);
+        LeaveChannel(_worldChannelSession);
+    }
+
     public void LeaveChannel(IChannelSession channelSession)
     {
         Debug.Log("<color=green>VIVOX: </color>Attempting to leaving channel " + channelSession);

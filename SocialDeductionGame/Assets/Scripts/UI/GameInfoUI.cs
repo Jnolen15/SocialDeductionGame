@@ -69,6 +69,7 @@ public class GameInfoUI : MonoBehaviour
     public void ReturnToMainMenu()
     {
         ConnectionManager.Instance.Shutdown();
+        VivoxManager.Instance.LeaveAll();
 
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }

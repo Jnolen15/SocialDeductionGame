@@ -40,6 +40,7 @@ public class CharacterSelectUI : MonoBehaviour
     public void ReturnToMainMenu()
     {
         LobbyManager.Instance.DisconnectFromLobby();
+        VivoxManager.Instance.LeaveAll();
 
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
