@@ -8,7 +8,6 @@ public class NightEventCardVisual : MonoBehaviour
     // ================== Refrences ==================
     [SerializeField] private GameObject _eventTagIconPref;
     [SerializeField] private TextMeshProUGUI _eventTitle;
-    [SerializeField] private TextMeshProUGUI _eventRequiredNum;
     [SerializeField] private TextMeshProUGUI _eventConsequences;
     [SerializeField] private TextMeshProUGUI _eventBonuses;
     [SerializeField] private Transform _eventTagIconSlot;
@@ -20,21 +19,28 @@ public class NightEventCardVisual : MonoBehaviour
         // Clear tags (in case of reused card assets)
         foreach (Transform t in _eventTagIconSlot)
         {
-            if(t != _eventTagIconSlot.GetChild(0))
-                Destroy(t.gameObject);
+            Destroy(t.gameObject);
         }
 
         // Setup new
         _heldEventID = eventID;
         NightEvent eventData = CardDatabase.Instance.GetEvent(eventID);
         _eventTitle.text = eventData.GetEventName();
-        _eventRequiredNum.text = eventData.GetSuccessPoints(playerNum) + " = ";
         _eventConsequences.text = "Fail: " + eventData.GetEventConsequences();
-        _eventBonuses.text = $"Bonus: Add {eventData.SPBonusCalculation(playerNum)} additional cards to {eventData.GetEventBonuses()}";
-        foreach (CardTag t in eventData.GetRequiredCardTags())
+        _eventBonuses.text = $"Bonus: Add {eventData.GetBonusRequirements()} additional cards to {eventData.GetEventBonuses()}";
+
+        Vector2 requirements = eventData.GetRequirements(playerNum);
+        CardTag primaryTag = eventData.GetPrimaryResource();
+        GameObject primaryResource = Instantiate(_eventTagIconPref, _eventTagIconSlot);
+        primaryResource.GetComponentInChildren<TagIcon>().SetupIcon(primaryTag.visual, primaryTag.name);
+        primaryResource.GetComponentInChildren<TextMeshProUGUI>().text = requirements.x.ToString();
+
+        if(requirements.y > 0)
         {
-            TagIcon icon = Instantiate(_eventTagIconPref, _eventTagIconSlot).GetComponent<TagIcon>();
-            icon.SetupIcon(t.visual, t.name);
+            CardTag secondaryTag = eventData.GetSecondaryResource();
+            GameObject secondaryResource = Instantiate(_eventTagIconPref, _eventTagIconSlot);
+            secondaryResource.GetComponentInChildren<TagIcon>().SetupIcon(secondaryTag.visual, secondaryTag.name);
+            secondaryResource.GetComponentInChildren<TextMeshProUGUI>().text = requirements.y.ToString();
         }
     }
 

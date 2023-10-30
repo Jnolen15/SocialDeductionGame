@@ -58,7 +58,6 @@ public class EventManager : NetworkBehaviour
         _nightEventThumbnail.SetEvent(_netCurrentNightEventID.Value, _netNumEventPlayers.Value);
     }
 
-    // Updates small event card with pass / fail text
     [ClientRpc]
     private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus)
     {
@@ -68,10 +67,7 @@ public class EventManager : NetworkBehaviour
         _nightEventResults.gameObject.SetActive(true);
         _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus);
     }
-    #endregion
 
-    // ================== Player Night Event Picking Menu ==================
-    #region Player Night Event Choice Menu
     public void OpenNightEventPicker()
     {
         Debug.Log("<color=yellow>SERVER: </color> OpenNightEventPicker");
@@ -148,8 +144,7 @@ public class EventManager : NetworkBehaviour
                 Debug.Log("<color=blue>CLIENT: </color>Event Bonus Earned!");
                 InvokeNightEventBonus(_netCurrentNightEventID.Value);
             }
-        }
-            
+        } 
         else
             InvokeNightEvent(_netCurrentNightEventID.Value);
     }
@@ -219,64 +214,81 @@ public class EventManager : NetworkBehaviour
         _netPassedNightEvent.Value = false;
         _netEarnedBonusNightEvent.Value = false;
 
-        // Keep track of success points locally
-        int successPoints = 0;
-        // In a loop, get each card in the stockpile
+        // Get requirement values
+        int primaryReq = (int)nEvent.GetRequirements(_netNumEventPlayers.Value).x;
+        int secondaryReq = (int)nEvent.GetRequirements(_netNumEventPlayers.Value).y;
+        int saboCards = 0;
+
+        // Loop through all cards
         int totCards = _stockpile.GetNumCards();
         int[] cardIDS = new int[totCards]; // For pass to results screen
         for (int i = 0; i <= totCards; i++)
         {
             int cardID = _stockpile.GetTopCard();
+
+            // Break if no more cards
             if (cardID == -1)
             {
                 Debug.Log("<color=yellow>SERVER: </color>No cards in stockpile");
                 break;
             }
-            GameObject card = CardDatabase.Instance.GetCard(cardID);
-            bool matched = false;
 
             cardIDS[i] = cardID;
+            GameObject card = CardDatabase.Instance.GetCard(cardID);
 
-            // Test if card subtype matches Night event subtype requirement list
-            foreach (CardTag tag in nEvent.GetRequiredCardTags())
+            // Check if card meets secondary or primary tag
+            // If it does -1 to needed ammount of that
+            if (card.GetComponent<Card>().HasTag(nEvent.GetPrimaryResource()))
             {
-                if (card.GetComponent<Card>().HasTag(tag))
-                {
-                    matched = true;
-                    Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, contained subtag {tag}");
-                    break;
-                }
+                primaryReq--;
+                Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
+                            $"contained tag {nEvent.GetPrimaryResource()}. Primary required remaining {primaryReq}");
             }
-
-            if (matched) // If it does +1 SP    
+            else if (card.GetComponent<Card>().HasTag(nEvent.GetSecondaryResource()))
             {
-                successPoints++;
-                Debug.Log("<color=yellow>SERVER: </color>Card Matched! " + successPoints);
+                secondaryReq--;
+                Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
+                            $"contained tag {nEvent.GetSecondaryResource()}. secondary required remaining {secondaryReq}");
             }
-            else        // If not -1 SP
+            // If it does not match either +1 to sabo
+            else
             {
-                successPoints--;
-                Debug.Log("<color=yellow>SERVER: </color>Card did not Match! " + successPoints);
+                saboCards++;
+                Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
+                            $"did not match either resources. Sabo cards now {saboCards}");
             }
         }
 
-        int spRequirement = nEvent.GetSuccessPoints(_netNumEventPlayers.Value);
-        // If number of points >= number of required points, success
-        if (successPoints >= spRequirement)
+        // After if both primary and secondary are not at or below 0 fail
+        if (primaryReq > 0 || secondaryReq > 0)
         {
-            Debug.Log("<color=yellow>SERVER: </color>Event Pass!");
-            _netPassedNightEvent.Value = true;
-
-            // If number of points >= extra bonus
-            // Extra bonus calculated with number of connected players not living players
-            if ((successPoints - spRequirement) >= nEvent.SPBonusCalculation(_netNumEventPlayers.Value))
-            {
-                Debug.Log("<color=yellow>SERVER: </color>Earned Bonus!");
-                _netEarnedBonusNightEvent.Value = true;
-            }
+            Debug.Log($"<color=yellow>SERVER: </color>FAILED! not enough resources: needed {primaryReq} more primary and {secondaryReq} more secondary");
         }
         else
-            Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
+        {
+            // Get ammount below 0 both are, subtract sabo from this num
+            int overBonus = Mathf.Abs(primaryReq) + Mathf.Abs(secondaryReq);
+            Debug.Log($"<color=yellow>SERVER: </color>{overBonus} extra resources were added.");
+            overBonus -= saboCards;
+            Debug.Log($"<color=yellow>SERVER: </color>-{saboCards} bonus now {overBonus}.");
+
+            // If num is still positive pass
+            if (overBonus >= 0)
+            {
+                Debug.Log("<color=yellow>SERVER: </color>Event Pass!");
+                _netPassedNightEvent.Value = true;
+
+                // If number of points >= extra bonus
+                if (overBonus >= nEvent.GetBonusRequirements())
+                {
+                    Debug.Log("<color=yellow>SERVER: </color>Earned Bonus!");
+                    _netEarnedBonusNightEvent.Value = true;
+                }
+            }
+            // if its negitive, then event failed
+            else
+                Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
+        }
 
         // Update all clients visually
         UpdateEventUIClientRpc(cardIDS, _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);

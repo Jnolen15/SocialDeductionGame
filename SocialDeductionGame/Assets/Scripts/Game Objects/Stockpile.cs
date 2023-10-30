@@ -70,8 +70,9 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
 
     private void ClearAll()
     {
-        _stockpileCardIDs.Clear();
         _contributorIDs.Clear();
+        _stockpileCardIDs.Clear();
+        _netCardsInStockpile.Value = 0;
     }
 
     public void AddCard(int cardID, ulong playerID)

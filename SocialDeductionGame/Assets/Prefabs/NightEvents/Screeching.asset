@@ -10,17 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e72f1ae1f2c2b74db098be57c3cac79, type: 3}
-  m_Name: Sickness
+  m_Name: Screeching
   m_EditorClassIdentifier: 
-  _eventID: 1005
-  _eventName: Spreading Sickness
-  _eventConsequences: All players -1 Health and -1 Hunger
-  _eventBonuses: to heal 1
+  _eventID: 1002
+  _eventName: Screeching from the Cliffs
+  _eventConsequences: All players -1 Health
+  _eventBonuses: gain one small raw food
   _eventArt: {fileID: 0}
-  _requiredCardTags:
-  - {fileID: 11400000, guid: 8de9f809fa6797b45bff5075b451562e, type: 2}
-  _requirementMod: 0.333
-  _bonusMod: 3
-  _eventBonus: {fileID: 11400000, guid: f48a4a831cb4c084f84b29774197a7b6, type: 2}
+  _requirements: {fileID: 11400000, guid: f4ffc7402e5fa9b408a2e64142a29f85, type: 2}
+  _eventBonus: {fileID: 11400000, guid: 0527e9fe83158274ba069845c4d1c61a, type: 2}
   _dmg: 1
-  _hunger: 1
+  _hunger: 0

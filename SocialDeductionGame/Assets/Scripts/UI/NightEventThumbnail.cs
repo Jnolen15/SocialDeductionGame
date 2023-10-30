@@ -9,7 +9,6 @@ public class NightEventThumbnail : MonoBehaviour
     [Header("Event Refrences")]
     [SerializeField] private GameObject _eventTagIconPref;
     [SerializeField] private TextMeshProUGUI _eventThumbnailTitle;
-    [SerializeField] private TextMeshProUGUI _eventThumbnailRequiredNum;
     [SerializeField] private Transform _eventThumbnailTagIconSlot;
     [SerializeField] private GameObject _expandIcon;
     [SerializeField] private GameObject _minimizeIcon;
@@ -50,18 +49,25 @@ public class NightEventThumbnail : MonoBehaviour
         // Clear tags (in case of reused card assets)
         foreach (Transform t in _eventThumbnailTagIconSlot)
         {
-            if (t != _eventThumbnailTagIconSlot.GetChild(0))
-                Destroy(t.gameObject);
+            Destroy(t.gameObject);
         }
 
         // Setup new
         NightEvent eventData = CardDatabase.Instance.GetEvent(_currentNightEventID);
         _eventThumbnailTitle.text = eventData.GetEventName();
-        _eventThumbnailRequiredNum.text = eventData.GetSuccessPoints(playerNum) + " = ";
-        foreach (CardTag t in eventData.GetRequiredCardTags())
+        
+        Vector2 requirements = eventData.GetRequirements(playerNum);
+        CardTag primaryTag = eventData.GetPrimaryResource();
+        GameObject primaryResource = Instantiate(_eventTagIconPref, _eventThumbnailTagIconSlot);
+        primaryResource.GetComponentInChildren<TagIcon>().SetupIcon(primaryTag.visual, primaryTag.name);
+        primaryResource.GetComponentInChildren<TextMeshProUGUI>().text = requirements.x.ToString();
+
+        if (requirements.y > 0)
         {
-            TagIcon icon = Instantiate(_eventTagIconPref, _eventThumbnailTagIconSlot).GetComponent<TagIcon>();
-            icon.SetupIcon(t.visual, t.name);
+            CardTag secondaryTag = eventData.GetSecondaryResource();
+            GameObject secondaryResource = Instantiate(_eventTagIconPref, _eventThumbnailTagIconSlot);
+            secondaryResource.GetComponentInChildren<TagIcon>().SetupIcon(secondaryTag.visual, secondaryTag.name);
+            secondaryResource.GetComponentInChildren<TextMeshProUGUI>().text = requirements.y.ToString();
         }
     }
 

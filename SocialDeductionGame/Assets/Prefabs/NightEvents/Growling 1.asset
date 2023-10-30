@@ -10,18 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e72f1ae1f2c2b74db098be57c3cac79, type: 3}
-  m_Name: Tide
+  m_Name: Growling 1
   m_EditorClassIdentifier: 
-  _eventID: 1003
-  _eventName: High Tide
+  _eventID: 1004
+  _eventName: Growling from the Forest
   _eventConsequences: All players -1 Health
   _eventBonuses: gain one small raw food
-  _eventArt: {fileID: 21300000, guid: 4e5d9431ad3849c47960aadd022545a9, type: 3}
-  _requiredCardTags:
-  - {fileID: 11400000, guid: 9758eb457d72f0e45809461842f5ee5c, type: 2}
-  - {fileID: 11400000, guid: d8840eeb267ff96478f01bc3637f76e5, type: 2}
-  _requirementMod: 1
-  _bonusMod: 3
+  _eventArt: {fileID: 0}
+  _requirements: {fileID: 11400000, guid: f2050725077683a48bbb89b1e947ebe0, type: 2}
   _eventBonus: {fileID: 11400000, guid: 0527e9fe83158274ba069845c4d1c61a, type: 2}
   _dmg: 1
   _hunger: 0
