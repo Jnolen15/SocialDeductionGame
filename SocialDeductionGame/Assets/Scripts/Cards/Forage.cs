@@ -22,9 +22,6 @@ public class Forage : NetworkBehaviour
     private HandManager _playerHandMan;
     [SerializeField] private GameObject _forageCanvas;
     [SerializeField] private GameObject _hazardCardPref;
-
-    public delegate void ForageAction(int dangerLevel);
-    public static event ForageAction OnDangerIncrement;
     #endregion
 
     // ============== Setup ==============
@@ -38,7 +35,7 @@ public class Forage : NetworkBehaviour
     {
         _netCurrentDanger.OnValueChanged += SendDangerChangedEvent;
 
-        if (!IsServer)
+        if (IsServer)
             GameManager.OnStateMorning += ResetDangerLevel;
     }
 
@@ -52,7 +49,7 @@ public class Forage : NetworkBehaviour
     {
         _netCurrentDanger.OnValueChanged -= SendDangerChangedEvent;
 
-        if (!IsServer)
+        if (IsServer)
             GameManager.OnStateMorning -= ResetDangerLevel;
     }
     #endregion
@@ -179,33 +176,34 @@ public class Forage : NetworkBehaviour
 
     private void SendDangerChangedEvent(int prev, int current)
     {
-        OnDangerIncrement?.Invoke(current);
+        _forageUI.UpdateDangerUI(current);
     }
 
     private void ResetDangerLevel()
     {
+        Debug.Log("IN RESET DANGER");
         SetDangerLevel(0);
     }
 
     private void IncrementDanger(int dangerInc)
     {
-        Debug.Log("Sending Increment Danger Event " + dangerInc);
+        Debug.Log("Incrementing danger by " + dangerInc);
         ModifyDangerLevelServerRPC(dangerInc, true);
     }
 
-    public void SetDangerLevel(int dangerInc)
+    public void SetDangerLevel(int dangerTo)
     {
         if (!IsServer)
             return;
 
-        Debug.Log("Sending Increment Danger Event " + dangerInc);
-        ModifyDangerLevelServerRPC(dangerInc, false);
+        Debug.Log("Setting danger to" + dangerTo);
+        ModifyDangerLevelServerRPC(dangerTo, false);
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void ModifyDangerLevelServerRPC(int ammount, bool add, ServerRpcParams serverRpcParams = default)
     {
-        Debug.Log($"{gameObject.name} had its danger level incremented by {ammount}");
+        Debug.Log($"<color=yellow>SERVER: </color>{gameObject.name} had its danger level changed by or to {ammount}");
 
         // temp for calculations
         int tempDL = _netCurrentDanger.Value;

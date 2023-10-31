@@ -408,13 +408,13 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 35
+  m_Spacing: 30
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
-  m_ChildScaleWidth: 1
-  m_ChildScaleHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
 --- !u!1 &3238553330213436442
 GameObject:
@@ -425,7 +425,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3238553330213436422}
-  - component: {fileID: 6445621895518788534}
+  - component: {fileID: 8414024033324291447}
   - component: {fileID: 3238553330213436417}
   m_Layer: 0
   m_Name: Forage
@@ -450,7 +450,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6445621895518788534
+--- !u!114 &8414024033324291447
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -464,7 +464,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
+  SynchronizeTransform: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 1
   DontDestroyWithOwner: 0
@@ -536,7 +536,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   _tierTwoHazardThreshold: 4
   _tierThreeHazardThreshold: 8
-  _maxDanger: 0
+  _maxDanger: 10
   _netCurrentDanger:
     m_InternalValue: 0
   _forageUI: {fileID: 4011721465090627423}

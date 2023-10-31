@@ -17,12 +17,12 @@ public class ForageUI : MonoBehaviour
     #region Setup
     private void Start()
     {
-        Forage.OnDangerIncrement += UpdateDangerUI;
+        //Forage.OnDangerIncrement += UpdateDangerUI;
     }
 
     private void OnDestroy()
     {
-        Forage.OnDangerIncrement -= UpdateDangerUI;
+        //Forage.OnDangerIncrement -= UpdateDangerUI;
     }
     #endregion
 
@@ -47,6 +47,7 @@ public class ForageUI : MonoBehaviour
         foreach (GameObject cardObj in cardObjs)
         {
             cardObj.transform.SetParent(_cardZone);
+            cardObj.transform.localScale = Vector3.one;
         }
     }
 
