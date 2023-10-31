@@ -13,6 +13,9 @@ public class CardDropTable
     {
         public int CardID;
 
+		// Card name (Just for to make it easier to read)
+		public string CardName;
+
         // The higher the weight, the higher chance of being picked
         public float ProbabilityWeight;
 
@@ -60,6 +63,9 @@ public class CardDropTable
 				cardDrop.ProbabilityRangeTo = currentProbabilityWeightMaximum;
 			}
 
+			// Set name
+			if(CardDatabase.Instance)
+				cardDrop.CardName = CardDatabase.Instance.GetCardName(cardDrop.CardID);
 		}
 
 		_probabilityTotalWeight = currentProbabilityWeightMaximum;

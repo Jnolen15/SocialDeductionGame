@@ -25,6 +25,7 @@ public class CardDatabase : MonoBehaviour
     public class CardEntry
     {
         public int CardID = 0;
+        public string CardName = "Card Name";
         public GameObject CardObj = null;
     }
 
@@ -35,7 +36,9 @@ public class CardDatabase : MonoBehaviour
         Debug.Log("Filling Card IDs");
         foreach (CardEntry entry in _globalCardList)
         {
-            entry.CardID = entry.CardObj.GetComponent<Card>().GetCardID();
+            Card card = entry.CardObj.GetComponent<Card>();
+            entry.CardID = card.GetCardID();
+            entry.CardName = card.GetCardName();
             Debug.Log("Setting Card ID " + entry.CardObj.GetComponent<Card>().GetCardID());
         }
     }
@@ -47,6 +50,18 @@ public class CardDatabase : MonoBehaviour
         {
             if (card.CardID == cardID)
                 return card.CardObj;
+        }
+
+        Debug.LogError($"Card with ID:{cardID} not found in global card list.");
+        return null;
+    }
+
+    public string GetCardName(int cardID)
+    {
+        foreach (CardEntry card in _globalCardList)
+        {
+            if (card.CardID == cardID)
+                return card.CardName;
         }
 
         Debug.LogError($"Card with ID:{cardID} not found in global card list.");
