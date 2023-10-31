@@ -13,8 +13,7 @@ public class Forage : NetworkBehaviour
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
 
-    [SerializeField] private int _maxDanger;
-    [SerializeField] private NetworkVariable<int> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<float> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
 
     [Header("Refrences")]
     [SerializeField]private ForageUI _forageUI;
@@ -84,7 +83,7 @@ public class Forage : NetworkBehaviour
     private GameObject HazardTest()
     {
         // Test for hazard
-        int dangerLevel = _netCurrentDanger.Value;
+        float dangerLevel = _netCurrentDanger.Value;
 
         // Get hazard teir
         Hazard.DangerLevel dangerTier = Hazard.DangerLevel.Low;
@@ -94,7 +93,7 @@ public class Forage : NetworkBehaviour
             dangerTier = Hazard.DangerLevel.High;
 
         // Roll Hazard chances
-        float hazardChance = _dangerLevelDrawChances.Evaluate(dangerLevel*0.1f);
+        float hazardChance = _dangerLevelDrawChances.Evaluate(dangerLevel*0.01f);
         Debug.Log($"<color=blue>CLIENT: </color> Player DL: {dangerLevel}, hazard chance: {hazardChance}, hazard level {dangerTier}. Rolling.");
         float rand = (Random.Range(0, 100)*0.01f);
 
@@ -169,57 +168,65 @@ public class Forage : NetworkBehaviour
 
     // ================ Danger Level ================
     #region Danger Level
-    public int GetDangerLevel()
+    public float GetDangerLevel()
     {
         return _netCurrentDanger.Value;
     }
 
-    private void SendDangerChangedEvent(int prev, int current)
+    private void SendDangerChangedEvent(float prev, float current)
     {
         _forageUI.UpdateDangerUI(current);
     }
 
     private void ResetDangerLevel()
     {
-        Debug.Log("IN RESET DANGER");
-        SetDangerLevel(0);
+        if (!IsServer)
+            return;
+
+        SetDangerLevelServerRPC(0);
     }
 
     private void IncrementDanger(int dangerInc)
     {
         Debug.Log("Incrementing danger by " + dangerInc);
-        ModifyDangerLevelServerRPC(dangerInc, true);
-    }
-
-    public void SetDangerLevel(int dangerTo)
-    {
-        if (!IsServer)
-            return;
-
-        Debug.Log("Setting danger to" + dangerTo);
-        ModifyDangerLevelServerRPC(dangerTo, false);
+        ModifyDangerLevelServerRPC((float)dangerInc);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void ModifyDangerLevelServerRPC(int ammount, bool add, ServerRpcParams serverRpcParams = default)
+    private void ModifyDangerLevelServerRPC(float ammount, ServerRpcParams serverRpcParams = default)
     {
-        Debug.Log($"<color=yellow>SERVER: </color>{gameObject.name} had its danger level changed by or to {ammount}");
+        Debug.Log($"<color=yellow>SERVER: </color>{gameObject.name} has its danger level increasing");
 
         // temp for calculations
-        int tempDL = _netCurrentDanger.Value;
+        float tempDL = _netCurrentDanger.Value;
 
-        if (add)
-            tempDL += ammount;
-        else
-            tempDL = ammount;
+        // Calculate danger increment ammount (Scales per living player)
+        float incValue = (100f / (3f * PlayerConnectionManager.Instance.GetNumLivingPlayers()));
+        Debug.Log($"<color=yellow>SERVER: </color>incValue: {incValue} based on 100/({PlayerConnectionManager.Instance.GetNumLivingPlayers()}*3)");
+        tempDL += (ammount * incValue);
+        Debug.Log($"<color=yellow>SERVER: </color>Total value danger changed by = {tempDL} as {incValue} scaled by {ammount}");
 
         // Clamp HP within bounds
         if (tempDL < 1)
             tempDL = 1;
-        else if (tempDL > _maxDanger)
-            tempDL = _maxDanger;
+        else if (tempDL > 100)
+            tempDL = 100;
 
         _netCurrentDanger.Value = tempDL;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SetDangerLevelServerRPC(int ammount, ServerRpcParams serverRpcParams = default)
+    {
+        Debug.Log($"<color=yellow>SERVER: </color>{gameObject.name} had its danger level set to {ammount}");
+
+        // Clamp HP within bounds
+        if (ammount < 1)
+            ammount = 1;
+        else if (ammount > 100)
+            ammount = 100;
+
+        _netCurrentDanger.Value = ammount;
     }
     #endregion
 }

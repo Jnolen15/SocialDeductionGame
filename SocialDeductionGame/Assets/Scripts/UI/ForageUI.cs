@@ -59,19 +59,19 @@ public class ForageUI : MonoBehaviour
         }
     }
 
-    public void UpdateDangerUI(int current)
+    public void UpdateDangerUI(float current)
     {
-        _dangerText.text = current.ToString();
+        _dangerText.text = current.ToString("F1");
 
         // Should not hard code this (should have value refrences)
         _dangerText.color = new Color32(233, 195, 41, 255);
         //_dangerIcon.sprite = _dangerIconStages[2];
-        if (4 < current && current <= 8)
+        if (40 < current && current <= 80)
         {
             _dangerText.color = new Color32(217, 116, 24, 255);
             //_dangerIcon.sprite = _dangerIconStages[1];
         }
-        else if (8 < current)
+        else if (80 < current)
         {
             _dangerText.color = new Color32(206, 60, 24, 255);
             //_dangerIcon.sprite = _dangerIconStages[0];
