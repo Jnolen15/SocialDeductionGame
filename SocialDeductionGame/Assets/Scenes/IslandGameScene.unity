@@ -1838,7 +1838,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436442, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8595778547318199243, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: m_text
@@ -4771,7 +4771,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 420d6c0d6c6ea244f8723507119e1778, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _locationContent: {fileID: 427731293}
   _locationDecor: {fileID: 1853720887}
   _locationCamPos: {fileID: 624219221}
   _forage: {fileID: 0}
@@ -28608,7 +28607,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 420d6c0d6c6ea244f8723507119e1778, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _locationContent: {fileID: 486527528}
   _locationDecor: {fileID: 1739475226}
   _locationCamPos: {fileID: 281871332}
   _forage: {fileID: 50292355}
@@ -29807,7 +29805,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436442, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8595778547318199243, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: m_text
@@ -30451,7 +30449,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 420d6c0d6c6ea244f8723507119e1778, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _locationContent: {fileID: 91605711}
   _locationDecor: {fileID: 320390649}
   _locationCamPos: {fileID: 454266929}
   _forage: {fileID: 3238553330270762712}
@@ -38413,7 +38410,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 420d6c0d6c6ea244f8723507119e1778, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _locationContent: {fileID: 288267598}
   _locationDecor: {fileID: 1150942146}
   _locationCamPos: {fileID: 1377806912}
   _forage: {fileID: 1163285812}
@@ -54795,13 +54791,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436442, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8595778547318199243, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: m_text
       value: Beach
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5470352855972055979, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
 --- !u!4 &3238553330270762710 stripped
 Transform:

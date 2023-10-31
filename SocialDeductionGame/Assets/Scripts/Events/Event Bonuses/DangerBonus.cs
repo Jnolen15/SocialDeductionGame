@@ -19,6 +19,6 @@ public class DangerBonus : EventBonus
             return;
         }
 
-        player.GetComponent<PlayerData>().ModifyDangerLevel(-_dangerReduction);
+        //player.GetComponent<PlayerData>().ModifyDangerLevel(-_dangerReduction);
     }
 }

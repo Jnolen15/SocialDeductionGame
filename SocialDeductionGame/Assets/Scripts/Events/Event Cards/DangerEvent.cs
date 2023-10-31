@@ -19,6 +19,6 @@ public class DangerEvent : NightEvent
             return;
         }
 
-        player.GetComponent<PlayerData>().ModifyDangerLevel(_danger);
+        //player.GetComponent<PlayerData>().ModifyDangerLevel(_danger);
     }
 }

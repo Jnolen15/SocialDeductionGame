@@ -1,27 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Forage : MonoBehaviour
+public class Forage : NetworkBehaviour
 {
     // ============== Parameters / Refrences / Variables ==============
     #region P / R / V
     [Header("Parameters")]
     [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
-    [SerializeField] private int _cardsDelt;
     [SerializeField] private AnimationCurve _dangerLevelDrawChances;
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
 
+    [SerializeField] private int _maxDanger;
+    [SerializeField] private NetworkVariable<int> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
+
     [Header("Refrences")]
+    [SerializeField]private ForageUI _forageUI;
     private CardManager _cardManager;
-    private PlayerData _playerData;
     private HandManager _playerHandMan;
-    [SerializeField] private Transform _cardZone;
-    [SerializeField] private GameObject _forageMenu;
-    [SerializeField] private GameObject _forageButton;
-    //[SerializeField] private GameObject _redealButton;
-    [SerializeField] private GameObject _hazardCloseButton;
+    [SerializeField] private GameObject _forageCanvas;
     [SerializeField] private GameObject _hazardCardPref;
 
     public delegate void ForageAction(int dangerLevel);
@@ -35,150 +34,194 @@ public class Forage : MonoBehaviour
         _cardDropTable.ValidateTable();
     }
 
+    public override void OnNetworkSpawn()
+    {
+        _netCurrentDanger.OnValueChanged += SendDangerChangedEvent;
+
+        if (!IsServer)
+            GameManager.OnStateMorning += ResetDangerLevel;
+    }
+
     private void Start()
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
-        _playerData = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>();
-        _playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
         _cardDropTable.ValidateTable();
+    }
+
+    private void OnDisable()
+    {
+        _netCurrentDanger.OnValueChanged -= SendDangerChangedEvent;
+
+        if (!IsServer)
+            GameManager.OnStateMorning -= ResetDangerLevel;
     }
     #endregion
 
-    // ============== Functions ==============
-    #region Functions
-    public void OpenForageMenu()
+    // ============== Choose and Deal ==============
+    #region Choose and Deal
+    public void DealCards()
     {
-        _forageButton.SetActive(false);
-        _forageMenu.SetActive(true);
-        TestHazardThenDeal();
-    }
+        Debug.Log(gameObject.name + " Dealing cards");
 
-    private void CloseForageMenu()
-    {
-        _forageButton.SetActive(true);
-        _forageMenu.SetActive(false);
-    }
-
-    private void TestHazardThenDeal()
-    {
-        if (!HazardTest())
-            DealCards();
-    }
-
-    public bool HazardTest()
-    {
         // Increase danger with each forage action
         IncrementDanger(1);
 
+        List<GameObject> cardObjList = new();
+
+        GameObject hazardCard = HazardTest();
+        if (!hazardCard)// If no hazard drawn
+        {
+            for(int i = 0; i < 3; i++)
+                cardObjList.Add(ChooseCard());
+        }
+        else// If hazard drawn
+        {
+            cardObjList.Add(hazardCard);
+            for (int i = 0; i < 2; i++)
+                cardObjList.Add(ChooseCard());
+        }
+
+        _forageUI.DealCardObjects(cardObjList);
+    }
+
+    private GameObject HazardTest()
+    {
         // Test for hazard
-        int playerDangerLevel = _playerData.GetDangerLevel();
+        int dangerLevel = _netCurrentDanger.Value;
 
         // Get hazard teir
-        Hazard.DangerLevel dangerLevel = Hazard.DangerLevel.Low;
-        if (_tierTwoHazardThreshold < playerDangerLevel && playerDangerLevel <= _tierThreeHazardThreshold)
-            dangerLevel = Hazard.DangerLevel.Medium;
-        else if (_tierThreeHazardThreshold < playerDangerLevel)
-            dangerLevel = Hazard.DangerLevel.High;
+        Hazard.DangerLevel dangerTier = Hazard.DangerLevel.Low;
+        if (_tierTwoHazardThreshold < dangerLevel && dangerLevel <= _tierThreeHazardThreshold)
+            dangerTier = Hazard.DangerLevel.Medium;
+        else if (_tierThreeHazardThreshold < dangerLevel)
+            dangerTier = Hazard.DangerLevel.High;
 
         // Roll Hazard chances
-        float hazardChance = _dangerLevelDrawChances.Evaluate(playerDangerLevel*0.1f);
-        Debug.Log($"<color=blue>CLIENT: </color> Player DL: {playerDangerLevel}, hazard chance: {hazardChance}, hazard level {dangerLevel}. Rolling.");
+        float hazardChance = _dangerLevelDrawChances.Evaluate(dangerLevel*0.1f);
+        Debug.Log($"<color=blue>CLIENT: </color> Player DL: {dangerLevel}, hazard chance: {hazardChance}, hazard level {dangerTier}. Rolling.");
         float rand = (Random.Range(0, 100)*0.01f);
 
         // Hazard
         if (hazardChance >= rand)
         {
             Debug.Log($"<color=blue>CLIENT: </color> Rolled: {rand}, hazard encountered!");
-            SpawnHazard(dangerLevel);
-            return true;
+            return SpawnHazard(dangerTier);
         }
         // No Hazard
         else
         {
             Debug.Log($"<color=blue>CLIENT: </color> Rolled: {rand}, no hazard!");
-            return false;
+            return null;
         }
     }
 
-    private void SpawnHazard(Hazard.DangerLevel dangerLevel)
+    private GameObject SpawnHazard(Hazard.DangerLevel dangerLevel)
     {
+        if(!_playerHandMan)
+            _playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
+
         // Spawn in random hazard
         int randHazardID = CardDatabase.Instance.GetRandHazard(dangerLevel);
-        HazardCardVisual hazard = Instantiate(_hazardCardPref, _cardZone).GetComponent<HazardCardVisual>();
+        GameObject hazardCard = Instantiate(_hazardCardPref, transform);
+        HazardCardVisual hazard = hazardCard.GetComponent<HazardCardVisual>();
+        
         hazard.Setup(randHazardID);
-
         hazard.RunHazard(_playerHandMan);
 
-        OpenHazardUI();
+        return hazardCard;
     }
 
-    public void DealCards()
+    private GameObject ChooseCard()
     {
-        if (_cardManager == null)
-            _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
+        // Pick and deal random foraged card
+        int cardID = _cardDropTable.PickCardDrop();
+        Debug.Log("Picked Card " + cardID);
 
-        // Pick and deal random foraged cards
-        Debug.Log(gameObject.name + " Dealing cards");
-        for(int i = 0; i < _cardsDelt; i++)
-        {
-            // Pick card
-            int cardID = _cardDropTable.PickCardDrop();
+        // Put card on screen
+        GameObject cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), transform);
+        cardObj.GetComponent<Card>().SetupSelectable();
 
-            // Put card on screen
-            Card newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardZone).GetComponent<Card>();
-            newCard.SetupSelectable();
-        }
+        return cardObj;
     }
+    #endregion
 
-    public void RedealCards()
-    {
-        Debug.Log(gameObject.name + " Redealing cards");
-        ClearCards();
-        TestHazardThenDeal();
-    }
-
+    // ============== Other ==============
+    #region Other
     public void SelectCard(Card card)
     {
         // Give cards to Card Manager
         _cardManager.GiveCard(card.GetCardID());
 
-        ClearCards();
-        CloseForageMenu();
+        _forageUI.ClearCards();
+        _forageUI.CloseForageMenu();
     }
 
-    private void ClearCards()
+    public void Setup()
     {
-        // Clear lists
-        foreach (Transform child in _cardZone)
-        {
-            Destroy(child.gameObject);
-        }
+        Debug.Log("Forage Setup");
+        _forageCanvas.SetActive(true);
+    }
+
+    public void Shutdown()
+    {
+        _forageUI.ClearCards();
+        _forageUI.CloseForageMenu();
+        _forageCanvas.SetActive(false);
+    }
+    #endregion
+
+    // ================ Danger Level ================
+    #region Danger Level
+    public int GetDangerLevel()
+    {
+        return _netCurrentDanger.Value;
+    }
+
+    private void SendDangerChangedEvent(int prev, int current)
+    {
+        OnDangerIncrement?.Invoke(current);
+    }
+
+    private void ResetDangerLevel()
+    {
+        SetDangerLevel(0);
     }
 
     private void IncrementDanger(int dangerInc)
     {
         Debug.Log("Sending Increment Danger Event " + dangerInc);
-        OnDangerIncrement?.Invoke(dangerInc);
+        ModifyDangerLevelServerRPC(dangerInc, true);
     }
 
-    private void OpenHazardUI()
+    public void SetDangerLevel(int dangerInc)
     {
-        _hazardCloseButton.SetActive(true);
-        //_redealButton.SetActive(false);
+        if (!IsServer)
+            return;
+
+        Debug.Log("Sending Increment Danger Event " + dangerInc);
+        ModifyDangerLevelServerRPC(dangerInc, false);
     }
 
-    public void CloseHazardAndDeal()
+    [ServerRpc(RequireOwnership = false)]
+    private void ModifyDangerLevelServerRPC(int ammount, bool add, ServerRpcParams serverRpcParams = default)
     {
-        _hazardCloseButton.SetActive(false);
-        //_redealButton.SetActive(true);
-        ClearCards();
-        DealCards();
-    }
+        Debug.Log($"{gameObject.name} had its danger level incremented by {ammount}");
 
-    public void Shutdown()
-    {
-        ClearCards();
-        CloseForageMenu();
+        // temp for calculations
+        int tempDL = _netCurrentDanger.Value;
+
+        if (add)
+            tempDL += ammount;
+        else
+            tempDL = ammount;
+
+        // Clamp HP within bounds
+        if (tempDL < 1)
+            tempDL = 1;
+        else if (tempDL > _maxDanger)
+            tempDL = _maxDanger;
+
+        _netCurrentDanger.Value = tempDL;
     }
     #endregion
 }

@@ -6,7 +6,6 @@ public class Location : MonoBehaviour
 {
     // ============== Variables / Refrences ==============
     #region Variables / Refrences
-    [SerializeField] private GameObject _locationContent;
     [SerializeField] private GameObject _locationDecor;
     [SerializeField] private Transform _locationCamPos;
     [SerializeField] private Forage _forage;
@@ -29,11 +28,22 @@ public class Location : MonoBehaviour
     #region Location Functions
     public void EnableLocation()
     {
-        _locationContent.SetActive(true);
+        Debug.Log("Enabling location " + gameObject.name);
+
         _locationDecor.SetActive(true);
 
         _mainCam.transform.position = _locationCamPos.localToWorldMatrix.GetPosition();
         _mainCam.transform.rotation = _locationCamPos.localToWorldMatrix.rotation;
+
+        if (_forage)
+            _forage.Setup();
+    }
+
+    public void DisableLocation()
+    {
+        LocationShutdown();
+
+        _locationDecor.SetActive(false);
     }
 
     public void LocationShutdown()
@@ -43,14 +53,6 @@ public class Location : MonoBehaviour
 
         Debug.Log("Shutting down location " + gameObject.name);
         _forage.Shutdown();
-    }
-
-    public void DisableLocation()
-    {
-        LocationShutdown();
-
-        _locationContent.SetActive(false);
-        _locationDecor.SetActive(false);
     }
 
     public SeatManager GetLocationSeatManager()

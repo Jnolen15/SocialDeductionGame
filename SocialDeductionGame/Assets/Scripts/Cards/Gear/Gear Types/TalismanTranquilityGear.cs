@@ -16,7 +16,7 @@ public class TalismanTranquilityGear : Gear
         Debug.Log("Talisman of Tranquility reducing danger");
 
         if (_playerData != null)
-            _playerData.ModifyDangerLevel(-_dangerReduction);
+            Debug.Log("REPLACE EFFECT");//_playerData.ModifyDangerLevel(-_dangerReduction);
         else
             Debug.LogError("Talisman of Tranquility does not have player data refrence");
     }

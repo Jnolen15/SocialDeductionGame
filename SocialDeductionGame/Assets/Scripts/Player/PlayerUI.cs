@@ -27,9 +27,6 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _hungerNum;
     [SerializeField] private List<Sprite> _healthIconStages;
     [SerializeField] private List<Sprite> _hungerIconStages;
-    [SerializeField] private TextMeshProUGUI _dangerText;
-    [SerializeField] private Image _dangerIcon;
-    [SerializeField] private List<Sprite> _dangerIconStages;
     [SerializeField] private GameObject _deathMessage;
 
     [Header("Other")]
@@ -175,25 +172,6 @@ public class PlayerUI : MonoBehaviour
 
         // Update number
         _hungerNum.text = newTotal.ToString();
-    }
-
-    public void UpdateDanger(int prev, int current)
-    {
-        _dangerText.text = current.ToString();
-
-        // Should not hard code this (should have value refrences)
-        _dangerText.color = new Color32(233, 195, 41, 255);
-        _dangerIcon.sprite = _dangerIconStages[2];
-        if (4 < current && current <= 8)
-        {
-            _dangerText.color = new Color32(217, 116, 24, 255);
-            _dangerIcon.sprite = _dangerIconStages[1];
-        }
-        else if (8 < current)
-        {
-            _dangerText.color = new Color32(206, 60, 24, 255);
-            _dangerIcon.sprite = _dangerIconStages[0];
-        }
     }
 
     private void OnDeath()

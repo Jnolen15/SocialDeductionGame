@@ -15,8 +15,8 @@ public class DangerHazard : Hazard
 
         if (playerObj != null)
         {
-            if (_danger != 0)
-                playerObj.GetComponent<PlayerData>().ModifyDangerLevel(_danger);
+            //if (_danger != 0)
+            //    playerObj.GetComponent<PlayerData>().ModifyDangerLevel(_danger);
         }
         else
             Debug.LogError("Player object not found!");
