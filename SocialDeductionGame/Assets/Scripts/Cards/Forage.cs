@@ -15,6 +15,7 @@ public class Forage : NetworkBehaviour
     [SerializeField] private AnimationCurve _dangerLevelDrawChances;
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
+    [SerializeField] private LocationManager.LocationName _locationName;
 
     [Header("Refrences")]
     [SerializeField]private ForageUI _forageUI;
@@ -27,6 +28,12 @@ public class Forage : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _eventDebuffed = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _eventBuffed = new(writePerm: NetworkVariableWritePermission.Server);
+
+    public delegate void LocationForageAction(LocationManager.LocationName locationName);
+    public static event LocationForageAction OnLocationBuffEnabled;
+    public static event LocationForageAction OnLocationBuffDisabled;
+    public static event LocationForageAction OnLocationDebuffEnabled;
+    public static event LocationForageAction OnLocationDebuffDisabled;
     #endregion
 
     // ============== Setup ==============
@@ -278,6 +285,7 @@ public class Forage : NetworkBehaviour
 
         Debug.Log(gameObject.name + "Debuffed by an event!");
         _eventDebuffed.Value = true;
+        OnLocationDebuffEnabled?.Invoke(_locationName);
     }
     
     public void SetLocationEventBuff()
@@ -290,6 +298,7 @@ public class Forage : NetworkBehaviour
 
         Debug.Log(gameObject.name + "Buffed by an event!");
         _eventBuffed.Value = true;
+        OnLocationBuffEnabled?.Invoke(_locationName);
     }
 
     private void ClearBuffs()
@@ -297,6 +306,8 @@ public class Forage : NetworkBehaviour
         Debug.Log(gameObject.name + " clearing buffs");
         _eventDebuffed.Value = false;
         _eventBuffed.Value = false;
+        OnLocationDebuffDisabled?.Invoke(_locationName);
+        OnLocationBuffDisabled?.Invoke(_locationName);
     }
     #endregion
 }
