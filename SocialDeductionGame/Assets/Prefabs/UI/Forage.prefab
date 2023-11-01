@@ -483,6 +483,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardDropTable:
     CardDrops: []
+  _uselessCardID: 9001
+  _uselessOddsDefault: 30
+  _uselessOddsDebuffModifier: 15
   _dangerLevelDrawChances:
     serializedVersion: 2
     m_Curve:
@@ -536,11 +539,15 @@ MonoBehaviour:
     m_RotationOrder: 4
   _tierTwoHazardThreshold: 40
   _tierThreeHazardThreshold: 80
-  _netCurrentDanger:
-    m_InternalValue: 0
   _forageUI: {fileID: 4011721465090627423}
   _forageCanvas: {fileID: 3238553328835705927}
   _hazardCardPref: {fileID: 7376748315988548449, guid: 928f42358a7dd524e8052c7d9a135188, type: 3}
+  _netCurrentDanger:
+    m_InternalValue: 0
+  _eventDebuffed:
+    m_InternalValue: 0
+  _eventBuffed:
+    m_InternalValue: 0
 --- !u!1 &4581074892960370356
 GameObject:
   m_ObjectHideFlags: 0

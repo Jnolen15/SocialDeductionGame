@@ -9,6 +9,9 @@ public class Forage : NetworkBehaviour
     #region P / R / V
     [Header("Parameters")]
     [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
+    [SerializeField] private int _uselessCardID;
+    [SerializeField] private int _uselessOddsDefault;
+    [SerializeField] private int _uselessOddsDebuffModifier;
     [SerializeField] private AnimationCurve _dangerLevelDrawChances;
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
@@ -22,8 +25,8 @@ public class Forage : NetworkBehaviour
 
     [Header("Variables")]
     [SerializeField] private NetworkVariable<float> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private bool _eventDebuffed;
-    [SerializeField] private bool _eventBuffed;
+    [SerializeField] private NetworkVariable<bool> _eventDebuffed = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _eventBuffed = new(writePerm: NetworkVariableWritePermission.Server);
     #endregion
 
     // ============== Setup ==============
@@ -38,7 +41,10 @@ public class Forage : NetworkBehaviour
         _netCurrentDanger.OnValueChanged += SendDangerChangedEvent;
 
         if (IsServer)
+        {
             GameManager.OnStateMorning += ResetDangerLevel;
+            GameManager.OnStateEvening += ClearBuffs;
+        }
     }
 
     private void Start()
@@ -52,7 +58,10 @@ public class Forage : NetworkBehaviour
         _netCurrentDanger.OnValueChanged -= SendDangerChangedEvent;
 
         if (IsServer)
+        {
             GameManager.OnStateMorning -= ResetDangerLevel;
+            GameManager.OnStateEvening -= ClearBuffs;
+        }
     }
     #endregion
 
@@ -132,9 +141,33 @@ public class Forage : NetworkBehaviour
 
     private GameObject ChooseCard()
     {
-        // Pick and deal random foraged card
-        int cardID = _cardDropTable.PickCardDrop();
-        Debug.Log("Picked Card " + cardID);
+        int cardID;
+
+        // Test for useless card
+        int uselessOdds = _uselessOddsDefault;
+        if (_eventDebuffed.Value)
+            uselessOdds += _uselessOddsDebuffModifier;
+        else if (_eventBuffed.Value)
+            uselessOdds -= _uselessOddsDebuffModifier;
+        int rand = (Random.Range(0, 100));
+        Debug.Log($"Useless Odds are {uselessOdds}, rolled a {rand}");
+        if (uselessOdds >= rand)
+        {
+            cardID = _uselessCardID;
+            Debug.Log("Picked Useless Card " + cardID);
+        }
+        else
+        {
+            // Pick and deal random foraged card
+            cardID = _cardDropTable.PickCardDrop();
+            Debug.Log("Picked Card " + cardID);
+        }
+
+        if (!CardDatabase.Instance.VerifyCard(cardID))
+        {
+            Debug.Log("Card ID could not be verified. Picking new from drop table");
+            cardID = _cardDropTable.PickCardDrop();
+        }
 
         // Put card on screen
         GameObject cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), transform);
@@ -234,6 +267,7 @@ public class Forage : NetworkBehaviour
     #endregion
 
     // ================ Event / Totem interaction ================
+    #region Event/Totem Interaction
     public void SetLocationEventDebuff()
     {
         if (!IsServer)
@@ -243,7 +277,7 @@ public class Forage : NetworkBehaviour
         }
 
         Debug.Log(gameObject.name + "Debuffed by an event!");
-        _eventDebuffed = true;
+        _eventDebuffed.Value = true;
     }
     
     public void SetLocationEventBuff()
@@ -255,6 +289,14 @@ public class Forage : NetworkBehaviour
         }
 
         Debug.Log(gameObject.name + "Buffed by an event!");
-        _eventBuffed = true;
+        _eventBuffed.Value = true;
     }
+
+    private void ClearBuffs()
+    {
+        Debug.Log(gameObject.name + " clearing buffs");
+        _eventDebuffed.Value = false;
+        _eventBuffed.Value = false;
+    }
+    #endregion
 }

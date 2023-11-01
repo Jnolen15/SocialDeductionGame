@@ -44,6 +44,18 @@ public class CardDatabase : MonoBehaviour
     }
 
     // ===== Card Functions =====
+    public bool VerifyCard(int cardID)
+    {
+        foreach (CardEntry card in _globalCardList)
+        {
+            if (card.CardID == cardID)
+                return true;
+        }
+
+        Debug.LogError($"Card with ID:{cardID} not found in global card list.");
+        return false;
+    }
+
     public GameObject GetCard(int cardID)
     {
         foreach (CardEntry card in _globalCardList)
