@@ -13,14 +13,17 @@ public class Forage : NetworkBehaviour
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
 
-    [SerializeField] private NetworkVariable<float> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
-
     [Header("Refrences")]
     [SerializeField]private ForageUI _forageUI;
     private CardManager _cardManager;
     private HandManager _playerHandMan;
     [SerializeField] private GameObject _forageCanvas;
     [SerializeField] private GameObject _hazardCardPref;
+
+    [Header("Variables")]
+    [SerializeField] private NetworkVariable<float> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private bool _eventDebuffed;
+    [SerializeField] private bool _eventBuffed;
     #endregion
 
     // ============== Setup ==============
@@ -186,10 +189,10 @@ public class Forage : NetworkBehaviour
         SetDangerLevelServerRPC(0);
     }
 
-    private void IncrementDanger(int dangerInc)
+    public void IncrementDanger(float dangerInc)
     {
         Debug.Log("Incrementing danger by " + dangerInc);
-        ModifyDangerLevelServerRPC((float)dangerInc);
+        ModifyDangerLevelServerRPC(dangerInc);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -229,4 +232,29 @@ public class Forage : NetworkBehaviour
         _netCurrentDanger.Value = ammount;
     }
     #endregion
+
+    // ================ Event / Totem interaction ================
+    public void SetLocationEventDebuff()
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning("SetLocationEventDebuff invoked by client!");
+            return;
+        }
+
+        Debug.Log(gameObject.name + "Debuffed by an event!");
+        _eventDebuffed = true;
+    }
+    
+    public void SetLocationEventBuff()
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning("SetLocationEventBuff invoked by client!");
+            return;
+        }
+
+        Debug.Log(gameObject.name + "Buffed by an event!");
+        _eventBuffed = true;
+    }
 }

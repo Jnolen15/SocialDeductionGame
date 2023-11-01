@@ -26,10 +26,9 @@ public class EventManager : NetworkBehaviour
     {
         _nightEventThumbnail = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponentInChildren<NightEventThumbnail>();
 
-        GameManager.OnStateNight += DoEvent;
-
         if (IsServer)
         {
+            GameManager.OnStateNight += DoEventServerRpc;
             GameManager.OnStateMorning += SetupNewEventServerRpc;
             GameManager.OnSetup += PickRandomEvent;
             GameManager.OnStateEvening += TestEvent;
@@ -39,10 +38,9 @@ public class EventManager : NetworkBehaviour
 
     private void OnDisable()
     {
-        GameManager.OnStateNight -= DoEvent;
-
         if (IsServer)
         {
+            GameManager.OnStateNight -= DoEventServerRpc;
             GameManager.OnStateMorning -= SetupNewEventServerRpc;
             GameManager.OnSetup -= PickRandomEvent;
             GameManager.OnStateEvening -= TestEvent;
@@ -133,24 +131,56 @@ public class EventManager : NetworkBehaviour
         UpdateEventUI();
     }
 
-    private void DoEvent()
+    [ServerRpc]
+    private void DoEventServerRpc()
     {
+        if (!IsServer)
+            return;
+
         // Calls InvokeNightEvent if event test failed
         if (_netPassedNightEvent.Value)
         {
-            Debug.Log("<color=blue>CLIENT: </color>Event passed, no suffering");
+            Debug.Log("<color=yellow>Server: </color>Event passed, no suffering");
             if (_netEarnedBonusNightEvent.Value)
             {
-                Debug.Log("<color=blue>CLIENT: </color>Event Bonus Earned!");
-                InvokeNightEventBonus(_netCurrentNightEventID.Value);
+                Debug.Log("<color=yellow>Server: </color>Event Bonus Earned!");
+                // Invoke Server event bonus
+                if (CardDatabase.Instance.GetEvent(_netCurrentNightEventID.Value).GetEventIsServerInvoked())
+                    InvokeNightEventBonusServerRpc(_netCurrentNightEventID.Value);
+                // Invoke client event bonus
+                else
+                    InvokeNightEventBonusClientRpc(_netCurrentNightEventID.Value);
             }
-        } 
+        }
         else
-            InvokeNightEvent(_netCurrentNightEventID.Value);
+        {
+            // Invoke Server event
+            if (CardDatabase.Instance.GetEvent(_netCurrentNightEventID.Value).GetEventIsServerInvoked())
+                InvokeNightEventServerRpc(_netCurrentNightEventID.Value);
+            // Invoke client event
+            else
+                InvokeNightEventClientRpc(_netCurrentNightEventID.Value);
+        }
     }
 
-    // Gets event from database and invokes it
-    private void InvokeNightEvent(int eventID)
+    // Gets event from database and invokes it on server
+    [ServerRpc]
+    private void InvokeNightEventServerRpc(int eventID)
+    {
+        Debug.Log("<color=yellow>Server: </color>Invoking server event");
+
+        // Invoke Night Event
+        NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
+
+        if (nEvent)
+            nEvent.InvokeEvent();
+        else
+            Debug.LogError("<color=yellow>Server: </color>No Night Event found");
+    }
+
+    // Gets event from database and invokes it on each client
+    [ClientRpc]
+    private void InvokeNightEventClientRpc(int eventID)
     {
         // Saboteurs not effected by night events
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -163,6 +193,8 @@ public class EventManager : NetworkBehaviour
         if (player.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
             return;
 
+        Debug.Log("<color=blue>CLIENT: </color>Invoking night event!");
+
         // Invoke Night Event
         NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
 
@@ -173,7 +205,23 @@ public class EventManager : NetworkBehaviour
     }
 
     // Gets event from database and invokes bonus
-    private void InvokeNightEventBonus(int eventID)
+    [ServerRpc]
+    private void InvokeNightEventBonusServerRpc(int eventID)
+    {
+        Debug.Log("<color=yellow>SERVER: </color>Invoking server event bonus");
+
+        // Invoke Night Event Bonus
+        NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
+
+        if (nEvent)
+            nEvent.InvokeBonus();
+        else
+            Debug.LogError("<color=yellow>SERVER: </color>No Night Event found");
+    }
+
+    // Gets event from database and invokes bonus
+    [ClientRpc]
+    private void InvokeNightEventBonusClientRpc(int eventID)
     {
         // Saboteurs not effected by night event Bonuses
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -185,6 +233,8 @@ public class EventManager : NetworkBehaviour
 
         if (player.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
             return;
+
+        Debug.Log("<color=blue>CLIENT: </color>Invoking night event bonus!");
 
         // Invoke Night Event Bonus
         NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);

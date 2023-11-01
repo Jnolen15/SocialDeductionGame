@@ -59,5 +59,29 @@ public class Location : MonoBehaviour
     {
         return _seatManager;
     }
+
+    public void SetLocationEventDebuff()
+    {
+        if (_forage)
+        {
+            _forage.SetLocationEventDebuff();
+        }
+        else
+        {
+            Debug.LogError("Error: Forage not assigned!");
+        }
+    }
+
+    public void SetLocationEventBuff()
+    {
+        if (_forage)
+        {
+            _forage.SetLocationEventBuff();
+        }
+        else
+        {
+            Debug.LogError("Error: Forage not assigned!");
+        }
+    }
     #endregion
 }

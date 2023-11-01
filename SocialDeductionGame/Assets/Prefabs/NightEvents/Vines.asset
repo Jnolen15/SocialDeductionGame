@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e85ee037626bb44daee4e904f944ed6, type: 3}
   m_Name: Vines
   m_EditorClassIdentifier: 
-  _eventID: 1007
+  _eventID: 1009
   _eventName: Grasping Vines
-  _eventConsequences: X Location debuffed
-  _eventBonuses: X Location buffed
+  _eventConsequences: Forest debuffed
+  _eventBonuses: Forest buffed
   _eventArt: {fileID: 0}
-  _requirements: {fileID: 11400000, guid: f2050725077683a48bbb89b1e947ebe0, type: 2}
-  _eventBonus: {fileID: 11400000, guid: 595616b01a47fb64ba6f98cfa1303361, type: 2}
-  _danger: 0
+  _serverInvoked: 1
+  _requirements: {fileID: 11400000, guid: efeaedcfc0ca4ad45ad8249f15182184, type: 2}
+  _eventBonus: {fileID: 11400000, guid: 7777c3e17d656a04ea70f52f74199450, type: 2}
+  _location: 2

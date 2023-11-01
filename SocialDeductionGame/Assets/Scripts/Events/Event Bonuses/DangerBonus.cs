@@ -5,20 +5,24 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Night Event/Danger Bonus")]
 public class DangerBonus : EventBonus
 {
-    [Header("Danger Reduction Ammount")]
-    [SerializeField] private int _dangerReduction;
+    [Header("Danger Event Details")]
+    [SerializeField] private LocationManager.LocationName _location;
 
     // ========== METHOD OVERRIDES ==========
+    // This event bonus should only be invoked by server
     public override void InvokeBonus()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        GameObject gameManager = GameObject.FindGameObjectWithTag("GameManager");
 
-        if (player == null)
+        if (gameManager != null)
         {
-            Debug.LogError("Cannot enact night event. Player object not found!");
+            Debug.Log("Setting Location Debuff");
+            gameManager.GetComponent<LocationManager>().SetLocationBuff(_location);
+        }
+        else
+        {
+            Debug.LogError("Cannot enact night event. Game Manager object not found!");
             return;
         }
-
-        //player.GetComponent<PlayerData>().ModifyDangerLevel(-_dangerReduction);
     }
 }

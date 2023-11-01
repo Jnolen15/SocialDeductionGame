@@ -15,6 +15,7 @@ public abstract class NightEvent : ScriptableObject
     [TextArea]
     [SerializeField] private string _eventBonuses;
     [SerializeField] private Sprite _eventArt;
+    [SerializeField] private bool _serverInvoked;
 
     [Header("Required Resources")]
     [SerializeField] private EventRequirementsSO _requirements;
@@ -43,6 +44,11 @@ public abstract class NightEvent : ScriptableObject
     public string GetEventBonuses()
     {
         return _eventBonuses;
+    }
+
+    public bool GetEventIsServerInvoked()
+    {
+        return _serverInvoked;
     }
 
     public int GetBonusRequirements()

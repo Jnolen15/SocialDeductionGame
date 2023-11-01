@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e85ee037626bb44daee4e904f944ed6, type: 3}
   m_Name: Wind
   m_EditorClassIdentifier: 
-  _eventID: 1008
+  _eventID: 1007
   _eventName: Howling Wind
-  _eventConsequences: X Location debuffed
-  _eventBonuses: X Location buffed
+  _eventConsequences: Plateau debuffed
+  _eventBonuses: Plateau buffed
   _eventArt: {fileID: 0}
-  _requirements: {fileID: 11400000, guid: f4ffc7402e5fa9b408a2e64142a29f85, type: 2}
-  _eventBonus: {fileID: 11400000, guid: 595616b01a47fb64ba6f98cfa1303361, type: 2}
-  _danger: 0
+  _serverInvoked: 1
+  _requirements: {fileID: 11400000, guid: f2050725077683a48bbb89b1e947ebe0, type: 2}
+  _eventBonus: {fileID: 11400000, guid: 25567adae98a2444897ae27faf1a187e, type: 2}
+  _location: 3
