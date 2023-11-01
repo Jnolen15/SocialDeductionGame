@@ -382,6 +382,23 @@ public class HandManager : NetworkBehaviour
         return 0;
     }
 
+    public bool CheckForForageGear(string location)
+    {
+        Debug.Log("Looking for equipped gear with " + location + " tag");
+
+        foreach (Gear gear in _equipedGear)
+        {
+            if (gear != null && gear.HasTag(location))
+            {
+                Debug.Log("Found matching gear " + gear.GetCardName());
+                return true;
+            }
+        }
+
+        Debug.Log("Did not find mathcing gear in either slot");
+        return false;
+    }
+
     public void UseGear(int gearID)
     {
         // Find gear

@@ -54,9 +54,10 @@ public class Forage : NetworkBehaviour
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
+        _playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
         _cardDropTable.ValidateTable();
     }
 
@@ -76,23 +77,30 @@ public class Forage : NetworkBehaviour
     #region Choose and Deal
     public void DealCards()
     {
+        if (!_playerHandMan)
+            _playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
+
         Debug.Log(gameObject.name + " Dealing cards");
 
         // Increase danger with each forage action
         IncrementDanger(1);
+
+        int numToDeal = 3;
+        if (_playerHandMan.CheckForForageGear(_locationName.ToString()))
+            numToDeal++;
 
         List<GameObject> cardObjList = new();
 
         GameObject hazardCard = HazardTest();
         if (!hazardCard)// If no hazard drawn
         {
-            for(int i = 0; i < 3; i++)
+            for(int i = 0; i < numToDeal; i++)
                 cardObjList.Add(ChooseCard());
         }
         else// If hazard drawn
         {
             cardObjList.Add(hazardCard);
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < (numToDeal-1); i++)
                 cardObjList.Add(ChooseCard());
         }
 
