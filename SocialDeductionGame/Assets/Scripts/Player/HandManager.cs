@@ -365,20 +365,20 @@ public class HandManager : NetworkBehaviour
         return 0;
     }
 
-    public int CheckGearTagsFor(CardTag tag)
+    public int CheckForHazardPreventionGear()
     {
-        Debug.Log("Checking gear for tag " + tag);
+        Debug.Log("Looking for equipped gear with 'Weapon' tag");
 
         foreach (Gear gear in _equipedGear)
         {
-            if (gear != null && gear.HasTag(tag))
+            if (gear != null && gear.HasTag("Weapon"))
             {
-                Debug.Log("Found matching tag on " + gear.GetCardName());
+                Debug.Log("Found matching gear " + gear.GetCardName());
                 return gear.GetCardID();
             }
         }
 
-        Debug.Log("Did not find mathcing tag in either slot");
+        Debug.Log("Did not find mathcing gear in either slot");
         return 0;
     }
 

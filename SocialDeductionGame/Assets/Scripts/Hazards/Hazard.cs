@@ -12,12 +12,6 @@ public abstract class Hazard : ScriptableObject
     [TextArea]
     [SerializeField] protected string _hazardConsequences;
     [SerializeField] protected Sprite _hazardArt;
-    public enum HazardType
-    {
-        Animal,
-        Environmental
-    }
-    [SerializeField] protected HazardType _hazardType;
     public enum DangerLevel
     {
         Low,
@@ -25,7 +19,7 @@ public abstract class Hazard : ScriptableObject
         High
     }
     [SerializeField] protected DangerLevel _dangerLevel;
-    [SerializeField] protected CardTag _preventionTag;
+    [SerializeField] protected bool _preventable;
 
 
     // ========== Getters ==========
@@ -43,11 +37,6 @@ public abstract class Hazard : ScriptableObject
     public string GetHazardConsequences()
     {
         return _hazardConsequences;
-    }
-    
-    public HazardType GetHazardType()
-    {
-        return _hazardType;
     }
     
     public DangerLevel GetHazardDangerLevel()
@@ -80,9 +69,9 @@ public abstract class Hazard : ScriptableObject
 
         // Tests to see if can be prevented by player gear
         int gearID = 0;
-        if (_preventionTag != null)
+        if (_preventable)
         {
-            gearID = handMan.CheckGearTagsFor(_preventionTag);
+            gearID = handMan.CheckForHazardPreventionGear();
             if (gearID != 0)
             {
                 handMan.UseGear(gearID);
