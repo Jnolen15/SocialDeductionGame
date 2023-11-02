@@ -346,6 +346,12 @@ public class PlayerCardManager : NetworkBehaviour
             Stockpile stockpile = _cardPlayLocation.GetComponent<Stockpile>();
             playedCard.PlayToStockpile(stockpile);
         }
+        // Play card to stockpile
+        else if (_cardPlayLocation.CompareTag("Totem"))
+        {
+            Totem totem = _cardPlayLocation.GetComponent<Totem>();
+            playedCard.PlayToTotem(totem);
+        }
         // Play the card to location
         else
         {

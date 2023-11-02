@@ -33,6 +33,11 @@ public abstract class Card : MonoBehaviour
         return _cardName;
     }
 
+    public List<CardTag> GetCardTags()
+    {
+        return new List<CardTag>(_tags);
+    }
+
     // ========== Tags ==========
     public bool HasTag(CardTag t)
     {
@@ -89,6 +94,17 @@ public abstract class Card : MonoBehaviour
         {
             Debug.Log("Playng card to stockpile: " + _cardName);
             stockpile.AddCard(GetCardID(), PlayerConnectionManager.Instance.GetLocalPlayersID());
+        }
+        else
+            Debug.LogError("Card was played on a location it can't do anything with");
+    }
+    
+    public void PlayToTotem(Totem totem)
+    {
+        if (totem != null)
+        {
+            Debug.Log("Playng card to totem: " + _cardName);
+            totem.AddCard(GetCardID());
         }
         else
             Debug.LogError("Card was played on a location it can't do anything with");

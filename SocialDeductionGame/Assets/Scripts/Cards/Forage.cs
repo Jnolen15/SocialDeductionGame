@@ -57,7 +57,7 @@ public class Forage : NetworkBehaviour
     private void Awake()
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
-        _playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
+        //_playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
         _cardDropTable.ValidateTable();
     }
 
