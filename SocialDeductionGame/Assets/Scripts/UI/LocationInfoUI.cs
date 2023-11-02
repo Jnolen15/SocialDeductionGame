@@ -17,6 +17,8 @@ public class LocationInfoUI : MonoBehaviour
         Forage.OnLocationBuffDisabled += HideBuffIcon;
         Forage.OnLocationDebuffEnabled += ShowDebuffIcon;
         Forage.OnLocationDebuffDisabled += HideDebuffIcon;
+        Totem.OnLocationTotemEnable += ShowTotemIcon;
+        Totem.OnLocationTotemDisable += HideTotemIcon;
     }
 
     private void OnDestroy()
@@ -25,6 +27,8 @@ public class LocationInfoUI : MonoBehaviour
         Forage.OnLocationBuffDisabled -= HideBuffIcon;
         Forage.OnLocationDebuffEnabled -= ShowDebuffIcon;
         Forage.OnLocationDebuffDisabled -= HideDebuffIcon;
+        Totem.OnLocationTotemEnable -= ShowTotemIcon;
+        Totem.OnLocationTotemDisable -= HideTotemIcon;
     }
 
     // ============== UI Functions ==============

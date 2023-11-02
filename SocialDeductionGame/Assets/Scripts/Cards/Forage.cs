@@ -28,6 +28,7 @@ public class Forage : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _eventDebuffed = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _eventBuffed = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _totemActive = new(writePerm: NetworkVariableWritePermission.Server);
 
     public delegate void LocationForageAction(LocationManager.LocationName locationName);
     public static event LocationForageAction OnLocationBuffEnabled;
@@ -51,6 +52,8 @@ public class Forage : NetworkBehaviour
         {
             GameManager.OnStateMorning += ResetDangerLevel;
             GameManager.OnStateEvening += ClearBuffs;
+            Totem.OnLocationTotemEnable += SetLocationTotem;
+            Totem.OnLocationTotemDisable += ClearLocationTotem;
         }
     }
 
@@ -69,6 +72,8 @@ public class Forage : NetworkBehaviour
         {
             GameManager.OnStateMorning -= ResetDangerLevel;
             GameManager.OnStateEvening -= ClearBuffs;
+            Totem.OnLocationTotemEnable -= SetLocationTotem;
+            Totem.OnLocationTotemDisable -= ClearLocationTotem;
         }
     }
     #endregion
@@ -239,6 +244,9 @@ public class Forage : NetworkBehaviour
 
     public void IncrementDanger(float dangerInc)
     {
+        if (_totemActive.Value)
+            dangerInc = (dangerInc * 1.5f);
+
         Debug.Log("Incrementing danger by " + dangerInc);
         ModifyDangerLevelServerRPC(dangerInc);
     }
@@ -307,6 +315,36 @@ public class Forage : NetworkBehaviour
         Debug.Log(gameObject.name + "Buffed by an event!");
         _eventBuffed.Value = true;
         OnLocationBuffEnabled?.Invoke(_locationName);
+    }
+
+    private void SetLocationTotem(LocationManager.LocationName locationName)
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning("SetLocationTotem invoked by client!");
+            return;
+        }
+
+        if (_locationName != locationName)
+            return;
+
+        Debug.Log(locationName + "Totem enabled!");
+        _totemActive.Value = true;
+    }
+
+    private void ClearLocationTotem(LocationManager.LocationName locationName)
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning("ClearLocationTotem invoked by client!");
+            return;
+        }
+
+        if (_locationName != locationName)
+            return;
+
+        Debug.Log(locationName + "Totem disabled!");
+        _totemActive.Value = false;
     }
 
     private void ClearBuffs()
