@@ -14,4 +14,9 @@ public class TagIcon : MonoBehaviour
         _iconVisual.sprite = vis;
         _iconName.text = name;
     }
+
+    public string GetIconName()
+    {
+        return _iconName.text;
+    }
 }

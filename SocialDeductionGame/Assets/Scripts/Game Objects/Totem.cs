@@ -8,7 +8,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
     // ================== Refrences ==================
     [SerializeField] private GameObject _totemEffects;
     [SerializeField] private GameObject _totemButton;
-    [SerializeField] private GameObject _tagZone;
+    [SerializeField] private Transform _tagZone;
     [SerializeField] private GameObject _tagPref;
 
     // ================== Variables ==================
@@ -17,6 +17,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
     [SerializeField] private NetworkVariable<bool> _netIsPrepped = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netIsActive = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private List<CardTag> _currentTags = new();
+    [SerializeField] private Dictionary<string, GameObject> _localTags = new();
 
     public delegate void TotemAction(LocationManager.LocationName locationName);
     public static event TotemAction OnLocationTotemEnable;
@@ -25,21 +26,18 @@ public class Totem : NetworkBehaviour, ICardPlayable
     // ================== Setup ==================
     public override void OnNetworkSpawn()
     {
+        GameManager.OnStateIntro += InitialVisibiltyToggle;
         _netIsActive.OnValueChanged += ToggleVisibility;
         
         if(IsServer)
             GameManager.OnStateNight += ToggleActive;
     }
 
-    private void Start()
-    {
-        ToggleVisibility(false, false);
-    }
-
     public override void OnDestroy()
     {
+        GameManager.OnStateIntro -= InitialVisibiltyToggle;
         _netIsActive.OnValueChanged -= ToggleVisibility;
-        
+
         if (IsServer)
             GameManager.OnStateNight -= ToggleActive;
 
@@ -58,6 +56,11 @@ public class Totem : NetworkBehaviour, ICardPlayable
     }
 
     // ================== Functions ==================
+    private void InitialVisibiltyToggle()
+    {
+        ToggleVisibility(false, false);
+    }
+
     private void ToggleVisibility(bool prev, bool current)
     {
         Debug.Log("Toggling totem visibility " + current);
@@ -72,6 +75,8 @@ public class Totem : NetworkBehaviour, ICardPlayable
         // Set totem deactive
         else
         {
+            _currentTags.Clear();
+            _localTags.Clear();
             _totemEffects.SetActive(false);
             _totemButton.SetActive(false);
             OnLocationTotemDisable?.Invoke(_locationName);
@@ -106,7 +111,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
     [ServerRpc(RequireOwnership = false)]
     private void AddCardSaboServerRpc(int cardID)
     {
-        Debug.Log("Adding card to unactivated Totem");
+        Debug.Log("<color=yellow>SERVER: </color>Adding card to unactivated Totem");
         _netIsPrepped.Value = true;
 
         // Loop through card tag list and add new card tags from given card
@@ -121,13 +126,29 @@ public class Totem : NetworkBehaviour, ICardPlayable
                 _currentTags.Add(tag);
             }
         }
+
+        AddToTagListClientRpc(cardID);
     }
 
     [ClientRpc]
-    private void UpdateTagListClientRpc()
+    private void AddToTagListClientRpc(int cardID)
     {
-        Debug.Log("Adding card to unactivated Totem");
-        // ?
+        Debug.Log("Adding card to unactivated Totem locally");
+        
+        // Loop through card tag list and add new card tags from given card
+        foreach (CardTag tag in ExtractTags(cardID))
+        {
+            if (_localTags.Count >= _tagLimit)
+                break;
+
+            if (!_localTags.ContainsKey(tag.Name))
+            {
+                Debug.Log("<color=blue>CLIENT: </color>Added new tag to totem " + tag.name);
+                TagIcon tagIcon = Instantiate(_tagPref, _tagZone).GetComponent<TagIcon>();
+                tagIcon.SetupIcon(tag.visual, tag.Name);
+                _localTags.Add(tag.Name, tagIcon.gameObject);
+            }
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -148,6 +169,25 @@ public class Totem : NetworkBehaviour, ICardPlayable
             {
                 Debug.Log("<color=yellow>SERVER: </color>All tags added, shutting down totem");
                 _netIsActive.Value = false;
+            }
+        }
+
+        RemoveFromTagListSurvivorsClientRpc(cardID);
+    }
+
+    [ClientRpc]
+    private void RemoveFromTagListSurvivorsClientRpc(int cardID)
+    {
+        Debug.Log("Adding card to activated Totem locally");
+
+        // Loop through card tag list and remove matching tags
+        foreach (CardTag tag in ExtractTags(cardID))
+        {
+            if (_localTags.ContainsKey(tag.Name))
+            {
+                Debug.Log("<color=blue>CLIENT: </color>Removing card tag from totem " + tag.name);
+                Destroy(_localTags[tag.Name]);
+                _localTags.Remove(tag.Name);
             }
         }
     }
