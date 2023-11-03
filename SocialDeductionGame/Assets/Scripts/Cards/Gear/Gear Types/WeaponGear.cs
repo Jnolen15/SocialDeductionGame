@@ -33,7 +33,7 @@ public class WeaponGear : Gear
 
     // ========== Override Functions ==========
     // Playable card for in the playerss hand
-    public override void SetupPlayable()
+    /*public override void SetupPlayable()
     {
         GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _cardArtAdjustments, _cardArtDimensions, _tags);
@@ -55,11 +55,19 @@ public class WeaponGear : Gear
         GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
         cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _cardArtAdjustments, _cardArtDimensions, _tags);
         cardVisual.GetComponent<GearDurabilityVisual>().Setup(true, _durability);
-    }
+    }*/
 
     public override void OnUse()
     {
-        LowerDurability();
-        Debug.Log($"WEAPON CARD {GetCardName()} USED. DURABILITY NOW {GetDurability()}");
+        //LowerDurability();
+        //Debug.Log($"WEAPON CARD {GetCardName()} USED. DURABILITY NOW {GetDurability()}");
+
+        int rand = Random.Range(1, 4);
+        Debug.Log($"Gear used, rolling for break: {rand}");
+        if (rand == 1)
+        {
+            Debug.Log($"Gear {_cardName} has broken!");
+            GetComponentInParent<GearSlot>().Unequip(_cardID);
+        }
     }
 }

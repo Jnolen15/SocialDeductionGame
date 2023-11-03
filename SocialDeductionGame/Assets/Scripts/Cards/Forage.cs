@@ -113,9 +113,6 @@ public class Forage : NetworkBehaviour
 
         Debug.Log(gameObject.name + " Dealing cards");
 
-        // Increase danger with each forage action
-        IncrementDanger(1);
-
         int numToDeal = 3;
         if (_playerHandMan.CheckForForageGear(_locationName.ToString()))
             numToDeal++;
@@ -136,6 +133,9 @@ public class Forage : NetworkBehaviour
         }
 
         _forageUI.DealCardObjects(cardObjList);
+
+        // Increase danger with each forage action
+        IncrementDanger(1);
     }
 
     private GameObject HazardTest()
