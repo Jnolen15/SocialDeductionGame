@@ -3310,12 +3310,12 @@ GameObject:
   - component: {fileID: 4950891939459229386}
   - component: {fileID: 8431619029498916950}
   m_Layer: 5
-  m_Name: LocationChoiceMenu
+  m_Name: LocationMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3973808780427672209
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3337,7 +3337,7 @@ RectTransform:
   - {fileID: 1531779104344935242}
   - {fileID: 5329385609657513710}
   m_Father: {fileID: 8949621547670666933}
-  m_RootOrder: 11
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3759,7 +3759,7 @@ RectTransform:
   - {fileID: 3451216473480245816}
   - {fileID: 8942979160917863424}
   m_Father: {fileID: 8949621547670666933}
-  m_RootOrder: 8
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -3896,7 +3896,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3630135657126982622
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3917,7 +3917,7 @@ RectTransform:
   - {fileID: 1658134968849958970}
   - {fileID: 4561400994264735857}
   m_Father: {fileID: 8949621547670666933}
-  m_RootOrder: 10
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -12515,10 +12515,10 @@ RectTransform:
   - {fileID: 421133665465865916}
   - {fileID: 3251195162746600603}
   - {fileID: 7704787913290521172}
-  - {fileID: 1919166814772352869}
-  - {fileID: 7736477131140089266}
   - {fileID: 3630135657126982622}
   - {fileID: 3973808780427672209}
+  - {fileID: 1919166814772352869}
+  - {fileID: 7736477131140089266}
   - {fileID: 2501337765362115816}
   - {fileID: 5750202296769119246}
   m_Father: {fileID: 3533476098479759951}
@@ -12626,7 +12626,7 @@ MonoBehaviour:
   _readyButtonIcon: {fileID: 9128789120514597121}
   _readyNormal: {fileID: 21300000, guid: d7e1cafed554d9d44a42650549ef572d, type: 3}
   _readySpeedUp: {fileID: 21300000, guid: f788826abaf744440b01308dee0c78d9, type: 3}
-  _islandMap: {fileID: 3678802946767330581}
+  _locationMenu: {fileID: 3678802946767330581}
   _craftingMenu: {fileID: 4521029355656764801}
   _introRole: {fileID: 2050469909241539794}
   _movementText: {fileID: 3572763046728829125}
@@ -12923,7 +12923,7 @@ RectTransform:
   - {fileID: 8887436802817948194}
   - {fileID: 2249558527235296349}
   m_Father: {fileID: 8949621547670666933}
-  m_RootOrder: 9
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
