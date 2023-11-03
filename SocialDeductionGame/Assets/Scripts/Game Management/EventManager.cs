@@ -70,6 +70,9 @@ public class EventManager : NetworkBehaviour
     {
         Debug.Log("<color=yellow>SERVER: </color> OpenNightEventPicker");
 
+        // Pick random event in case no votes
+        PickRandomEvent();
+
         _nightEventPickerMenu.DealOptionsServerRpc(_netPreviousNightEventID.Value);
     }
 

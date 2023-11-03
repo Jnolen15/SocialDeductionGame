@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class ForageUI : MonoBehaviour
 {
@@ -9,9 +10,13 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _forageMenu;
     [SerializeField] private GameObject _forageButton;
-    //[SerializeField] private GameObject _redealButton;
-    [SerializeField] private GameObject _hazardCloseButton;
+    [SerializeField] private TextMeshProUGUI _threatLevelText;
     [SerializeField] private TextMeshProUGUI _dangerText;
+    [SerializeField] private Image _dangerIcon;
+    [SerializeField] private Sprite[] _dangerIconStages;
+    [SerializeField] private Color _lowColor = new Color32(233, 195, 41, 255);
+    [SerializeField] private Color _medColor = new Color32(217, 116, 24, 255);
+    [SerializeField] private Color _highColor = new Color32(206, 60, 24, 255);
 
     // ===================== Setup =====================
     #region Setup
@@ -63,18 +68,26 @@ public class ForageUI : MonoBehaviour
     {
         _dangerText.text = current.ToString("F1");
 
-        // Should not hard code this (should have value refrences)
-        _dangerText.color = new Color32(233, 195, 41, 255);
-        //_dangerIcon.sprite = _dangerIconStages[2];
-        if (40 < current && current <= 80)
+        if (current <= 40)
         {
-            _dangerText.color = new Color32(217, 116, 24, 255);
-            //_dangerIcon.sprite = _dangerIconStages[1];
+            _threatLevelText.text = "Low";
+            _threatLevelText.color = _lowColor;
+            _dangerText.color = _lowColor;
+            _dangerIcon.sprite = _dangerIconStages[0];
+        }
+        else if (40 < current && current <= 80)
+        {
+            _threatLevelText.text = "Medium";
+            _threatLevelText.color = _medColor;
+            _dangerText.color = _medColor;
+            _dangerIcon.sprite = _dangerIconStages[1];
         }
         else if (80 < current)
         {
-            _dangerText.color = new Color32(206, 60, 24, 255);
-            //_dangerIcon.sprite = _dangerIconStages[0];
+            _threatLevelText.text = "High";
+            _threatLevelText.color = _highColor;
+            _dangerText.color = _highColor;
+            _dangerIcon.sprite = _dangerIconStages[2];
         }
     }
     #endregion

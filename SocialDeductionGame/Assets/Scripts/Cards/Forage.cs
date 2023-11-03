@@ -20,7 +20,9 @@ public class Forage : NetworkBehaviour
     [Header("Refrences")]
     [SerializeField]private ForageUI _forageUI;
     private CardManager _cardManager;
+    private GameObject _playerObj;
     private HandManager _playerHandMan;
+    private PlayerHealth _playerHealth;
     [SerializeField] private GameObject _forageCanvas;
     [SerializeField] private GameObject _hazardCardPref;
 
@@ -47,6 +49,7 @@ public class Forage : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         _netCurrentDanger.OnValueChanged += SendDangerChangedEvent;
+        GameManager.OnStateIntro += SetupPlayerConnections;
 
         if (IsServer)
         {
@@ -60,13 +63,13 @@ public class Forage : NetworkBehaviour
     private void Awake()
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
-        //_playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
         _cardDropTable.ValidateTable();
     }
 
     private void OnDisable()
     {
         _netCurrentDanger.OnValueChanged -= SendDangerChangedEvent;
+        GameManager.OnStateIntro -= SetupPlayerConnections;
 
         if (IsServer)
         {
@@ -76,14 +79,33 @@ public class Forage : NetworkBehaviour
             Totem.OnLocationTotemDisable -= ClearLocationTotem;
         }
     }
+
+    // Direct player refrences proboably isnt the best so maybe change in the future
+    // But also it works sooo
+    private void SetupPlayerConnections()
+    {
+        _playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (_playerObj != null)
+        {
+            _playerHealth = _playerObj.GetComponent<PlayerHealth>();
+            _playerHandMan = _playerObj.GetComponent<HandManager>();
+        }
+        else
+        {
+            Debug.LogError("Player Object not found!");
+        }
+    }
     #endregion
 
     // ============== Choose and Deal ==============
     #region Choose and Deal
     public void DealCards()
     {
-        if (!_playerHandMan)
-            _playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
+        if (!_playerObj)
+            SetupPlayerConnections();
+
+        if (!_playerHealth.IsLiving())
+            return;
 
         Debug.Log(gameObject.name + " Dealing cards");
 
@@ -145,8 +167,8 @@ public class Forage : NetworkBehaviour
 
     private GameObject SpawnHazard(Hazard.DangerLevel dangerLevel)
     {
-        if(!_playerHandMan)
-            _playerHandMan = GameObject.FindGameObjectWithTag("Player").GetComponent<HandManager>();
+        if (!_playerObj)
+            SetupPlayerConnections();
 
         // Spawn in random hazard
         int randHazardID = CardDatabase.Instance.GetRandHazard(dangerLevel);
