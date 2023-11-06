@@ -1722,7 +1722,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityWeight
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityWeight
@@ -1734,19 +1734,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityWeight
-      value: 15
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityWeight
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityWeight
-      value: 8
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityWeight
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityWeight
@@ -1754,59 +1754,59 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityPercent
-      value: 40
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityRangeTo
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityPercent
-      value: 6.6666665
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityRangeTo
-      value: 35
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityPercent
-      value: 6.6666665
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeTo
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityPercent
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeTo
       value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityPercent
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeTo
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityPercent
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeTo
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityPercent
-      value: 13.333333
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeTo
-      value: 65
+      value: 95
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityPercent
-      value: 10.666667
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityRangeTo
-      value: 73
+      value: 99
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityPercent
-      value: 2.6666667
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityRangeTo
-      value: 75
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityPercent
@@ -1822,27 +1822,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityRangeFrom
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeFrom
-      value: 35
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeFrom
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeFrom
       value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeFrom
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeFrom
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityRangeFrom
-      value: 65
+      value: 95
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityRangeFrom
-      value: 73
+      value: 99
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityRangeFrom
@@ -29902,7 +29902,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityWeight
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityWeight
@@ -29914,19 +29914,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityWeight
-      value: 15
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityWeight
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityWeight
-      value: 8
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityWeight
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityWeight
@@ -29934,59 +29934,59 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityPercent
-      value: 40
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityRangeTo
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityPercent
-      value: 6.6666665
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityRangeTo
-      value: 35
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityPercent
-      value: 6.6666665
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeTo
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityPercent
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeTo
       value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityPercent
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeTo
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityPercent
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeTo
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityPercent
-      value: 13.333333
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeTo
-      value: 65
+      value: 95
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityPercent
-      value: 10.666667
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityRangeTo
-      value: 73
+      value: 99
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityPercent
-      value: 2.6666667
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityRangeTo
-      value: 75
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityPercent
@@ -30002,27 +30002,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityRangeFrom
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeFrom
-      value: 35
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeFrom
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeFrom
       value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeFrom
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeFrom
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityRangeFrom
-      value: 65
+      value: 95
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityRangeFrom
-      value: 73
+      value: 99
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityRangeFrom
@@ -55028,7 +55028,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityWeight
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityWeight
@@ -55040,19 +55040,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityWeight
-      value: 15
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityWeight
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityWeight
-      value: 8
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityWeight
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityWeight
@@ -55060,59 +55060,59 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityPercent
-      value: 40
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[0].ProbabilityRangeTo
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityPercent
-      value: 6.6666665
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityRangeTo
-      value: 35
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityPercent
-      value: 6.6666665
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeTo
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityPercent
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeTo
       value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityPercent
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeTo
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityPercent
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeTo
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityPercent
-      value: 13.333333
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeTo
-      value: 65
+      value: 95
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityPercent
-      value: 10.666667
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityRangeTo
-      value: 73
+      value: 99
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityPercent
-      value: 2.6666667
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityRangeTo
-      value: 75
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityPercent
@@ -55128,27 +55128,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[1].ProbabilityRangeFrom
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[2].ProbabilityRangeFrom
-      value: 35
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeFrom
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
-      propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeFrom
       value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[3].ProbabilityRangeFrom
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
+      propertyPath: _cardDropTable.CardDrops.Array.data[4].ProbabilityRangeFrom
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[5].ProbabilityRangeFrom
-      value: 65
+      value: 95
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[6].ProbabilityRangeFrom
-      value: 73
+      value: 99
       objectReference: {fileID: 0}
     - target: {fileID: 3238553330213436417, guid: c4196187401bfd14f91e355ef41ff815, type: 3}
       propertyPath: _cardDropTable.CardDrops.Array.data[7].ProbabilityRangeFrom
