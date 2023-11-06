@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Gear : Card
+public class Gear : Card
 {
     // ========== Gear Functions ==========
     public virtual void OnEquip()

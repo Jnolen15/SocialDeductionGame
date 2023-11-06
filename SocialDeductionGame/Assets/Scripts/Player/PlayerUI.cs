@@ -27,9 +27,6 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _hungerNum;
     [SerializeField] private List<Sprite> _healthIconStages;
     [SerializeField] private List<Sprite> _hungerIconStages;
-    [SerializeField] private TextMeshProUGUI _dangerText;
-    [SerializeField] private Image _dangerIcon;
-    [SerializeField] private List<Sprite> _dangerIconStages;
     [SerializeField] private GameObject _deathMessage;
 
     [Header("Other")]
@@ -37,7 +34,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private GameObject _readyButtonIcon;
     [SerializeField] private Sprite _readyNormal;
     [SerializeField] private Sprite _readySpeedUp;
-    [SerializeField] private GameObject _islandMap;
+    [SerializeField] private GameObject _locationMenu;
     [SerializeField] private GameObject _craftingMenu;
     [SerializeField] private GameObject _introRole;
     [SerializeField] private TextMeshProUGUI _movementText;
@@ -64,6 +61,13 @@ public class PlayerUI : MonoBehaviour
         PlayerHealth.OnDeath += OnDeath;
         VivoxClient.OnBeginSpeaking += SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking += SpeakingIndicatorOff;
+    }
+
+    private void Start()
+    {
+        // These menus have to start active so setup scripts propperly run on them
+        _craftingMenu.SetActive(false);
+        _locationMenu.SetActive(false);
     }
 
     private void OnDisable()
@@ -177,25 +181,6 @@ public class PlayerUI : MonoBehaviour
         _hungerNum.text = newTotal.ToString();
     }
 
-    public void UpdateDanger(int prev, int current)
-    {
-        _dangerText.text = current.ToString();
-
-        // Should not hard code this (should have value refrences)
-        _dangerText.color = new Color32(233, 195, 41, 255);
-        _dangerIcon.sprite = _dangerIconStages[2];
-        if (4 < current && current <= 8)
-        {
-            _dangerText.color = new Color32(217, 116, 24, 255);
-            _dangerIcon.sprite = _dangerIconStages[1];
-        }
-        else if (8 < current)
-        {
-            _dangerText.color = new Color32(206, 60, 24, 255);
-            _dangerIcon.sprite = _dangerIconStages[0];
-        }
-    }
-
     private void OnDeath()
     {
         DisableReadyButton();
@@ -205,7 +190,7 @@ public class PlayerUI : MonoBehaviour
         //MutedIndicatorOn();
 
         // Close Menus if player died
-        _islandMap.SetActive(false);
+        _locationMenu.SetActive(false);
         _craftingMenu.SetActive(false);
     }
     #endregion
@@ -218,7 +203,7 @@ public class PlayerUI : MonoBehaviour
             _introRole.SetActive(false);
 
         // Close Menus on a state change
-        _islandMap.SetActive(false);
+        _locationMenu.SetActive(false);
         _craftingMenu.SetActive(false);
     }
 
@@ -275,7 +260,7 @@ public class PlayerUI : MonoBehaviour
         if (GameManager.Instance.GetCurrentGameState() != GameManager.GameState.Morning)
             return;
 
-        _islandMap.SetActive(!_islandMap.activeSelf);
+        _locationMenu.SetActive(!_locationMenu.activeSelf);
     }
 
     public void UpdateMovement(int prev, int current)

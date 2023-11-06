@@ -8,7 +8,7 @@ public class DamageEvent : NightEvent
     [Header("Damage Ammount")]
     [SerializeField] private int _dmg;
     [Header("Hunger Loss Ammount")]
-    [SerializeField] private int _hunger;
+    [SerializeField] private float _hunger;
 
     // ========== METHOD OVERRIDES ==========
     public override void InvokeEvent()

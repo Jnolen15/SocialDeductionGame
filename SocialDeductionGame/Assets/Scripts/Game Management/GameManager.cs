@@ -96,6 +96,7 @@ public class GameManager : NetworkBehaviour
         {
             PlayerConnectionManager.OnPlayerSetupComplete += PregameComplete;
             PlayerConnectionManager.OnAllPlayersReady += ProgressState;
+            PlayerConnectionManager.OnPlayerDied += CheckSaboteurWin;
         }
     }
 
@@ -107,6 +108,7 @@ public class GameManager : NetworkBehaviour
         {
             PlayerConnectionManager.OnPlayerSetupComplete -= PregameComplete;
             PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
+            PlayerConnectionManager.OnPlayerDied -= CheckSaboteurWin;
         }
     }
     #endregion
@@ -218,6 +220,8 @@ public class GameManager : NetworkBehaviour
         Debug.Log("<color=yellow>SERVER: </color> Updating Game State to " + current.ToString());
         OnStateChange?.Invoke(prev, current);
 
+        // This shouldn't be needed. But since the game can be started with euqal sabos and survivors ill leave it
+        // But in the future when the lobby update comes it should not be possible
         if (IsServer && current != GameState.Intro)
             CheckSaboteurWin();
 

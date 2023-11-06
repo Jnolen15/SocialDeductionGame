@@ -11,12 +11,13 @@ public class DangerHazard : Hazard
     // ========== METHOD OVERRIDES ==========
     public override void InvokeHazardConsequence()
     {
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        GameObject LocationManObj = GameObject.FindGameObjectWithTag("GameManager");
 
-        if (playerObj != null)
+        if (LocationManObj != null)
         {
-            if (_danger != 0)
-                playerObj.GetComponent<PlayerData>().ModifyDangerLevel(_danger);
+            //if (_danger != 0)
+            //    playerObj.GetComponent<PlayerData>().ModifyDangerLevel(_danger);
+            Debug.LogError("Danger hazard not currently used!");
         }
         else
             Debug.LogError("Player object not found!");

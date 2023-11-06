@@ -46,47 +46,80 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _globalCardList:
   - CardID: 1001
+    CardName: Wood
     CardObj: {fileID: 2180218720445251677, guid: dc9f3e5f2f1557244af0bb1077d194d5, type: 3}
   - CardID: 1002
+    CardName: Stone
     CardObj: {fileID: 7000249256201084715, guid: 6f9e6f28f7c4ab4498bc9735eb9d49a5, type: 3}
   - CardID: 1003
+    CardName: Plants
     CardObj: {fileID: 7395155199074010490, guid: 020a6e7d337ac034e82f65883d89656a, type: 3}
   - CardID: 2001
+    CardName: Small Raw Food
     CardObj: {fileID: 8127116550430777070, guid: 6b78df192db1a074daa8874033799b6b, type: 3}
   - CardID: 2002
+    CardName: Medium Raw Food
     CardObj: {fileID: 7371062133208053496, guid: 167bc2baf2ee4a345b0c36217fc437d6, type: 3}
   - CardID: 2003
+    CardName: Large Raw Food
     CardObj: {fileID: 4431660846251608710, guid: cbb0943fc8655d346a7a66439d19678a, type: 3}
   - CardID: 2004
+    CardName: Small Meal
     CardObj: {fileID: 8127116550430777070, guid: 5e1b44defba36cf419b1d887d5a80fed, type: 3}
   - CardID: 2005
+    CardName: Medium Meal
     CardObj: {fileID: 8127116550430777070, guid: 2183aadbff831f44fa4488c6b870fe78, type: 3}
   - CardID: 2006
+    CardName: Large Meal
     CardObj: {fileID: 8127116550430777070, guid: 0c2da1ebdf2c0e046a1d62a018723ba5, type: 3}
   - CardID: 2007
+    CardName: Fruit
     CardObj: {fileID: 8127116550430777070, guid: 813591c53f6966a43bdb4b788deabc89, type: 3}
   - CardID: 2008
+    CardName: Fruit Cluster (2)
     CardObj: {fileID: 8127116550430777070, guid: 11fb6824c327c294488542d034006ff4, type: 3}
   - CardID: 2009
+    CardName: Fruit Cluster (3)
     CardObj: {fileID: 8127116550430777070, guid: a20501a5289c8fb4e92d1bf3c57cd0c2, type: 3}
   - CardID: 3001
+    CardName: Aloe
     CardObj: {fileID: 8127116550430777070, guid: f2f1f518331c6104f8a98f937957c9b8, type: 3}
   - CardID: 4001
+    CardName: Basket
     CardObj: {fileID: 8127116550430777070, guid: 384bdfe87f5c5334ca2d835ba0f78a1e, type: 3}
   - CardID: 4002
+    CardName: Dagger
     CardObj: {fileID: 9091030622661736120, guid: c9bc807831acca140897bfb015104e72, type: 3}
   - CardID: 4003
+    CardName: Spear
     CardObj: {fileID: 9091030622661736120, guid: 34a4ceaf8cc0d914f9c92c005f9477f1, type: 3}
   - CardID: 4004
+    CardName: Protective Footwear
     CardObj: {fileID: 8127116550430777070, guid: 922c9748926de9f4dbbef91ec5b2b4ea, type: 3}
   - CardID: 1004
+    CardName: Runestone
     CardObj: {fileID: 2180218720445251677, guid: 3027f7c4d557415488af1408d2cbc94f, type: 3}
   - CardID: 4005
+    CardName: Talisman of Nourishment
     CardObj: {fileID: 8127116550430777070, guid: a38efcbe8da703145a6a4a7fd02eeef3, type: 3}
   - CardID: 4006
-    CardObj: {fileID: 8127116550430777070, guid: ddd9f0e91bc7bfb4db6fdc734a0fe7ee, type: 3}
-  - CardID: 4007
+    CardName: Talisman of Protection
     CardObj: {fileID: 8127116550430777070, guid: 84606b221326baf4a9d4c33a0efc0c3c, type: 3}
+  - CardID: 4007
+    CardName: Fishing Pole
+    CardObj: {fileID: 9091030622661736120, guid: 50a4c1d18cc90b54f840f526c35e64fd, type: 3}
+  - CardID: 4008
+    CardName: Net
+    CardObj: {fileID: 9091030622661736120, guid: 76b9ef63b6ad5ef4395219d64e8778ee, type: 3}
+  - CardID: 9001
+    CardName: Sand
+    CardObj: {fileID: 2180218720445251677, guid: 693c69c5a02f7c240bc72d4d9254d81d, type: 3}
+  - CardID: 9002
+    CardName: Dirt
+    CardObj: {fileID: 2180218720445251677, guid: 51e36130527deed4db6ff0249abe7a3e, type: 3}
+  - CardID: 9003
+    CardName: Mud
+    CardObj: {fileID: 2180218720445251677, guid: a9a6c08d15d1e84408c7684d3b3db1d9, type: 3}
   _globalEventList:
   - EventID: 1001
     EventSO: {fileID: 11400000, guid: 7ab8ada28df80f24a8578185ad19188e, type: 2}
@@ -95,16 +128,20 @@ MonoBehaviour:
   - EventID: 1003
     EventSO: {fileID: 11400000, guid: 46fd6eaed0198e04eaaa2470489ef73e, type: 2}
   - EventID: 1004
-    EventSO: {fileID: 11400000, guid: eacce7d5d5ee5ba44bb36575152829d3, type: 2}
+    EventSO: {fileID: 11400000, guid: 51792c548dd4e4a42af269aa71b403ce, type: 2}
   - EventID: 1005
-    EventSO: {fileID: 11400000, guid: d4e46f696d2c41243beca7d8c2310dec, type: 2}
+    EventSO: {fileID: 11400000, guid: 9310f281a25590848b07ea7a67299fe0, type: 2}
   - EventID: 1006
-    EventSO: {fileID: 11400000, guid: 9b383a036d7c34d4dbf3cd06d1abaf48, type: 2}
+    EventSO: {fileID: 11400000, guid: 780bbcdc03e09ee4da5ea773d162eaa3, type: 2}
+  - EventID: 1007
+    EventSO: {fileID: 11400000, guid: 4b42895bc68b5754eb5c3c3d3eb39343, type: 2}
+  - EventID: 1008
+    EventSO: {fileID: 11400000, guid: 9bf7ee1090d7c3746bb60f86f0b74e95, type: 2}
+  - EventID: 1009
+    EventSO: {fileID: 11400000, guid: 65e0ded7197a8ea4b9cb8d4177716b78, type: 2}
   _globalHazardList:
   - HazardID: 1001
     HazardSO: {fileID: 11400000, guid: d7013cf635e27144ebaee83fdd01f675, type: 2}
-  - HazardID: 1002
-    HazardSO: {fileID: 11400000, guid: 692f98ac031cd6f46b5b45572e2c2d7a, type: 2}
   - HazardID: 1003
     HazardSO: {fileID: 11400000, guid: 2ffa30ab5e35c5d4b9713acec14f3236, type: 2}
   - HazardID: 1004
@@ -115,5 +152,3 @@ MonoBehaviour:
     HazardSO: {fileID: 11400000, guid: 0b17a0caa8781604bbd1e6a72035c79e, type: 2}
   - HazardID: 1007
     HazardSO: {fileID: 11400000, guid: ffa663f557f6d414bb2f5d78c59aa12b, type: 2}
-  - HazardID: 1008
-    HazardSO: {fileID: 11400000, guid: 533cd9f0bf9346446a7c36b8a85fa019, type: 2}

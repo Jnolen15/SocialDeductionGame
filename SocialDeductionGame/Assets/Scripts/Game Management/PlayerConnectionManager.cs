@@ -128,6 +128,9 @@ public class PlayerConnectionManager : NetworkBehaviour
     public static event PlayerReadyAction OnAllPlayersReady;
     public static event PlayerReadyAction OnAllPlayersReadyAlertClients;
     public static event PlayerReadyAction OnPlayerSetupComplete;
+
+    public delegate void PlayerChangeAction();
+    public static event PlayerReadyAction OnPlayerDied;
     #endregion
 
     // ============== Setup =============
@@ -684,6 +687,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         FindPlayerEntry(id).SetPlayerLiving(false);
         _netNumLivingPlayers.Value--;
+        OnPlayerDied?.Invoke();
         Debug.Log("<color=yellow>SERVER: </color> Player death " + id + ": " + FindPlayerEntry(id).PlayerName + " recorded");
         UpdatePlayerLivingClientRpc(id, false);
     }

@@ -7,6 +7,7 @@ public class LoseGearHazard : Hazard
 {
     [Header("Card Loss Stats")]
     [SerializeField] private int[] _gearSlots;
+    [SerializeField] private int _numCardsLost;
 
     // ========== METHOD OVERRIDES ==========
     public override void InvokeHazardConsequence()
@@ -15,10 +16,15 @@ public class LoseGearHazard : Hazard
 
         if (playerObj != null)
         {
+            // Loose gear
             for(int i = 0; i < _gearSlots.Length; i++)
             {
                 playerObj.GetComponent<PlayerCardManager>().LoseGear(_gearSlots[i]);
             }
+
+            // Loose cards
+            if (_numCardsLost != 0)
+                playerObj.GetComponent<PlayerCardManager>().DiscardRandom(_numCardsLost);
         }
         else
             Debug.LogError("Player object not found!");

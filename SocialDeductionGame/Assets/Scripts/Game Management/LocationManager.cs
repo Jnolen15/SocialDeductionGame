@@ -142,4 +142,63 @@ public class LocationManager : NetworkBehaviour
         }
     }
     #endregion
+
+    // ============== Location Interaction ==============
+    #region Location Interaction
+    public void SetLocationDebuff(LocationName loctaion)
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning("SetLocationDebuff invoked by client!");
+            return;
+        }
+
+        switch (loctaion)
+        {
+            case LocationName.Camp:
+                Debug.LogWarning("Can't debuff camp.");
+                break;
+            case LocationName.Beach:
+                _beachLocation.SetLocationEventDebuff();
+                break;
+            case LocationName.Forest:
+                _forestLocation.SetLocationEventDebuff();
+                break;
+            case LocationName.Plateau:
+                _plateauLocation.SetLocationEventDebuff();
+                break;
+            default:
+                Debug.LogError("SetLocationDebuff picked default case");
+                break;
+        }
+    }
+
+    public void SetLocationBuff(LocationName loctaion)
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning("SetLocationBuff invoked by client!");
+            return;
+        }
+
+        switch (loctaion)
+        {
+            case LocationName.Camp:
+                Debug.LogWarning("Can't Buff camp.");
+                break;
+            case LocationName.Beach:
+                _beachLocation.SetLocationEventBuff();
+                break;
+            case LocationName.Forest:
+                _forestLocation.SetLocationEventBuff();
+                break;
+            case LocationName.Plateau:
+                _plateauLocation.SetLocationEventBuff();
+                break;
+            default:
+                Debug.LogError("SetLocationBuff picked default case");
+                break;
+        }
+    }
+    #endregion
 }

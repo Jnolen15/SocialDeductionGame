@@ -25,6 +25,7 @@ public class VivoxClient : NetworkBehaviour
 
             PlayerHealth.OnDeath += TransitionDeathSpeak;
             VivoxManager.OnDeathChannelJoined += JoinedDeathChannel;
+            GameManager.OnStateIntro += IntroShutoff;
         }
         else
         {
@@ -43,6 +44,7 @@ public class VivoxClient : NetworkBehaviour
 
         PlayerHealth.OnDeath -= TransitionDeathSpeak;
         VivoxManager.OnDeathChannelJoined -= JoinedDeathChannel;
+        GameManager.OnStateIntro -= IntroShutoff;
     }
     #endregion
 
@@ -94,6 +96,14 @@ public class VivoxClient : NetworkBehaviour
     {
         _deathChannel = true;
         Debug.Log("<color=green>VIVOX: </color>Now speaking in death channel");
+    }
+
+    // Sometimes players do not disconnect from lobby VC in time before game starts
+    // This makes sure that the transmission is shut off so they dont keep talking
+    // without PTT
+    private void IntroShutoff()
+    {
+        VivoxManager.Instance.SetTransmissionNone();
     }
     #endregion
 }

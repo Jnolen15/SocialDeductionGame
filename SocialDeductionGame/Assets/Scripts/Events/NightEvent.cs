@@ -4,6 +4,7 @@ using UnityEngine;
 
 public abstract class NightEvent : ScriptableObject
 {
+    // =============== DATA ===============
     [Header("Night Event ID")]
     [SerializeField] private int _eventID;
 
@@ -14,19 +15,17 @@ public abstract class NightEvent : ScriptableObject
     [TextArea]
     [SerializeField] private string _eventBonuses;
     [SerializeField] private Sprite _eventArt;
+    [SerializeField] private bool _serverInvoked;
 
     [Header("Required Resources")]
-    [SerializeField] private List<CardTag> _requiredCardTags = new();
-    [Header("Requirement = Celing(#players*this)")]
-    [SerializeField] private float _requirementMod;
-    [Header("Requirement =  Celing(#players/this)")]
-    [SerializeField] private float _bonusMod;
+    [SerializeField] private EventRequirementsSO _requirements;
 
     [Header("Bonus")]
     [SerializeField] private EventBonus _eventBonus;
 
 
     // ========== Getters ==========
+    #region Getters
     public int GetEventID()
     {
         return _eventID;
@@ -47,39 +46,33 @@ public abstract class NightEvent : ScriptableObject
         return _eventBonuses;
     }
 
-    public int GetSuccessPoints(int numPlayers)
+    public bool GetEventIsServerInvoked()
     {
-        return SPCalculation(numPlayers);
+        return _serverInvoked;
     }
 
-    public List<CardTag> GetRequiredCardTags()
+    public int GetBonusRequirements()
     {
-        return _requiredCardTags;
+        return 2;
     }
 
-    // ========== OVERRIDE CLASSES ==========
-    // Calculates the SuccessPoints needed to prevent the event consequences
-    public virtual int SPCalculation(int numPlayers)
+    public CardTag GetPrimaryResource()
     {
-        int num = Mathf.CeilToInt(numPlayers * _requirementMod);
-
-        if (num <= 1)
-            num = 1;
-
-        return num;
+        return _requirements.GetPrimaryTag();
     }
 
-    // Calculates the SuccessPoints needed to achive the event bonus
-    public virtual int SPBonusCalculation(int numPlayers)
+    public CardTag GetSecondaryResource()
     {
-        int num = Mathf.CeilToInt(numPlayers / _bonusMod);
-
-        if (num <= 1)
-            num = 1;
-
-        return num;
+        return _requirements.GetSecondaryTag();
     }
 
+    public Vector2 GetRequirements(int numPlayers)
+    {
+        return _requirements.GetRequirements(numPlayers);
+    }
+    #endregion
+
+    // ========== OVERRIDE Functions ==========
     // The gameplay consecqunces of the event
     public abstract void InvokeEvent();
 

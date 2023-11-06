@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e85ee037626bb44daee4e904f944ed6, type: 3}
+  m_Name: Vines
+  m_EditorClassIdentifier: 
+  _eventID: 1009
+  _eventName: Grasping Vines
+  _eventConsequences: Foraging at Forest debuffed tomorrow
+  _eventBonuses: Foraging at Forest buffed tomorrow
+  _eventArt: {fileID: 0}
+  _serverInvoked: 1
+  _requirements: {fileID: 11400000, guid: efeaedcfc0ca4ad45ad8249f15182184, type: 2}
+  _eventBonus: {fileID: 11400000, guid: 7777c3e17d656a04ea70f52f74199450, type: 2}
+  _location: 2
