@@ -1,0 +1,170 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Unity.Netcode;
+
+public class TotemSlot : NetworkBehaviour
+{
+    // ================== Refrences ==================
+    [SerializeField] private Transform _cardZone;
+    [SerializeField] private Transform _tagZone;
+    [SerializeField] private GameObject _tagPref;
+
+    // ================== Variables ==================
+    [SerializeField] private NetworkVariable<int> _netSaboCard = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netSurvivorCard = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netSlotActive = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netCorrectCardAdded = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private List<CardTag> _currentTags = new();
+
+    private Totem _totem;
+
+    // ================== Setup ==================
+    #region Setup
+    public void Setup(Totem totem)
+    {
+        _totem = totem;
+    }
+
+    [ServerRpc]
+    public void TotemDeactivatedServerRpc()
+    {
+        _netSaboCard.Value = 0;
+        _netSurvivorCard.Value = 0;
+        _netSlotActive.Value = false;
+        _netCorrectCardAdded.Value = false;
+        _currentTags.Clear();
+        TotemDeactivatedClientRpc();
+    }
+
+    [ClientRpc]
+    public void TotemDeactivatedClientRpc()
+    {
+        foreach (Transform child in _tagZone)
+            Destroy(child.gameObject);
+
+        if (_cardZone.childCount != 0)
+            Destroy(_cardZone.GetChild(0).gameObject);
+    }
+
+    [ServerRpc]
+    public void TotemActivatedServerRpc()
+    {
+        _netSurvivorCard.Value = 0;
+        if (_netSlotActive.Value) // No card here
+            _netCorrectCardAdded.Value = false;
+        else
+            _netCorrectCardAdded.Value = true;
+        TotemActivatedClientRpc();
+    }
+
+    [ClientRpc]
+    public void TotemActivatedClientRpc()
+    {
+        if (_cardZone.childCount != 0)
+            Destroy(_cardZone.GetChild(0).gameObject);
+    }
+    #endregion
+
+    // ================== Helpers ==================
+    #region Helpers
+    public bool HasSaboCard()
+    {
+        return _netSlotActive.Value;
+    }
+
+    public bool GetCardSatesfied()
+    {
+        return _netCorrectCardAdded.Value;
+    }
+    #endregion
+
+    // ================== Function ==================
+    #region Function
+    public void AddCard(int cardID)
+    {
+        Debug.Log("In totem slot");
+
+        if (_totem.GetTotemActive())
+            AddCardSurvivorsServerRpc(cardID);
+        else
+            AddCardSaboServerRpc(cardID);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void AddCardSaboServerRpc(int cardID)
+    {
+        Debug.Log("<color=yellow>SERVER: </color>Adding card to unactivated Totem slot");
+
+        // Add card
+        _netSaboCard.Value = cardID;
+        _netSlotActive.Value = true;
+        _currentTags.AddRange(ExtractTags(cardID));
+
+        _totem.CardAddedToInactiveTotem();
+
+        ShowCardClientRpc(cardID);
+        ShowTagsClientRpc(cardID);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void AddCardSurvivorsServerRpc(int cardID)
+    {
+        Debug.Log("Adding card to activated Totem");
+
+        // Test to see if tags from given card match tags of saboCard
+        bool tagsMatch = true;
+        foreach (CardTag tag in _currentTags)
+        {
+            if (!ExtractTags(cardID).Contains(tag))
+            {
+                Debug.Log($"<color=yellow>SERVER: </color>Given card did not contain tag {tag.name}");
+                tagsMatch = false;
+                break;
+            }
+        }
+
+        if (tagsMatch)
+        {
+            // LOCK IN
+            _netSurvivorCard.Value = cardID;
+            _netCorrectCardAdded.Value = true;
+            ShowCardClientRpc(cardID);
+
+            _totem.CardAddedToActiveTotem();
+        }
+        else
+        {
+            // Show dosn't match message
+        }
+    }
+
+    [ClientRpc]
+    private void ShowCardClientRpc(int cardID)
+    {
+        Debug.Log("Adding card to activated Totem locally");
+
+        Card newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardZone).GetComponent<Card>();
+        newCard.SetupUI();
+    }
+
+    [ClientRpc]
+    private void ShowTagsClientRpc(int cardID)
+    {
+        Debug.Log("Adding card to unactivated Totem slot locally");
+
+        // Instantiate Tags
+        foreach (CardTag tag in ExtractTags(cardID))
+        {
+            Debug.Log("<color=blue>CLIENT: </color>Added new tag to totem " + tag.name);
+            TagIcon tagIcon = Instantiate(_tagPref, _tagZone).GetComponent<TagIcon>();
+            tagIcon.SetupIcon(tag.visual, tag.Name);
+        }
+    }
+
+    private List<CardTag> ExtractTags(int cardId)
+    {
+        return CardDatabase.Instance.GetCard(cardId).GetComponent<Card>().GetCardTags();
+    }
+    #endregion
+}

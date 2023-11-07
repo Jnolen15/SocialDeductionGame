@@ -8,22 +8,20 @@ public class Totem : NetworkBehaviour, ICardPlayable
     // ================== Refrences ==================
     [SerializeField] private GameObject _totemEffects;
     [SerializeField] private GameObject _totemButton;
-    [SerializeField] private Transform _tagZone;
-    [SerializeField] private GameObject _tagPref;
+    [SerializeField] private GameObject _totemPannel;
 
     // ================== Variables ==================
-    [SerializeField] private int _tagLimit;
     [SerializeField] private LocationManager.LocationName _locationName;
     [SerializeField] private NetworkVariable<bool> _netIsPrepped = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netIsActive = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private List<CardTag> _currentTags = new();
-    [SerializeField] private Dictionary<string, GameObject> _localTags = new();
+    [SerializeField] private List<TotemSlot> _totemSlots = new();
 
     public delegate void TotemAction(LocationManager.LocationName locationName);
     public static event TotemAction OnLocationTotemEnable;
     public static event TotemAction OnLocationTotemDisable;
 
     // ================== Setup ==================
+    #region Setup
     public override void OnNetworkSpawn()
     {
         GameManager.OnStateIntro += InitialVisibiltyToggle;
@@ -31,6 +29,16 @@ public class Totem : NetworkBehaviour, ICardPlayable
         
         if(IsServer)
             GameManager.OnStateNight += ToggleActive;
+    }
+
+    private void Start()
+    {
+        foreach(TotemSlot slot in _totemSlots)
+        {
+            slot.Setup(this);
+        }
+
+        _totemPannel.SetActive(false);
     }
 
     public override void OnDestroy()
@@ -44,18 +52,45 @@ public class Totem : NetworkBehaviour, ICardPlayable
         // Invoke the base when using networkobject
         base.OnDestroy();
     }
+    #endregion
 
-    // ================== Interface ==================
-    // Totem accepts any card types
+    // ================== Helpers ==================
+    public bool GetTotemActive()
+    {
+        return _netIsActive.Value;
+    }
+
     public bool CanPlayCardHere(Card cardToPlay)
     {
-        if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
-            return true;
-        else
-            return _netIsActive.Value;
+        return true;
     }
 
     // ================== Functions ==================
+    #region Function
+    public void AddCard(int cardID)
+    {
+        // Find first slot with no card and add this card
+        foreach (TotemSlot slot in _totemSlots)
+        {
+            if (_netIsActive.Value)
+            {
+                if (!slot.GetCardSatesfied())
+                {
+                    slot.AddCard(cardID);
+                    break;
+                }
+            }
+            else
+            {
+                if (!slot.HasSaboCard())
+                {
+                    slot.AddCard(cardID);
+                    break;
+                }
+            }
+        }
+    }
+
     private void InitialVisibiltyToggle()
     {
         ToggleVisibility(false, false);
@@ -71,15 +106,25 @@ public class Totem : NetworkBehaviour, ICardPlayable
             _totemEffects.SetActive(true);
             _totemButton.SetActive(true);
             OnLocationTotemEnable?.Invoke(_locationName);
+
+            if (IsServer)
+            {
+                foreach (TotemSlot slot in _totemSlots)
+                    slot.TotemActivatedServerRpc();
+            }
         }
         // Set totem deactive
         else
         {
-            _currentTags.Clear();
-            _localTags.Clear();
             _totemEffects.SetActive(false);
             _totemButton.SetActive(false);
             OnLocationTotemDisable?.Invoke(_locationName);
+
+            if (IsServer)
+            {
+                foreach (TotemSlot slot in _totemSlots)
+                    slot.TotemDeactivatedServerRpc();
+            }
         }
 
         // If player is sabo, can see button while deactive
@@ -100,100 +145,37 @@ public class Totem : NetworkBehaviour, ICardPlayable
         }
     }
 
-    public void AddCard(int cardID)
+    // Called by Server
+    public void CardAddedToInactiveTotem()
     {
-        if (_netIsActive.Value)
-            AddCardSurvivorsServerRpc(cardID);
-        else
-            AddCardSaboServerRpc(cardID);
-    }
+        if (!IsServer)
+            return;
 
-    [ServerRpc(RequireOwnership = false)]
-    private void AddCardSaboServerRpc(int cardID)
-    {
-        Debug.Log("<color=yellow>SERVER: </color>Adding card to unactivated Totem");
         _netIsPrepped.Value = true;
+    }
 
-        // Loop through card tag list and add new card tags from given card
-        foreach(CardTag tag in ExtractTags(cardID))
+    // Called by Server
+    public void CardAddedToActiveTotem()
+    {
+        if (!IsServer)
+            return;
+
+        // Test if all totem slots are full
+        bool complete = true;
+        foreach (TotemSlot slot in _totemSlots)
         {
-            if (_currentTags.Count >= _tagLimit)
+            if (!slot.GetCardSatesfied())
+            {
+                complete = false;
                 break;
-
-            if (!_currentTags.Contains(tag))
-            {
-                Debug.Log("<color=yellow>SERVER: </color>Added new tag to totem " + tag.name);
-                _currentTags.Add(tag);
             }
         }
 
-        AddToTagListClientRpc(cardID);
-    }
-
-    [ClientRpc]
-    private void AddToTagListClientRpc(int cardID)
-    {
-        Debug.Log("Adding card to unactivated Totem locally");
-        
-        // Loop through card tag list and add new card tags from given card
-        foreach (CardTag tag in ExtractTags(cardID))
+        if (complete)
         {
-            if (_localTags.Count >= _tagLimit)
-                break;
-
-            if (!_localTags.ContainsKey(tag.Name))
-            {
-                Debug.Log("<color=blue>CLIENT: </color>Added new tag to totem " + tag.name);
-                TagIcon tagIcon = Instantiate(_tagPref, _tagZone).GetComponent<TagIcon>();
-                tagIcon.SetupIcon(tag.visual, tag.Name);
-                _localTags.Add(tag.Name, tagIcon.gameObject);
-            }
+            Debug.Log("<color=yellow>SERVER: </color>All cards successfully added, Disabling totem");
+            _netIsActive.Value = false;
         }
     }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void AddCardSurvivorsServerRpc(int cardID)
-    {
-        Debug.Log("Adding card to activated Totem");
-
-        // Loop through card tag list and remove matching tags
-        foreach (CardTag tag in ExtractTags(cardID))
-        {
-            if (_currentTags.Contains(tag))
-            {
-                Debug.Log("<color=yellow>SERVER: </color>Removing card tag from totem " + tag.name);
-                _currentTags.Remove(tag);
-            }
-
-            if(_currentTags.Count == 0)
-            {
-                Debug.Log("<color=yellow>SERVER: </color>All tags added, shutting down totem");
-                _netIsActive.Value = false;
-            }
-        }
-
-        RemoveFromTagListSurvivorsClientRpc(cardID);
-    }
-
-    [ClientRpc]
-    private void RemoveFromTagListSurvivorsClientRpc(int cardID)
-    {
-        Debug.Log("Adding card to activated Totem locally");
-
-        // Loop through card tag list and remove matching tags
-        foreach (CardTag tag in ExtractTags(cardID))
-        {
-            if (_localTags.ContainsKey(tag.Name))
-            {
-                Debug.Log("<color=blue>CLIENT: </color>Removing card tag from totem " + tag.name);
-                Destroy(_localTags[tag.Name]);
-                _localTags.Remove(tag.Name);
-            }
-        }
-    }
-
-    private List<CardTag> ExtractTags(int cardId)
-    {
-        return CardDatabase.Instance.GetCard(cardId).GetComponent<Card>().GetCardTags();
-    }
+    #endregion
 }
