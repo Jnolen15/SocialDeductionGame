@@ -60,7 +60,22 @@ public class CardInteraction : MonoBehaviour,
         if (!_dragging)
             return;
 
-        _playerCardManager.TryCardPlay(_card);
+        bool playedToUI = false;
+        GameObject currentHover = eventData.pointerCurrentRaycast.gameObject;
+        if (currentHover != null)
+        {
+            Debug.Log("Mouse Over: " + currentHover.name);
+            if(currentHover.tag == "UICardPlayable")
+            {
+                // Play to UI
+                Debug.Log("Playing card to UI");
+                _playerCardManager.TryCardPlayToUI(_card, currentHover);
+                playedToUI = true;
+            }
+        }
+
+        if(!playedToUI)
+            _playerCardManager.TryCardPlay(_card);
 
         Destroy(_indicator);
         _indicator = null;

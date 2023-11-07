@@ -98,17 +98,6 @@ public abstract class Card : MonoBehaviour
         else
             Debug.LogError("Card was played on a location it can't do anything with");
     }
-    
-    public void PlayToTotem(Totem totem)
-    {
-        if (totem != null)
-        {
-            Debug.Log("Playng card to totem: " + _cardName);
-            totem.AddCard(GetCardID());
-        }
-        else
-            Debug.LogError("Card was played on a location it can't do anything with");
-    }
 
     // ========== OVERRIDE CLASSES ==========
     public abstract void OnPlay(GameObject playLocation);

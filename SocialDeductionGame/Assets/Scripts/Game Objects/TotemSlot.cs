@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
-public class TotemSlot : NetworkBehaviour
+public class TotemSlot : NetworkBehaviour, ICardUIPlayable
 {
     // ================== Refrences ==================
-    [SerializeField] private Transform _cardZone;
     [SerializeField] private Transform _tagZone;
     [SerializeField] private GameObject _tagPref;
 
@@ -16,7 +15,7 @@ public class TotemSlot : NetworkBehaviour
     [SerializeField] private NetworkVariable<bool> _netSlotActive = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netCorrectCardAdded = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private List<CardTag> _currentTags = new();
-
+    private GameObject _cardObj;
     private Totem _totem;
 
     // ================== Setup ==================
@@ -43,8 +42,10 @@ public class TotemSlot : NetworkBehaviour
         foreach (Transform child in _tagZone)
             Destroy(child.gameObject);
 
-        if (_cardZone.childCount != 0)
-            Destroy(_cardZone.GetChild(0).gameObject);
+        if (_cardObj != null)
+            Destroy(_cardObj);
+
+        _cardObj = null;
     }
 
     [ServerRpc]
@@ -61,8 +62,10 @@ public class TotemSlot : NetworkBehaviour
     [ClientRpc]
     public void TotemActivatedClientRpc()
     {
-        if (_cardZone.childCount != 0)
-            Destroy(_cardZone.GetChild(0).gameObject);
+        if (_cardObj != null)
+            Destroy(_cardObj);
+
+        _cardObj = null;
     }
     #endregion
 
@@ -76,6 +79,20 @@ public class TotemSlot : NetworkBehaviour
     public bool GetCardSatesfied()
     {
         return _netCorrectCardAdded.Value;
+    }
+    #endregion
+
+    // ================== Interface ==================
+    #region Interface
+    public bool CanPlayCardHere(Card cardToPlay)
+    {
+        return true;
+    }
+
+    public void PlayCardHere(int cardID)
+    {
+        Debug.Log($"Card {cardID} played on totem slot");
+        AddCard(cardID);
     }
     #endregion
 
@@ -144,7 +161,8 @@ public class TotemSlot : NetworkBehaviour
     {
         Debug.Log("Adding card to activated Totem locally");
 
-        Card newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardZone).GetComponent<Card>();
+        _cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), transform);
+        Card newCard = _cardObj.GetComponent<Card>();
         newCard.SetupUI();
     }
 

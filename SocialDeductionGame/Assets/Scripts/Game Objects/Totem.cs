@@ -67,30 +67,6 @@ public class Totem : NetworkBehaviour, ICardPlayable
 
     // ================== Functions ==================
     #region Function
-    public void AddCard(int cardID)
-    {
-        // Find first slot with no card and add this card
-        foreach (TotemSlot slot in _totemSlots)
-        {
-            if (_netIsActive.Value)
-            {
-                if (!slot.GetCardSatesfied())
-                {
-                    slot.AddCard(cardID);
-                    break;
-                }
-            }
-            else
-            {
-                if (!slot.HasSaboCard())
-                {
-                    slot.AddCard(cardID);
-                    break;
-                }
-            }
-        }
-    }
-
     private void InitialVisibiltyToggle()
     {
         ToggleVisibility(false, false);

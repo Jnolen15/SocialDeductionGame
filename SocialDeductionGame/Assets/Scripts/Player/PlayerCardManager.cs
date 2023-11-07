@@ -304,6 +304,28 @@ public class PlayerCardManager : NetworkBehaviour
             Debug.Log("Card not played on playable object");
     }
 
+    public void TryCardPlayToUI(Card playedCard, GameObject UIObject)
+    {
+        // Verify object has script with correct interface
+        ICardUIPlayable cardPlayable = UIObject.GetComponent<ICardUIPlayable>();
+        if (cardPlayable != null)
+        {
+            // Verify this card can be played here
+            if (cardPlayable.CanPlayCardHere(playedCard))
+            {
+                _cardPlayLocation = UIObject;
+
+                // Try to play the card
+                PlayCardUIServerRPC(playedCard.GetCardID());
+                return;
+            }
+            else
+                Debug.Log("Card cannot be played here");
+        }
+        else
+            Debug.LogError("Card Played on object on playable layer without ICardPlayable implementation");
+    }
+
     // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
     [ServerRpc]
     public void PlayCardServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
@@ -346,16 +368,50 @@ public class PlayerCardManager : NetworkBehaviour
             Stockpile stockpile = _cardPlayLocation.GetComponent<Stockpile>();
             playedCard.PlayToStockpile(stockpile);
         }
-        // Play card to stockpile
-        else if (_cardPlayLocation.CompareTag("Totem"))
-        {
-            Totem totem = _cardPlayLocation.GetComponent<Totem>();
-            playedCard.PlayToTotem(totem);
-        }
         // Play the card to location
         else
         {
             playedCard.OnPlay(_cardPlayLocation);
+        }
+    }
+
+    [ServerRpc]
+    public void PlayCardUIServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
+        // Test if networked deck contains the card that is being played
+        if (_playerDeckIDs.Contains(cardID))
+        {
+            // Discard the card
+            int[] toDiscard = new int[] { cardID };
+            DiscardCardsOnServer(toDiscard, true, clientRpcParams);
+
+            // Play card
+            ExecutePlayedUICardClientRpc(cardID, clientRpcParams);
+        }
+        else
+            Debug.LogError($"{cardID} not found in player's networked deck!");
+    }
+
+    [ClientRpc]
+    public void ExecutePlayedUICardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
+    {
+        Debug.Log($"Card {cardID} played on UI {_cardPlayLocation.name}");
+
+        //Play Card
+        ICardUIPlayable cardUI = _cardPlayLocation.GetComponent<ICardUIPlayable>();
+        if(cardUI != null)
+        {
+            cardUI.PlayCardHere(cardID);
         }
     }
 
