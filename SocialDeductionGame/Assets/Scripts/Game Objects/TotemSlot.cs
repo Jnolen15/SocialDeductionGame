@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using DG.Tweening;
 
 public class TotemSlot : NetworkBehaviour, ICardUIPlayable
 {
     // ================== Refrences ==================
     [SerializeField] private Transform _tagZone;
     [SerializeField] private GameObject _tagPref;
+    [SerializeField] private GameObject _cantPlayMsg;
 
     // ================== Variables ==================
     [SerializeField] private NetworkVariable<int> _netSaboCard = new(writePerm: NetworkVariableWritePermission.Server);
@@ -86,7 +88,24 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     #region Interface
     public bool CanPlayCardHere(Card cardToPlay)
     {
-        return true;
+        // Test if card tags match
+        if (_totem.GetTotemActive())
+        {
+            if (!_netSlotActive.Value)
+                return false;
+            else if (TestForMatchingTags(cardToPlay.GetCardID()))
+                return true;
+            else
+            {
+                // Show cant play message
+                _cantPlayMsg.SetActive(true);
+                _cantPlayMsg.transform.DOKill();
+                _cantPlayMsg.transform.DOPunchPosition(Vector3.one, 1f).OnComplete(() => _cantPlayMsg.SetActive(false));
+                return false;
+            }
+        }
+        else
+            return true;
     }
 
     public void PlayCardHere(int cardID)
@@ -129,19 +148,7 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     {
         Debug.Log("Adding card to activated Totem");
 
-        // Test to see if tags from given card match tags of saboCard
-        bool tagsMatch = true;
-        foreach (CardTag tag in _currentTags)
-        {
-            if (!ExtractTags(cardID).Contains(tag))
-            {
-                Debug.Log($"<color=yellow>SERVER: </color>Given card did not contain tag {tag.name}");
-                tagsMatch = false;
-                break;
-            }
-        }
-
-        if (tagsMatch)
+        if (TestForMatchingTags(cardID))
         {
             // LOCK IN
             _netSurvivorCard.Value = cardID;
@@ -152,6 +159,7 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
         }
         else
         {
+            Debug.Log("Cards did not match! Should not see this message, as match is tested when in CanPlayCardHere function");
             // Show dosn't match message
         }
     }
@@ -183,6 +191,22 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     private List<CardTag> ExtractTags(int cardId)
     {
         return CardDatabase.Instance.GetCard(cardId).GetComponent<Card>().GetCardTags();
+    }
+
+    private bool TestForMatchingTags(int cardId)
+    {
+        // Test to see if tags from given card match tags of saboCard
+        foreach (CardTag tag in _currentTags)
+        {
+            if (!ExtractTags(cardId).Contains(tag))
+            {
+                Debug.Log($"<color=yellow>SERVER: </color>Given card did not contain tag {tag.name}");
+                return false;
+                break;
+            }
+        }
+
+        return true;
     }
     #endregion
 }
