@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using System.Linq;
+using UnityEngine.UI;
 
 public class ExileManager : NetworkBehaviour
 {
@@ -10,13 +11,17 @@ public class ExileManager : NetworkBehaviour
     #region Refrences and Variables
     [SerializeField] private GameObject _exileButton;
     [SerializeField] private GameObject _exileUI;
-    [SerializeField] private GameObject _closeUIButton;
     [SerializeField] private Transform _voteArea;
     [SerializeField] private GameObject _exileVotePrefab;
+    [SerializeField] private Image _voteTimerFill;
 
+    [SerializeField] private NetworkVariable<bool> _netExileVoteStarted = new();
     private List<ExileVoteEntry> _voteList = new();
     [SerializeField] private NetworkVariable<int> _netPlayersVoted = new();
     private Dictionary<ulong, bool> _playerVotedDictionary = new();
+
+    [SerializeField] private float _voteTimerMax;
+    [SerializeField] private NetworkVariable<float> _netVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
     #endregion
 
     #region ExileVoteEntry
@@ -73,6 +78,30 @@ public class ExileManager : NetworkBehaviour
         }
     }
     #endregion
+
+    // ================== Update ==================
+    private void Update()
+    {
+        // Update timer
+        if(_netExileVoteStarted.Value)
+            _voteTimerFill.fillAmount = 1 - (_netVoteTimer.Value / _voteTimerMax);
+
+        if (!IsServer)
+            return;
+
+        if(_netExileVoteStarted.Value && _netVoteTimer.Value >= 0)
+            RunTimer(_netVoteTimer);
+    }
+
+    private void RunTimer(NetworkVariable<float> timer)
+    {
+        timer.Value -= Time.deltaTime;
+        if (timer.Value <= 0)
+        {
+            Debug.Log($"<color=yellow>SERVER: </color> {timer} Timer up, Vote complete");
+            RunVoteCompletetion();
+        }
+    }
 
     // ================== Exile ==================
     #region Exile
@@ -140,9 +169,16 @@ public class ExileManager : NetworkBehaviour
     }
 
     // Called by button
-    public void StartExile()
+    public void ExileButtonPressed()
     {
-        StartExileServerRpc();
+        if (_netExileVoteStarted.Value)
+        {
+            _exileUI.SetActive(true);
+        }
+        else
+        {
+            StartExileServerRpc();
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -161,6 +197,9 @@ public class ExileManager : NetworkBehaviour
             _playerVotedDictionary[playerID] = false;
         }
 
+        _netExileVoteStarted.Value = true;
+        _netVoteTimer.Value = _voteTimerMax;
+
         // Show UI
         ShowExileUIClientRpc();
     }
@@ -168,8 +207,6 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     public void ShowExileUIClientRpc()
     {
-        _exileButton.SetActive(false);
-
         // Dont let dead players vote
         if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
         {
@@ -190,7 +227,6 @@ public class ExileManager : NetworkBehaviour
                 vote.ResetVote(true);
         }
 
-        _closeUIButton.SetActive(false);
         _exileUI.SetActive(true);
     }
 
@@ -206,6 +242,13 @@ public class ExileManager : NetworkBehaviour
         if (_playerVotedDictionary.ContainsKey(playerID) && _playerVotedDictionary[playerID] == true)
         {
             Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " already voted!");
+            return;
+        }
+
+        // Check to make sure vote is still going on
+        if (!_netExileVoteStarted.Value)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " voted too late");
             return;
         }
 
@@ -238,60 +281,70 @@ public class ExileManager : NetworkBehaviour
 
         if (_netPlayersVoted.Value >= PlayerConnectionManager.Instance.GetNumLivingPlayers())
         {
-            Debug.Log("<color=yellow>SERVER: </color> All players have voted");
+            RunVoteCompletetion();
+        }
+    }
 
-            // Results list for clients
-            int[] results = new int[_voteList.Count];
-            int i = 0;
+    private void RunVoteCompletetion()
+    {
+        if (!IsServer)
+            return;
 
-            // Find highest voted
-            ExileVoteEntry dummy = new ExileVoteEntry(888, "dummy");
-            ExileVoteEntry curHeighest = dummy;
-            ExileVoteEntry prevHeighest = dummy;
+        Debug.Log("<color=yellow>SERVER: </color> All players have voted, or time ran out");
+        _netExileVoteStarted.Value = false;
 
-            foreach (ExileVoteEntry v in _voteList)
+        // Results list for clients
+        int[] results = new int[_voteList.Count];
+        int i = 0;
+
+        // Find highest voted
+        ExileVoteEntry dummy = new ExileVoteEntry(888, "dummy");
+        ExileVoteEntry curHeighest = dummy;
+        ExileVoteEntry prevHeighest = dummy;
+
+        foreach (ExileVoteEntry v in _voteList)
+        {
+            results[i] = v.NumVotes;
+            i++;
+
+            // Get highest voted player
+            if (v.NumVotes >= curHeighest.NumVotes)
             {
-                results[i] = v.NumVotes;
-                i++;
-
-                // Get highest voted player
-                if (v.NumVotes >= curHeighest.NumVotes)
-                {
-                    Debug.Log("<color=yellow>SERVER: </color> New highest found: " + v.NumVotes + " from " + v.PlayerName);
-                    prevHeighest = curHeighest;
-                    curHeighest = v;
-                }
+                Debug.Log("<color=yellow>SERVER: </color> New highest found: " + v.NumVotes + " from " + v.PlayerName);
+                prevHeighest = curHeighest;
+                curHeighest = v;
             }
+        }
 
-            // If there is a tie, no punishement
-            if (curHeighest.NumVotes == prevHeighest.NumVotes)
-                Debug.Log("<color=yellow>SERVER: </color> Tie for highest vote, no punishement");
-            // If nobody highest, no punishement
-            else if (curHeighest.PlayerID == 999)
-                Debug.Log("<color=yellow>SERVER: </color> Nobody voted highest, no punishement");
-            // kill highest voted player
+        // If there is a tie, no punishement
+        if (curHeighest.NumVotes == prevHeighest.NumVotes)
+            Debug.Log("<color=yellow>SERVER: </color> Tie for highest vote, no punishement");
+        // If nobody highest, no punishement
+        else if (curHeighest.PlayerID == 999)
+            Debug.Log("<color=yellow>SERVER: </color> Nobody voted highest, no punishement");
+        // kill highest voted player
+        else
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Killing " + curHeighest.PlayerName);
+            if (PlayerConnectionManager.Instance.FindPlayerEntry(curHeighest.PlayerID) != null)
+            {
+                GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(curHeighest.PlayerID);
+                playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99);
+            }
             else
             {
-                Debug.Log("<color=yellow>SERVER: </color> Killing " + curHeighest.PlayerName);
-                if (PlayerConnectionManager.Instance.FindPlayerEntry(curHeighest.PlayerID) != null) 
-                {
-                    GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(curHeighest.PlayerID);
-                    playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99);
-                } else
-                {
-                    Debug.Log("<color=yellow>SERVER: </color> TOP VOTED PLAYER NOT FOUND!");
-                }
+                Debug.Log("<color=yellow>SERVER: </color> TOP VOTED PLAYER NOT FOUND!");
             }
-
-            // Show Results
-            ShowResultsClientRpc(results);
         }
+
+        // Show Results
+        ShowResultsClientRpc(results);
     }
 
     [ClientRpc]
     public void ShowResultsClientRpc(int[] results)
     {
-        _closeUIButton.SetActive(true);
+        _exileUI.SetActive(true);
 
         int i = 0;
         foreach (Transform child in _voteArea)

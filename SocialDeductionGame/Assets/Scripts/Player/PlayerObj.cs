@@ -177,7 +177,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public void ToggleSpeakingIconOff(VivoxManager.ChannelSeshName channel)
     {
-        Debug.Log("Toggling campfire icon off");
+        Debug.Log("Toggling speaking icon off");
         _netSpeaking.Value = false;
     }
 

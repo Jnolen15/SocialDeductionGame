@@ -202,7 +202,6 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
             {
                 Debug.Log($"<color=yellow>SERVER: </color>Given card did not contain tag {tag.name}");
                 return false;
-                break;
             }
         }
 
