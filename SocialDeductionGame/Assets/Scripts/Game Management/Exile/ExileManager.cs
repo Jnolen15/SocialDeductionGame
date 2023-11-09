@@ -414,6 +414,13 @@ public class ExileManager : NetworkBehaviour
             return;
         }
 
+        // Make sure player voting isn't player on trial
+        if (playerID == _netOnTrialPlayerID.Value)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " is on trial and cant vote!");
+            return;
+        }
+
         if (vote)
         {
             _netExileVotes.Value++;
@@ -431,8 +438,8 @@ public class ExileManager : NetworkBehaviour
         _netPlayersVoted.Value++;
         _playerVotedDictionary[playerID] = true;
 
-        // Test if all players have voted
-        if (_netPlayersVoted.Value >= PlayerConnectionManager.Instance.GetNumLivingPlayers())
+        // Test if all players have voted, Its num living -1 for the 1 person on trial
+        if (_netPlayersVoted.Value >= (PlayerConnectionManager.Instance.GetNumLivingPlayers() - 1))
         {
             RunTiralVoteCompleteion();
         }
