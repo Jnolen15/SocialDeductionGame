@@ -3,25 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using System.Linq;
-using UnityEngine.UI;
+using TMPro;
 
 public class ExileManager : NetworkBehaviour
 {
     // ================== Refrences / Variables ==================
     #region Refrences and Variables
     [SerializeField] private GameObject _exileButton;
-    [SerializeField] private GameObject _exileUI;
-    [SerializeField] private Transform _voteArea;
-    [SerializeField] private GameObject _exileVotePrefab;
-    [SerializeField] private Image _voteTimerFill;
+    [SerializeField] private ExileVoteUI _exileUI;
+    [SerializeField] private TrialVoteUI _trialUI;
 
-    [SerializeField] private NetworkVariable<bool> _netExileVoteStarted = new();
-    private List<ExileVoteEntry> _voteList = new();
-    [SerializeField] private NetworkVariable<int> _netPlayersVoted = new();
+    private NetworkVariable<int> _netPlayersVoted = new();
     private Dictionary<ulong, bool> _playerVotedDictionary = new();
 
-    [SerializeField] private float _voteTimerMax;
-    [SerializeField] private NetworkVariable<float> _netVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [Header("Phase 1: Exile Vote")]
+    private NetworkVariable<bool> _netExileVoteActive = new();
+    private List<ExileVoteEntry> _voteList = new();
+
+    [SerializeField] private float _exileVoteTimerMax;
+    [SerializeField] private NetworkVariable<float> _netExileVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
+
+    [Header("Phase 2: Trial Vote")]
+    private NetworkVariable<bool> _netTrialActive = new();
+    private NetworkVariable<ulong> _netOnTrialPlayerID = new();
+    private NetworkVariable<int> _netExileVotes = new();
+    private NetworkVariable<int> _netSpareVotes = new();
+
+    [SerializeField] private float _trialVoteTimerMax;
+    [SerializeField] private NetworkVariable<float> _netTrialVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
     #endregion
 
     #region ExileVoteEntry
@@ -56,12 +65,11 @@ public class ExileManager : NetworkBehaviour
     {
         GameManager.OnStateEvening += EnableExileButton;
         GameManager.OnStateNight += DisableExileButton;
-        GameManager.OnStateNight += CloseExileVote;
 
         if (IsServer)
         {
             GameManager.OnStateIntro += InitializeExileVotes;
-            PlayerConnectionManager.OnPlayerDisconnect += TestForCompletionOnClientDisconnect;
+            GameManager.OnStateNight += StopVoting;
         }
     }
 
@@ -69,42 +77,82 @@ public class ExileManager : NetworkBehaviour
     {
         GameManager.OnStateEvening -= EnableExileButton;
         GameManager.OnStateNight -= DisableExileButton;
-        GameManager.OnStateNight -= CloseExileVote;
 
         if (IsServer)
         {
             GameManager.OnStateIntro -= InitializeExileVotes;
-            PlayerConnectionManager.OnPlayerDisconnect -= TestForCompletionOnClientDisconnect;
+            GameManager.OnStateNight -= StopVoting;
         }
     }
     #endregion
 
     // ================== Update ==================
+    #region Update
     private void Update()
     {
-        // Update timer
-        if(_netExileVoteStarted.Value)
-            _voteTimerFill.fillAmount = 1 - (_netVoteTimer.Value / _voteTimerMax);
-
         if (!IsServer)
             return;
 
-        if(_netExileVoteStarted.Value && _netVoteTimer.Value >= 0)
-            RunTimer(_netVoteTimer);
-    }
-
-    private void RunTimer(NetworkVariable<float> timer)
-    {
-        timer.Value -= Time.deltaTime;
-        if (timer.Value <= 0)
+        // Exile timer
+        if(_netExileVoteActive.Value && _netExileVoteTimer.Value >= 0)
         {
-            Debug.Log($"<color=yellow>SERVER: </color> {timer} Timer up, Vote complete");
-            RunVoteCompletetion();
+            _netExileVoteTimer.Value -= Time.deltaTime;
+            if (_netExileVoteTimer.Value <= 0)
+            {
+                Debug.Log($"<color=yellow>SERVER: </color> {_netExileVoteTimer} Timer up, Vote complete");
+                RunVoteCompletetion();
+            }
+        }
+
+        // Trial timer
+        if (_netTrialActive.Value && _netTrialVoteTimer.Value >= 0)
+        {
+            _netTrialVoteTimer.Value -= Time.deltaTime;
+            if (_netTrialVoteTimer.Value <= 0)
+            {
+                Debug.Log($"<color=yellow>SERVER: </color> {_netTrialVoteTimer} Phase two timer up, Vote complete");
+                RunTiralVoteCompleteion();
+            }
         }
     }
 
+    public float CalculateExileTimerFill()
+    {
+        return 1 - (_netExileVoteTimer.Value / _exileVoteTimerMax);
+    }
+
+    public float CalculateTrialTimerFill()
+    {
+        return 1 - (_netTrialVoteTimer.Value / _trialVoteTimerMax);
+    }
+    #endregion
+
+    // ================== Helpers ==================
+    #region Helpers
+    public bool ExileStarted()
+    {
+        return _netExileVoteActive.Value;
+    }
+
+    public bool TrialStarted()
+    {
+        return _netTrialActive.Value;
+    }
+
+    // Called by server to interupt and stop voting on end of night
+    private void StopVoting()
+    {
+        if (!IsServer)
+            return;
+
+        _netExileVoteActive.Value = false;
+        _netTrialActive.Value = false;
+    }
+    #endregion
+
     // ================== Exile ==================
     #region Exile
+    // ~~~~~~ Vote initilization ~~~~~~
     private void InitializeExileVotes()
     {
         if (!IsServer)
@@ -142,16 +190,10 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     private void InitializeVotePrefabsClientRpc(ulong[] playerIDs)
     {
-        // Initialize vote prefabs
-        for(int i = 0; i < playerIDs.Length; i++)
-        {
-            GameObject vote = Instantiate(_exileVotePrefab, _voteArea);
-            //vote.transform.SetParent(_voteArea, false);
-            vote.GetComponent<ExileVote>().Setup(playerIDs[i], PlayerConnectionManager.Instance.GetPlayerNameByID(playerIDs[i]));
-            Debug.Log("<color=blue>CLIENT: </color>Spawned an exile vote", vote);
-        }
+        _exileUI.InitializeVotePrefabs(playerIDs);
     }
 
+    // ~~~~~~ Exile Button Stuff ~~~~~~
     private void EnableExileButton()
     {
         if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
@@ -171,9 +213,9 @@ public class ExileManager : NetworkBehaviour
     // Called by button
     public void ExileButtonPressed()
     {
-        if (_netExileVoteStarted.Value)
+        if (_netExileVoteActive.Value)
         {
-            _exileUI.SetActive(true);
+            _exileUI.Show();
         }
         else
         {
@@ -181,6 +223,7 @@ public class ExileManager : NetworkBehaviour
         }
     }
 
+    // ~~~~~~ Exile Function ~~~~~~
     [ServerRpc(RequireOwnership = false)]
     public void StartExileServerRpc(ServerRpcParams serverRpcParams = default)
     {
@@ -197,8 +240,8 @@ public class ExileManager : NetworkBehaviour
             _playerVotedDictionary[playerID] = false;
         }
 
-        _netExileVoteStarted.Value = true;
-        _netVoteTimer.Value = _voteTimerMax;
+        _netExileVoteActive.Value = true;
+        _netExileVoteTimer.Value = _exileVoteTimerMax;
 
         // Show UI
         ShowExileUIClientRpc();
@@ -214,20 +257,7 @@ public class ExileManager : NetworkBehaviour
             return;
         }
 
-        // Reset vote objects
-        foreach (Transform exilevote in _voteArea)
-        {
-            ExileVote vote = exilevote.GetComponent<ExileVote>();
-            // Reset player votes, show if the player is dead or living (or dead if diconnected)
-            if(vote.GetVotePlayerID() != 999)
-            {
-                vote.ResetVote(PlayerConnectionManager.Instance.GetPlayerLivingByID(vote.GetVotePlayerID()));
-            }
-            else // Nobody vote
-                vote.ResetVote(true);
-        }
-
-        _exileUI.SetActive(true);
+        _exileUI.UpdateExileUI();
     }
 
     public void SubmitVote(ulong playerID, ulong VotedID)
@@ -246,7 +276,7 @@ public class ExileManager : NetworkBehaviour
         }
 
         // Check to make sure vote is still going on
-        if (!_netExileVoteStarted.Value)
+        if (!_netExileVoteActive.Value)
         {
             Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " voted too late");
             return;
@@ -268,12 +298,6 @@ public class ExileManager : NetworkBehaviour
         TestForVoteCompletetion();
     }
 
-    private void TestForCompletionOnClientDisconnect(ulong playerID)
-    {
-        Debug.Log("<color=yellow>SERVER: </color> Client disconnected, testing for vote completion");
-        TestForVoteCompletetion();
-    }
-
     private void TestForVoteCompletetion()
     {
         if (!IsServer)
@@ -291,7 +315,7 @@ public class ExileManager : NetworkBehaviour
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> All players have voted, or time ran out");
-        _netExileVoteStarted.Value = false;
+        _netExileVoteActive.Value = false;
 
         // Results list for clients
         int[] results = new int[_voteList.Count];
@@ -322,19 +346,10 @@ public class ExileManager : NetworkBehaviour
         // If nobody highest, no punishement
         else if (curHeighest.PlayerID == 999)
             Debug.Log("<color=yellow>SERVER: </color> Nobody voted highest, no punishement");
-        // kill highest voted player
+        // Go to phase two with highest voted player
         else
         {
-            Debug.Log("<color=yellow>SERVER: </color> Killing " + curHeighest.PlayerName);
-            if (PlayerConnectionManager.Instance.FindPlayerEntry(curHeighest.PlayerID) != null)
-            {
-                GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(curHeighest.PlayerID);
-                playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99);
-            }
-            else
-            {
-                Debug.Log("<color=yellow>SERVER: </color> TOP VOTED PLAYER NOT FOUND!");
-            }
+            StartTrialVote(curHeighest.PlayerID);
         }
 
         // Show Results
@@ -344,21 +359,132 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     public void ShowResultsClientRpc(int[] results)
     {
-        _exileUI.SetActive(true);
+        DisableExileButton();
+        _exileUI.ShowResults(results);
+    }
+    #endregion
 
-        int i = 0;
-        foreach (Transform child in _voteArea)
+    // ================== Trial ==================
+    #region Trial
+    private void StartTrialVote(ulong playerID)
+    {
+        if (!IsServer)
+            return;
+
+        // Clear old stuff
+        _netExileVotes.Value = 0;
+        _netSpareVotes.Value = 0;
+        _netPlayersVoted.Value = 0;
+        foreach (ulong pID in _playerVotedDictionary.Keys.ToList())
         {
-            child.GetComponent<ExileVote>().DisplayResults(results[i]);
-            i++;
+            _playerVotedDictionary[pID] = false;
+        }
+
+        // Start
+        _netOnTrialPlayerID.Value = playerID;
+        _netTrialActive.Value = true;
+        _netTrialVoteTimer.Value = _trialVoteTimerMax;
+
+        SetupPhaseTwoClientRpc(playerID);
+    }
+
+    [ClientRpc]
+    private void SetupPhaseTwoClientRpc(ulong playerID)
+    {
+        _trialUI.Setup(playerID);
+    }
+
+    public void SubmitExileVote()
+    {
+        SubmitTrialVoteServerRpc(PlayerConnectionManager.Instance.GetLocalPlayersID(), true);
+    }
+
+    public void SubmitSpareVote()
+    {
+        SubmitTrialVoteServerRpc(PlayerConnectionManager.Instance.GetLocalPlayersID(), false);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SubmitTrialVoteServerRpc(ulong playerID, bool vote)
+    {
+        // Check if player hasn't already voted
+        if (_playerVotedDictionary.ContainsKey(playerID) && _playerVotedDictionary[playerID] == true)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " already voted!");
+            return;
+        }
+
+        if (vote)
+        {
+            _netExileVotes.Value++;
+            Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " voted exile");
+        }
+        else
+        {
+            _netSpareVotes.Value++;
+            Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " voted spare");
+        }
+
+        UpdateTrialResultsClientRpc(_netExileVotes.Value, _netSpareVotes.Value);
+
+        // Track player voted
+        _netPlayersVoted.Value++;
+        _playerVotedDictionary[playerID] = true;
+
+        // Test if all players have voted
+        if (_netPlayersVoted.Value >= PlayerConnectionManager.Instance.GetNumLivingPlayers())
+        {
+            RunTiralVoteCompleteion();
         }
     }
 
-    // Called when the state transitions.
-    // This matters if the timer ends but players are not done voting.
-    private void CloseExileVote()
+    private void RunTiralVoteCompleteion()
     {
-        _exileUI.SetActive(false);
+        if (!IsServer)
+            return;
+
+        Debug.Log("<color=yellow>SERVER: </color> All players have voted, or time ran out");
+        _netTrialActive.Value = false;
+
+        // majority exile
+        if (_netExileVotes.Value > _netSpareVotes.Value)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Killing " + _netOnTrialPlayerID.Value);
+            if (PlayerConnectionManager.Instance.FindPlayerEntry(_netOnTrialPlayerID.Value) != null)
+            {
+                GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(_netOnTrialPlayerID.Value);
+                playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99);
+            }
+            else
+            {
+                Debug.Log("<color=yellow>SERVER: </color> TOP VOTED PLAYER NOT FOUND!");
+            }
+        }
+        // Majority spare
+        else if(_netExileVotes.Value < _netSpareVotes.Value)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Majority voted spare, no punishement");
+        }
+        // Tie
+        else
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Tie for highest vote, no punishement");
+        }
+
+        TrialVoteEndedClientRpc();
     }
+
+    [ClientRpc]
+    private void UpdateTrialResultsClientRpc(int exileVotes, int SpareVotes)
+    {
+        _trialUI.UpdateTrialResults(exileVotes, SpareVotes);
+    }
+    
+    [ClientRpc]
+    private void TrialVoteEndedClientRpc()
+    {
+        _trialUI.VoteEnded();
+    }
+
     #endregion
 }
