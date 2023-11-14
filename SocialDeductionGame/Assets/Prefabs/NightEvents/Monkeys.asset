@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e72f1ae1f2c2b74db098be57c3cac79, type: 3}
-  m_Name: Monkies
+  m_Name: Monkeys
   m_EditorClassIdentifier: 
   _eventID: 1004
-  _eventName: Theiving Monkies
+  _eventName: Thieving Monkeys
   _eventConsequences: All players -1.5 Hunger
   _eventBonuses: All players +1 hunger
   _eventArt: {fileID: 0}
+  _serverInvoked: 0
   _requirements: {fileID: 11400000, guid: f2050725077683a48bbb89b1e947ebe0, type: 2}
   _eventBonus: {fileID: 11400000, guid: ca7354e2404e1b74a9510acbb8f4ccfa, type: 2}
   _dmg: 0
