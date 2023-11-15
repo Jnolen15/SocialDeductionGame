@@ -41,6 +41,9 @@ public class WatchHUD : MonoBehaviour
     [SerializeField] private Image _healthWarning;
     [SerializeField] private List<Image> _hungerSegments;
     [SerializeField] private Image _hungerWarning;
+    [Header("Ready")]
+    [SerializeField] private GameObject _readyButton;
+    [SerializeField] private GameObject _readyButtonIcon;
 
 
     private Dictionary<string, UIFlashObj> _flashDict = new();
@@ -86,6 +89,9 @@ public class WatchHUD : MonoBehaviour
         PlayerHealth.OnHungerModified += UpdateHunger;
         PlayerHealth.OnDeath += OnDeath;
         GameManager.OnStateChange += UpdateStateUI;
+        GameManager.OnStateChange += EnableReadyButton;
+        PlayerConnectionManager.OnPlayerReady += Ready;
+        PlayerConnectionManager.OnPlayerUnready += Unready;
     }
 
     private void OnDisable()
@@ -96,6 +102,9 @@ public class WatchHUD : MonoBehaviour
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= OnDeath;
         GameManager.OnStateChange -= UpdateStateUI;
+        GameManager.OnStateChange -= EnableReadyButton;
+        PlayerConnectionManager.OnPlayerReady -= Ready;
+        PlayerConnectionManager.OnPlayerUnready -= Unready;
     }
     #endregion 
 
@@ -203,7 +212,7 @@ public class WatchHUD : MonoBehaviour
         }
 
         // Add flashes
-        Debug.Log($"Setting {objName} flashes to {numFlashes}");
+        //Debug.Log($"Setting {objName} flashes to {numFlashes}");
         flashObj.SetFlashes(numFlashes);
 
         SetFlashActive(true);
@@ -299,6 +308,8 @@ public class WatchHUD : MonoBehaviour
 
     public void UpdateTeam(PlayerData.Team prev, PlayerData.Team current)
     {
+        Debug.Log("<color=green>Watch:</color> Updating player team to " + current, this);
+
         if (current == PlayerData.Team.Survivors)
         {
             _saboIcon.SetActive(false);
@@ -372,6 +383,8 @@ public class WatchHUD : MonoBehaviour
 
     private void OnDeath()
     {
+        DisableReadyButton();
+
         _playerStats.SetActive(false);
         _playerDead.SetActive(true);
     }
@@ -408,6 +421,32 @@ public class WatchHUD : MonoBehaviour
     private void UpdateDayText()
     {
         _dayText.text = GameManager.Instance.GetCurrentDay().ToString();
+    }
+    #endregion
+
+    // ================== Ready ==================
+    #region Ready
+    private void EnableReadyButton(GameManager.GameState prev, GameManager.GameState current)
+    {
+        if (!_playerHealth.IsLiving())
+            return;
+
+        //_readyButtonIcon.SetActive(true);
+    }
+
+    public void DisableReadyButton()
+    {
+        _readyButton.SetActive(false);
+    }
+
+    public void Ready()
+    {
+        _readyButtonIcon.SetActive(true);
+    }
+
+    public void Unready()
+    {
+        _readyButtonIcon.SetActive(false);
     }
     #endregion
 

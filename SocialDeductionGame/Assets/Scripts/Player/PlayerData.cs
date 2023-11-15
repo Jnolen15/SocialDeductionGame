@@ -86,7 +86,10 @@ public class PlayerData : NetworkBehaviour
         _locationManager = gameMan.GetComponent<LocationManager>();
         _nightEventManger = gameMan.GetComponent<EventManager>();
 
-        UpdateTeamText(Team.Survivors, _netTeam.Value);
+        // Manually update team text because its default survivors
+        // So when the game starts and a player is survivors the UI wont update
+        if (!IsOwner) return;
+            UpdateTeamText(Team.Survivors, _netTeam.Value);
     }
     #endregion
 
@@ -142,6 +145,9 @@ public class PlayerData : NetworkBehaviour
     #region Player Readying
     public void ReadyPlayer()
     {
+        if (!_playerHealth.IsLiving())
+            return;
+
         _playerObj.ToggleReadyIconActive();
         PlayerConnectionManager.Instance.ReadyPlayer();
     }

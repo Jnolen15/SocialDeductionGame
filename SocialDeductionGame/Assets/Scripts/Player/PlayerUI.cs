@@ -13,10 +13,6 @@ public class PlayerUI : MonoBehaviour
     private PlayerHealth _playerHealth;
 
     [Header("Other")]
-    [SerializeField] private GameObject _readyButton;
-    [SerializeField] private GameObject _readyButtonIcon;
-    [SerializeField] private Sprite _readyNormal;
-    [SerializeField] private Sprite _readySpeedUp;
     [SerializeField] private GameObject _locationMenu;
     [SerializeField] private GameObject _craftingMenu;
     [SerializeField] private GameObject _introRole;
@@ -33,10 +29,7 @@ public class PlayerUI : MonoBehaviour
         _playerData = this.GetComponentInParent<PlayerData>();
         _playerHealth = this.GetComponentInParent<PlayerHealth>();
 
-        GameManager.OnStateChange += EnableReadyButton;
         GameManager.OnStateChange += StateChangeEvent;
-        PlayerConnectionManager.OnPlayerReady += Ready;
-        PlayerConnectionManager.OnPlayerUnready += Unready;
         GameManager.OnStateIntro += DisplayRole;
         VivoxClient.OnBeginSpeaking += SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking += SpeakingIndicatorOff;
@@ -51,10 +44,7 @@ public class PlayerUI : MonoBehaviour
 
     private void OnDisable()
     {
-        GameManager.OnStateChange -= EnableReadyButton;
         GameManager.OnStateChange -= StateChangeEvent;
-        PlayerConnectionManager.OnPlayerReady -= Ready;
-        PlayerConnectionManager.OnPlayerUnready -= Unready;
         GameManager.OnStateIntro -= DisplayRole;
         VivoxClient.OnBeginSpeaking -= SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking -= SpeakingIndicatorOff;
@@ -65,8 +55,6 @@ public class PlayerUI : MonoBehaviour
     #region Misc UI
     private void OnDeath()
     {
-        DisableReadyButton();
-
         //MutedIndicatorOn();
 
         // Close Menus if player died
@@ -82,29 +70,6 @@ public class PlayerUI : MonoBehaviour
         // Close Menus on a state change
         _locationMenu.SetActive(false);
         _craftingMenu.SetActive(false);
-    }
-
-    private void EnableReadyButton(GameManager.GameState prev, GameManager.GameState current)
-    {
-        if (!_playerHealth.IsLiving())
-            return;
-
-        _readyButtonIcon.SetActive(true);
-    }
-
-    public void DisableReadyButton()
-    {
-        _readyButton.SetActive(false);
-    }
-
-    public void Ready()
-    {
-        _readyButtonIcon.GetComponent<Image>().sprite = _readySpeedUp;
-    }
-
-    public void Unready()
-    {
-        _readyButtonIcon.GetComponent<Image>().sprite = _readyNormal;
     }
 
     private void DisplayRole()
