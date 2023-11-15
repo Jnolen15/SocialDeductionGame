@@ -7,7 +7,7 @@ using TMPro;
 
 public class PlayerData : NetworkBehaviour
 {
-    // ================== Refrences ==================
+    // ================== Refrences / Variables ==================
     #region Refrences
     private HandManager _handManager;
     private PlayerCardManager _playerCardManager;
@@ -17,10 +17,8 @@ public class PlayerData : NetworkBehaviour
 
     private LocationManager _locationManager;
     private EventManager _nightEventManger;
-    #endregion
 
-    // ================== Variables ==================
-    #region Variables
+
     public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
     [SerializeField] private NetworkVariable<LocationManager.LocationName> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
@@ -33,6 +31,9 @@ public class PlayerData : NetworkBehaviour
     [SerializeField] private int _defaultMP = 2;
     [SerializeField] private NetworkVariable<int> _netMaxMP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netCurrentMP = new(writePerm: NetworkVariableWritePermission.Server);
+
+    public delegate void UpdateTeamAction(Team prev, Team current);
+    public static event UpdateTeamAction OnTeamUpdated;
     #endregion
 
     // ================== Setup ==================
@@ -119,8 +120,7 @@ public class PlayerData : NetworkBehaviour
 
     private void UpdateTeamText(Team prev, Team current)
     {
-        if(_playerUI != null)
-            _playerUI.UpdateTeam(current);
+        OnTeamUpdated?.Invoke(prev, current);
     }
 
     // Show night event choices if Saboteur, else show Recap
