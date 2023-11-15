@@ -25,6 +25,15 @@ public class WatchHUD : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private GameObject _saboIcon;
     [SerializeField] private GameObject _survivorIcon;
+    [Header("Day Info Refrences")]
+    [SerializeField] private TextMeshProUGUI _gameStateText;
+    [SerializeField] private TextMeshProUGUI _dayText;
+    [SerializeField] private Image _stateTimerFill;
+    [SerializeField] private GameObject _morningIcon;
+    [SerializeField] private GameObject _afternoonIcon;
+    [SerializeField] private GameObject _eveningIcon;
+    [SerializeField] private GameObject _nightIcon;
+    private bool _updatedDay;
     [Header("Player Stats")]
     [SerializeField] private GameObject _playerStats;
     [SerializeField] private GameObject _playerDead;
@@ -76,6 +85,7 @@ public class WatchHUD : MonoBehaviour
         PlayerHealth.OnHealthModified += UpdateHealth;
         PlayerHealth.OnHungerModified += UpdateHunger;
         PlayerHealth.OnDeath += OnDeath;
+        GameManager.OnStateChange += UpdateStateUI;
     }
 
     private void OnDisable()
@@ -85,6 +95,7 @@ public class WatchHUD : MonoBehaviour
         PlayerHealth.OnHealthModified -= UpdateHealth;
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= OnDeath;
+        GameManager.OnStateChange -= UpdateStateUI;
     }
     #endregion 
 
@@ -92,9 +103,16 @@ public class WatchHUD : MonoBehaviour
     #region Update
     private void Update()
     {
-        if (!_flashActive)
-            return;
+        // Flash Stuff
+        if (_flashActive)
+            RunFlashTimer();
 
+        // Update Day
+        UpdateGameInfo();
+    }
+
+    private void RunFlashTimer()
+    {
         // Every X seconds flash
         // Loop through list of flash objects and flash
         if (_curFlashTime > 0)
@@ -105,6 +123,22 @@ public class WatchHUD : MonoBehaviour
 
             _curFlashTime = _flashPause;
         }
+    }
+
+    private void UpdateGameInfo()
+    {
+        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Morning && !_updatedDay)
+        {
+            UpdateDayText();
+            _updatedDay = true;
+        }
+        else if (_updatedDay)
+        {
+            _updatedDay = false;
+        }
+
+        // State Timer stuff
+        _stateTimerFill.fillAmount = GameManager.Instance.GetStateTimer();
     }
     #endregion
 
@@ -340,6 +374,40 @@ public class WatchHUD : MonoBehaviour
     {
         _playerStats.SetActive(false);
         _playerDead.SetActive(true);
+    }
+    #endregion
+
+    // ================== Day Info ==================
+    #region Day Info
+    private void UpdateStateUI(GameManager.GameState prev, GameManager.GameState current)
+    {
+        _gameStateText.text = current.ToString();
+
+        _morningIcon.SetActive(false);
+        _afternoonIcon.SetActive(false);
+        _eveningIcon.SetActive(false);
+        _nightIcon.SetActive(false);
+
+        switch (current)
+        {
+            case GameManager.GameState.Morning:
+                _morningIcon.SetActive(true);
+                break;
+            case GameManager.GameState.Afternoon:
+                _afternoonIcon.SetActive(true);
+                break;
+            case GameManager.GameState.Evening:
+                _eveningIcon.SetActive(true);
+                break;
+            case GameManager.GameState.Night:
+                _nightIcon.SetActive(true);
+                break;
+        }
+    }
+
+    private void UpdateDayText()
+    {
+        _dayText.text = GameManager.Instance.GetCurrentDay().ToString();
     }
     #endregion
 
