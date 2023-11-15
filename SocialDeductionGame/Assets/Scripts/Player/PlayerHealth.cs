@@ -12,13 +12,13 @@ public class PlayerHealth : NetworkBehaviour
     [SerializeField] private int _maxHP;
     [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _maxHunger;
-    [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
     public NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
 
     private bool _doCheats;
 
     // Events
-    public delegate void ValueModified(float ModifiedAmmount, float newTotal);
+    public delegate void ValueModified(int ModifiedAmmount, int newTotal);
     public static event ValueModified OnHealthModified;
     public static event ValueModified OnHungerModified;
     public delegate void Death();
@@ -54,7 +54,7 @@ public class PlayerHealth : NetworkBehaviour
         if (IsOwner)
         {
             ModifyHealthServerRPC(4, false);
-            ModifyHungerServerRPC(3f, false);
+            ModifyHungerServerRPC(6, false);
         }
     }
 
@@ -157,7 +157,7 @@ public class PlayerHealth : NetworkBehaviour
     // ==================== Hunger ====================
     #region Hunger
     // Calls server to increase or decrease player hunger
-    public void ModifyHunger(float ammount)
+    public void ModifyHunger(int ammount)
     {
         if (!IsLiving())
             return;
@@ -166,12 +166,12 @@ public class PlayerHealth : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void ModifyHungerServerRPC(float ammount, bool add, ServerRpcParams serverRpcParams = default)
+    private void ModifyHungerServerRPC(int ammount, bool add, ServerRpcParams serverRpcParams = default)
     {
         Debug.Log($"{NetworkManager.Singleton.LocalClientId} had its hunger incremented by {ammount}");
 
         // temp for calculations
-        float tempHunger = _netCurrentHunger.Value;
+        int tempHunger = _netCurrentHunger.Value;
 
         if (add)
             tempHunger += ammount;
@@ -205,9 +205,9 @@ public class PlayerHealth : NetworkBehaviour
         OnHealthModified?.Invoke(modifiedAmmount, next);
     }
 
-    private void HungerChanged(float prev, float next)
+    private void HungerChanged(int prev, int next)
     {
-        float modifiedAmmount = next - prev;
+        int modifiedAmmount = next - prev;
         OnHungerModified?.Invoke(modifiedAmmount, next);
     }
 }

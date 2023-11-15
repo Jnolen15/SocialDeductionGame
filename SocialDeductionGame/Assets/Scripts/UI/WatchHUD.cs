@@ -66,7 +66,7 @@ public class WatchHUD : MonoBehaviour
     // ================== Setup ==================
     #region Setup
     // COMENTED OUT ONLY FOR TESTING
-    /*public void OnEnable()
+    public void OnEnable()
     {
         _playerData = this.GetComponentInParent<PlayerData>();
         _playerHealth = this.GetComponentInParent<PlayerHealth>();
@@ -83,9 +83,9 @@ public class WatchHUD : MonoBehaviour
         _playerData._netPlayerName.OnValueChanged -= UpdatePlayerNameText;
         PlayerData.OnTeamUpdated -= UpdateTeam;
         PlayerHealth.OnHealthModified -= UpdateHealth;
-        //PlayerHealth.OnHungerModified -= UpdateHunger;
+        PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= OnDeath;
-    }*/
+    }
     #endregion 
 
     // ================== Update ==================

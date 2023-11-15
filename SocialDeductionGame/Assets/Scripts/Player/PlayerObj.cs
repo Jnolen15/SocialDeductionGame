@@ -188,7 +188,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     #endregion
 
     // ================== Food ==================
-    public void Eat(float servings, int hpGain = 0)
+    public void Eat(int servings, int hpGain = 0)
     {
         if (!IsOwner)
             return;

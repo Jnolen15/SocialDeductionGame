@@ -7,7 +7,7 @@ public class DamageHazard : Hazard
 {
     [Header("Damage Stats")]
     [SerializeField] private int _damage;
-    [SerializeField] private float _hunger;
+    [SerializeField] private int _hunger;
 
     // ========== METHOD OVERRIDES ==========
     public override void InvokeHazardConsequence()

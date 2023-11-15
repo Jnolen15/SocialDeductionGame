@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 2
+  m_text: 4
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 744dcfa55d665fb428a454337938185f, type: 2}
   m_sharedMaterial: {fileID: -5811233463216366101, guid: 744dcfa55d665fb428a454337938185f, type: 2}
@@ -444,7 +444,7 @@ GameObject:
   - component: {fileID: 8209608695514516567}
   - component: {fileID: 5979452917462352348}
   m_Layer: 6
-  m_Name: TakeOne
+  m_Name: TakeTwo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -556,11 +556,11 @@ MonoBehaviour:
       - m_Target: {fileID: 8773767253874905864}
         m_TargetAssemblyTypeName: Campfire, Assembly-CSharp
         m_MethodName: TakeFood
-        m_Mode: 4
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 2
           m_FloatArgument: 1
           m_StringArgument: 
           m_BoolArgument: 0
@@ -1097,7 +1097,7 @@ GameObject:
   - component: {fileID: 7875617382450762228}
   - component: {fileID: 252173997711307047}
   m_Layer: 6
-  m_Name: TakeTwo
+  m_Name: TakeFour
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1209,11 +1209,11 @@ MonoBehaviour:
       - m_Target: {fileID: 8773767253874905864}
         m_TargetAssemblyTypeName: Campfire, Assembly-CSharp
         m_MethodName: TakeFood
-        m_Mode: 4
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 4
           m_FloatArgument: 2
           m_StringArgument: 
           m_BoolArgument: 0
@@ -1231,7 +1231,7 @@ GameObject:
   - component: {fileID: 8773767251928112262}
   - component: {fileID: 8773767251928112265}
   m_Layer: 6
-  m_Name: TakeHalf
+  m_Name: TakeOne
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1343,11 +1343,11 @@ MonoBehaviour:
       - m_Target: {fileID: 8773767253874905864}
         m_TargetAssemblyTypeName: Campfire, Assembly-CSharp
         m_MethodName: TakeFood
-        m_Mode: 4
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 1
           m_FloatArgument: 0.5
           m_StringArgument: 
           m_BoolArgument: 0
@@ -1519,7 +1519,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0.5
+  m_text: 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 744dcfa55d665fb428a454337938185f, type: 2}
   m_sharedMaterial: {fileID: -5811233463216366101, guid: 744dcfa55d665fb428a454337938185f, type: 2}
@@ -1915,7 +1915,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 2
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 744dcfa55d665fb428a454337938185f, type: 2}
   m_sharedMaterial: {fileID: -5811233463216366101, guid: 744dcfa55d665fb428a454337938185f, type: 2}

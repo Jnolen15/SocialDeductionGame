@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _eventID: 1006
   _eventName: Hungry Insects
-  _eventConsequences: All players -1.5 Hunger
-  _eventBonuses: All players +1 hunger
+  _eventConsequences: All players -3 Hunger
+  _eventBonuses: All players +2 hunger
   _eventArt: {fileID: 0}
+  _serverInvoked: 0
   _requirements: {fileID: 11400000, guid: efeaedcfc0ca4ad45ad8249f15182184, type: 2}
   _eventBonus: {fileID: 11400000, guid: ca7354e2404e1b74a9510acbb8f4ccfa, type: 2}
   _dmg: 0
-  _hunger: 1.5
+  _hunger: 3
