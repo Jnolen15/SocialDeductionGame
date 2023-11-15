@@ -330,8 +330,17 @@ public class WatchHUD : MonoBehaviour
         if (ModifiedAmmount == 0)
             return;
 
-        if (ModifiedAmmount < 0) // Health Down
-            UpdateFlashObj(_healthWarning.name, _healthWarning, 3);
+        //if (ModifiedAmmount < 0) // Health Down
+        //    UpdateFlashObj(_healthWarning.name, _healthWarning, 3);
+
+        // Warning if health low
+        if (newTotal <= 1)
+        {
+            _healthWarning.gameObject.SetActive(true);
+            UpdateFlashObj(_healthWarning.name, _healthWarning, 6);
+        }
+        else
+            _healthWarning.gameObject.SetActive(false);
 
         // Update segments
         int place = 0;
@@ -358,8 +367,17 @@ public class WatchHUD : MonoBehaviour
         if (ModifiedAmmount == 0)
             return;
 
-        if (ModifiedAmmount < 0) // Hunger Down
-            UpdateFlashObj(_hungerWarning.name, _hungerWarning, 3);
+        //if (ModifiedAmmount < 0) // Hunger Down
+        //    UpdateFlashObj(_hungerWarning.name, _hungerWarning, 3);
+
+        // Warning if hunger low
+        if (newTotal <= 1)
+        {
+            _hungerWarning.gameObject.SetActive(true);
+            UpdateFlashObj(_hungerWarning.name, _hungerWarning, 6);
+        }
+        else
+            _hungerWarning.gameObject.SetActive(false);
 
         // Update segments
         int place = 0;
