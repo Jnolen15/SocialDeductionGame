@@ -33,6 +33,9 @@ public class PlayerUI : MonoBehaviour
         GameManager.OnStateIntro += DisplayRole;
         VivoxClient.OnBeginSpeaking += SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking += SpeakingIndicatorOff;
+
+        TabButtonUI.OnMapPressed += ToggleMap;
+        TabButtonUI.OnCraftingPressed += ToggleCraft;
     }
 
     private void Start()
@@ -48,6 +51,9 @@ public class PlayerUI : MonoBehaviour
         GameManager.OnStateIntro -= DisplayRole;
         VivoxClient.OnBeginSpeaking -= SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking -= SpeakingIndicatorOff;
+
+        TabButtonUI.OnMapPressed -= ToggleMap;
+        TabButtonUI.OnCraftingPressed -= ToggleCraft;
     }
     #endregion
 

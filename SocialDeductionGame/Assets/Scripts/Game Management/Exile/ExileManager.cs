@@ -9,7 +9,6 @@ public class ExileManager : NetworkBehaviour
 {
     // ================== Refrences / Variables ==================
     #region Refrences and Variables
-    [SerializeField] private GameObject _exileButton;
     [SerializeField] private ExileVoteUI _exileUI;
     [SerializeField] private TrialVoteUI _trialUI;
 
@@ -63,8 +62,7 @@ public class ExileManager : NetworkBehaviour
     #region Setup
     public override void OnNetworkSpawn()
     {
-        GameManager.OnStateEvening += EnableExileButton;
-        GameManager.OnStateNight += DisableExileButton;
+        TabButtonUI.OnExilePressed += ExileButtonPressed;
 
         if (IsServer)
         {
@@ -75,8 +73,7 @@ public class ExileManager : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
-        GameManager.OnStateEvening -= EnableExileButton;
-        GameManager.OnStateNight -= DisableExileButton;
+        TabButtonUI.OnExilePressed -= ExileButtonPressed;
 
         if (IsServer)
         {
@@ -193,24 +190,7 @@ public class ExileManager : NetworkBehaviour
         _exileUI.InitializeVotePrefabs(playerIDs);
     }
 
-    // ~~~~~~ Exile Button Stuff ~~~~~~
-    private void EnableExileButton()
-    {
-        if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
-        {
-            Debug.Log("<color=blue>CLIENT: </color>Player is dead, and cannot vote");
-            return;
-        }
-
-        _exileButton.SetActive(true);
-    }
-
-    private void DisableExileButton()
-    {
-        _exileButton.SetActive(false);
-    }
-
-    // Called by button
+    // Called by button event
     public void ExileButtonPressed()
     {
         if (_netExileVoteActive.Value)
@@ -359,7 +339,6 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     public void ShowResultsClientRpc(int[] results)
     {
-        DisableExileButton();
         _exileUI.ShowResults(results);
     }
     #endregion
