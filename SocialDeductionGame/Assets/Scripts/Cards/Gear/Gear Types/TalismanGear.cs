@@ -2,29 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TalismanNourishmentGear : Gear
+public class TalismanGear : Gear
 {
     // ========== Talisman Details ==========
     [Header("Talisman Stats")]
-    [SerializeField] private int _mealID;
+    [SerializeField] private int _givenCardID;
+    [SerializeField] private int _odds;
+    [SerializeField] private string _nightRecapMessage;
 
     private CardManager _cardManager;
 
-    public delegate void TalismanEvent();
-    public static event TalismanEvent OnGiveMeal;
+    public delegate void TalismanEvent(string message);
+    public static event TalismanEvent OnGiveCard;
 
     // ========== Talisman Functions ==========
     private void GiveFood()
     {
-        Debug.Log("Talisman of Nourishment giving daily meal");
-
         if (_cardManager != null)
         {
-            _cardManager.GiveCard(_mealID);
-            OnGiveMeal?.Invoke();
+            int rand = Random.Range(1, _odds);
+
+            if(rand == 1)
+            {
+                Debug.Log(GetCardName() + " giving card");
+                _cardManager.GiveCard(_givenCardID);
+                OnGiveCard?.Invoke(_nightRecapMessage);
+            }
         }
         else
-            Debug.LogError("Talisman of Nourishment does not have card manager refrence");
+            Debug.LogError("Talisman does not have card manager refrence");
     }
 
     // ========== Override Functions ==========

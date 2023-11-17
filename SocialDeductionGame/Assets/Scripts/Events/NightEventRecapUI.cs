@@ -8,21 +8,24 @@ public class NightEventRecapUI : MonoBehaviour
     // ================== Refrences ==================
     [Header("Survivor Reacp")]
     [SerializeField] private GameObject _survivorRecap;
+    [SerializeField] private Transform _survivorRecapZone;
     [SerializeField] private NightEventCardVisual _eventCard;
     [SerializeField] private TextMeshProUGUI _resultText;
     [SerializeField] private TextMeshProUGUI _consequencesText;
 
     [Header("Sabotuer Reacp")]
     [SerializeField] private GameObject _saborRecap;
-    [SerializeField] private Transform _RecapZone;
+    [SerializeField] private Transform _saboRecapZone;
 
     [Header("Night Recap Objs")]
+    [SerializeField] private GameObject _genericRecapMessage;
     [SerializeField] private GameObject _hungerDrain;
     [SerializeField] private GameObject _starvation;
     [SerializeField] private GameObject _death;
-    [SerializeField] private GameObject _talismanNourishment;
 
     private GameObject _recapObject;
+    private PlayerData.Team _localTeam;
+    private List<GameObject> _extraRecapObjects = new();
 
     // ================== Setup ==================
     #region Setup
@@ -32,7 +35,7 @@ public class NightEventRecapUI : MonoBehaviour
         PlayerHealth.OnHungerDrain += ShowHungerDrain;
         PlayerHealth.OnStarvation += ShowStarvation;
         PlayerHealth.OnDeath += ShowDeath;
-        TalismanNourishmentGear.OnGiveMeal += ShowTalismanNourishment;
+        TalismanGear.OnGiveCard += ShowTalisman;
     }
 
     private void Start()
@@ -47,7 +50,7 @@ public class NightEventRecapUI : MonoBehaviour
         PlayerHealth.OnHungerDrain -= ShowHungerDrain;
         PlayerHealth.OnStarvation -= ShowStarvation;
         PlayerHealth.OnDeath -= ShowDeath;
-        TalismanNourishmentGear.OnGiveMeal -= ShowTalismanNourishment;
+        TalismanGear.OnGiveCard -= ShowTalisman;
     }
 
     public void Setup(PlayerData.Team prev, PlayerData.Team current)
@@ -55,16 +58,19 @@ public class NightEventRecapUI : MonoBehaviour
         Debug.Log("Setting up night event recap UI for team " + current);
 
         if (current == PlayerData.Team.Survivors)
+        {
+            _localTeam = PlayerData.Team.Survivors;
             _recapObject = _survivorRecap;
+        }
         else
         {
+            _localTeam = PlayerData.Team.Saboteurs;
             _recapObject = _saborRecap;
 
             // Move recap objects to survivor recap
-            _hungerDrain.transform.SetParent(_RecapZone);
-            _starvation.transform.SetParent(_RecapZone);
-            _death.transform.SetParent(_RecapZone);
-            _talismanNourishment.transform.SetParent(_RecapZone);
+            _hungerDrain.transform.SetParent(_saboRecapZone);
+            _starvation.transform.SetParent(_saboRecapZone);
+            _death.transform.SetParent(_saboRecapZone);
         }
     }
     #endregion
@@ -81,7 +87,11 @@ public class NightEventRecapUI : MonoBehaviour
         _hungerDrain.SetActive(false);
         _starvation.SetActive(false);
         _death.SetActive(false);
-        _talismanNourishment.SetActive(false);
+        
+        foreach(GameObject obj in _extraRecapObjects)
+        {
+            Destroy(obj);
+        }
 
         _recapObject.SetActive(false);
     }
@@ -131,9 +141,17 @@ public class NightEventRecapUI : MonoBehaviour
         _death.SetActive(true);
     }
 
-    private void ShowTalismanNourishment()
+    private void ShowTalisman(string message)
     {
-        _talismanNourishment.SetActive(true);
+        Debug.Log("Showing Talisman message: " + message);
+
+        GameObject recapMessage = Instantiate(_genericRecapMessage, _survivorRecapZone);
+        recapMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
+
+        _extraRecapObjects.Add(recapMessage);
+
+        if (_localTeam == PlayerData.Team.Saboteurs)
+            recapMessage.transform.SetParent(_saboRecapZone);
     }
     #endregion
 }
