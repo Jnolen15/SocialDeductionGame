@@ -19,28 +19,31 @@ public class TabButtonUI : MonoBehaviour
     private bool _hovering;
     private bool _minimized;
     [Header("Tabs")]
-    [SerializeField] private GameObject _exileTab;
+    [SerializeField] private GameObject _eventTab;
     [SerializeField] private GameObject _mapTab;
     [SerializeField] private GameObject _craftingTab;
     [SerializeField] private GameObject _helpTab;
-    private bool _exileTabHidden;
+    [SerializeField] private GameObject _exileTab;
+    private bool _eventTabHidden;
     private bool _mapTabHidden;
     private bool _craftingTabHidden;
     private bool _helpTabHidden;
+    private bool _exileTabHidden;
 
     public delegate void TabPressedAction();
-    public static event TabPressedAction OnExilePressed;
+    public static event TabPressedAction OnEventPressed;
     public static event TabPressedAction OnMapPressed;
     public static event TabPressedAction OnCraftingPressed;
     public static event TabPressedAction OnHelpPressed;
+    public static event TabPressedAction OnExilePressed;
     #endregion
 
     // ================== Setup ==================
     #region Setup
     public void OnEnable()
     {
-        GameManager.OnStateEvening += ShowExileButton;
-        GameManager.OnStateNight += HideExileButton;
+        GameManager.OnStateMorning += ShowEventButton;
+        GameManager.OnStateNight += HideEventButton;
 
         GameManager.OnStateMorning += ShowMapButton;
         GameManager.OnStateAfternoon += HideMapButton;
@@ -50,20 +53,24 @@ public class TabButtonUI : MonoBehaviour
 
         GameManager.OnStateMorning += ShowHelpButton;
         GameManager.OnStateNight += HideHelpButton;
+
+        GameManager.OnStateEvening += ShowExileButton;
+        GameManager.OnStateNight += HideExileButton;
     }
 
     private void Start()
     {
-        HideExileButton();
+        HideEventButton();
         HideMapButton();
         HideCraftingButton();
         HideHelpButton();
+        HideExileButton();
     }
 
     public void OnDisable()
     {
-        GameManager.OnStateEvening -= ShowExileButton;
-        GameManager.OnStateNight -= HideExileButton;
+        GameManager.OnStateMorning -= ShowEventButton;
+        GameManager.OnStateEvening -= HideEventButton;
 
         GameManager.OnStateMorning -= ShowMapButton;
         GameManager.OnStateAfternoon -= HideMapButton;
@@ -73,6 +80,9 @@ public class TabButtonUI : MonoBehaviour
 
         GameManager.OnStateMorning -= ShowHelpButton;
         GameManager.OnStateNight -= HideHelpButton;
+
+        GameManager.OnStateEvening -= ShowExileButton;
+        GameManager.OnStateNight -= HideExileButton;
     }
     #endregion
 
@@ -112,12 +122,12 @@ public class TabButtonUI : MonoBehaviour
     {
         _minimized = false;
 
-        if (!_exileTabHidden)
+        if (!_eventTabHidden)
         {
-            if(_exileTab.transform == tab)
-                ExtendTab(_exileTab.transform);
+            if (_eventTab.transform == tab)
+                ExtendTab(_eventTab.transform);
             else
-                ShowTab(_exileTab.transform);
+                ShowTab(_eventTab.transform);
         }
         if (!_mapTabHidden)
         {
@@ -140,20 +150,29 @@ public class TabButtonUI : MonoBehaviour
             else
                 ShowTab(_helpTab.transform);
         }
+        if (!_exileTabHidden)
+        {
+            if (_exileTab.transform == tab)
+                ExtendTab(_exileTab.transform);
+            else
+                ShowTab(_exileTab.transform);
+        }
     }
 
     private void MinimizeActiveTabs()
     {
         _minimized = true;
 
-        if (!_exileTabHidden)
-            MinimizeTab(_exileTab.transform);
+        if (!_eventTabHidden)
+            MinimizeTab(_eventTab.transform);
         if (!_mapTabHidden)
             MinimizeTab(_mapTab.transform);
         if (!_craftingTabHidden)
             MinimizeTab(_craftingTab.transform);
         if (!_helpTabHidden)
             MinimizeTab(_helpTab.transform);
+        if (!_exileTabHidden)
+            MinimizeTab(_exileTab.transform);
     }
 
     private void HideTab(Transform tab)
@@ -181,32 +200,32 @@ public class TabButtonUI : MonoBehaviour
     }
     #endregion
 
-    // ================== Exile ==================
-    #region Exile
-    private void ShowExileButton()
+    // ================== Event ==================
+    #region Event
+    private void ShowEventButton()
     {
-        MinimizeTab(_exileTab.transform);
-        _exileTabHidden = false;
+        MinimizeTab(_eventTab.transform);
+        _eventTabHidden = false;
     }
 
-    private void HideExileButton()
+    private void HideEventButton()
     {
-        HideTab(_exileTab.transform);
-        _exileTabHidden = true;
+        HideTab(_eventTab.transform);
+        _eventTabHidden = true;
     }
 
-    public void ExileHovered()
+    public void EventHovered()
     {
-        MouseEnter(_exileTab.transform);
+        MouseEnter(_eventTab.transform);
     }
 
-    public void ExilePressed()
+    public void EventPressed()
     {
-        if (_exileTabHidden)
+        if (_eventTabHidden)
             return;
 
-        Debug.Log("Exile button pressed");
-        OnExilePressed?.Invoke();
+        Debug.Log("Event button pressed");
+        OnEventPressed?.Invoke();
     }
     #endregion
 
@@ -294,6 +313,35 @@ public class TabButtonUI : MonoBehaviour
 
         Debug.Log("Map button pressed");
         OnHelpPressed?.Invoke();
+    }
+    #endregion
+
+    // ================== Exile ==================
+    #region Exile
+    private void ShowExileButton()
+    {
+        MinimizeTab(_exileTab.transform);
+        _exileTabHidden = false;
+    }
+
+    private void HideExileButton()
+    {
+        HideTab(_exileTab.transform);
+        _exileTabHidden = true;
+    }
+
+    public void ExileHovered()
+    {
+        MouseEnter(_exileTab.transform);
+    }
+
+    public void ExilePressed()
+    {
+        if (_exileTabHidden)
+            return;
+
+        Debug.Log("Exile button pressed");
+        OnExilePressed?.Invoke();
     }
     #endregion
 }

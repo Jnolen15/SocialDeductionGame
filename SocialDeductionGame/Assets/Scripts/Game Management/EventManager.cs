@@ -18,13 +18,13 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netEarnedBonusNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
 
-    private NightEventThumbnail _nightEventThumbnail;
+    private NightEventPreview _nightEventThumbnail;
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
-        _nightEventThumbnail = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponentInChildren<NightEventThumbnail>();
+        _nightEventThumbnail = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponentInChildren<NightEventPreview>();
 
         if (IsServer)
         {
