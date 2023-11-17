@@ -10,13 +10,19 @@ public class TalismanNourishmentGear : Gear
 
     private CardManager _cardManager;
 
+    public delegate void TalismanEvent();
+    public static event TalismanEvent OnGiveMeal;
+
     // ========== Talisman Functions ==========
     private void GiveFood()
     {
         Debug.Log("Talisman of Nourishment giving daily meal");
 
         if (_cardManager != null)
+        {
             _cardManager.GiveCard(_mealID);
+            OnGiveMeal?.Invoke();
+        }
         else
             Debug.LogError("Talisman of Nourishment does not have card manager refrence");
     }
@@ -25,14 +31,14 @@ public class TalismanNourishmentGear : Gear
     public override void OnEquip()
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
-        GameManager.OnStateMorning += GiveFood;
+        GameManager.OnStateNight += GiveFood;
 
         Debug.Log($"CARD {GetCardName()} EQUIPPED");
     }
 
     public override void OnUnequip()
     {
-        GameManager.OnStateMorning -= GiveFood;
+        GameManager.OnStateNight -= GiveFood;
 
         Debug.Log($"CARD {GetCardName()} UNEQUIPPED");
     }

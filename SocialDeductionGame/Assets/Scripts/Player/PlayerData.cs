@@ -16,8 +16,6 @@ public class PlayerData : NetworkBehaviour
     [SerializeField] private PlayerUI _playerUI;
 
     private LocationManager _locationManager;
-    private EventManager _nightEventManger;
-
 
     public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
@@ -45,7 +43,6 @@ public class PlayerData : NetworkBehaviour
             LocationManager.OnForceLocationChange += UpdateLocation;
             _netTeam.OnValueChanged += UpdateTeamText;
             _netCurrentMP.OnValueChanged += UpdateMovementPointUI;
-            GameManager.OnStateNight += ShowEventRecap;
             GameManager.OnStateMorning += ResetMovementPoints;
 
             gameObject.tag = "Player";
@@ -68,7 +65,6 @@ public class PlayerData : NetworkBehaviour
         LocationManager.OnForceLocationChange -= UpdateLocation;
         _netTeam.OnValueChanged -= UpdateTeamText;
         _netCurrentMP.OnValueChanged -= UpdateMovementPointUI;
-        GameManager.OnStateNight -= ShowEventRecap;
         GameManager.OnStateMorning -= ResetMovementPoints;
     }
 
@@ -84,7 +80,6 @@ public class PlayerData : NetworkBehaviour
         // TODO: NOT HAVE DIRECT REFRENCES, Use singleton or some other method ?
         GameObject gameMan = GameObject.FindGameObjectWithTag("GameManager");
         _locationManager = gameMan.GetComponent<LocationManager>();
-        _nightEventManger = gameMan.GetComponent<EventManager>();
 
         // Manually update team text because its default survivors
         // So when the game starts and a player is survivors the UI wont update
@@ -124,15 +119,6 @@ public class PlayerData : NetworkBehaviour
     private void UpdateTeamText(Team prev, Team current)
     {
         OnTeamUpdated?.Invoke(prev, current);
-    }
-
-    // Show night event choices if Saboteur, else show Recap
-    private void ShowEventRecap()
-    {
-        if (_netTeam.Value == Team.Saboteurs)
-            _nightEventManger.ShowNightEventPicker();
-        else if (_playerHealth.IsLiving())
-            _nightEventManger.ShowRecap();
     }
 
     public Team GetPlayerTeam()

@@ -19,12 +19,18 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<bool> _netEarnedBonusNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
 
     private NightEventPreview _nightEventThumbnail;
+    private PlayerData.Team _localplayerTeam;
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
         _nightEventThumbnail = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponentInChildren<NightEventPreview>();
+        _localplayerTeam = PlayerData.Team.Survivors;
+
+        PlayerData.OnTeamUpdated += AssignLocalTeam;
+        GameManager.OnStateNight += ShowRecap;
+        GameManager.OnStateNight += ShowNightEventPicker;
 
         if (IsServer)
         {
@@ -32,25 +38,36 @@ public class EventManager : NetworkBehaviour
             GameManager.OnStateMorning += SetupNewEventServerRpc;
             GameManager.OnSetup += PickRandomEvent;
             GameManager.OnStateEvening += TestEvent;
-            GameManager.OnStateNight += OpenNightEventPicker;
+            GameManager.OnStateNight += UpdateNightEventPicker;
         }
     }
 
     private void OnDisable()
     {
+        GameManager.OnStateNight -= ShowRecap;
+        GameManager.OnStateNight -= ShowNightEventPicker;
+
         if (IsServer)
         {
             GameManager.OnStateNight -= DoEventServerRpc;
             GameManager.OnStateMorning -= SetupNewEventServerRpc;
             GameManager.OnSetup -= PickRandomEvent;
             GameManager.OnStateEvening -= TestEvent;
-            GameManager.OnStateNight -= OpenNightEventPicker;
+            GameManager.OnStateNight -= UpdateNightEventPicker;
         }
     }
     #endregion
 
     // ================== UI ELEMENTS ==================
     #region UI Elements
+    private void AssignLocalTeam(PlayerData.Team prev, PlayerData.Team current)
+    {
+        Debug.Log("Event manager updating local player team " + current);
+        _localplayerTeam = current;
+
+        _nightEventRecap.Setup(prev, current);
+    }
+
     private void UpdateEventUI()
     {
         _nightEventThumbnail.SetEvent(_netCurrentNightEventID.Value, _netNumEventPlayers.Value);
@@ -66,9 +83,9 @@ public class EventManager : NetworkBehaviour
         _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, scores);
     }
 
-    public void OpenNightEventPicker()
+    public void UpdateNightEventPicker()
     {
-        Debug.Log("<color=yellow>SERVER: </color> OpenNightEventPicker");
+        Debug.Log("<color=yellow>SERVER: </color> UpdateNightEventPicker");
 
         // Pick random event in case no votes
         PickRandomEvent();
@@ -78,13 +95,18 @@ public class EventManager : NetworkBehaviour
 
     public void ShowNightEventPicker()
     {
+        if (_localplayerTeam != PlayerData.Team.Saboteurs)
+            return;
+
         _nightEventPickerMenu.ShowMenu();
     }
 
     public void ShowRecap()
     {
-        _nightEventRecap.gameObject.SetActive(true);
-        _nightEventRecap.Setup(_netPreviousNightEventID.Value, _netNumEventPlayers.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
+        _nightEventRecap.OpenRecap();
+
+        if (_localplayerTeam == PlayerData.Team.Survivors)
+            _nightEventRecap.UpdateNightEvent(_netPreviousNightEventID.Value, _netNumEventPlayers.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
     }
     #endregion
 

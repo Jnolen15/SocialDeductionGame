@@ -21,8 +21,11 @@ public class PlayerHealth : NetworkBehaviour
     public delegate void ValueModified(int ModifiedAmmount, int newTotal);
     public static event ValueModified OnHealthModified;
     public static event ValueModified OnHungerModified;
-    public delegate void Death();
-    public static event Death OnDeath;
+
+    public delegate void HealthEvent();
+    public static event HealthEvent OnDeath;
+    public static event HealthEvent OnHungerDrain;
+    public static event HealthEvent OnStarvation;
 
     // ===================== SETUP =====================
     #region Setup
@@ -33,7 +36,7 @@ public class PlayerHealth : NetworkBehaviour
 
         if (IsOwner)
         {
-            GameManager.OnStateMorning += HungerDrain;
+            GameManager.OnStateNight += HungerDrain;
             _netCurrentHP.OnValueChanged += HealthChanged;
             _netCurrentHunger.OnValueChanged += HungerChanged;
             _netIsLiving.OnValueChanged += Die;
@@ -62,7 +65,7 @@ public class PlayerHealth : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        GameManager.OnStateMorning -= HungerDrain;
+        GameManager.OnStateNight -= HungerDrain;
         _netCurrentHP.OnValueChanged -= HealthChanged;
         _netCurrentHunger.OnValueChanged -= HungerChanged;
         _netIsLiving.OnValueChanged -= Die;
@@ -190,11 +193,15 @@ public class PlayerHealth : NetworkBehaviour
     // Loose hunger each day
     private void HungerDrain()
     {
-        // loose HP if hunger is less than 1
-        if (_netCurrentHunger.Value < 1)
+        // loose HP if hunger is less than 2
+        if (_netCurrentHunger.Value < 2)
+        {
             ModifyHealth(-1);
+            OnStarvation?.Invoke();
+        }
 
-        ModifyHunger(-1);
+        ModifyHunger(-2);
+        OnHungerDrain?.Invoke();
     }
     #endregion
 
