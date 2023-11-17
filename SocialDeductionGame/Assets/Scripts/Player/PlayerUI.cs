@@ -15,7 +15,9 @@ public class PlayerUI : MonoBehaviour
     [Header("Other")]
     [SerializeField] private GameObject _locationMenu;
     [SerializeField] private GameObject _craftingMenu;
-    [SerializeField] private GameObject _introRole;
+    [SerializeField] private CanvasGroup _introRole;
+    [SerializeField] private GameObject _introRoleSaboIcon;
+    [SerializeField] private GameObject _introRoleSurvivorIcon;
     [SerializeField] private TextMeshProUGUI _movementText;
     [SerializeField] private GameObject _speakingIndicator;
     [SerializeField] private TextMeshProUGUI _speakingIndicatorText;
@@ -70,9 +72,6 @@ public class PlayerUI : MonoBehaviour
 
     public void StateChangeEvent(GameManager.GameState prev, GameManager.GameState current)
     {
-        if(_introRole != null && _introRole.activeInHierarchy)
-            _introRole.SetActive(false);
-
         // Close Menus on a state change
         _locationMenu.SetActive(false);
         _craftingMenu.SetActive(false);
@@ -80,19 +79,27 @@ public class PlayerUI : MonoBehaviour
 
     private void DisplayRole()
     {
-        _introRole.SetActive(true);
+        _introRole.gameObject.SetActive(true);
         TextMeshProUGUI roleText = _introRole.GetComponentInChildren<TextMeshProUGUI>();
 
         if (_playerData.GetPlayerTeam() == PlayerData.Team.Survivors)
         {
             roleText.text = "Survivors";
             roleText.color = Color.green;
+            _introRoleSurvivorIcon.SetActive(true);
         }
         else if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs)
         {
             roleText.text = "Saboteurs";
             roleText.color = Color.red;
+            _introRoleSaboIcon.SetActive(true);
         }
+
+        Sequence IntroRoleSequence = DOTween.Sequence();
+        IntroRoleSequence.Append(_introRole.DOFade(1, 0.5f))
+          .AppendInterval(3)
+          .Append(_introRole.DOFade(0, 0.5f))
+          .AppendCallback(() => _introRole.gameObject.SetActive(false));
     }
 
     public void ToggleCraft()
