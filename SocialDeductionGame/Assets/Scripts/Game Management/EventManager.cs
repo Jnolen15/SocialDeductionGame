@@ -57,13 +57,13 @@ public class EventManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus)
+    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus, Vector3 scores)
     {
         _nightEventThumbnail.SetEventResults(passed);
 
         // Show results
         _nightEventResults.gameObject.SetActive(true);
-        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus);
+        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, scores);
     }
 
     public void OpenNightEventPicker()
@@ -272,9 +272,13 @@ public class EventManager : NetworkBehaviour
         int secondaryReq = (int)nEvent.GetRequirements(_netNumEventPlayers.Value).y;
         int saboCards = 0;
 
-        // Loop through all cards
         int totCards = _stockpile.GetNumCards();
-        int[] cardIDS = new int[totCards]; // For pass to results screen
+
+        // For pass to results screen
+        int[] cardIDS = new int[totCards];
+        Vector3 scores = new Vector3(0, 0, 0);
+
+        // Loop through all cards
         for (int i = 0; i <= totCards; i++)
         {
             int cardID = _stockpile.GetTopCard();
@@ -294,12 +298,14 @@ public class EventManager : NetworkBehaviour
             if (card.GetComponent<Card>().HasTag(nEvent.GetPrimaryResource()))
             {
                 primaryReq--;
+                scores.x++;
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"contained tag {nEvent.GetPrimaryResource()}. Primary required remaining {primaryReq}");
             }
             else if (card.GetComponent<Card>().HasTag(nEvent.GetSecondaryResource()))
             {
                 secondaryReq--;
+                scores.y++;
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"contained tag {nEvent.GetSecondaryResource()}. secondary required remaining {secondaryReq}");
             }
@@ -325,6 +331,8 @@ public class EventManager : NetworkBehaviour
             overBonus -= saboCards;
             Debug.Log($"<color=yellow>SERVER: </color>-{saboCards} bonus now {overBonus}.");
 
+            scores.z = overBonus;
+
             // If num is still positive pass
             if (overBonus >= 0)
             {
@@ -344,7 +352,8 @@ public class EventManager : NetworkBehaviour
         }
 
         // Update all clients visually
-        UpdateEventUIClientRpc(cardIDS, _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
+        UpdateEventUIClientRpc(cardIDS, _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
+            _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, scores);
     }
     #endregion
 }
