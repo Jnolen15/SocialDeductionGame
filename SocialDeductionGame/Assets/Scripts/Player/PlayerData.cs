@@ -22,10 +22,11 @@ public class PlayerData : NetworkBehaviour
     [SerializeField] private NetworkVariable<LocationManager.LocationName> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     public enum Team
     {
+        Unassigned,
         Survivors,
         Saboteurs
     }
-    private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _defaultMP = 2;
     [SerializeField] private NetworkVariable<int> _netMaxMP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netCurrentMP = new(writePerm: NetworkVariableWritePermission.Server);
@@ -80,11 +81,6 @@ public class PlayerData : NetworkBehaviour
         // TODO: NOT HAVE DIRECT REFRENCES, Use singleton or some other method ?
         GameObject gameMan = GameObject.FindGameObjectWithTag("GameManager");
         _locationManager = gameMan.GetComponent<LocationManager>();
-
-        // Manually update team text because its default survivors
-        // So when the game starts and a player is survivors the UI wont update
-        if (!IsOwner) return;
-            UpdateTeamText(Team.Survivors, _netTeam.Value);
     }
     #endregion
 
@@ -113,6 +109,8 @@ public class PlayerData : NetworkBehaviour
     #region Teams
     public void SetTeam(Team team)
     {
+        Debug.Log($"Setting player {_netPlayerName.Value} to team {team}");
+
         _netTeam.Value = team;
     }
 

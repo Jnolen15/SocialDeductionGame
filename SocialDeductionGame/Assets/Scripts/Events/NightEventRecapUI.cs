@@ -38,12 +38,6 @@ public class NightEventRecapUI : MonoBehaviour
         TalismanGear.OnGiveCard += ShowTalisman;
     }
 
-    private void Start()
-    {
-        // By deafult
-        _recapObject = _survivorRecap;
-    }
-
     private void OnDisable()
     {
         GameManager.OnStateMorning -= CloseRecap;
@@ -88,10 +82,11 @@ public class NightEventRecapUI : MonoBehaviour
         _starvation.SetActive(false);
         _death.SetActive(false);
         
-        foreach(GameObject obj in _extraRecapObjects)
+        for(int i = _extraRecapObjects.Count-1; i >= 0; i--)
         {
-            Destroy(obj);
+            Destroy(_extraRecapObjects[i]);
         }
+        _extraRecapObjects.Clear();
 
         _recapObject.SetActive(false);
     }

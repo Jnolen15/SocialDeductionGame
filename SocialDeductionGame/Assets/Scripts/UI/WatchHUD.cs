@@ -158,14 +158,14 @@ public class WatchHUD : MonoBehaviour
         if (_flashActive == flashActive)
             return;
 
-        Debug.Log("Setting Flash " + flashActive);
+        //Debug.Log("Setting Flash " + flashActive);
         _curFlashTime = 0;
         _flashActive = flashActive;
     }
 
     private IEnumerator Flash()
     {
-        Debug.Log("Flash!");
+        //Debug.Log("Flash!");
 
         bool flashing = false;
 

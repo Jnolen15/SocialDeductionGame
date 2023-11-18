@@ -18,6 +18,8 @@ public class MenuManager : MonoBehaviour
             Destroy(LobbyManager.Instance.gameObject);
         if (PlayerConnectionManager.Instance != null)
             Destroy(PlayerConnectionManager.Instance.gameObject);
+        if (ConnectionManager.Instance != null)
+            Destroy(ConnectionManager.Instance.gameObject);
     }
 
     // ============== Functions ==============

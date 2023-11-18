@@ -81,7 +81,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [ClientRpc]
     public void UpdateCharacterModelClientRPC(int styleIndex, int materialIndex)
     {
-        Debug.Log("Updating Character");
+        //Debug.Log("Updating Character");
 
         // Set initial inactive
         _character.GetChild(0).gameObject.SetActive(false);

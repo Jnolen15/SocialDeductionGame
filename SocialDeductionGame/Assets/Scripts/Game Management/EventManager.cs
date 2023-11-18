@@ -44,6 +44,7 @@ public class EventManager : NetworkBehaviour
 
     private void OnDisable()
     {
+        PlayerData.OnTeamUpdated -= AssignLocalTeam;
         GameManager.OnStateNight -= ShowRecap;
         GameManager.OnStateNight -= ShowNightEventPicker;
 

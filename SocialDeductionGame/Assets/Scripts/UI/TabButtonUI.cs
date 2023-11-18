@@ -70,7 +70,7 @@ public class TabButtonUI : MonoBehaviour
     public void OnDisable()
     {
         GameManager.OnStateMorning -= ShowEventButton;
-        GameManager.OnStateEvening -= HideEventButton;
+        GameManager.OnStateNight -= HideEventButton;
 
         GameManager.OnStateMorning -= ShowMapButton;
         GameManager.OnStateAfternoon -= HideMapButton;
