@@ -8,7 +8,6 @@ public class ForageUI : MonoBehaviour
 {
     // ===================== Refrernces =====================
     [SerializeField] private Transform _cardZone;
-    [SerializeField] private GameObject _forageMenu;
     [SerializeField] private GameObject _forageButton;
     [SerializeField] private TextMeshProUGUI _threatLevelText;
     [SerializeField] private TextMeshProUGUI _dangerText;
@@ -33,21 +32,21 @@ public class ForageUI : MonoBehaviour
 
     // ===================== Functions =====================
     #region Functions
-    public void OpenForageMenu()
+    public void ShowCards()
     {
         _forageButton.SetActive(false);
-        _forageMenu.SetActive(true);
+        _cardZone.gameObject.SetActive(true);
     }
 
-    public void CloseForageMenu()
+    public void HideCards()
     {
         _forageButton.SetActive(true);
-        _forageMenu.SetActive(false);
+        _cardZone.gameObject.SetActive(false);
     }
 
     public void DealCardObjects(List<GameObject> cardObjs)
     {
-        OpenForageMenu();
+        ShowCards();
 
         foreach (GameObject cardObj in cardObjs)
         {
@@ -66,27 +65,30 @@ public class ForageUI : MonoBehaviour
 
     public void UpdateDangerUI(float current)
     {
-        _dangerText.text = current.ToString("F1");
+        _dangerText.text = current.ToString("F0");
 
         if (current <= 40)
         {
             _threatLevelText.text = "Low";
-            _threatLevelText.color = _lowColor;
+            //_threatLevelText.color = _lowColor;
             _dangerText.color = _lowColor;
+            _forageButton.GetComponent<Image>().color = _lowColor;
             _dangerIcon.sprite = _dangerIconStages[0];
         }
         else if (40 < current && current <= 80)
         {
             _threatLevelText.text = "Medium";
-            _threatLevelText.color = _medColor;
+            //_threatLevelText.color = _medColor;
             _dangerText.color = _medColor;
+            _forageButton.GetComponent<Image>().color = _medColor;
             _dangerIcon.sprite = _dangerIconStages[1];
         }
         else if (80 < current)
         {
             _threatLevelText.text = "High";
-            _threatLevelText.color = _highColor;
+            //_threatLevelText.color = _highColor;
             _dangerText.color = _highColor;
+            _forageButton.GetComponent<Image>().color = _highColor;
             _dangerIcon.sprite = _dangerIconStages[2];
         }
     }

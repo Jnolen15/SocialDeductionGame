@@ -231,7 +231,7 @@ public class Forage : NetworkBehaviour
         _cardManager.GiveCard(card.GetCardID());
 
         _forageUI.ClearCards();
-        _forageUI.CloseForageMenu();
+        _forageUI.HideCards();
     }
 
     public void Setup()
@@ -243,7 +243,7 @@ public class Forage : NetworkBehaviour
     public void Shutdown()
     {
         _forageUI.ClearCards();
-        _forageUI.CloseForageMenu();
+        _forageUI.HideCards();
         _forageCanvas.SetActive(false);
     }
     #endregion
