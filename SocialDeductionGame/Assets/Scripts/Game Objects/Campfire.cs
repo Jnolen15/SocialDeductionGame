@@ -39,7 +39,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
 
     public override void OnNetworkSpawn()
     {
-        _servingsText.text = "Food In Fire: " + _netServingsStored.Value;
+        _servingsText.text = _netServingsStored.Value.ToString();
     }
 
     private void Start()
@@ -69,7 +69,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     // ================== Text ==================
     private void UpdateServingsText(float prev, float next)
     {
-        _servingsText.text = "Servings: " + next;
+        _servingsText.text = next.ToString();
     }
 
     // ================== Interface ==================
