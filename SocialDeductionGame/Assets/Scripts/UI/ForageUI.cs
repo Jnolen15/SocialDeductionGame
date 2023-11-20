@@ -9,6 +9,7 @@ public class ForageUI : MonoBehaviour
     // ===================== Refrernces =====================
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _forageButton;
+    [SerializeField] private GameObject _totemWarning;
     [SerializeField] private TextMeshProUGUI _threatLevelText;
     [SerializeField] private TextMeshProUGUI _dangerText;
     [SerializeField] private Image _dangerIcon;
@@ -63,7 +64,7 @@ public class ForageUI : MonoBehaviour
         }
     }
 
-    public void UpdateDangerUI(float current)
+    public void UpdateDangerUI(float current, bool totemActive)
     {
         _dangerText.text = current.ToString("F0");
 
@@ -91,6 +92,14 @@ public class ForageUI : MonoBehaviour
             _forageButton.GetComponent<Image>().color = _highColor;
             _dangerIcon.sprite = _dangerIconStages[2];
         }
+    }
+
+    public void UpdateTotemWarning(bool totemActive)
+    {
+        if (totemActive)
+            _totemWarning.SetActive(true);
+        else
+            _totemWarning.SetActive(false);
     }
     #endregion
 }
