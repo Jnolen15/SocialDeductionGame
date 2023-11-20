@@ -298,7 +298,9 @@ public class EventManager : NetworkBehaviour
         int totCards = _stockpile.GetNumCards();
 
         // For pass to results screen
-        int[] cardIDS = new int[totCards];
+        List<int> primaryCards = new();
+        List<int> secondaryCards = new();
+        List<int> otherCards = new();
         Vector3 scores = new Vector3(0, 0, 0);
 
         // Loop through all cards
@@ -313,7 +315,6 @@ public class EventManager : NetworkBehaviour
                 break;
             }
 
-            cardIDS[i] = cardID;
             GameObject card = CardDatabase.Instance.GetCard(cardID);
 
             // Check if card meets secondary or primary tag
@@ -322,6 +323,7 @@ public class EventManager : NetworkBehaviour
             {
                 primaryReq--;
                 scores.x++;
+                primaryCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"contained tag {nEvent.GetPrimaryResource()}. Primary required remaining {primaryReq}");
             }
@@ -329,6 +331,7 @@ public class EventManager : NetworkBehaviour
             {
                 secondaryReq--;
                 scores.y++;
+                secondaryCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"contained tag {nEvent.GetSecondaryResource()}. secondary required remaining {secondaryReq}");
             }
@@ -336,6 +339,7 @@ public class EventManager : NetworkBehaviour
             else
             {
                 saboCards++;
+                otherCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"did not match either resources. Sabo cards now {saboCards}");
             }
@@ -374,8 +378,14 @@ public class EventManager : NetworkBehaviour
                 Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
         }
 
+        // Combine lists for clients
+        List<int> cardIDList = new();
+        cardIDList.AddRange(primaryCards);
+        cardIDList.AddRange(secondaryCards);
+        cardIDList.AddRange(otherCards);
+
         // Update all clients visually
-        UpdateEventUIClientRpc(cardIDS, _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
+        UpdateEventUIClientRpc(cardIDList.ToArray(), _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
             _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, scores);
     }
     #endregion
