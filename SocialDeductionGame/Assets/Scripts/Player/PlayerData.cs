@@ -33,6 +33,11 @@ public class PlayerData : NetworkBehaviour
 
     public delegate void UpdateTeamAction(Team prev, Team current);
     public static event UpdateTeamAction OnTeamUpdated;
+
+    public delegate void MovePointsValueModified(int ModifiedAmmount, int newTotal);
+    public static event MovePointsValueModified OnMovePointsModified;
+    public static event MovePointsValueModified OnMaxMovePointsModified;
+    public static event MovePointsValueModified OnNoMoreMovePoints;
     #endregion
 
     // ================== Setup ==================
@@ -43,7 +48,8 @@ public class PlayerData : NetworkBehaviour
         {
             LocationManager.OnForceLocationChange += UpdateLocation;
             _netTeam.OnValueChanged += UpdateTeamText;
-            _netCurrentMP.OnValueChanged += UpdateMovementPointUI;
+            _netCurrentMP.OnValueChanged += MovePointsModified;
+            _netMaxMP.OnValueChanged += MaxMovePointsModified;
             GameManager.OnStateMorning += ResetMovementPoints;
 
             gameObject.tag = "Player";
@@ -65,7 +71,8 @@ public class PlayerData : NetworkBehaviour
 
         LocationManager.OnForceLocationChange -= UpdateLocation;
         _netTeam.OnValueChanged -= UpdateTeamText;
-        _netCurrentMP.OnValueChanged -= UpdateMovementPointUI;
+        _netCurrentMP.OnValueChanged -= MovePointsModified;
+        _netMaxMP.OnValueChanged += MaxMovePointsModified;
         GameManager.OnStateMorning -= ResetMovementPoints;
     }
 
@@ -140,9 +147,7 @@ public class PlayerData : NetworkBehaviour
     // ================ Location / Movement ================
     #region Location
     // Called when the player chooses a location on their map
-    // Or when location change is forced by game manager / location manager
-    // Called by button
-    public void ChangeLocation(string locationName)
+    public void MoveLocation(string locationName)
     {
         // Dont move if already at the same location
         if (_netCurrentLocation.Value.ToString() == locationName)
@@ -156,6 +161,7 @@ public class PlayerData : NetworkBehaviour
             else
             {
                 Debug.Log("<color=blue>CLIENT: </color>Cannot move, no points!");
+                OnNoMoreMovePoints?.Invoke(0, 0);
                 return;
             }
         }
@@ -221,9 +227,15 @@ public class PlayerData : NetworkBehaviour
         return _netCurrentMP.Value;
     }
 
-    private void UpdateMovementPointUI(int prev, int cur)
+    private void MovePointsModified(int prev, int cur)
     {
-        _playerUI.UpdateMovement(prev, cur);
+        int modifiedAmmount = cur - prev;
+        OnMovePointsModified?.Invoke(modifiedAmmount, cur);
+    }
+
+    private void MaxMovePointsModified(int prev, int cur)
+    {
+        OnMaxMovePointsModified?.Invoke(prev, cur);
     }
 
     [ServerRpc(RequireOwnership = false)]

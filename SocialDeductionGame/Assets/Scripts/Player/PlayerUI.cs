@@ -13,12 +13,11 @@ public class PlayerUI : MonoBehaviour
     private PlayerHealth _playerHealth;
 
     [Header("Other")]
-    [SerializeField] private GameObject _locationMenu;
     [SerializeField] private GameObject _craftingMenu;
     [SerializeField] private CanvasGroup _introRole;
     [SerializeField] private GameObject _introRoleSaboIcon;
     [SerializeField] private GameObject _introRoleSurvivorIcon;
-    [SerializeField] private TextMeshProUGUI _movementText;
+    //[SerializeField] private TextMeshProUGUI _movementText;
     [SerializeField] private GameObject _speakingIndicator;
     [SerializeField] private TextMeshProUGUI _speakingIndicatorText;
     [SerializeField] private GameObject _mutedIndicator;
@@ -36,7 +35,6 @@ public class PlayerUI : MonoBehaviour
         VivoxClient.OnBeginSpeaking += SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking += SpeakingIndicatorOff;
 
-        TabButtonUI.OnMapPressed += ToggleMap;
         TabButtonUI.OnCraftingPressed += ToggleCraft;
     }
 
@@ -44,7 +42,6 @@ public class PlayerUI : MonoBehaviour
     {
         // These menus have to start active so setup scripts propperly run on them
         _craftingMenu.SetActive(false);
-        _locationMenu.SetActive(false);
     }
 
     private void OnDisable()
@@ -54,7 +51,6 @@ public class PlayerUI : MonoBehaviour
         VivoxClient.OnBeginSpeaking -= SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking -= SpeakingIndicatorOff;
 
-        TabButtonUI.OnMapPressed -= ToggleMap;
         TabButtonUI.OnCraftingPressed -= ToggleCraft;
     }
     #endregion
@@ -66,14 +62,12 @@ public class PlayerUI : MonoBehaviour
         //MutedIndicatorOn();
 
         // Close Menus if player died
-        _locationMenu.SetActive(false);
         _craftingMenu.SetActive(false);
     }
 
     public void StateChangeEvent(GameManager.GameState prev, GameManager.GameState current)
     {
         // Close Menus on a state change
-        _locationMenu.SetActive(false);
         _craftingMenu.SetActive(false);
     }
 
@@ -108,19 +102,6 @@ public class PlayerUI : MonoBehaviour
             return;
 
         _craftingMenu.SetActive(!_craftingMenu.activeSelf);
-    }
-
-    public void ToggleMap()
-    {
-        if (GameManager.Instance.GetCurrentGameState() != GameManager.GameState.Morning)
-            return;
-
-        _locationMenu.SetActive(!_locationMenu.activeSelf);
-    }
-
-    public void UpdateMovement(int prev, int current)
-    {
-        _movementText.text = "Movement: " + current;
     }
 
     public void SpeakingIndicatorOn(VivoxManager.ChannelSeshName channel)
