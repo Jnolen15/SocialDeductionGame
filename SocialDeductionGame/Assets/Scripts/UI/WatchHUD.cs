@@ -474,7 +474,7 @@ public class WatchHUD : MonoBehaviour
     {
         _watchColors = colors;
 
-        ColorSetter[] coloredObjs = this.GetComponentsInChildren<ColorSetter>();
+        ColorSetter[] coloredObjs = this.GetComponentsInChildren<ColorSetter>(true);
 
         foreach(ColorSetter cs in coloredObjs)
         {

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 
 public class MapMenuUI : MonoBehaviour
 {
@@ -219,12 +220,21 @@ public class MapMenuUI : MonoBehaviour
     {
         _gpsColors = colors;
 
-        ColorSetter[] coloredObjs = this.GetComponentsInChildren<ColorSetter>();
+        ColorSetter[] coloredObjs = this.GetComponentsInChildren<ColorSetter>(true);
 
         foreach (ColorSetter cs in coloredObjs)
         {
             cs.SetColor(colors);
         }
+    }
+
+    [Button("TestSetColors")]
+    private void TestSetColors(WatchColors colors)
+    {
+        if (!colors)
+            return;
+
+        SetColorPallet(colors);
     }
     #endregion
 }
