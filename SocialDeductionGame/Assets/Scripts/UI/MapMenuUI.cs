@@ -10,7 +10,10 @@ public class MapMenuUI : MonoBehaviour
 {
     // ================== Refrences ==================
     #region Refrences
+    [Header("Colors")]
     [SerializeField] private WatchColors _gpsColors;
+    [SerializeField] private List<WatchColors> _gpsColorList;
+    [Header("UI Refrences")]
     [SerializeField] private GameObject _book;
     [SerializeField] private GameObject _gps;
     [SerializeField] private Transform _map;
@@ -54,8 +57,14 @@ public class MapMenuUI : MonoBehaviour
         PlayerData.OnNoMoreMovePoints += ShowNoMPWarning;
     }
 
-    private void Start()
+    private void Awake()
     {
+        int colorIndex = PlayerPrefs.GetInt("WatchColor");
+        if (colorIndex < _gpsColorList.Count)
+            SetColorPallet(_gpsColorList[colorIndex]);
+        else
+            Debug.LogWarning("Watch color index out of bounds " + colorIndex + " of " + _gpsColorList.Count);
+
         MoveSpecific(0);
         Hide();
     }
@@ -218,6 +227,8 @@ public class MapMenuUI : MonoBehaviour
     #region Colors
     public void SetColorPallet(WatchColors colors)
     {
+        Debug.Log("Setting GPS color");
+
         _gpsColors = colors;
 
         ColorSetter[] coloredObjs = this.GetComponentsInChildren<ColorSetter>(true);

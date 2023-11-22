@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using TMPro;
 
 public class CharacterSelectManager : NetworkBehaviour
 {
@@ -9,10 +10,14 @@ public class CharacterSelectManager : NetworkBehaviour
     [SerializeField] private Transform _characterModel;
     private Transform _currentSelectedModel;
     [SerializeField] private List<Material> _characterMatList = new();
+    [SerializeField] private GameObject _watchVisual;
+    [SerializeField] private TextMeshProUGUI _watchColorName = new();
+    [SerializeField] private List<WatchColors> _watchColorList = new();
 
     // ================== Variables ==================
     private int _characterMatIndex;
     private int _characterStyleIndex;
+    private int _watchColorIndex;
 
     // ============== Setup ==============
     #region Setup
@@ -25,6 +30,9 @@ public class CharacterSelectManager : NetworkBehaviour
     private void Start()
     {
         _currentSelectedModel = _characterModel.GetChild(0);
+
+        _watchColorIndex = PlayerPrefs.GetInt("WatchColor");
+            UpdateWatchVisual(_watchColorIndex);
     }
 
     public override void OnNetworkDespawn()
@@ -137,6 +145,39 @@ public class CharacterSelectManager : NetworkBehaviour
 
         // Update data
         SetPlayerVisuals(_characterStyleIndex, _characterMatIndex);
+    }
+
+    public void ChangeWatchColor(bool next)
+    {
+        // Next color
+        if (next)
+            _watchColorIndex++;
+        // Previous color
+        else
+            _watchColorIndex--;
+
+        // Clamp values
+        if (_watchColorIndex < 0)
+            _watchColorIndex = _watchColorList.Count - 1;
+        else if (_watchColorIndex >= _watchColorList.Count)
+            _watchColorIndex = 0;
+
+        // Update player prefs
+        PlayerPrefs.SetInt("WatchColor", _watchColorIndex);
+
+        UpdateWatchVisual(_watchColorIndex);
+    }
+
+    private void UpdateWatchVisual(int index)
+    {
+        // Update watch visual
+        _watchColorName.text = _watchColorList[index].GetPaletteName();
+        ColorSetter[] coloredObjs = _watchVisual.GetComponentsInChildren<ColorSetter>(true);
+
+        foreach (ColorSetter cs in coloredObjs)
+        {
+            cs.SetColor(_watchColorList[index]);
+        }
     }
     #endregion
 }

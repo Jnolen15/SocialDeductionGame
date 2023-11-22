@@ -16,6 +16,7 @@ public class WatchHUD : MonoBehaviour
 
     [Header("Colors")]
     [SerializeField] private WatchColors _watchColors;
+    [SerializeField] private List<WatchColors> _watchColorList;
     [Header("UI Params")]
     [SerializeField] private float _flashDuration;
     [SerializeField] private float _flashPause;
@@ -92,6 +93,15 @@ public class WatchHUD : MonoBehaviour
         GameManager.OnStateChange += EnableReadyButton;
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
+    }
+
+    private void Awake()
+    {
+        int colorIndex = PlayerPrefs.GetInt("WatchColor");
+        if (colorIndex < _watchColorList.Count)
+            SetColorPallet(_watchColorList[colorIndex]);
+        else
+            Debug.LogWarning("Watch color index out of bounds " + colorIndex + " of " + _watchColorList.Count);
     }
 
     private void OnDisable()
@@ -472,6 +482,8 @@ public class WatchHUD : MonoBehaviour
     #region Colors
     public void SetColorPallet(WatchColors colors)
     {
+        Debug.Log("Setting GPS color");
+
         _watchColors = colors;
 
         ColorSetter[] coloredObjs = this.GetComponentsInChildren<ColorSetter>(true);
