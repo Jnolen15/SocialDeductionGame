@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using TMPro;
+using System.Text.RegularExpressions;
 
 public class CharacterSelectManager : NetworkBehaviour
 {
     // ============== Refrences ==============
+    [SerializeField] TMP_InputField _inputField;
     [SerializeField] private Transform _characterModel;
     private Transform _currentSelectedModel;
     [SerializeField] private List<Material> _characterMatList = new();
@@ -66,6 +68,12 @@ public class CharacterSelectManager : NetworkBehaviour
 
     // ============== Character Customization ==============
     #region Character Customization
+    public void InputValueChanged(string attemptedVal)
+    {
+        string cleanStr = Regex.Replace(attemptedVal, @"[^a-zA-Z0-9]", "");
+        _inputField.text = cleanStr;
+    }
+
     public void SetPlayerName(string newName)
     {
         Debug.Log("Name Recieved: " + newName);
