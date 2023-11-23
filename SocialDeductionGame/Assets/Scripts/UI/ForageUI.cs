@@ -17,31 +17,61 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private Color _lowColor = new Color32(233, 195, 41, 255);
     [SerializeField] private Color _medColor = new Color32(217, 116, 24, 255);
     [SerializeField] private Color _highColor = new Color32(206, 60, 24, 255);
+    [SerializeField] private GameObject _takeNoneButton;
+    private Forage _forage;
 
     // ===================== Setup =====================
     #region Setup
     private void Start()
     {
-        //Forage.OnDangerIncrement += UpdateDangerUI;
+        _forage = GetComponentInParent<Forage>();
+
+        Totem.OnTotemMenuOpened += OnTotemOpened;
+        Totem.OnTotemMenuClosed += OnTotemClosed;
     }
 
     private void OnDestroy()
     {
-        //Forage.OnDangerIncrement -= UpdateDangerUI;
+        Totem.OnTotemMenuOpened -= OnTotemOpened;
+        Totem.OnTotemMenuClosed -= OnTotemClosed;
     }
     #endregion
 
     // ===================== Functions =====================
     #region Functions
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+    private void OnTotemOpened(LocationManager.LocationName locationName)
+    {
+        if (locationName == _forage.GetForageLocation())
+            Hide();
+    }
+
+    private void OnTotemClosed(LocationManager.LocationName locationName)
+    {
+        if (locationName == _forage.GetForageLocation())
+            Show();
+    }
+
     public void ShowCards()
     {
         _forageButton.SetActive(false);
+        _takeNoneButton.SetActive(true);
         _cardZone.gameObject.SetActive(true);
     }
 
     public void HideCards()
     {
         _forageButton.SetActive(true);
+        _takeNoneButton.SetActive(false);
         _cardZone.gameObject.SetActive(false);
     }
 

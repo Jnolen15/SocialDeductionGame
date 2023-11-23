@@ -34140,9 +34140,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _introTimerMax: 5
-  _morningTimerMax: 200
-  _afternoonTimerMax: 80
-  _eveningTimerMax: 120
+  _morningTimerMax: 140
+  _afternoonTimerMax: 60
+  _eveningTimerMax: 100
   _nightTimerMax: 15
   _transitionTimerMax: 2
   _netIntroTimer:
@@ -49919,6 +49919,10 @@ PrefabInstance:
     - target: {fileID: 1809689419820600987, guid: 99f8d44fc1e699c4cb42628bbbf39022, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 1041253220
+      objectReference: {fileID: 0}
+    - target: {fileID: 5276030953496620764, guid: 99f8d44fc1e699c4cb42628bbbf39022, type: 3}
+      propertyPath: _locationName
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7789051287193838455, guid: 99f8d44fc1e699c4cb42628bbbf39022, type: 3}
       propertyPath: m_RootOrder

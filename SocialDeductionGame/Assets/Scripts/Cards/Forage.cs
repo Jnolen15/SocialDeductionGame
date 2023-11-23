@@ -23,7 +23,6 @@ public class Forage : NetworkBehaviour
     private GameObject _playerObj;
     private HandManager _playerHandMan;
     private PlayerHealth _playerHealth;
-    [SerializeField] private GameObject _forageCanvas;
     [SerializeField] private GameObject _hazardCardPref;
 
     [Header("Variables")]
@@ -238,17 +237,28 @@ public class Forage : NetworkBehaviour
         _forageUI.HideCards();
     }
 
+    public void TakeNone()
+    {
+        _forageUI.ClearCards();
+        _forageUI.HideCards();
+    }
+
     public void Setup()
     {
         Debug.Log("Forage Setup");
-        _forageCanvas.SetActive(true);
+        _forageUI.Show();
     }
 
     public void Shutdown()
     {
         _forageUI.ClearCards();
         _forageUI.HideCards();
-        _forageCanvas.SetActive(false);
+        _forageUI.Hide();
+    }
+
+    public LocationManager.LocationName GetForageLocation()
+    {
+        return _locationName;
     }
     #endregion
 

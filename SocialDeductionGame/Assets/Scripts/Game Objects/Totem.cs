@@ -19,12 +19,15 @@ public class Totem : NetworkBehaviour, ICardPlayable
     public delegate void TotemAction(LocationManager.LocationName locationName);
     public static event TotemAction OnLocationTotemEnable;
     public static event TotemAction OnLocationTotemDisable;
+    public static event TotemAction OnTotemMenuOpened;
+    public static event TotemAction OnTotemMenuClosed;
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
         GameManager.OnStateIntro += InitialVisibiltyToggle;
+        GameManager.OnStateAfternoon += CloseUIOnStateChange;
         _netIsActive.OnValueChanged += ToggleVisibility;
         
         if(IsServer)
@@ -44,6 +47,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
     public override void OnDestroy()
     {
         GameManager.OnStateIntro -= InitialVisibiltyToggle;
+        GameManager.OnStateAfternoon -= CloseUIOnStateChange;
         _netIsActive.OnValueChanged -= ToggleVisibility;
 
         if (IsServer)
@@ -51,6 +55,26 @@ public class Totem : NetworkBehaviour, ICardPlayable
 
         // Invoke the base when using networkobject
         base.OnDestroy();
+    }
+    #endregion
+
+    // ================== UI ==================
+    #region UI
+    public void Show()
+    {
+        _totemPannel.SetActive(true);
+        OnTotemMenuOpened?.Invoke(_locationName);
+    }
+
+    public void Hide()
+    {
+        _totemPannel.SetActive(false);
+        OnTotemMenuClosed?.Invoke(_locationName);
+    }
+
+    public void CloseUIOnStateChange()
+    {
+        _totemPannel.SetActive(false);
     }
     #endregion
 
