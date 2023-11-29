@@ -311,7 +311,7 @@ public class TabButtonUI : MonoBehaviour
         if (_helpTabHidden)
             return;
 
-        Debug.Log("Map button pressed");
+        Debug.Log("Help button pressed");
         OnHelpPressed?.Invoke();
     }
     #endregion
