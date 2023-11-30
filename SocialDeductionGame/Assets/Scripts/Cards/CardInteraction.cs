@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 public class CardInteraction : MonoBehaviour,
     IPointerEnterHandler,
-    //IPointerExitHandler,
+    IPointerExitHandler,
     IDragHandler,
     IBeginDragHandler,
     IEndDragHandler
@@ -18,6 +18,10 @@ public class CardInteraction : MonoBehaviour,
     private GameObject _indicator;
     private bool _dragging;
 
+    public delegate void CardHighlightAction(Card cardHighlighted);
+    public static event CardHighlightAction OnCardHighlighted;
+    public static event CardHighlightAction OnCardUnhighlighted;
+
     // =============== Setup ===============
     void Start()
     {
@@ -29,7 +33,12 @@ public class CardInteraction : MonoBehaviour,
     // =============== Interaction ===============
     public void OnPointerEnter(PointerEventData eventData)
     {
-        //Debug.Log($"Mouse entered card {_card.GetCardName()}");
+        OnCardHighlighted?.Invoke(_card);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        OnCardUnhighlighted?.Invoke(_card);
     }
 
     // =============== Drag ===============
