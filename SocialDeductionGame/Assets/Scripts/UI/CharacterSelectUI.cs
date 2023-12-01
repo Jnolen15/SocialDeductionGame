@@ -19,6 +19,7 @@ public class CharacterSelectUI : MonoBehaviour
     // ============== Setup ==============
     private void Awake()
     {
+        PlayerConnectionManager.OnPlayerConnect += UpdatePlayerCount;
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
         PlayerConnectionManager.OnAllPlayersReadyAlertClients += ShowLoad;
@@ -31,6 +32,7 @@ public class CharacterSelectUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        PlayerConnectionManager.OnPlayerConnect -= UpdatePlayerCount;
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
         PlayerConnectionManager.OnAllPlayersReadyAlertClients -= ShowLoad;
@@ -63,6 +65,13 @@ public class CharacterSelectUI : MonoBehaviour
     {
         _readyButtonSprite.color = Color.red;
         _localPlayerReady = false;
+    }
+
+    private void UpdatePlayerCount(ulong id)
+    {
+        Debug.Log("PLAYER CONNECTED UPDATING COUNT");
+        int numPlayers = PlayerConnectionManager.Instance.GetNumConnectedPlayers();
+        _joinedPlayers.text = "Connected Players: " + numPlayers;
     }
 
     private void SetupLobbyInfoPannel()

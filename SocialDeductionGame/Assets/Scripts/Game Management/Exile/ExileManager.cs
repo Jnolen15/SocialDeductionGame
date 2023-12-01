@@ -18,6 +18,7 @@ public class ExileManager : NetworkBehaviour
     [Header("Phase 1: Exile Vote")]
     private NetworkVariable<bool> _netExileVoteActive = new();
     private List<ExileVoteEntry> _voteList = new();
+    private bool _exileVoteStarted;
 
     [SerializeField] private float _exileVoteTimerMax;
     [SerializeField] private NetworkVariable<float> _netExileVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
@@ -30,6 +31,9 @@ public class ExileManager : NetworkBehaviour
 
     [SerializeField] private float _trialVoteTimerMax;
     [SerializeField] private NetworkVariable<float> _netTrialVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
+
+    public delegate void VoteEvent();
+    public static event VoteEvent OnExileVoteComplete;
     #endregion
 
     #region ExileVoteEntry
@@ -144,6 +148,7 @@ public class ExileManager : NetworkBehaviour
 
         _netExileVoteActive.Value = false;
         _netTrialActive.Value = false;
+        _exileVoteStarted = false;
     }
     #endregion
 
@@ -207,6 +212,12 @@ public class ExileManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void StartExileServerRpc(ServerRpcParams serverRpcParams = default)
     {
+        if (_exileVoteStarted)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> Exile vote already complete");
+            return;
+        }
+
         Debug.Log("<color=yellow>SERVER: </color> Starting Exile Vote");
 
         // Clear old stuff
@@ -220,6 +231,7 @@ public class ExileManager : NetworkBehaviour
             _playerVotedDictionary[playerID] = false;
         }
 
+        _exileVoteStarted = true;
         _netExileVoteActive.Value = true;
         _netExileVoteTimer.Value = _exileVoteTimerMax;
 
@@ -340,6 +352,8 @@ public class ExileManager : NetworkBehaviour
     public void ShowResultsClientRpc(int[] results)
     {
         _exileUI.ShowResults(results);
+
+        OnExileVoteComplete?.Invoke();
     }
     #endregion
 
@@ -370,6 +384,13 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     private void SetupPhaseTwoClientRpc(ulong playerID)
     {
+        // Dont let dead players vote
+        if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
+        {
+            Debug.Log("<color=blue>CLIENT: </color>Player is dead, and cannot vote");
+            return;
+        }
+
         _trialUI.Setup(playerID);
     }
 

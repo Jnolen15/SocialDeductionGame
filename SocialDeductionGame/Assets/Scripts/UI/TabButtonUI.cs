@@ -56,6 +56,7 @@ public class TabButtonUI : MonoBehaviour
 
         GameManager.OnStateEvening += ShowExileButton;
         GameManager.OnStateNight += HideExileButton;
+        ExileManager.OnExileVoteComplete += HideExileButton;
     }
 
     private void Start()
@@ -83,6 +84,7 @@ public class TabButtonUI : MonoBehaviour
 
         GameManager.OnStateEvening -= ShowExileButton;
         GameManager.OnStateNight -= HideExileButton;
+        ExileManager.OnExileVoteComplete -= HideExileButton;
     }
     #endregion
 
