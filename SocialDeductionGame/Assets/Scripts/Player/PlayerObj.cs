@@ -20,6 +20,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private List<Material> _characterMatList = new();
     [SerializeField] private Material _ghostMat;
     private GameObject _model;
+    [SerializeField] private CardHighlight _cardHighlight;
 
     // ================== Variables ==================
     [SerializeField] private List<CardTag> _cardTagsAccepted = new();
@@ -42,6 +43,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
             VivoxClient.OnBeginSpeaking += ToggleSpeakingIconActive;
             VivoxClient.OnEndSpeaking += ToggleSpeakingIconOff;
         }
+        else
+            Destroy(_cardHighlight); // A temp solution
     }
 
     private void OnEnable()
