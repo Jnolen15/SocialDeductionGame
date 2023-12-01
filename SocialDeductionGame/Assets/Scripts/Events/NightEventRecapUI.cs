@@ -36,6 +36,7 @@ public class NightEventRecapUI : MonoBehaviour
         PlayerHealth.OnStarvation += ShowStarvation;
         PlayerHealth.OnDeath += ShowDeath;
         TalismanGear.OnGiveCard += ShowTalisman;
+        Totem.OnLocationTotemEnable += ShowTotem;
     }
 
     private void OnDisable()
@@ -45,6 +46,7 @@ public class NightEventRecapUI : MonoBehaviour
         PlayerHealth.OnStarvation -= ShowStarvation;
         PlayerHealth.OnDeath -= ShowDeath;
         TalismanGear.OnGiveCard -= ShowTalisman;
+        Totem.OnLocationTotemEnable -= ShowTotem;
     }
 
     public void Setup(PlayerData.Team prev, PlayerData.Team current)
@@ -142,6 +144,21 @@ public class NightEventRecapUI : MonoBehaviour
 
         GameObject recapMessage = Instantiate(_genericRecapMessage, _survivorRecapZone);
         recapMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
+        recapMessage.GetComponentInChildren<TextMeshProUGUI>().color = Color.green;
+
+        _extraRecapObjects.Add(recapMessage);
+
+        if (_localTeam == PlayerData.Team.Saboteurs)
+            recapMessage.transform.SetParent(_saboRecapZone);
+    }
+    
+    private void ShowTotem(LocationManager.LocationName location)
+    {
+        string message = "A Saboteur activated the totem at the " + location.ToString();
+
+        GameObject recapMessage = Instantiate(_genericRecapMessage, _survivorRecapZone);
+        recapMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
+        recapMessage.GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
 
         _extraRecapObjects.Add(recapMessage);
 
