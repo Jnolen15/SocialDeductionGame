@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class ForageUI : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private Color _medColor = new Color32(217, 116, 24, 255);
     [SerializeField] private Color _highColor = new Color32(206, 60, 24, 255);
     [SerializeField] private GameObject _takeNoneButton;
+    [SerializeField] private CanvasGroup _clawMarks;
     private Forage _forage;
 
     // ===================== Setup =====================
@@ -130,6 +132,31 @@ public class ForageUI : MonoBehaviour
             _totemWarning.SetActive(true);
         else
             _totemWarning.SetActive(false);
+    }
+
+    public void PunchCard(GameObject card)
+    {
+        card.transform.DOKill();
+        card.transform.DOPunchScale(new Vector3(0.3f, 0.3f, 0.3f), 0.5f, 6, 0.8f);
+    }
+
+    public void ShowClawMarks()
+    {
+        _clawMarks.gameObject.SetActive(true);
+
+        Sequence ClawSequence = DOTween.Sequence();
+        ClawSequence.Append(_clawMarks.transform.DOScale(new Vector3(1f, 1f, 1f), 0.1f))
+          .AppendInterval(1)
+          .Append(_clawMarks.DOFade(0, 2f).OnComplete(() => CloseClaw()));
+    }
+
+    public void CloseClaw()
+    {
+        _clawMarks.transform.DOKill();
+        _clawMarks.DOKill();
+        _clawMarks.alpha = 1;
+        _clawMarks.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+        _clawMarks.gameObject.SetActive(false);
     }
     #endregion
 }

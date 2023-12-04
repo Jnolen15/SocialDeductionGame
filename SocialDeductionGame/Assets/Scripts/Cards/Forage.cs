@@ -137,6 +137,12 @@ public class Forage : NetworkBehaviour
 
         _forageUI.DealCardObjects(cardObjList);
 
+        if (hazardCard)
+        {
+            _forageUI.ShowClawMarks();
+            _forageUI.PunchCard(hazardCard);
+        }
+
         // Increase danger with each forage action
         IncrementDanger(1);
     }
