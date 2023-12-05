@@ -13,7 +13,8 @@ public class ExileManager : NetworkBehaviour
     [SerializeField] private TrialVoteUI _trialUI;
 
     private NetworkVariable<int> _netPlayersVoted = new();
-    private Dictionary<ulong, bool> _playerVotedDictionary = new();
+    private Dictionary<ulong, bool> _playerExileVoteDictionary = new();
+    private Dictionary<ulong, string> _playerTrialVoteDictionary = new();
 
     [Header("Phase 1: Exile Vote")]
     private NetworkVariable<bool> _netExileVoteActive = new();
@@ -226,9 +227,9 @@ public class ExileManager : NetworkBehaviour
         {
             v.NumVotes = 0;
         }
-        foreach (ulong playerID in _playerVotedDictionary.Keys.ToList())
+        foreach (ulong playerID in _playerExileVoteDictionary.Keys.ToList())
         {
-            _playerVotedDictionary[playerID] = false;
+            _playerExileVoteDictionary[playerID] = false;
         }
 
         _exileVoteStarted = true;
@@ -261,7 +262,7 @@ public class ExileManager : NetworkBehaviour
     public void SubmitPlayerVoteServerRpc(ulong playerID, ulong VotedID)
     {
         // Check if player hasn't already voted
-        if (_playerVotedDictionary.ContainsKey(playerID) && _playerVotedDictionary[playerID] == true)
+        if (_playerExileVoteDictionary.ContainsKey(playerID) && _playerExileVoteDictionary[playerID] == true)
         {
             Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " already voted!");
             return;
@@ -282,7 +283,7 @@ public class ExileManager : NetworkBehaviour
         voteEntry.NumVotes++;
 
         // Track player voted
-        _playerVotedDictionary[playerID] = true;
+        _playerExileVoteDictionary[playerID] = true;
 
         Debug.Log("<color=yellow>SERVER: </color>" + playerID + "voted for " + VotedID);
 
@@ -367,10 +368,9 @@ public class ExileManager : NetworkBehaviour
         // Clear old stuff
         _netExileVotes.Value = 0;
         _netSpareVotes.Value = 0;
-        _netPlayersVoted.Value = 0;
-        foreach (ulong pID in _playerVotedDictionary.Keys.ToList())
+        foreach (ulong pID in _playerTrialVoteDictionary.Keys.ToList())
         {
-            _playerVotedDictionary[pID] = false;
+            _playerTrialVoteDictionary[pID] = "none";
         }
 
         // Start
@@ -407,13 +407,6 @@ public class ExileManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void SubmitTrialVoteServerRpc(ulong playerID, bool vote)
     {
-        // Check if player hasn't already voted
-        if (_playerVotedDictionary.ContainsKey(playerID) && _playerVotedDictionary[playerID] == true)
-        {
-            Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " already voted!");
-            return;
-        }
-
         // Make sure player voting isn't player on trial
         if (playerID == _netOnTrialPlayerID.Value)
         {
@@ -421,28 +414,39 @@ public class ExileManager : NetworkBehaviour
             return;
         }
 
+        // If player already voted, remove previous vote if new one is different
+        if (_playerTrialVoteDictionary.ContainsKey(playerID))
+        {
+            if (_playerTrialVoteDictionary[playerID] == "exile" && !vote) // Previously voted exile but now vote spare
+            {
+                _netExileVotes.Value--;
+                Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " already voted exile, removing that vote");
+            }
+            else if (_playerTrialVoteDictionary[playerID] == "exile" && vote) // Prev is exile and new is exile
+                return;
+            else if (_playerTrialVoteDictionary[playerID] == "spare" && vote) // Previously voted spare but now vote exile
+            {
+                _netSpareVotes.Value--;
+                Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " already voted spare, removing that vote");
+            }
+            else if (_playerTrialVoteDictionary[playerID] == "spare" && !vote) // Prev is spare and new is spare
+                return;
+        }
+
         if (vote)
         {
             _netExileVotes.Value++;
+            _playerTrialVoteDictionary[playerID] = "exile";
             Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " voted exile");
         }
         else
         {
             _netSpareVotes.Value++;
+            _playerTrialVoteDictionary[playerID] = "spare";
             Debug.Log("<color=yellow>SERVER: </color> Player " + playerID + " voted spare");
         }
 
         UpdateTrialResultsClientRpc(_netExileVotes.Value, _netSpareVotes.Value);
-
-        // Track player voted
-        _netPlayersVoted.Value++;
-        _playerVotedDictionary[playerID] = true;
-
-        // Test if all players have voted, Its num living -1 for the 1 person on trial
-        if (_netPlayersVoted.Value >= (PlayerConnectionManager.Instance.GetNumLivingPlayers() - 1))
-        {
-            RunTiralVoteCompleteion();
-        }
     }
 
     private void RunTiralVoteCompleteion()
