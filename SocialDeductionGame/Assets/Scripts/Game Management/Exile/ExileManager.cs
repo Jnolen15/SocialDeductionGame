@@ -11,6 +11,7 @@ public class ExileManager : NetworkBehaviour
     #region Refrences and Variables
     [SerializeField] private ExileVoteUI _exileUI;
     [SerializeField] private TrialVoteUI _trialUI;
+    private GameManager _gameManager;
 
     private NetworkVariable<int> _netPlayersVoted = new();
     private Dictionary<ulong, bool> _playerExileVoteDictionary = new();
@@ -74,6 +75,11 @@ public class ExileManager : NetworkBehaviour
             GameManager.OnStateIntro += InitializeExileVotes;
             GameManager.OnStateNight += StopVoting;
         }
+    }
+
+    private void Start()
+    {
+        _gameManager = this.GetComponent<GameManager>();
     }
 
     public override void OnNetworkDespawn()
@@ -372,6 +378,12 @@ public class ExileManager : NetworkBehaviour
         {
             _playerTrialVoteDictionary[pID] = "none";
         }
+
+        // Add time
+        if (_gameManager != null)
+            _gameManager.PauseCurrentTimer(_trialVoteTimerMax);
+        else
+            Debug.LogWarning("Exile Manager does not have Game Manager Refrence!");
 
         // Start
         _netOnTrialPlayerID.Value = playerID;

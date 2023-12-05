@@ -35,6 +35,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netTransitionTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    private float _pauseTimer;
     [Header("Win Settings")]
     [SerializeField] private int _numDaysTillRescue;
 
@@ -173,11 +174,20 @@ public class GameManager : NetworkBehaviour
 
     private void RunTimer(NetworkVariable<float> timer)
     {
-        timer.Value -= (Time.deltaTime * CalculateTimerMod());
-        if (timer.Value <= 0)
+        // Pause Timer
+        if(_pauseTimer >= 0)
         {
-            Debug.Log($"<color=yellow>SERVER: </color> {timer} Timer up, Progressing");
-            ProgressState();
+            _pauseTimer -= Time.deltaTime;
+        }
+        // Normal state timer
+        else
+        {
+            timer.Value -= (Time.deltaTime * CalculateTimerMod());
+            if (timer.Value <= 0)
+            {
+                Debug.Log($"<color=yellow>SERVER: </color> {timer} Timer up, Progressing");
+                ProgressState();
+            }
         }
     }
 
@@ -186,6 +196,15 @@ public class GameManager : NetworkBehaviour
     {
         float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.GetNumLivingPlayers());
         return (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
+    }
+
+    public void PauseCurrentTimer(float time)
+    {
+        if (!IsServer) return;
+
+        Debug.Log($"<color=yellow>SERVER: </color> Pausing {_netCurrentGameState.Value} timer for {time} seconds.");
+
+        _pauseTimer += time;
     }
     #endregion
 
