@@ -78,22 +78,6 @@ public abstract class Hazard : ScriptableObject
                 return true;
             }
         }
-
-        // Tests to see if can be prevented with Talisman of protection
-        gearID = handMan.CheckGearTagsFor("Protection");
-        if (gearID != 0)
-        {
-            // 1/3 chance success
-            int rand = Random.Range(1, 4);
-            Debug.Log("Rolling for talisman of protection: " + rand);
-            if(rand == 1)
-            {
-                Debug.Log("Roll == 1. Success!");
-                handMan.UseGear(gearID);
-                return true;
-            }
-        }
-
         return false;
     }
 

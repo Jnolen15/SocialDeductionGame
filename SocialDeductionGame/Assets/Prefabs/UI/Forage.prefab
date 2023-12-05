@@ -1101,7 +1101,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.1
+      value: 0.2
       inSlope: -0.0050203498
       outSlope: -0.0050203498
       tangentMode: 0
@@ -1110,7 +1110,7 @@ MonoBehaviour:
       outWeight: 1
     - serializedVersion: 3
       time: 0.1
-      value: 0.1
+      value: 0.2
       inSlope: -0.0027923887
       outSlope: -0.0027923887
       tangentMode: 0
@@ -1119,35 +1119,26 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 0.5
-      value: 0.2
-      inSlope: 0.44775817
-      outSlope: 0.44775817
+      value: 0.3
+      inSlope: 0.39669415
+      outSlope: 0.39669415
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.3705636
-    - serializedVersion: 3
-      time: 0.7
-      value: 0.3
-      inSlope: 0.517187
-      outSlope: 0.517187
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.36847594
-      outWeight: 0.33333334
+      outWeight: 1
     - serializedVersion: 3
       time: 1
       value: 0.5
-      inSlope: 1.0646529
-      outSlope: 1.0646529
+      inSlope: 0.3981704
+      outSlope: 0.3981704
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.1530967
+      inWeight: 1
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _tierTwoHazardThreshold: 40
+  _tierTwoHazardThreshold: 50
   _tierThreeHazardThreshold: 80
   _locationName: 0
   _forageUI: {fileID: 4011721465090627423}

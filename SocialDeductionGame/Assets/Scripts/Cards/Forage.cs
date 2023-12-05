@@ -139,12 +139,11 @@ public class Forage : NetworkBehaviour
 
         if (hazardCard)
         {
-            _forageUI.ShowClawMarks();
             _forageUI.PunchCard(hazardCard);
         }
 
         // Increase danger with each forage action
-        IncrementDanger(1);
+        IncrementDanger(0.8f);
     }
 
     private GameObject HazardTest()
@@ -295,10 +294,6 @@ public class Forage : NetworkBehaviour
 
     public void IncrementDanger(float dangerInc)
     {
-        // Old totem mechanic
-        //if (_netTotemActive.Value)
-        //    dangerInc = (dangerInc * 1.5f);
-
         Debug.Log("Incrementing danger by " + dangerInc);
         ModifyDangerLevelServerRPC(dangerInc);
     }

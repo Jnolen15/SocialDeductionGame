@@ -30,12 +30,14 @@ public class ForageUI : MonoBehaviour
 
         Totem.OnTotemMenuOpened += OnTotemOpened;
         Totem.OnTotemMenuClosed += OnTotemClosed;
+        HazardCardVisual.OnHazardActivated += ShowClawMarks;
     }
 
     private void OnDestroy()
     {
         Totem.OnTotemMenuOpened -= OnTotemOpened;
         Totem.OnTotemMenuClosed -= OnTotemClosed;
+        HazardCardVisual.OnHazardActivated -= ShowClawMarks;
     }
     #endregion
 
@@ -104,7 +106,7 @@ public class ForageUI : MonoBehaviour
         else
             _dangerText.text = dangerNum.ToString("F1");
 
-        if (current <= 40)
+        if (current <= 50)
         {
             _threatLevelText.text = "Low";
             //_threatLevelText.color = _lowColor;
@@ -112,7 +114,7 @@ public class ForageUI : MonoBehaviour
             _forageButton.GetComponent<Image>().color = _lowColor;
             _dangerIcon.sprite = _dangerIconStages[0];
         }
-        else if (40 < current && current <= 80)
+        else if (50 < current && current <= 80)
         {
             _threatLevelText.text = "Medium";
             //_threatLevelText.color = _medColor;
