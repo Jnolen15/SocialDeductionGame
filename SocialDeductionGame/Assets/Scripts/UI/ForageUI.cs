@@ -98,7 +98,11 @@ public class ForageUI : MonoBehaviour
 
     public void UpdateDangerUI(float current, bool totemActive)
     {
-        _dangerText.text = current.ToString("F0");
+        float dangerNum = current / 10;
+        if(dangerNum >= 10f)
+            _dangerText.text = dangerNum.ToString("F0");
+        else
+            _dangerText.text = dangerNum.ToString("F1");
 
         if (current <= 40)
         {
