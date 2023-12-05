@@ -399,11 +399,12 @@ public class ExileManager : NetworkBehaviour
         // Dont let dead players vote
         if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
         {
-            Debug.Log("<color=blue>CLIENT: </color>Player is dead, and cannot vote");
-            return;
+            _trialUI.Setup(playerID, false);
         }
-
-        _trialUI.Setup(playerID);
+        else
+        {
+            _trialUI.Setup(playerID, true);
+        }
     }
 
     public void SubmitExileVote()

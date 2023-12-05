@@ -12,6 +12,8 @@ public class TrialVoteUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _subtitle;
     [SerializeField] private TextMeshProUGUI _exileVoteText;
     [SerializeField] private TextMeshProUGUI _spareVoteText;
+    [SerializeField] private GameObject _voteButtons;
+    [SerializeField] private GameObject _voteText;
     [SerializeField] private Image _voteTimerFill;
     [SerializeField] private GameObject _closeButton;
     private ExileManager _exileManager;
@@ -50,7 +52,7 @@ public class TrialVoteUI : MonoBehaviour
         _pannel.SetActive(false);
     }
 
-    public void Setup(ulong playerID)
+    public void Setup(ulong playerID, bool canVote)
     {
         Show();
         _closeButton.SetActive(false);
@@ -59,9 +61,23 @@ public class TrialVoteUI : MonoBehaviour
         _spareVoteText.text = "0";
 
         if (playerID == PlayerConnectionManager.Instance.GetLocalPlayersID())
+        {
+            canVote = false;
             _subtitle.text = "You are on trial. Make your defense.";
+        }
         else
             _subtitle.text = "Is on trial. Exile them?";
+
+        if (canVote)
+        {
+            _voteButtons.SetActive(true);
+            _voteText.SetActive(false);
+        }
+        else
+        {
+            _voteText.SetActive(true);
+            _voteButtons.SetActive(false);
+        }
     }
 
     public void UpdateTrialResults(int exileVotes, int SpareVotes)
@@ -72,6 +88,9 @@ public class TrialVoteUI : MonoBehaviour
 
     public void VoteEnded()
     {
+        _voteText.SetActive(true);
+        _voteButtons.SetActive(false);
+
         _closeButton.SetActive(true);
     }
     #endregion
