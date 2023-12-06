@@ -17,9 +17,9 @@ public class DamageHazard : Hazard
         if (playerObj != null)
         {
             if(_damage != 0)
-                playerObj.GetComponent<PlayerHealth>().ModifyHealth(-_damage);
+                playerObj.GetComponent<PlayerHealth>().ModifyHealth(-_damage, "Hazard");
             if (_hunger != 0)
-                playerObj.GetComponent<PlayerHealth>().ModifyHunger(-_hunger);
+                playerObj.GetComponent<PlayerHealth>().ModifyHunger(-_hunger, "Hazard");
         }
         else
             Debug.LogError("Player object not found!");

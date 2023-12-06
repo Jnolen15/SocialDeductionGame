@@ -27,6 +27,13 @@ public class PlayerHealth : NetworkBehaviour
     public static event HealthEvent OnHungerDrain;
     public static event HealthEvent OnStarvation;
 
+    // The following events are for the HealthHungerViewer debug UI
+    public delegate void DetailHealthHungerEvent(int ModifiedAmmount, string cause);
+    public static event DetailHealthHungerEvent OnHungerDecrease;
+    public static event DetailHealthHungerEvent OnHungerIncrease;
+    public static event DetailHealthHungerEvent OnHealthDecrease;
+    public static event DetailHealthHungerEvent OnHealthIncrease;
+
     // ===================== SETUP =====================
     #region Setup
     public override void OnNetworkSpawn()
@@ -78,16 +85,16 @@ public class PlayerHealth : NetworkBehaviour
             return;
 
         if (Input.GetKeyDown(KeyCode.T))
-            ModifyHealth(1);
+            ModifyHealth(1, "Cheat");
 
         if (Input.GetKeyDown(KeyCode.Y))
-            ModifyHunger(1);
+            ModifyHunger(1, "Cheat");
 
         if (Input.GetKeyDown(KeyCode.G))
-            ModifyHealth(-1);
+            ModifyHealth(-1, "Cheat");
 
         if (Input.GetKeyDown(KeyCode.H))
-            ModifyHunger(-1);
+            ModifyHunger(-1, "Cheat");
     }
 
     // ===================== Helpers =====================
@@ -106,10 +113,15 @@ public class PlayerHealth : NetworkBehaviour
     // ==================== Health ====================
     #region Health
     // Calls server to increase or decrease player health
-    public void ModifyHealth(int ammount)
+    public void ModifyHealth(int ammount, string mesage)
     {
         if (!IsLiving())
             return;
+
+        if (ammount > 0)
+            OnHealthIncrease(ammount, mesage);
+        else
+            OnHealthDecrease(ammount, mesage);
 
         ModifyHealthServerRPC(ammount, true);
     }
@@ -160,10 +172,15 @@ public class PlayerHealth : NetworkBehaviour
     // ==================== Hunger ====================
     #region Hunger
     // Calls server to increase or decrease player hunger
-    public void ModifyHunger(int ammount)
+    public void ModifyHunger(int ammount, string mesage)
     {
         if (!IsLiving())
             return;
+
+        if (ammount > 0)
+            OnHungerIncrease(ammount, mesage);
+        else
+            OnHungerDecrease(ammount, mesage);
 
         ModifyHungerServerRPC(ammount, true);
     }
@@ -196,11 +213,11 @@ public class PlayerHealth : NetworkBehaviour
         // loose HP if hunger is less than 2
         if (_netCurrentHunger.Value < 2)
         {
-            ModifyHealth(-1);
+            ModifyHealth(-1, "Starvation");
             OnStarvation?.Invoke();
         }
 
-        ModifyHunger(-2);
+        ModifyHunger(-2, "Hunger Drain");
         OnHungerDrain?.Invoke();
     }
     #endregion

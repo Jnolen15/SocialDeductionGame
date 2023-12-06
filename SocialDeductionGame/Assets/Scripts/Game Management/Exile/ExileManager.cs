@@ -477,7 +477,7 @@ public class ExileManager : NetworkBehaviour
             if (PlayerConnectionManager.Instance.FindPlayerEntry(_netOnTrialPlayerID.Value) != null)
             {
                 GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(_netOnTrialPlayerID.Value);
-                playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99);
+                playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
             }
             else
             {

@@ -21,7 +21,7 @@ public class DamageEvent : NightEvent
             return;
         }
 
-        player.GetComponent<PlayerHealth>().ModifyHealth(-_dmg);
-        player.GetComponent<PlayerHealth>().ModifyHunger(-_hunger);
+        player.GetComponent<PlayerHealth>().ModifyHealth(-_dmg, "DamageEvent Event Consequence");
+        player.GetComponent<PlayerHealth>().ModifyHunger(-_hunger, "DamageEvent Event Consequence");
     }
 }

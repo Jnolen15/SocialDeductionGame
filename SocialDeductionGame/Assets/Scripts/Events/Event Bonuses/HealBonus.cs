@@ -21,7 +21,7 @@ public class HealBonus : EventBonus
             return;
         }
 
-        player.GetComponent<PlayerHealth>().ModifyHealth(+_heal);
-        player.GetComponent<PlayerHealth>().ModifyHunger(+_hunger);
+        player.GetComponent<PlayerHealth>().ModifyHealth(+_heal, "HealBonus Event Bonus");
+        player.GetComponent<PlayerHealth>().ModifyHunger(+_hunger, "HealBonus Event Bonus");
     }
 }

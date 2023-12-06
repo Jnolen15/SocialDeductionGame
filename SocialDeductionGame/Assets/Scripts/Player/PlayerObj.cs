@@ -196,9 +196,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         if (!IsOwner)
             return;
 
-        _playerHealth.ModifyHunger(servings);
+        _playerHealth.ModifyHunger(servings, "Consumed Card");
 
         if (hpGain > 0)
-            _playerHealth.ModifyHealth(hpGain);
+            _playerHealth.ModifyHealth(hpGain, "Consumed Card");
     }
 }
