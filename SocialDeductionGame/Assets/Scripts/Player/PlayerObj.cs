@@ -175,6 +175,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public void ToggleSpeakingIconActive(VivoxManager.ChannelSeshName channel)
     {
+        if (channel == VivoxManager.ChannelSeshName.Sabo)
+            return;
+
         _netSpeaking.Value = true;
     }
 

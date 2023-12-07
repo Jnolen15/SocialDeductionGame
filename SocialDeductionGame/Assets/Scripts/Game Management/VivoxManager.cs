@@ -34,6 +34,7 @@ public class VivoxManager : MonoBehaviour
     private IChannelSession _lobbyChannelSession = null;
     private IChannelSession _worldChannelSession = null;
     private IChannelSession _deathChannelSession = null;
+    private IChannelSession _saboChannelSession = null;
 
     public enum ChannelSeshName
     {
@@ -144,6 +145,16 @@ public class VivoxManager : MonoBehaviour
         JoinVivoxChannel(deathChannel, false, ChannelSeshName.Death);
     }
 
+    public void JoinSaboChannel()
+    {
+        Debug.Log("<color=green>VIVOX: </color>Attempting to join Vivox saboteur channel!");
+
+        ChannelType saboChannelType = ChannelType.NonPositional;
+        Channel saboChannel = new Channel(_lobbyID + "_sabo", saboChannelType, null);
+
+        JoinVivoxChannel(saboChannel, false, ChannelSeshName.Sabo);
+    }
+
     public void JoinVivoxChannel(Channel channel, bool switchTransmission, ChannelSeshName channelSessionName)
     {
         if (!_hasInitialized || LoginSession.State != LoginState.LoggedIn)
@@ -183,6 +194,10 @@ public class VivoxManager : MonoBehaviour
                     _deathChannelSession = channelSession;
                     OnDeathChannelJoined?.Invoke();
                 }
+                else if (channelSessionName == ChannelSeshName.Sabo)
+                {
+                    _saboChannelSession = channelSession;
+                }
 
                 Debug.Log("<color=green>VIVOX: </color>Joined Vivox channel " + channel.Name);
             }
@@ -220,11 +235,19 @@ public class VivoxManager : MonoBehaviour
         LeaveChannel(_deathChannelSession);
     }
 
+    public void LeaveSaboChannel()
+    {
+        Debug.Log("<color=green>VIVOX: </color>Leaving Vivox sabo channel!");
+
+        LeaveChannel(_saboChannelSession);
+    }
+
     public void LeaveAll()
     {
         LeaveChannel(_lobbyChannelSession);
         LeaveChannel(_deathChannelSession);
         LeaveChannel(_worldChannelSession);
+        LeaveChannel(_saboChannelSession);
     }
 
     public void LeaveChannel(IChannelSession channelSession)
@@ -301,6 +324,10 @@ public class VivoxManager : MonoBehaviour
         else if (channelName == ChannelSeshName.Death)
         {
             LoginSession.SetTransmissionMode(TransmissionMode.Single, _deathChannelSession.Channel);
+        }
+        else if (channelName == ChannelSeshName.Sabo)
+        {
+            LoginSession.SetTransmissionMode(TransmissionMode.Single, _saboChannelSession.Channel);
         }
         else
         {

@@ -118,6 +118,11 @@ public class PlayerUI : MonoBehaviour
             _speakingIndicatorText.text = "Death";
             _speakingIndicatorText.color = Color.blue;
         }
+        else if (channel == VivoxManager.ChannelSeshName.Sabo)
+        {
+            _speakingIndicatorText.text = "Saboteur";
+            _speakingIndicatorText.color = Color.red;
+        }
         else
         {
             _speakingIndicatorText.text = channel.ToString();
