@@ -210,6 +210,7 @@ GameObject:
   - component: {fileID: 5427489456640813845}
   - component: {fileID: 5810370142698414227}
   - component: {fileID: 7414257654862318558}
+  - component: {fileID: -8125686511084597820}
   m_Layer: 0
   m_Name: UICardVisual
   m_TagString: Untagged
@@ -296,6 +297,18 @@ MonoBehaviour:
   _cardDescription: {fileID: 4751811995851426458}
   _cardSprite: {fileID: 8998020472741111497}
   _tagIconSlot: {fileID: 3646378670657527517}
+--- !u!225 &-8125686511084597820
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5427489456640813847}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7125616115271452912
 GameObject:
   m_ObjectHideFlags: 0

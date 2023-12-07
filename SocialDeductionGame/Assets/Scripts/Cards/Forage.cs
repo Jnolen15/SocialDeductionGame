@@ -130,17 +130,12 @@ public class Forage : NetworkBehaviour
         }
         else// If hazard drawn
         {
-            cardObjList.Add(hazardCard);
             for (int i = 0; i < (numToDeal-1); i++)
                 cardObjList.Add(ChooseCard());
+            cardObjList.Insert(Random.Range(0, cardObjList.Count), hazardCard);
         }
 
         _forageUI.DealCardObjects(cardObjList);
-
-        if (hazardCard)
-        {
-            _forageUI.PunchCard(hazardCard);
-        }
 
         // Increase danger with each forage action
         IncrementDanger(0.8f);

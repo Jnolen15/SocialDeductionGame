@@ -644,9 +644,10 @@ GameObject:
   - component: {fileID: 2194551304501501951}
   - component: {fileID: 4565904788005578167}
   - component: {fileID: 80051668092334190}
+  - component: {fileID: -6989713394843337660}
   m_Layer: 5
   m_Name: Hazard Card Visual
-  m_TagString: Untagged
+  m_TagString: HazardCard
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -708,6 +709,18 @@ MonoBehaviour:
   _slash: {fileID: 7638627770522875502}
   _hazardTitle: {fileID: 4687083019525409765}
   _hazardConsequences: {fileID: 3330637909737349414}
+--- !u!225 &-6989713394843337660
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7376748315988548449}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7638627770522875502
 GameObject:
   m_ObjectHideFlags: 0
