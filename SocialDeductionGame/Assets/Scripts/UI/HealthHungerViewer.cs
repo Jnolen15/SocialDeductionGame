@@ -11,6 +11,7 @@ public class HealthHungerViewer : MonoBehaviour
     [SerializeField] private Transform _hidden;
     [SerializeField] private Transform _shown;
     private bool _isShown = true;
+    private GameManager _gameManager;
 
     // ==================== Setup ====================
     void OnEnable()
@@ -19,6 +20,11 @@ public class HealthHungerViewer : MonoBehaviour
         PlayerHealth.OnHealthDecrease += DisplayHealthMessage;
         PlayerHealth.OnHungerIncrease += DisplayHungerMessage;
         PlayerHealth.OnHungerDecrease += DisplayHungerMessage;
+    }
+
+    private void Start()
+    {
+        _gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     void OnDisable()
@@ -32,13 +38,15 @@ public class HealthHungerViewer : MonoBehaviour
     // ==================== Function ====================
     private void DisplayHealthMessage(int ammount, string mesage)
     {
-        string healthMesage = (ammount.ToString() + " Health: " + mesage);
+        float timeStamp = (_gameManager.GetStateTimer() * 100);
+        string healthMesage = ($"{_gameManager.GetCurrentGameState()} {timeStamp.ToString("F2")} {ammount} Health: {mesage}");
         DisplayMessage(ammount, healthMesage);
     }
 
     private void DisplayHungerMessage(int ammount, string mesage)
     {
-        string hungerMesage = (ammount.ToString() + " Hunger: " + mesage);
+        float timeStamp = (_gameManager.GetStateTimer() * 100);
+        string hungerMesage = ($"{_gameManager.GetCurrentGameState()} {timeStamp.ToString("F2")} {ammount} Hunger: {mesage}");
         DisplayMessage(ammount, hungerMesage);
     }
 
