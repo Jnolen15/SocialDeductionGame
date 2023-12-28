@@ -118,8 +118,13 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
                 return false;
             }
         }
-        else
+        else if (!_totem.GetTotemOnCooldown())
             return true;
+        else
+        {
+            Debug.Log("Totem is inactive and on cooldown");
+            return false;
+        }
     }
 
     public void PlayCardHere(int cardID)
@@ -133,8 +138,6 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     #region Function
     public void AddCard(int cardID)
     {
-        Debug.Log("In totem slot");
-
         if (_totem.GetTotemActive())
             AddCardSurvivorsServerRpc(cardID);
         else
