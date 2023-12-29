@@ -23,6 +23,9 @@ public class HazardCardVisual : MonoBehaviour
     private int _heldHazardID;
     private Hazard _hazardData;
 
+    public delegate void HazardVisualEvent();
+    public static event HazardVisualEvent OnHazardActivated;
+
     // ================== Setup ==================
     public void Setup(int hazardID)
     {
@@ -58,9 +61,14 @@ public class HazardCardVisual : MonoBehaviour
     {
         if (!_hazardData.RunHazard(handMan))
         {
-            // If this triggerrs the card was prevented
+            // Hazard card prevented
             _hazardCard.color = Color.grey;
             _slash.SetActive(true);
+        }
+        else
+        {
+            // Hazard card happened
+            OnHazardActivated?.Invoke();
         }
     }
 }

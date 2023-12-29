@@ -39,7 +39,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
 
     public override void OnNetworkSpawn()
     {
-        _servingsText.text = "Food In Fire: " + _netServingsStored.Value;
+        _servingsText.text = _netServingsStored.Value.ToString();
     }
 
     private void Start()
@@ -69,7 +69,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     // ================== Text ==================
     private void UpdateServingsText(float prev, float next)
     {
-        _servingsText.text = "Servings: " + next;
+        _servingsText.text = next.ToString();
     }
 
     // ================== Interface ==================
@@ -82,13 +82,13 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     }
 
     // ================== Functions ==================
-    public void AddFood(float servings)
+    public void AddFood(int servings)
     {
         AddFoodServerRpc(servings);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void AddFoodServerRpc(float servings)
+    public void AddFoodServerRpc(int servings)
     {
         _netServingsStored.Value += servings;
     }
@@ -121,7 +121,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
 
     // ================== Take Food ==================
     #region Take Food
-    public void TakeFood(float ammount)
+    public void TakeFood(int ammount)
     {
         // Quick and dirty way to prevent dead players from taking food (Change later)
         GameObject playa = GameObject.FindGameObjectWithTag("Player");
@@ -146,14 +146,14 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         // Quick and dirty, fix later
         playa.GetComponentInChildren<PlayerObj>().ToggleCampfireIconActive();
 
-        if (ammount == 0.5f)
+        if (ammount == 1)
             _cardManager.GiveCard(2004);
-        else if (ammount == 1)
-            _cardManager.GiveCard(2005);
         else if (ammount == 2)
+            _cardManager.GiveCard(2005);
+        else if (ammount == 4)
             _cardManager.GiveCard(2006);
         else
-            Debug.LogError("AMMOUNT TAKEN FROM FIRE NOT 0.5, 1 or 2 " + ammount);
+            Debug.LogError("AMMOUNT TAKEN FROM FIRE NOT 1, 2 or 4 " + ammount);
     }
     #endregion
 }

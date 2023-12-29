@@ -27,7 +27,7 @@ public class NightEventCardVisual : MonoBehaviour
         NightEvent eventData = CardDatabase.Instance.GetEvent(eventID);
         _eventTitle.text = eventData.GetEventName();
         _eventConsequences.text = "Fail: " + eventData.GetEventConsequences();
-        _eventBonuses.text = $"Bonus: Add {eventData.GetBonusRequirements()} additional cards to {eventData.GetEventBonuses()}";
+        _eventBonuses.text = $"Add {eventData.GetBonusRequirements()} additional cards: {eventData.GetEventBonuses()}";
 
         Vector2 requirements = eventData.GetRequirements(playerNum);
         CardTag primaryTag = eventData.GetPrimaryResource();

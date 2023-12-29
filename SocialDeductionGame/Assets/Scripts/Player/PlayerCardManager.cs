@@ -6,6 +6,7 @@ using Unity.Netcode;
 public class PlayerCardManager : NetworkBehaviour
 {
     // ================ Refrences ================
+    [SerializeField] private HandFullUI _handFullUI;
     private PlayerData _pData;
     private PlayerHealth _pHealth;
     private HandManager _handManager;
@@ -87,6 +88,8 @@ public class PlayerCardManager : NetworkBehaviour
     // ================ Card Add ================
     #region Card Add
     // ~~~~~~~~~~~ Local ~~~~~~~~~~~
+    // Primarily called by CardManager.OnCardsGained
+    // also called by hand full notification menu
     public void GainCards(int[] cardIDs)
     {
         // Maker sure player isn't dead
@@ -118,6 +121,7 @@ public class PlayerCardManager : NetworkBehaviour
             if (GetNumCardsHeldServer() >= _netHandSize.Value)
             {
                 Debug.Log("<color=yellow>SERVER: </color>Player " + clientId + "'s hand is full, cannot add more cards");
+                HandWasFullClientRpc(id, clientRpcParams);
                 break;
             }
 
@@ -148,6 +152,14 @@ public class PlayerCardManager : NetworkBehaviour
 
             _handManager.AddCard(id);
         }
+    }
+
+    [ClientRpc]
+    private void HandWasFullClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
+    {
+        // If had was full, bring up UI
+        Debug.Log("Hand was full, opening hand full UI");
+        _handFullUI.Open(cardID);
     }
     #endregion
 

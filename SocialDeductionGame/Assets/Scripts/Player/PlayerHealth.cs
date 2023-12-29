@@ -12,17 +12,27 @@ public class PlayerHealth : NetworkBehaviour
     [SerializeField] private int _maxHP;
     [SerializeField] private NetworkVariable<int> _netCurrentHP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _maxHunger;
-    [SerializeField] private NetworkVariable<float> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
     public NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
 
     private bool _doCheats;
 
     // Events
-    public delegate void ValueModified(float ModifiedAmmount, float newTotal);
+    public delegate void ValueModified(int ModifiedAmmount, int newTotal);
     public static event ValueModified OnHealthModified;
     public static event ValueModified OnHungerModified;
-    public delegate void Death();
-    public static event Death OnDeath;
+
+    public delegate void HealthEvent();
+    public static event HealthEvent OnDeath;
+    public static event HealthEvent OnHungerDrain;
+    public static event HealthEvent OnStarvation;
+
+    // The following events are for the HealthHungerViewer debug UI
+    public delegate void DetailHealthHungerEvent(int ModifiedAmmount, string cause);
+    public static event DetailHealthHungerEvent OnHungerDecrease;
+    public static event DetailHealthHungerEvent OnHungerIncrease;
+    public static event DetailHealthHungerEvent OnHealthDecrease;
+    public static event DetailHealthHungerEvent OnHealthIncrease;
 
     // ===================== SETUP =====================
     #region Setup
@@ -33,7 +43,7 @@ public class PlayerHealth : NetworkBehaviour
 
         if (IsOwner)
         {
-            GameManager.OnStateMorning += HungerDrain;
+            GameManager.OnStateNight += HungerDrain;
             _netCurrentHP.OnValueChanged += HealthChanged;
             _netCurrentHunger.OnValueChanged += HungerChanged;
             _netIsLiving.OnValueChanged += Die;
@@ -54,7 +64,7 @@ public class PlayerHealth : NetworkBehaviour
         if (IsOwner)
         {
             ModifyHealthServerRPC(4, false);
-            ModifyHungerServerRPC(3f, false);
+            ModifyHungerServerRPC(6, false);
         }
     }
 
@@ -62,7 +72,7 @@ public class PlayerHealth : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        GameManager.OnStateMorning -= HungerDrain;
+        GameManager.OnStateNight -= HungerDrain;
         _netCurrentHP.OnValueChanged -= HealthChanged;
         _netCurrentHunger.OnValueChanged -= HungerChanged;
         _netIsLiving.OnValueChanged -= Die;
@@ -75,16 +85,16 @@ public class PlayerHealth : NetworkBehaviour
             return;
 
         if (Input.GetKeyDown(KeyCode.T))
-            ModifyHealth(1);
+            ModifyHealth(1, "Cheat");
 
         if (Input.GetKeyDown(KeyCode.Y))
-            ModifyHunger(1);
+            ModifyHunger(1, "Cheat");
 
         if (Input.GetKeyDown(KeyCode.G))
-            ModifyHealth(-1);
+            ModifyHealth(-1, "Cheat");
 
         if (Input.GetKeyDown(KeyCode.H))
-            ModifyHunger(-1);
+            ModifyHunger(-1, "Cheat");
     }
 
     // ===================== Helpers =====================
@@ -103,10 +113,15 @@ public class PlayerHealth : NetworkBehaviour
     // ==================== Health ====================
     #region Health
     // Calls server to increase or decrease player health
-    public void ModifyHealth(int ammount)
+    public void ModifyHealth(int ammount, string mesage)
     {
         if (!IsLiving())
             return;
+
+        if (ammount > 0)
+            OnHealthIncrease(ammount, mesage);
+        else
+            OnHealthDecrease(ammount, mesage);
 
         ModifyHealthServerRPC(ammount, true);
     }
@@ -157,21 +172,26 @@ public class PlayerHealth : NetworkBehaviour
     // ==================== Hunger ====================
     #region Hunger
     // Calls server to increase or decrease player hunger
-    public void ModifyHunger(float ammount)
+    public void ModifyHunger(int ammount, string mesage)
     {
         if (!IsLiving())
             return;
+
+        if (ammount > 0)
+            OnHungerIncrease(ammount, mesage);
+        else
+            OnHungerDecrease(ammount, mesage);
 
         ModifyHungerServerRPC(ammount, true);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void ModifyHungerServerRPC(float ammount, bool add, ServerRpcParams serverRpcParams = default)
+    private void ModifyHungerServerRPC(int ammount, bool add, ServerRpcParams serverRpcParams = default)
     {
         Debug.Log($"{NetworkManager.Singleton.LocalClientId} had its hunger incremented by {ammount}");
 
         // temp for calculations
-        float tempHunger = _netCurrentHunger.Value;
+        int tempHunger = _netCurrentHunger.Value;
 
         if (add)
             tempHunger += ammount;
@@ -190,11 +210,15 @@ public class PlayerHealth : NetworkBehaviour
     // Loose hunger each day
     private void HungerDrain()
     {
-        // loose HP if hunger is less than 1
-        if (_netCurrentHunger.Value < 1)
-            ModifyHealth(-1);
+        // loose HP if hunger is less than 2
+        if (_netCurrentHunger.Value < 2)
+        {
+            ModifyHealth(-1, "Starvation");
+            OnStarvation?.Invoke();
+        }
 
-        ModifyHunger(-1);
+        ModifyHunger(-2, "Hunger Drain");
+        OnHungerDrain?.Invoke();
     }
     #endregion
 
@@ -205,9 +229,9 @@ public class PlayerHealth : NetworkBehaviour
         OnHealthModified?.Invoke(modifiedAmmount, next);
     }
 
-    private void HungerChanged(float prev, float next)
+    private void HungerChanged(int prev, int next)
     {
-        float modifiedAmmount = next - prev;
+        int modifiedAmmount = next - prev;
         OnHungerModified?.Invoke(modifiedAmmount, next);
     }
 }

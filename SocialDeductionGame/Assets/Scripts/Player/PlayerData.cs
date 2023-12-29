@@ -7,7 +7,7 @@ using TMPro;
 
 public class PlayerData : NetworkBehaviour
 {
-    // ================== Refrences ==================
+    // ================== Refrences / Variables ==================
     #region Refrences
     private HandManager _handManager;
     private PlayerCardManager _playerCardManager;
@@ -16,23 +16,28 @@ public class PlayerData : NetworkBehaviour
     [SerializeField] private PlayerUI _playerUI;
 
     private LocationManager _locationManager;
-    private EventManager _nightEventManger;
-    #endregion
 
-    // ================== Variables ==================
-    #region Variables
     public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
     [SerializeField] private NetworkVariable<LocationManager.LocationName> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     public enum Team
     {
+        Unassigned,
         Survivors,
         Saboteurs
     }
-    private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<Team> _netTeam = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private int _defaultMP = 2;
     [SerializeField] private NetworkVariable<int> _netMaxMP = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netCurrentMP = new(writePerm: NetworkVariableWritePermission.Server);
+
+    public delegate void UpdateTeamAction(Team prev, Team current);
+    public static event UpdateTeamAction OnTeamUpdated;
+
+    public delegate void MovePointsValueModified(int ModifiedAmmount, int newTotal);
+    public static event MovePointsValueModified OnMovePointsModified;
+    public static event MovePointsValueModified OnMaxMovePointsModified;
+    public static event MovePointsValueModified OnNoMoreMovePoints;
     #endregion
 
     // ================== Setup ==================
@@ -43,8 +48,8 @@ public class PlayerData : NetworkBehaviour
         {
             LocationManager.OnForceLocationChange += UpdateLocation;
             _netTeam.OnValueChanged += UpdateTeamText;
-            _netCurrentMP.OnValueChanged += UpdateMovementPointUI;
-            GameManager.OnStateNight += ShowEventRecap;
+            _netCurrentMP.OnValueChanged += MovePointsModified;
+            _netMaxMP.OnValueChanged += MaxMovePointsModified;
             GameManager.OnStateMorning += ResetMovementPoints;
 
             gameObject.tag = "Player";
@@ -66,8 +71,8 @@ public class PlayerData : NetworkBehaviour
 
         LocationManager.OnForceLocationChange -= UpdateLocation;
         _netTeam.OnValueChanged -= UpdateTeamText;
-        _netCurrentMP.OnValueChanged -= UpdateMovementPointUI;
-        GameManager.OnStateNight -= ShowEventRecap;
+        _netCurrentMP.OnValueChanged -= MovePointsModified;
+        _netMaxMP.OnValueChanged += MaxMovePointsModified;
         GameManager.OnStateMorning -= ResetMovementPoints;
     }
 
@@ -83,9 +88,6 @@ public class PlayerData : NetworkBehaviour
         // TODO: NOT HAVE DIRECT REFRENCES, Use singleton or some other method ?
         GameObject gameMan = GameObject.FindGameObjectWithTag("GameManager");
         _locationManager = gameMan.GetComponent<LocationManager>();
-        _nightEventManger = gameMan.GetComponent<EventManager>();
-
-        UpdateTeamText(Team.Survivors, _netTeam.Value);
     }
     #endregion
 
@@ -114,22 +116,14 @@ public class PlayerData : NetworkBehaviour
     #region Teams
     public void SetTeam(Team team)
     {
+        Debug.Log($"Setting player {_netPlayerName.Value} to team {team}");
+
         _netTeam.Value = team;
     }
 
     private void UpdateTeamText(Team prev, Team current)
     {
-        if(_playerUI != null)
-            _playerUI.UpdateTeam(current);
-    }
-
-    // Show night event choices if Saboteur, else show Recap
-    private void ShowEventRecap()
-    {
-        if (_netTeam.Value == Team.Saboteurs)
-            _nightEventManger.ShowNightEventPicker();
-        else if (_playerHealth.IsLiving())
-            _nightEventManger.ShowRecap();
+        OnTeamUpdated?.Invoke(prev, current);
     }
 
     public Team GetPlayerTeam()
@@ -142,6 +136,9 @@ public class PlayerData : NetworkBehaviour
     #region Player Readying
     public void ReadyPlayer()
     {
+        if (!_playerHealth.IsLiving())
+            return;
+
         _playerObj.ToggleReadyIconActive();
         PlayerConnectionManager.Instance.ReadyPlayer();
     }
@@ -150,9 +147,7 @@ public class PlayerData : NetworkBehaviour
     // ================ Location / Movement ================
     #region Location
     // Called when the player chooses a location on their map
-    // Or when location change is forced by game manager / location manager
-    // Called by button
-    public void ChangeLocation(string locationName)
+    public void MoveLocation(string locationName)
     {
         // Dont move if already at the same location
         if (_netCurrentLocation.Value.ToString() == locationName)
@@ -166,6 +161,7 @@ public class PlayerData : NetworkBehaviour
             else
             {
                 Debug.Log("<color=blue>CLIENT: </color>Cannot move, no points!");
+                OnNoMoreMovePoints?.Invoke(0, 0);
                 return;
             }
         }
@@ -231,9 +227,15 @@ public class PlayerData : NetworkBehaviour
         return _netCurrentMP.Value;
     }
 
-    private void UpdateMovementPointUI(int prev, int cur)
+    private void MovePointsModified(int prev, int cur)
     {
-        _playerUI.UpdateMovement(prev, cur);
+        int modifiedAmmount = cur - prev;
+        OnMovePointsModified?.Invoke(modifiedAmmount, cur);
+    }
+
+    private void MaxMovePointsModified(int prev, int cur)
+    {
+        OnMaxMovePointsModified?.Invoke(prev, cur);
     }
 
     [ServerRpc(RequireOwnership = false)]

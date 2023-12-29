@@ -5,7 +5,7 @@ using UnityEngine;
 public class FruitClusterCard : Card
 {
     [Header("Cluster Details")]
-    [SerializeField] private float _servings;
+    [SerializeField] private int _servings;
     [SerializeField] private int _givenCardID;
     private CardManager _cardManager;
 

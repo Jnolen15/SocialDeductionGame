@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using DG.Tweening;
 
 public class CraftingUI : MonoBehaviour
 {
@@ -37,7 +38,6 @@ public class CraftingUI : MonoBehaviour
             return;
         }
 
-
         foreach (BlueprintSO blueprint in _blueprints)
         {
             BlueprintEntry blueprintEntry = Instantiate(_blueprintEntryPref, _blueprintZone).GetComponent<BlueprintEntry>();
@@ -59,7 +59,8 @@ public class CraftingUI : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        _cantCraftMessage.SetActive(false);
+        _cantCraftMessage.transform.DOKill();
+        _cantCraftMessage.gameObject.SetActive(false);
         _description.gameObject.SetActive(true);
 
         _currentBlueprint = blueprint;
@@ -101,7 +102,9 @@ public class CraftingUI : MonoBehaviour
         else
         {
             Debug.Log("Crafting fail! Do not have required resources");
-            _cantCraftMessage.SetActive(true);
+            _cantCraftMessage.transform.DOKill();
+            _cantCraftMessage.gameObject.SetActive(true);
+            _cantCraftMessage.transform.DOShakePosition(1f).OnComplete( () => _cantCraftMessage.gameObject.SetActive(false));
         }
     }
 }

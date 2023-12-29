@@ -28,7 +28,7 @@ public class CardManager : MonoBehaviour
 
     // ================== Testing ==================
     [Button("Give player card")]
-    private void FillEventIDs(int cardID)
+    private void GivePlayerCard(int cardID)
     {
         int[] card = { cardID };
 

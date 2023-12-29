@@ -5,7 +5,7 @@ using UnityEngine;
 public class FoodCard : Card
 {
     [Header("Food Details")]
-    [SerializeField] private float _servings;
+    [SerializeField] private int _servings;
     [SerializeField] private int _hpGain;
 
     public override void OnPlay(GameObject playLocation)

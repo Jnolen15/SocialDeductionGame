@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8127116550430777070
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8127116550430777071}
+  - component: {fileID: 6591267325124998895}
+  m_Layer: 5
+  m_Name: T_TalismanHealing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8127116550430777071
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8127116550430777070}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 420}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &6591267325124998895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8127116550430777070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db395f8c74399bb44992966bcdcb4494, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cardID: 4006
+  _cardName: Talisman of Healing
+  _cardDescription: Chance to give the player an aloe each night.
+  _cardArt: {fileID: 0}
+  _cardArtAdjustments: {x: 1, y: 0, z: 0}
+  _cardArtDimensions: {x: 0, y: 0}
+  _tags:
+  - {fileID: 11400000, guid: f4abbad926680224cbba12f037ef5f56, type: 2}
+  _cardPlayablePrefab: {fileID: 65244148699938677, guid: 996f7b301cca3c54dbe49686f000a5c0, type: 3}
+  _cardSelectablePrefab: {fileID: 446939417493041211, guid: 4e868e1a3e90d8f4199240f658330024, type: 3}
+  _cardUIPrefab: {fileID: 9000991329413360747, guid: 72846bb83a6547a4d9685954028794ba, type: 3}
+  _givenCardID: 3001
+  _odds: 3
+  _nightRecapMessage: 'Talisman of Healing: +1 Aloe'

@@ -20,6 +20,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private List<Material> _characterMatList = new();
     [SerializeField] private Material _ghostMat;
     private GameObject _model;
+    [SerializeField] private CardHighlight _cardHighlight;
 
     // ================== Variables ==================
     [SerializeField] private List<CardTag> _cardTagsAccepted = new();
@@ -42,6 +43,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
             VivoxClient.OnBeginSpeaking += ToggleSpeakingIconActive;
             VivoxClient.OnEndSpeaking += ToggleSpeakingIconOff;
         }
+        else
+            Destroy(_cardHighlight); // A temp solution
     }
 
     private void OnEnable()
@@ -81,7 +84,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [ClientRpc]
     public void UpdateCharacterModelClientRPC(int styleIndex, int materialIndex)
     {
-        Debug.Log("Updating Character");
+        //Debug.Log("Updating Character");
 
         // Set initial inactive
         _character.GetChild(0).gameObject.SetActive(false);
@@ -172,6 +175,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public void ToggleSpeakingIconActive(VivoxManager.ChannelSeshName channel)
     {
+        if (channel == VivoxManager.ChannelSeshName.Sabo)
+            return;
+
         _netSpeaking.Value = true;
     }
 
@@ -188,14 +194,14 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     #endregion
 
     // ================== Food ==================
-    public void Eat(float servings, int hpGain = 0)
+    public void Eat(int servings, int hpGain = 0)
     {
         if (!IsOwner)
             return;
 
-        _playerHealth.ModifyHunger(servings);
+        _playerHealth.ModifyHunger(servings, "Consumed Card");
 
         if (hpGain > 0)
-            _playerHealth.ModifyHealth(hpGain);
+            _playerHealth.ModifyHealth(hpGain, "Consumed Card");
     }
 }

@@ -18,13 +18,19 @@ public class EventManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<bool> _netPassedNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netEarnedBonusNightEvent = new(writePerm: NetworkVariableWritePermission.Server);
 
-    private NightEventThumbnail _nightEventThumbnail;
+    private NightEventPreview _nightEventThumbnail;
+    private PlayerData.Team _localplayerTeam;
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
-        _nightEventThumbnail = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponentInChildren<NightEventThumbnail>();
+        _nightEventThumbnail = GameObject.FindGameObjectWithTag("GameInfoUI").GetComponentInChildren<NightEventPreview>();
+        _localplayerTeam = PlayerData.Team.Survivors;
+
+        PlayerData.OnTeamUpdated += AssignLocalTeam;
+        GameManager.OnStateNight += ShowRecap;
+        GameManager.OnStateNight += ShowNightEventPicker;
 
         if (IsServer)
         {
@@ -32,43 +38,55 @@ public class EventManager : NetworkBehaviour
             GameManager.OnStateMorning += SetupNewEventServerRpc;
             GameManager.OnSetup += PickRandomEvent;
             GameManager.OnStateEvening += TestEvent;
-            GameManager.OnStateNight += OpenNightEventPicker;
+            GameManager.OnStateNight += UpdateNightEventPicker;
         }
     }
 
     private void OnDisable()
     {
+        PlayerData.OnTeamUpdated -= AssignLocalTeam;
+        GameManager.OnStateNight -= ShowRecap;
+        GameManager.OnStateNight -= ShowNightEventPicker;
+
         if (IsServer)
         {
             GameManager.OnStateNight -= DoEventServerRpc;
             GameManager.OnStateMorning -= SetupNewEventServerRpc;
             GameManager.OnSetup -= PickRandomEvent;
             GameManager.OnStateEvening -= TestEvent;
-            GameManager.OnStateNight -= OpenNightEventPicker;
+            GameManager.OnStateNight -= UpdateNightEventPicker;
         }
     }
     #endregion
 
     // ================== UI ELEMENTS ==================
     #region UI Elements
+    private void AssignLocalTeam(PlayerData.Team prev, PlayerData.Team current)
+    {
+        Debug.Log("Event manager updating local player team " + current);
+        _localplayerTeam = current;
+
+        _nightEventRecap.Setup(prev, current);
+    }
+
     private void UpdateEventUI()
     {
         _nightEventThumbnail.SetEvent(_netCurrentNightEventID.Value, _netNumEventPlayers.Value);
     }
 
     [ClientRpc]
-    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus)
+    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus, Vector3 scores)
     {
         _nightEventThumbnail.SetEventResults(passed);
 
         // Show results
         _nightEventResults.gameObject.SetActive(true);
-        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus);
+        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, scores);
     }
 
-    public void OpenNightEventPicker()
+    public void UpdateNightEventPicker()
     {
-        Debug.Log("<color=yellow>SERVER: </color> OpenNightEventPicker");
+        Debug.Log("<color=yellow>SERVER: </color> UpdateNightEventPicker");
 
         // Pick random event in case no votes
         PickRandomEvent();
@@ -78,13 +96,18 @@ public class EventManager : NetworkBehaviour
 
     public void ShowNightEventPicker()
     {
+        if (_localplayerTeam != PlayerData.Team.Saboteurs)
+            return;
+
         _nightEventPickerMenu.ShowMenu();
     }
 
     public void ShowRecap()
     {
-        _nightEventRecap.gameObject.SetActive(true);
-        _nightEventRecap.Setup(_netPreviousNightEventID.Value, _netNumEventPlayers.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
+        _nightEventRecap.OpenRecap();
+
+        if (_localplayerTeam == PlayerData.Team.Survivors)
+            _nightEventRecap.UpdateNightEvent(_netPreviousNightEventID.Value, _netNumEventPlayers.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
     }
     #endregion
 
@@ -272,9 +295,15 @@ public class EventManager : NetworkBehaviour
         int secondaryReq = (int)nEvent.GetRequirements(_netNumEventPlayers.Value).y;
         int saboCards = 0;
 
-        // Loop through all cards
         int totCards = _stockpile.GetNumCards();
-        int[] cardIDS = new int[totCards]; // For pass to results screen
+
+        // For pass to results screen
+        List<int> primaryCards = new();
+        List<int> secondaryCards = new();
+        List<int> otherCards = new();
+        Vector3 scores = new Vector3(0, 0, 0);
+
+        // Loop through all cards
         for (int i = 0; i <= totCards; i++)
         {
             int cardID = _stockpile.GetTopCard();
@@ -286,7 +315,6 @@ public class EventManager : NetworkBehaviour
                 break;
             }
 
-            cardIDS[i] = cardID;
             GameObject card = CardDatabase.Instance.GetCard(cardID);
 
             // Check if card meets secondary or primary tag
@@ -294,12 +322,16 @@ public class EventManager : NetworkBehaviour
             if (card.GetComponent<Card>().HasTag(nEvent.GetPrimaryResource()))
             {
                 primaryReq--;
+                scores.x++;
+                primaryCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"contained tag {nEvent.GetPrimaryResource()}. Primary required remaining {primaryReq}");
             }
             else if (card.GetComponent<Card>().HasTag(nEvent.GetSecondaryResource()))
             {
                 secondaryReq--;
+                scores.y++;
+                secondaryCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"contained tag {nEvent.GetSecondaryResource()}. secondary required remaining {secondaryReq}");
             }
@@ -307,6 +339,7 @@ public class EventManager : NetworkBehaviour
             else
             {
                 saboCards++;
+                otherCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"did not match either resources. Sabo cards now {saboCards}");
             }
@@ -324,6 +357,8 @@ public class EventManager : NetworkBehaviour
             Debug.Log($"<color=yellow>SERVER: </color>{overBonus} extra resources were added.");
             overBonus -= saboCards;
             Debug.Log($"<color=yellow>SERVER: </color>-{saboCards} bonus now {overBonus}.");
+
+            scores.z = overBonus;
 
             // If num is still positive pass
             if (overBonus >= 0)
@@ -343,8 +378,15 @@ public class EventManager : NetworkBehaviour
                 Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
         }
 
+        // Combine lists for clients
+        List<int> cardIDList = new();
+        cardIDList.AddRange(primaryCards);
+        cardIDList.AddRange(secondaryCards);
+        cardIDList.AddRange(otherCards);
+
         // Update all clients visually
-        UpdateEventUIClientRpc(cardIDS, _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
+        UpdateEventUIClientRpc(cardIDList.ToArray(), _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
+            _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, scores);
     }
     #endregion
 }

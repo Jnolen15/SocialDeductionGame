@@ -23,14 +23,13 @@ public class Forage : NetworkBehaviour
     private GameObject _playerObj;
     private HandManager _playerHandMan;
     private PlayerHealth _playerHealth;
-    [SerializeField] private GameObject _forageCanvas;
     [SerializeField] private GameObject _hazardCardPref;
 
     [Header("Variables")]
     [SerializeField] private NetworkVariable<float> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private NetworkVariable<bool> _eventDebuffed = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private NetworkVariable<bool> _eventBuffed = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private NetworkVariable<bool> _totemActive = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netEventDebuffed = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netEventBuffed = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netTotemActive = new(writePerm: NetworkVariableWritePermission.Server);
 
     public delegate void LocationForageAction(LocationManager.LocationName locationName);
     public static event LocationForageAction OnLocationBuffEnabled;
@@ -48,9 +47,10 @@ public class Forage : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        _netCurrentDanger.OnValueChanged += SendDangerChangedEvent;
-        _eventDebuffed.OnValueChanged += SendDebuffedEvent;
-        _eventBuffed.OnValueChanged += SendBuffedEvent;
+        _netCurrentDanger.OnValueChanged += UpdateDangerUI;
+        _netTotemActive.OnValueChanged += UpdateTotemUI;
+        _netEventDebuffed.OnValueChanged += SendDebuffedEvent;
+        _netEventBuffed.OnValueChanged += SendBuffedEvent;
         GameManager.OnStateIntro += SetupPlayerConnections;
 
         if (IsServer)
@@ -70,9 +70,10 @@ public class Forage : NetworkBehaviour
 
     private void OnDisable()
     {
-        _netCurrentDanger.OnValueChanged -= SendDangerChangedEvent;
-        _eventDebuffed.OnValueChanged -= SendDebuffedEvent;
-        _eventBuffed.OnValueChanged -= SendBuffedEvent;
+        _netCurrentDanger.OnValueChanged -= UpdateDangerUI;
+        _netTotemActive.OnValueChanged -= UpdateTotemUI;
+        _netEventDebuffed.OnValueChanged -= SendDebuffedEvent;
+        _netEventBuffed.OnValueChanged -= SendBuffedEvent;
         GameManager.OnStateIntro -= SetupPlayerConnections;
 
         if (IsServer)
@@ -114,6 +115,8 @@ public class Forage : NetworkBehaviour
         Debug.Log(gameObject.name + " Dealing cards");
 
         int numToDeal = 3;
+        if (_netTotemActive.Value)
+            numToDeal--;
         if (_playerHandMan.CheckForForageGear(_locationName.ToString()))
             numToDeal++;
 
@@ -127,15 +130,15 @@ public class Forage : NetworkBehaviour
         }
         else// If hazard drawn
         {
-            cardObjList.Add(hazardCard);
             for (int i = 0; i < (numToDeal-1); i++)
                 cardObjList.Add(ChooseCard());
+            cardObjList.Insert(Random.Range(0, cardObjList.Count), hazardCard);
         }
 
         _forageUI.DealCardObjects(cardObjList);
 
         // Increase danger with each forage action
-        IncrementDanger(1);
+        IncrementDanger(0.8f);
     }
 
     private GameObject HazardTest()
@@ -191,9 +194,9 @@ public class Forage : NetworkBehaviour
 
         // Test for useless card
         int uselessOdds = _uselessOddsDefault;
-        if (_eventDebuffed.Value)
+        if (_netEventDebuffed.Value)
             uselessOdds += _uselessOddsDebuffModifier;
-        else if (_eventBuffed.Value)
+        else if (_netEventBuffed.Value)
             uselessOdds -= _uselessOddsDebuffModifier;
         int rand = (Random.Range(0, 100));
         Debug.Log($"Useless Odds are {uselessOdds}, rolled a {rand}");
@@ -231,20 +234,31 @@ public class Forage : NetworkBehaviour
         _cardManager.GiveCard(card.GetCardID());
 
         _forageUI.ClearCards();
-        _forageUI.CloseForageMenu();
+        _forageUI.HideCards();
+    }
+
+    public void TakeNone()
+    {
+        _forageUI.ClearCards();
+        _forageUI.HideCards();
     }
 
     public void Setup()
     {
         Debug.Log("Forage Setup");
-        _forageCanvas.SetActive(true);
+        _forageUI.Show();
     }
 
     public void Shutdown()
     {
         _forageUI.ClearCards();
-        _forageUI.CloseForageMenu();
-        _forageCanvas.SetActive(false);
+        _forageUI.HideCards();
+        _forageUI.Hide();
+    }
+
+    public LocationManager.LocationName GetForageLocation()
+    {
+        return _locationName;
     }
     #endregion
 
@@ -255,9 +269,14 @@ public class Forage : NetworkBehaviour
         return _netCurrentDanger.Value;
     }
 
-    private void SendDangerChangedEvent(float prev, float current)
+    private void UpdateDangerUI(float prev, float current)
     {
-        _forageUI.UpdateDangerUI(current);
+        _forageUI.UpdateDangerUI(current, _netTotemActive.Value);
+    }
+
+    private void UpdateTotemUI(bool prev, bool current)
+    {
+        _forageUI.UpdateTotemWarning(_netTotemActive.Value);
     }
 
     private void ResetDangerLevel()
@@ -270,9 +289,6 @@ public class Forage : NetworkBehaviour
 
     public void IncrementDanger(float dangerInc)
     {
-        if (_totemActive.Value)
-            dangerInc = (dangerInc * 1.5f);
-
         Debug.Log("Incrementing danger by " + dangerInc);
         ModifyDangerLevelServerRPC(dangerInc);
     }
@@ -326,7 +342,7 @@ public class Forage : NetworkBehaviour
         }
 
         Debug.Log(gameObject.name + "Debuffed by an event!");
-        _eventDebuffed.Value = true;
+        _netEventDebuffed.Value = true;
     }
 
     private void SendDebuffedEvent(bool prev, bool current)
@@ -346,7 +362,7 @@ public class Forage : NetworkBehaviour
         }
 
         Debug.Log(gameObject.name + "Buffed by an event!");
-        _eventBuffed.Value = true;
+        _netEventBuffed.Value = true;
     }
 
     private void SendBuffedEvent(bool prev, bool current)
@@ -369,7 +385,7 @@ public class Forage : NetworkBehaviour
             return;
 
         Debug.Log(locationName + "Totem enabled!");
-        _totemActive.Value = true;
+        _netTotemActive.Value = true;
     }
 
     private void ClearLocationTotem(LocationManager.LocationName locationName)
@@ -384,14 +400,14 @@ public class Forage : NetworkBehaviour
             return;
 
         Debug.Log(locationName + "Totem disabled!");
-        _totemActive.Value = false;
+        _netTotemActive.Value = false;
     }
 
     private void ClearBuffs()
     {
         Debug.Log(gameObject.name + " clearing buffs");
-        _eventDebuffed.Value = false;
-        _eventBuffed.Value = false;
+        _netEventDebuffed.Value = false;
+        _netEventBuffed.Value = false;
     }
     #endregion
 }

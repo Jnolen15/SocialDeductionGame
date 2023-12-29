@@ -73,7 +73,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         public void SetTeam(PlayerData.Team team)
         {
             PlayerTeam = team;
-            PlayerObject.GetComponent<PlayerData>().SetTeam(PlayerData.Team.Saboteurs);
+            PlayerObject.GetComponent<PlayerData>().SetTeam(team);
         }
 
         public void SetVisual(int style, int mat)
@@ -119,8 +119,9 @@ public class PlayerConnectionManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
     private Dictionary<ulong, bool> _playerReadyDictionary = new();
 
-    public delegate void PlayerDisconnectAction(ulong clientID);
-    public static event PlayerDisconnectAction OnPlayerDisconnect;
+    public delegate void PlayerConnectionAction(ulong clientID);
+    public static event PlayerConnectionAction OnPlayerConnect;
+    public static event PlayerConnectionAction OnPlayerDisconnect;
 
     public delegate void PlayerReadyAction();
     public static event PlayerReadyAction OnPlayerReady;
@@ -144,7 +145,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         if (IsServer)
         {
-            Debug.Log("<color=yellow>SERVER: </color> Doing Server setup");
+            Debug.Log("<color=yellow>SERVER: </color> Subscribing to callbacks");
 
             NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
@@ -157,6 +158,8 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         if (IsServer)
         {
+            Debug.Log("<color=yellow>SERVER: </color> Unsubscribing from callbacks");
+
             NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayerPrefabs;
@@ -183,6 +186,8 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         // Update client dictionaries
         AddPlayerToDictionaryClientRpc(clientID, newPlayer);
+
+        OnPlayerConnect?.Invoke(clientID);
     }
 
     private void ClientDisconnected(ulong clientID)
@@ -229,6 +234,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         // Spawn a player prefab for each connected player
         foreach(ulong clientID in NetworkManager.Singleton.ConnectedClientsIds)
         {
+            Debug.Log("<color=yellow>SERVER: </color> Spawning prefab for client " + clientID, gameObject);
             GameObject playerObj = Instantiate(_playerPrefab);
             playerObj.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientID, true);
         }
@@ -488,8 +494,9 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color>Assigning player roles. Sabos: " + _numSaboteurs);
 
-        // Pick X random players and assign them to team Saboteurs
+        // Pick X random players to be saboteurs
         List<ulong> playerIDs = new(_playerDict.Keys);
+        List<ulong> saboPlayers = new();
         for(int i = 0; i < _numSaboteurs; i++)
         {
             ulong rand = 99;
@@ -503,10 +510,24 @@ public class PlayerConnectionManager : NetworkBehaviour
                 break;
             }
 
-            _playerDict[rand].SetTeam(PlayerData.Team.Saboteurs);
+            Debug.Log($"<color=yellow>SERVER: </color>Player {rand} will be on team Saboteurs");
+            saboPlayers.Add(rand);
             playerIDs.Remove(rand);
+        }
 
-            Debug.Log($"<color=yellow>SERVER: </color>Assinging player {rand} to team saboteur");
+        // Assign roles
+        foreach (ulong playerID in _playerDict.Keys)
+        {
+            if (saboPlayers.Contains(playerID))
+            {
+                Debug.Log($"<color=yellow>SERVER: </color>Assinging player {playerID} to team Saboteurs");
+                _playerDict[playerID].SetTeam(PlayerData.Team.Saboteurs);
+            }
+            else
+            {
+                Debug.Log($"<color=yellow>SERVER: </color>Assinging player {playerID} to team Survivors");
+                _playerDict[playerID].SetTeam(PlayerData.Team.Survivors);
+            }
         }
     }
     #endregion

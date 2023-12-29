@@ -1,16 +1,16 @@
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using Sirenix.OdinInspector;
 
 public class TransitionManager : MonoBehaviour
 {
     // ================== Refrences ==================
     [Header("Transition Screens")]
     [SerializeField] private GameObject _waitingForPlayersTS;
-    [SerializeField] private CanvasGroup _morningTS;
-    [SerializeField] private CanvasGroup _afternoonTS;
-    [SerializeField] private CanvasGroup _eveningTS;
-    [SerializeField] private CanvasGroup _nightTS;
+    [SerializeField] private Transform _transitionWave;
+    [SerializeField] private int _hiddenPos;
+    [SerializeField] private int _upPos;
 
     // ================== Setup ==================
     private void OnEnable()
@@ -37,41 +37,44 @@ public class TransitionManager : MonoBehaviour
         switch (current)
         {
             case GameManager.GameState.Morning:
-                TransitionOut(_morningTS);
+                TransitionOut();
                 break;
             case GameManager.GameState.AfternoonTransition:
-                TransitionIn(_afternoonTS);
+                TransitionIn();
                 break;
             case GameManager.GameState.Afternoon:
-                TransitionOut(_afternoonTS);
+                TransitionOut();
                 break;
             case GameManager.GameState.EveningTransition:
-                TransitionIn(_eveningTS);
+                TransitionIn();
                 break;
             case GameManager.GameState.Evening:
-                TransitionOut(_eveningTS);
+                TransitionOut();
                 break;
             case GameManager.GameState.NightTransition:
-                TransitionIn(_nightTS);
+                TransitionIn();
                 break;
             case GameManager.GameState.Night:
-                TransitionOut(_nightTS);
+                TransitionOut();
                 break;
             case GameManager.GameState.MorningTransition:
-                TransitionIn(_morningTS);
+                TransitionIn();
                 break;
         }
     }
 
-    private void TransitionIn(CanvasGroup transitionScreen)
+    [Button]
+    private void TransitionIn()
     {
-        transitionScreen.gameObject.SetActive(true);
-        transitionScreen.DOFade(1f, 0.5f);
+        _transitionWave.gameObject.SetActive(true);
+
+        _transitionWave.DOLocalMoveY(_upPos, 1).SetEase(Ease.OutBack, 1);
     }
 
-    private void TransitionOut(CanvasGroup transitionScreen)
+    [Button]
+    private void TransitionOut()
     {
-        transitionScreen.DOFade(0f, 0.5f).OnComplete(() => { transitionScreen.gameObject.SetActive(false); });
+        _transitionWave.DOLocalMoveY(_hiddenPos, 1).SetEase(Ease.InOutBack).OnComplete(() => { _transitionWave.gameObject.SetActive(false); });
     }
     #endregion
 }

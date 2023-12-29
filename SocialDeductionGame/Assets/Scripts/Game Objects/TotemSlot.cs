@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using DG.Tweening;
+using UnityEngine.UI;
 
 public class TotemSlot : NetworkBehaviour, ICardUIPlayable
 {
     // ================== Refrences ==================
     [SerializeField] private Transform _tagZone;
+    [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _tagPref;
-    [SerializeField] private GameObject _cantPlayMsg;
+    [SerializeField] private Image _runeImg;
+    [SerializeField] private Color _runeEmptyColor;
+    [SerializeField] private Color _runeActiveColor;
+    [SerializeField] private Color _runeWrongColor;
 
     // ================== Variables ==================
     [SerializeField] private NetworkVariable<int> _netSaboCard = new(writePerm: NetworkVariableWritePermission.Server);
@@ -48,6 +53,9 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
             Destroy(_cardObj);
 
         _cardObj = null;
+
+        _runeImg.DOKill();
+        _runeImg.DOColor(_runeEmptyColor, 1f);
     }
 
     [ServerRpc]
@@ -58,6 +66,7 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
             _netCorrectCardAdded.Value = false;
         else
             _netCorrectCardAdded.Value = true;
+
         TotemActivatedClientRpc();
     }
 
@@ -68,6 +77,12 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
             Destroy(_cardObj);
 
         _cardObj = null;
+
+        if (_netSlotActive.Value)
+        {
+            _runeImg.DOKill();
+            _runeImg.DOColor(_runeActiveColor, 1f);
+        }
     }
     #endregion
 
@@ -97,15 +112,19 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
                 return true;
             else
             {
-                // Show cant play message
-                _cantPlayMsg.SetActive(true);
-                _cantPlayMsg.transform.DOKill();
-                _cantPlayMsg.transform.DOPunchPosition(Vector3.one, 1f).OnComplete(() => _cantPlayMsg.SetActive(false));
+                // Flash rune red
+                _runeImg.DOKill();
+                _runeImg.DOColor(_runeWrongColor, 1f).OnComplete(() => _runeImg.DOColor(_runeActiveColor, 1f));
                 return false;
             }
         }
-        else
+        else if (!_totem.GetTotemOnCooldown())
             return true;
+        else
+        {
+            Debug.Log("Totem is inactive and on cooldown");
+            return false;
+        }
     }
 
     public void PlayCardHere(int cardID)
@@ -119,8 +138,6 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     #region Function
     public void AddCard(int cardID)
     {
-        Debug.Log("In totem slot");
-
         if (_totem.GetTotemActive())
             AddCardSurvivorsServerRpc(cardID);
         else
@@ -169,7 +186,7 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     {
         Debug.Log("Adding card to activated Totem locally");
 
-        _cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), transform);
+        _cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardZone);
         Card newCard = _cardObj.GetComponent<Card>();
         newCard.SetupUI();
     }

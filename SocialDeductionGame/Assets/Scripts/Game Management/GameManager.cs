@@ -35,8 +35,10 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netTransitionTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    private float _pauseTimer;
     [Header("Win Settings")]
     [SerializeField] private int _numDaysTillRescue;
+    private bool _rescueEarly;
 
     private bool _dontTestWin;
     private bool _doCheats;
@@ -173,11 +175,20 @@ public class GameManager : NetworkBehaviour
 
     private void RunTimer(NetworkVariable<float> timer)
     {
-        timer.Value -= (Time.deltaTime * CalculateTimerMod());
-        if (timer.Value <= 0)
+        // Pause Timer
+        if(_pauseTimer >= 0)
         {
-            Debug.Log($"<color=yellow>SERVER: </color> {timer} Timer up, Progressing");
-            ProgressState();
+            _pauseTimer -= Time.deltaTime;
+        }
+        // Normal state timer
+        else
+        {
+            timer.Value -= (Time.deltaTime * CalculateTimerMod());
+            if (timer.Value <= 0)
+            {
+                Debug.Log($"<color=yellow>SERVER: </color> {timer} Timer up, Progressing");
+                ProgressState();
+            }
         }
     }
 
@@ -186,6 +197,15 @@ public class GameManager : NetworkBehaviour
     {
         float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.GetNumLivingPlayers());
         return (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
+    }
+
+    public void PauseCurrentTimer(float time)
+    {
+        if (!IsServer) return;
+
+        Debug.Log($"<color=yellow>SERVER: </color> Pausing {_netCurrentGameState.Value} timer for {time} seconds.");
+
+        _pauseTimer += time;
     }
     #endregion
 
@@ -219,11 +239,6 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color> Updating Game State to " + current.ToString());
         OnStateChange?.Invoke(prev, current);
-
-        // This shouldn't be needed. But since the game can be started with euqal sabos and survivors ill leave it
-        // But in the future when the lobby update comes it should not be possible
-        if (IsServer && current != GameState.Intro)
-            CheckSaboteurWin();
 
         switch (current)
         {
@@ -292,12 +307,26 @@ public class GameManager : NetworkBehaviour
         if (_dontTestWin)
             return;
 
-        Debug.Log("<color=yellow>SERVER: </color> Checking Survivor Win");
+        int numLivingSurvivors = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors);
+        int numLivingSaboteurs = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
+
+        Debug.Log($"<color=yellow>SERVER: </color>Testing Survivor Win. Survivors living: {numLivingSurvivors} Saboteurs living: {numLivingSaboteurs}");
 
         if (_netDay.Value >= _numDaysTillRescue)
         {
-            if (PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors) > PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs))
-                SetSurvivorWinClientRpc();
+            Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived. Survivor Win!");
+            SetSurvivorWinClientRpc();
+        }
+        else if (_rescueEarly)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived early. Survivor Win!");
+            _rescueEarly = false;
+            SetSurvivorWinClientRpc();
+        }
+        else if (numLivingSaboteurs <= 0)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>All Saboteurs are dead. Rescue arriving tomorrow.");
+            _rescueEarly = true;
         }
     }
 
@@ -316,19 +345,22 @@ public class GameManager : NetworkBehaviour
         if (_dontTestWin)
             return;
 
-        Debug.Log("<color=yellow>SERVER: </color> Checking Saboteur Win");
+        int numLivingSurvivors = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors);
+        int numLivingSaboteurs = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
 
-        // If number of Saboteurs >= survivors
-        if (PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs) >= PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors))
-        {
-            Debug.Log("<color=yellow>SERVER: </color> # of Saboteurs >= # of survivors, WIN!");
-            SetSaboteurWinClientRpc();
-        }
+        Debug.Log($"<color=yellow>SERVER: </color>Testing Saboteur Win. Survivors living: {numLivingSurvivors} Saboteurs living: {numLivingSaboteurs}");
 
         // If all players are dead
         if (PlayerConnectionManager.Instance.GetNumLivingPlayers() == 0)
         {
             Debug.Log("<color=yellow>SERVER: </color> All players have died, WIN!");
+            SetSaboteurWinClientRpc();
+        }
+
+        // If number of Saboteurs >= survivors
+        if (numLivingSaboteurs >= numLivingSurvivors)
+        {
+            Debug.Log("<color=yellow>SERVER: </color> # of Saboteurs >= # of survivors, WIN!");
             SetSaboteurWinClientRpc();
         }
     }

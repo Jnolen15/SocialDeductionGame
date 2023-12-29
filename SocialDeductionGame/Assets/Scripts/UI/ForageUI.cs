@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class ForageUI : MonoBehaviour
 {
     // ===================== Refrernces =====================
     [SerializeField] private Transform _cardZone;
-    [SerializeField] private GameObject _forageMenu;
     [SerializeField] private GameObject _forageButton;
+    [SerializeField] private GameObject _totemWarning;
     [SerializeField] private TextMeshProUGUI _threatLevelText;
     [SerializeField] private TextMeshProUGUI _dangerText;
     [SerializeField] private Image _dangerIcon;
@@ -17,43 +18,102 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private Color _lowColor = new Color32(233, 195, 41, 255);
     [SerializeField] private Color _medColor = new Color32(217, 116, 24, 255);
     [SerializeField] private Color _highColor = new Color32(206, 60, 24, 255);
+    [SerializeField] private GameObject _takeNoneButton;
+    [SerializeField] private CanvasGroup _clawMarks;
+    private Forage _forage;
 
     // ===================== Setup =====================
     #region Setup
     private void Start()
     {
-        //Forage.OnDangerIncrement += UpdateDangerUI;
+        _forage = GetComponentInParent<Forage>();
+
+        Totem.OnTotemMenuOpened += OnTotemOpened;
+        Totem.OnTotemMenuClosed += OnTotemClosed;
+        HazardCardVisual.OnHazardActivated += ShowClawMarks;
     }
 
     private void OnDestroy()
     {
-        //Forage.OnDangerIncrement -= UpdateDangerUI;
+        Totem.OnTotemMenuOpened -= OnTotemOpened;
+        Totem.OnTotemMenuClosed -= OnTotemClosed;
+        HazardCardVisual.OnHazardActivated -= ShowClawMarks;
     }
     #endregion
 
     // ===================== Functions =====================
     #region Functions
-    public void OpenForageMenu()
+    public void Show()
     {
-        _forageButton.SetActive(false);
-        _forageMenu.SetActive(true);
+        gameObject.SetActive(true);
     }
 
-    public void CloseForageMenu()
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+    private void OnTotemOpened(LocationManager.LocationName locationName)
+    {
+        if (locationName == _forage.GetForageLocation())
+            Hide();
+    }
+
+    private void OnTotemClosed(LocationManager.LocationName locationName)
+    {
+        if (locationName == _forage.GetForageLocation())
+            Show();
+    }
+
+    public void ShowCards()
+    {
+        _forageButton.SetActive(false);
+        _takeNoneButton.SetActive(true);
+        _cardZone.gameObject.SetActive(true);
+    }
+
+    public void HideCards()
     {
         _forageButton.SetActive(true);
-        _forageMenu.SetActive(false);
+        _takeNoneButton.SetActive(false);
+        _cardZone.gameObject.SetActive(false);
     }
 
     public void DealCardObjects(List<GameObject> cardObjs)
     {
-        OpenForageMenu();
+        ShowCards();
 
+        List<CanvasGroup> canvasCards = new();
         foreach (GameObject cardObj in cardObjs)
         {
             cardObj.transform.SetParent(_cardZone);
             cardObj.transform.localScale = Vector3.one;
+
+            CanvasGroup cardCanvas = cardObj.GetComponentInChildren<CanvasGroup>();
+            cardCanvas.alpha = 0;
+            cardCanvas.blocksRaycasts = false;
+            canvasCards.Add(cardCanvas);
         }
+
+        StartCoroutine(DealCardObjectsAnimated(canvasCards));
+    }
+
+    private IEnumerator DealCardObjectsAnimated(List<CanvasGroup> cardObjs)
+    {
+        foreach (CanvasGroup cardObj in cardObjs)
+        {
+            cardObj.DOFade(1, 0.2f);
+
+            if(cardObj.tag == "HazardCard")
+                PunchCard(cardObj.gameObject, 0.3f, 0.6f);
+            else
+                PunchCard(cardObj.gameObject, 0.2f, 0.4f);
+
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        foreach (CanvasGroup cardObj in cardObjs)
+            cardObj.blocksRaycasts = true;
     }
 
     public void ClearCards()
@@ -64,31 +124,71 @@ public class ForageUI : MonoBehaviour
         }
     }
 
-    public void UpdateDangerUI(float current)
+    public void UpdateDangerUI(float current, bool totemActive)
     {
-        _dangerText.text = current.ToString("F1");
+        float dangerNum = current / 10;
+        if(dangerNum >= 10f)
+            _dangerText.text = dangerNum.ToString("F0");
+        else
+            _dangerText.text = dangerNum.ToString("F1");
 
-        if (current <= 40)
+        if (current <= 50)
         {
             _threatLevelText.text = "Low";
-            _threatLevelText.color = _lowColor;
+            //_threatLevelText.color = _lowColor;
             _dangerText.color = _lowColor;
+            _forageButton.GetComponent<Image>().color = _lowColor;
             _dangerIcon.sprite = _dangerIconStages[0];
         }
-        else if (40 < current && current <= 80)
+        else if (50 < current && current <= 80)
         {
             _threatLevelText.text = "Medium";
-            _threatLevelText.color = _medColor;
+            //_threatLevelText.color = _medColor;
             _dangerText.color = _medColor;
+            _forageButton.GetComponent<Image>().color = _medColor;
             _dangerIcon.sprite = _dangerIconStages[1];
         }
         else if (80 < current)
         {
             _threatLevelText.text = "High";
-            _threatLevelText.color = _highColor;
+            //_threatLevelText.color = _highColor;
             _dangerText.color = _highColor;
+            _forageButton.GetComponent<Image>().color = _highColor;
             _dangerIcon.sprite = _dangerIconStages[2];
         }
+    }
+
+    public void UpdateTotemWarning(bool totemActive)
+    {
+        if (totemActive)
+            _totemWarning.SetActive(true);
+        else
+            _totemWarning.SetActive(false);
+    }
+
+    public void PunchCard(GameObject card, float size, float duration)
+    {
+        card.transform.DOKill();
+        card.transform.DOPunchScale(new Vector3(size, size, size), duration, 6, 0.8f);
+    }
+
+    public void ShowClawMarks()
+    {
+        _clawMarks.gameObject.SetActive(true);
+
+        Sequence ClawSequence = DOTween.Sequence();
+        ClawSequence.Append(_clawMarks.transform.DOScale(new Vector3(1f, 1f, 1f), 0.1f))
+          .AppendInterval(1)
+          .Append(_clawMarks.DOFade(0, 2f).OnComplete(() => CloseClaw()));
+    }
+
+    public void CloseClaw()
+    {
+        _clawMarks.transform.DOKill();
+        _clawMarks.DOKill();
+        _clawMarks.alpha = 1;
+        _clawMarks.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+        _clawMarks.gameObject.SetActive(false);
     }
     #endregion
 }
