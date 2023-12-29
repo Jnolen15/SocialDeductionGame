@@ -23,7 +23,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
 
         GameManager.OnStateIntro += SetNumVisible;
         GameManager.OnStateMorning += ClearAll;
-        GameManager.OnStateAfternoon += ToggleAcceptingCards;
+        GameManager.OnStateMorning += ToggleAcceptingCards;
         GameManager.OnStateEvening += ToggleAcceptingCards;
     }
 
@@ -33,7 +33,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
 
         GameManager.OnStateIntro -= SetNumVisible;
         GameManager.OnStateMorning -= ClearAll;
-        GameManager.OnStateAfternoon -= ToggleAcceptingCards;
+        GameManager.OnStateMorning -= ToggleAcceptingCards;
         GameManager.OnStateEvening -= ToggleAcceptingCards;
 
         // Always invoked the base 
