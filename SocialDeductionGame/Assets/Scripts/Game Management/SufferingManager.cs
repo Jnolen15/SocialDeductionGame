@@ -83,7 +83,9 @@ public class SufferingManager : NetworkBehaviour
     #region Suffering
     public void ModifySuffering(int ammount, int reasonCode, bool ServerOverride)
     {
-        if (!_isSabo && !ServerOverride)
+        if (ServerOverride && IsServer)
+            Debug.Log("<color=yellow>SERVER: </color> Modify Suffering Server Overide");
+        else if (!_isSabo)
             return;
 
         ModifySufferingServerRPC(ammount, reasonCode, true);
