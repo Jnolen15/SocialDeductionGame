@@ -740,5 +740,17 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log("<color=yellow>SERVER: </color> Living members of team " + team.ToString() + " = " + numAlive);
         return numAlive;
     }
+
+    // Server only
+    public int GetNumSaboteurs()
+    {
+        if (!IsServer)
+        {
+            Debug.LogError("Server only function not called by server");
+            return -1;
+        }
+
+        return _numSaboteurs;
+    }
     #endregion
 }

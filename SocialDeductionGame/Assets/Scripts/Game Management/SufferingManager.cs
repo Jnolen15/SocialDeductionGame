@@ -7,6 +7,18 @@ using DG.Tweening;
 
 public class SufferingManager : NetworkBehaviour
 {
+    // ============== Singleton pattern ==============
+    #region Singleton
+    public static SufferingManager Instance { get; private set; }
+    private void InitializeSingleton()
+    {
+        if (Instance != null && Instance != this)
+            Destroy(gameObject);
+        else
+            Instance = this;
+    }
+    #endregion
+
     // ================== Refrences / Variables ==================
     [Header("Suffering")]
     [SerializeField] private GameObject _sufferingUI;
@@ -23,14 +35,23 @@ public class SufferingManager : NetworkBehaviour
     public static event SufferingValueModified OnSufferingModified;
 
     // ================== Setup ==================
+    #region Setup
     public override void OnNetworkSpawn()
     {
         GameManager.OnStateIntro += Setup;
+
+        if(IsServer)
+            GameManager.OnStateMorning += DailySuffering;
+
+        InitializeSingleton();
     }
 
     private void OnDisable()
     {
         GameManager.OnStateIntro -= Setup;
+
+        if(IsServer)
+            GameManager.OnStateMorning -= DailySuffering;
     }
 
     private void Setup()
@@ -41,6 +62,7 @@ public class SufferingManager : NetworkBehaviour
             _sufferingUI.SetActive(true);
         }
     }
+    #endregion
 
     // FOR TESTING
     private void Update()
@@ -57,6 +79,7 @@ public class SufferingManager : NetworkBehaviour
     }
 
     // ================== Suffering ==================
+    // Suffering Increment / Decrement
     #region Suffering
     public void ModifySuffering(int ammount, int reasonCode)
     {
@@ -91,6 +114,7 @@ public class SufferingManager : NetworkBehaviour
     }
     #endregion
 
+    // UI
     #region UI
     [ClientRpc]
     private void UpdateSufferingUIClientRpc(int changedVal, int newVal, int reasonCode)
@@ -158,6 +182,19 @@ public class SufferingManager : NetworkBehaviour
           .AppendInterval(3)
           .Append(_sufferingReason.DOFade(0, 0.2f))
           .AppendCallback(() => _sufferingReason.gameObject.SetActive(false));
+    }
+    #endregion
+
+    // Misc
+    #region Misc
+    // Earn daily suffering per sabo
+    private void DailySuffering()
+    {
+        if (!IsServer)
+            return;
+
+        // Bypass is sabo check and call RPC directly (Sometimes server wont be saboteur)
+        ModifySufferingServerRPC(PlayerConnectionManager.Instance.GetNumSaboteurs(), 101, true);
     }
     #endregion
 }
