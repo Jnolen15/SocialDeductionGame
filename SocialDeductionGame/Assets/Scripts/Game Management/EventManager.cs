@@ -297,6 +297,10 @@ public class EventManager : NetworkBehaviour
 
         int totCards = _stockpile.GetNumCards();
 
+        // Suffering tracking
+        bool attemptedSabotage = false;
+        bool successfulSabotage = false;
+
         // For pass to results screen
         List<int> primaryCards = new();
         List<int> secondaryCards = new();
@@ -338,6 +342,7 @@ public class EventManager : NetworkBehaviour
             // If it does not match either +1 to sabo
             else
             {
+                attemptedSabotage = true;
                 saboCards++;
                 otherCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
@@ -375,8 +380,17 @@ public class EventManager : NetworkBehaviour
             }
             // if its negitive, then event failed
             else
+            {
                 Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
+                successfulSabotage = true;
+            }
         }
+
+        // Award suffering
+        if(successfulSabotage)
+            SufferingManager.Instance.ModifySuffering(2, 103, true);
+        else if (attemptedSabotage)
+            SufferingManager.Instance.ModifySuffering(1, 102, true);
 
         // Combine lists for clients
         List<int> cardIDList = new();

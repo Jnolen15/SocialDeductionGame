@@ -477,6 +477,12 @@ public class ExileManager : NetworkBehaviour
             if (PlayerConnectionManager.Instance.FindPlayerEntry(_netOnTrialPlayerID.Value) != null)
             {
                 GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(_netOnTrialPlayerID.Value);
+
+                // Award Suffering if they were a survivor
+                if (playerToExecute.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Survivors)
+                    SufferingManager.Instance.ModifySuffering(3, 104, true);
+
+                // Kill Plauer
                 playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
             }
             else

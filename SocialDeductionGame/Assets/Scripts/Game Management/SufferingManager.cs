@@ -69,21 +69,21 @@ public class SufferingManager : NetworkBehaviour
     {
         if (Input.GetKeyDown(KeyCode.S))
         {
-            ModifySuffering(1, Random.Range(101, 105));
+            ModifySuffering(1, Random.Range(101, 105), true);
         }
 
         if (Input.GetKeyDown(KeyCode.D))
         {
-            ModifySuffering(-1, Random.Range(201, 205));
+            ModifySuffering(-1, Random.Range(201, 205), true);
         }
     }
 
     // ================== Suffering ==================
     // Suffering Increment / Decrement
     #region Suffering
-    public void ModifySuffering(int ammount, int reasonCode)
+    public void ModifySuffering(int ammount, int reasonCode, bool ServerOverride)
     {
-        if (!_isSabo)
+        if (!_isSabo && !ServerOverride)
             return;
 
         ModifySufferingServerRPC(ammount, reasonCode, true);
@@ -193,8 +193,7 @@ public class SufferingManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        // Bypass is sabo check and call RPC directly (Sometimes server wont be saboteur)
-        ModifySufferingServerRPC(PlayerConnectionManager.Instance.GetNumSaboteurs(), 101, true);
+        ModifySuffering(PlayerConnectionManager.Instance.GetNumSaboteurs(), 101, true);
     }
     #endregion
 }
