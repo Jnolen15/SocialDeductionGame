@@ -17,7 +17,6 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private CanvasGroup _introRole;
     [SerializeField] private GameObject _introRoleSaboIcon;
     [SerializeField] private GameObject _introRoleSurvivorIcon;
-    //[SerializeField] private TextMeshProUGUI _movementText;
     [SerializeField] private GameObject _speakingIndicator;
     [SerializeField] private TextMeshProUGUI _speakingIndicatorText;
     [SerializeField] private GameObject _mutedIndicator;
@@ -71,6 +70,7 @@ public class PlayerUI : MonoBehaviour
         _craftingMenu.SetActive(false);
     }
 
+    // Display Role Intro
     private void DisplayRole()
     {
         _introRole.gameObject.SetActive(true);
@@ -96,6 +96,7 @@ public class PlayerUI : MonoBehaviour
           .AppendCallback(() => _introRole.gameObject.SetActive(false));
     }
 
+    // Crafting Open/Close
     public void ToggleCraft()
     {
         if (!_playerHealth.IsLiving())
@@ -104,6 +105,7 @@ public class PlayerUI : MonoBehaviour
         _craftingMenu.SetActive(!_craftingMenu.activeSelf);
     }
 
+    // Speaking
     public void SpeakingIndicatorOn(VivoxManager.ChannelSeshName channel)
     {
         _speakingIndicator.SetActive(true);
