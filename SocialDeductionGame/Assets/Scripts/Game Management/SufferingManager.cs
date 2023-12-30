@@ -47,12 +47,12 @@ public class SufferingManager : NetworkBehaviour
     {
         if (Input.GetKeyDown(KeyCode.S))
         {
-            ModifySuffering(1, 0);
+            ModifySuffering(1, Random.Range(101, 105));
         }
 
         if (Input.GetKeyDown(KeyCode.D))
         {
-            ModifySuffering(-1, 201);
+            ModifySuffering(-1, Random.Range(201, 205));
         }
     }
 
