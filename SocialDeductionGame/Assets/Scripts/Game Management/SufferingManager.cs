@@ -206,7 +206,7 @@ public class SufferingManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        ModifySuffering(PlayerConnectionManager.Instance.GetNumSaboteurs(), 101, true);
+        ModifySuffering(PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs), 101, true);
     }
     #endregion
 }
