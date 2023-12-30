@@ -67,12 +67,15 @@ public class SufferingManager : NetworkBehaviour
     // FOR TESTING
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.S))
+        if (!LogViewer.Instance.GetDoCheats())
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Comma))
         {
             ModifySuffering(1, Random.Range(101, 105), true);
         }
 
-        if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.Period))
         {
             ModifySuffering(-1, Random.Range(201, 205), true);
         }
@@ -81,6 +84,14 @@ public class SufferingManager : NetworkBehaviour
     // ================== Suffering ==================
     // Suffering Increment / Decrement
     #region Suffering
+    public int GetCurrentSufffering()
+    {
+        if (!_isSabo)
+            return -1;
+
+        return _netSufferning.Value;
+    }
+
     public void ModifySuffering(int ammount, int reasonCode, bool ServerOverride)
     {
         if (ServerOverride && IsServer)
@@ -146,7 +157,7 @@ public class SufferingManager : NetworkBehaviour
                 msg = $"+{changedVal} Survivor Exiled";
                 break;
             case 201:
-                msg = $"{changedVal} Totem Activated";
+                msg = $"{changedVal} Totem Awoken";
                 break;
             case 202:
                 msg = $"{changedVal} Night Event Re-Roll";
