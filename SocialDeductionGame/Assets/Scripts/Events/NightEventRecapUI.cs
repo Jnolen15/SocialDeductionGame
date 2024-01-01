@@ -6,6 +6,11 @@ using TMPro;
 public class NightEventRecapUI : MonoBehaviour
 {
     // ================== Refrences ==================
+    [Header("Text Colors")]
+    [SerializeField] private Color _neutralColor;
+    [SerializeField] private Color _goodColor;
+    [SerializeField] private Color _badColor;
+
     [Header("Survivor Reacp")]
     [SerializeField] private GameObject _survivorRecap;
     [SerializeField] private Transform _survivorRecapZone;
@@ -37,6 +42,8 @@ public class NightEventRecapUI : MonoBehaviour
         PlayerHealth.OnDeath += ShowDeath;
         TalismanGear.OnGiveCard += ShowTalisman;
         Totem.OnLocationTotemEnable += ShowTotem;
+        LTOSpawner.OnLTOSpawned += ShowLTOSpawn;
+        LTOSpawner.OnLTODespawned += ShowLTODespawn;
     }
 
     private void OnDisable()
@@ -47,6 +54,8 @@ public class NightEventRecapUI : MonoBehaviour
         PlayerHealth.OnDeath -= ShowDeath;
         TalismanGear.OnGiveCard -= ShowTalisman;
         Totem.OnLocationTotemEnable -= ShowTotem;
+        LTOSpawner.OnLTOSpawned -= ShowLTOSpawn;
+        LTOSpawner.OnLTODespawned -= ShowLTODespawn;
     }
 
     public void Setup(PlayerData.Team prev, PlayerData.Team current)
@@ -103,19 +112,19 @@ public class NightEventRecapUI : MonoBehaviour
             if (bonus)
             {
                 _resultText.text = "Passed with Bonus!";
-                _resultText.color = Color.green;
+                _resultText.color = _goodColor;
                 _consequencesText.text = "Earned " + nEvent.GetEventBonuses();
             }
             else
             {
                 _resultText.text = "Passed.";
-                _resultText.color = Color.green;
+                _resultText.color = _goodColor;
                 _consequencesText.text = "No consequences";
             }
         } else
         {
             _resultText.text = "Failed.";
-            _resultText.color = Color.red;
+            _resultText.color = _badColor;
             _consequencesText.text = nEvent.GetEventConsequences();
         }
     }
@@ -142,23 +151,35 @@ public class NightEventRecapUI : MonoBehaviour
     {
         Debug.Log("Showing Talisman message: " + message);
 
-        GameObject recapMessage = Instantiate(_genericRecapMessage, _survivorRecapZone);
-        recapMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
-        recapMessage.GetComponentInChildren<TextMeshProUGUI>().color = Color.green;
-
-        _extraRecapObjects.Add(recapMessage);
-
-        if (_localTeam == PlayerData.Team.Saboteurs)
-            recapMessage.transform.SetParent(_saboRecapZone);
+        ShowCustomEventMessage(message, _goodColor);
     }
     
     private void ShowTotem(LocationManager.LocationName location)
     {
         string message = "A Saboteur activated the totem at the " + location.ToString();
 
+        ShowCustomEventMessage(message, _badColor);
+    }
+
+    private void ShowLTOSpawn(LocationManager.LocationName location)
+    {
+        string message = "Something has appeared at the " + location.ToString();
+
+        ShowCustomEventMessage(message, _neutralColor);
+    }
+
+    private void ShowLTODespawn(LocationManager.LocationName location)
+    {
+        string message = $"The mysterious object at the {location} has disappeared";
+
+        ShowCustomEventMessage(message, _neutralColor);
+    }
+
+    private void ShowCustomEventMessage(string msg, Color color)
+    {
         GameObject recapMessage = Instantiate(_genericRecapMessage, _survivorRecapZone);
-        recapMessage.GetComponentInChildren<TextMeshProUGUI>().text = message;
-        recapMessage.GetComponentInChildren<TextMeshProUGUI>().color = Color.red;
+        recapMessage.GetComponentInChildren<TextMeshProUGUI>().text = msg;
+        recapMessage.GetComponentInChildren<TextMeshProUGUI>().color = color;
 
         _extraRecapObjects.Add(recapMessage);
 
