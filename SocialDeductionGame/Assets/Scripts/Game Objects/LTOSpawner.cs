@@ -94,6 +94,7 @@ public class LTOSpawner : NetworkBehaviour
         int rand = Random.Range(0, _spawnPointList.Count);
 
         _currentLTO = Instantiate(lto.LTOPrefab, _spawnPointList[rand]).GetComponent<LimitedTimeObject>();
+        _currentLTO.GetComponent<NetworkObject>().Spawn();
 
         //_spawnPointDict[_spawnPointList[rand]] = newLTO;
         _currentLTO.SetupLTO(lto.Lifetime);
@@ -117,7 +118,8 @@ public class LTOSpawner : NetworkBehaviour
             Debug.Log("<color=yellow>SERVER: </color> LTO out of life, destroying");
 
             // if so despawn it
-            _currentLTO.DestroySelf();
+            Destroy(_currentLTO);
+            //_currentLTO.DestroySelf();
 
             // Send Despawn event for night recap
             SendDespawnEventClientRpc();
