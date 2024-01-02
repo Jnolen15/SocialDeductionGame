@@ -22,21 +22,25 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private CanvasGroup _clawMarks;
     private Forage _forage;
 
+    public delegate void ForageUIAction(LocationManager.LocationName locationName);
+    public static ForageUIAction HideForageUI;
+    public static ForageUIAction ShowForageUI;
+
     // ===================== Setup =====================
     #region Setup
     private void Start()
     {
         _forage = GetComponentInParent<Forage>();
 
-        Totem.OnTotemMenuOpened += OnTotemOpened;
-        Totem.OnTotemMenuClosed += OnTotemClosed;
+        ShowForageUI += Show;
+        HideForageUI += Hide;
         HazardCardVisual.OnHazardActivated += ShowClawMarks;
     }
 
     private void OnDestroy()
     {
-        Totem.OnTotemMenuOpened -= OnTotemOpened;
-        Totem.OnTotemMenuClosed -= OnTotemClosed;
+        ShowForageUI -= Show;
+        HideForageUI -= Hide;
         HazardCardVisual.OnHazardActivated -= ShowClawMarks;
     }
     #endregion
@@ -53,16 +57,16 @@ public class ForageUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void OnTotemOpened(LocationManager.LocationName locationName)
-    {
-        if (locationName == _forage.GetForageLocation())
-            Hide();
-    }
-
-    private void OnTotemClosed(LocationManager.LocationName locationName)
+    private void Show(LocationManager.LocationName locationName)
     {
         if (locationName == _forage.GetForageLocation())
             Show();
+    }
+
+    private void Hide(LocationManager.LocationName locationName)
+    {
+        if (locationName == _forage.GetForageLocation())
+            Hide();
     }
 
     public void ShowCards()

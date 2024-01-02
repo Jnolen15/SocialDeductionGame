@@ -97,7 +97,7 @@ public class LTOSpawner : NetworkBehaviour
         _currentLTO.GetComponent<NetworkObject>().Spawn();
 
         //_spawnPointDict[_spawnPointList[rand]] = newLTO;
-        _currentLTO.SetupLTO(lto.Lifetime);
+        _currentLTO.SetupLTO(lto.Lifetime, _locationName);
 
         SendSpawnEventClientRpc();
 

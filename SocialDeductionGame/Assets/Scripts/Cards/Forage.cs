@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class Forage : NetworkBehaviour
+public class Forage : NetworkBehaviour, ICardPicker
 {
     // ============== Parameters / Refrences / Variables ==============
     #region P / R / V
@@ -226,9 +226,9 @@ public class Forage : NetworkBehaviour
     }
     #endregion
 
-    // ============== Other ==============
-    #region Other
-    public void SelectCard(Card card)
+    // ============== Interface ==============
+    #region ICardPicker
+    public void PickCard(Card card)
     {
         // Give cards to Card Manager
         _cardManager.GiveCard(card.GetCardID());
@@ -236,7 +236,10 @@ public class Forage : NetworkBehaviour
         _forageUI.ClearCards();
         _forageUI.HideCards();
     }
+    #endregion
 
+    // ============== Other ==============
+    #region Other
     public void TakeNone()
     {
         _forageUI.ClearCards();
