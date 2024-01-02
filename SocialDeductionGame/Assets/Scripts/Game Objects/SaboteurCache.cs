@@ -111,7 +111,7 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
         // Put card on screen
         foreach (int cardID in cardIds)
         {
-            GameObject cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), transform);
+            GameObject cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardZone);
             cardObj.GetComponent<Card>().SetupSelectable();
             cards.Add(cardObj);
         }

@@ -33,8 +33,8 @@ public class LTOSpawner : NetworkBehaviour
     {
         if (IsServer)
         {
-            GameManager.OnStateNight += TestSpawnLTO;
-            GameManager.OnStateAfternoon += TestLTOLifetimes;
+            GameManager.OnStateAfternoon += TestSpawnLTO;
+            GameManager.OnStateEvening += TestLTOLifetimes;
         }
     }
 
@@ -50,8 +50,8 @@ public class LTOSpawner : NetworkBehaviour
     {
         if (IsServer)
         {
-            GameManager.OnStateNight -= TestSpawnLTO;
-            GameManager.OnStateAfternoon -= TestLTOLifetimes;
+            GameManager.OnStateAfternoon -= TestSpawnLTO;
+            GameManager.OnStateEvening -= TestLTOLifetimes;
         }
 
         // Invoke the base when using networkobject
@@ -97,7 +97,7 @@ public class LTOSpawner : NetworkBehaviour
         _currentLTO.GetComponent<NetworkObject>().Spawn();
 
         //_spawnPointDict[_spawnPointList[rand]] = newLTO;
-        _currentLTO.SetupLTO(lto.Lifetime, _locationName);
+        _currentLTO.SetupLTO(lto.Lifetime+1, _locationName);
 
         SendSpawnEventClientRpc();
 
