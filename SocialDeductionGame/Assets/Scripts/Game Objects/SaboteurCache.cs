@@ -27,6 +27,7 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
     private void Start()
     {
         _cardDropTable.ValidateTable();
+        _cardDropTable.VerifyCards();
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
 
         _localTeam = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam();
@@ -92,12 +93,30 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
 
         int numToDeal = 3;
 
-        List<GameObject> cardObjList = new();
+        List<GameObject> cardObjList = ChooseCardsUnique(numToDeal);
 
-        for (int i = 0; i < (numToDeal); i++)
-            cardObjList.Add(ChooseCard());
+        //for (int i = 0; i < (numToDeal); i++)
+        //    cardObjList.Add(ChooseCard());
 
         DealCardObjects(cardObjList);
+    }
+
+    private List<GameObject> ChooseCardsUnique(int numToPick)
+    {
+        List<GameObject> cards = new();
+
+        // Pick and deal random card
+        List<int> cardIds = _cardDropTable.PickCardDropsUnique(numToPick);
+
+        // Put card on screen
+        foreach (int cardID in cardIds)
+        {
+            GameObject cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), transform);
+            cardObj.GetComponent<Card>().SetupSelectable();
+            cards.Add(cardObj);
+        }
+
+        return cards;
     }
 
     private GameObject ChooseCard()
@@ -107,12 +126,6 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
         // Pick and deal random card
         cardID = _cardDropTable.PickCardDrop();
         Debug.Log("Picked Cache Card " + cardID);
-
-        if (!CardDatabase.Instance.VerifyCard(cardID))
-        {
-            Debug.LogError("Cache Card ID could not be verified. No Card Picked");
-            return null;
-        }
 
         // Put card on screen
         GameObject cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), transform);

@@ -118,7 +118,8 @@ public class LTOSpawner : NetworkBehaviour
             Debug.Log("<color=yellow>SERVER: </color> LTO out of life, destroying");
 
             // if so despawn it
-            Destroy(_currentLTO);
+            //_currentLTO.GetComponent<NetworkObject>().Despawn();
+            Destroy(_currentLTO.gameObject);
             //_currentLTO.DestroySelf();
 
             // Send Despawn event for night recap

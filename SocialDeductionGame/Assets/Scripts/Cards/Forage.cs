@@ -66,6 +66,7 @@ public class Forage : NetworkBehaviour, ICardPicker
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
         _cardDropTable.ValidateTable();
+        _cardDropTable.VerifyCards();
     }
 
     private void OnDisable()
