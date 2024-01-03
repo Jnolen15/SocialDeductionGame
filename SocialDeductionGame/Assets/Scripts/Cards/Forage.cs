@@ -7,14 +7,19 @@ public class Forage : NetworkBehaviour, ICardPicker
 {
     // ============== Parameters / Refrences / Variables ==============
     #region P / R / V
-    [Header("Parameters")]
+    [Header("Card Parameters")]
     [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
     [SerializeField] private int _uselessCardID;
     [SerializeField] private int _uselessOddsDefault;
     [SerializeField] private int _uselessOddsDebuffModifier;
+    [Header("Danger Parameters")]
     [SerializeField] private AnimationCurve _dangerLevelDrawChances;
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
+    [SerializeField] private float _dangerIncrementNum;
+    [SerializeField] private float _dangerPerPlayerScaleNum;
+    [SerializeField] private int _dangerLevelBase;
+    [Header("Location")]
     [SerializeField] private LocationManager.LocationName _locationName;
 
     [Header("Refrences")]
@@ -139,7 +144,7 @@ public class Forage : NetworkBehaviour, ICardPicker
         _forageUI.DealCardObjects(cardObjList);
 
         // Increase danger with each forage action
-        IncrementDanger(0.8f);
+        IncrementDanger(_dangerIncrementNum);
     }
 
     private GameObject HazardTest()
@@ -288,7 +293,7 @@ public class Forage : NetworkBehaviour, ICardPicker
         if (!IsServer)
             return;
 
-        SetDangerLevelServerRPC(0);
+        SetDangerLevelServerRPC(_dangerLevelBase);
     }
 
     public void IncrementDanger(float dangerInc)
@@ -306,7 +311,7 @@ public class Forage : NetworkBehaviour, ICardPicker
         float tempDL = _netCurrentDanger.Value;
 
         // Calculate danger increment ammount (Scales per living player)
-        float incValue = (100f / (3f * PlayerConnectionManager.Instance.GetNumLivingPlayers()));
+        float incValue = (100f / (_dangerPerPlayerScaleNum * PlayerConnectionManager.Instance.GetNumLivingPlayers()));
         Debug.Log($"<color=yellow>SERVER: </color>incValue: {incValue} based on 100/({PlayerConnectionManager.Instance.GetNumLivingPlayers()}*3)");
         tempDL += (ammount * incValue);
         Debug.Log($"<color=yellow>SERVER: </color>Total value danger changed by = {tempDL} as {incValue} scaled by {ammount}");
@@ -325,7 +330,7 @@ public class Forage : NetworkBehaviour, ICardPicker
     {
         Debug.Log($"<color=yellow>SERVER: </color>{gameObject.name} had its danger level set to {ammount}");
 
-        // Clamp HP within bounds
+        // Clamp within bounds
         if (ammount < 1)
             ammount = 1;
         else if (ammount > 100)
