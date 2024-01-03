@@ -16,7 +16,10 @@ public class FoodCard : Card
         if (campfire != null)
         {
             Debug.Log("Cooking food card. Adding " + _servings + " Servings");
-            campfire.AddFood(_servings);
+            if(this.HasTag("Poison"))
+                campfire.AddPoisonedFood(_servings);
+            else
+                campfire.AddFood(_servings);
         }
         else if (player != null)
         {

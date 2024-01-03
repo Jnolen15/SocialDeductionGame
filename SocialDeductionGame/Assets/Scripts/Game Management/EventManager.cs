@@ -343,7 +343,15 @@ public class EventManager : NetworkBehaviour
             else
             {
                 attemptedSabotage = true;
-                saboCards++;
+
+                if (card.GetComponent<Card>().HasTag("Disruptive"))
+                {
+                    Debug.Log("<color=yellow>SERVER: </color>Disruptive card found, counting as 4");
+                    saboCards += 4;
+                }
+                else
+                    saboCards++;
+
                 otherCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"did not match either resources. Sabo cards now {saboCards}");
