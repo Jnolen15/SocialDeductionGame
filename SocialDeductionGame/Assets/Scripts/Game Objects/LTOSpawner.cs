@@ -11,7 +11,9 @@ public class LTOSpawner : NetworkBehaviour
     [SerializeField] private List<Transform> _spawnPointList;
     [SerializeField] private LimitedTimeObject _currentLTO;
     [SerializeField] private LocationManager.LocationName _locationName;
-    [SerializeField] private bool _hasLTO;
+    [SerializeField] private int _spawnIncreaseMod;
+    private int _daysSinceLastSpawn;
+    private bool _hasLTO;
     //private Dictionary<Transform, ILimitedTimeObject> _spawnPointDict;
 
     [System.Serializable]
@@ -74,12 +76,20 @@ public class LTOSpawner : NetworkBehaviour
             // Tf after day
             if(lto.AvailableAfterDay <= GameManager.Instance.GetCurrentDay())
             {
-                Debug.Log("<color=yellow>SERVER: </color> Avialable LTO found, Testing for spawn");
+                // Test to see if its spawned.
+                // If not spawned, days since last spawn increases
+                // Spawn mod * days since last is added to spawn chance.
+                // So the longer since a spawn, the more likely one is
 
-                // Test to see if its spawned
                 int rand = Random.Range(0, 101);
-                if (rand <= lto.SpawnChance)
+
+                Debug.Log($"<color=yellow>SERVER: </color>Testing LTO Spawn Base {lto.SpawnChance} + " +
+                    $"{(_spawnIncreaseMod * _daysSinceLastSpawn)}, Days since last {_daysSinceLastSpawn}. Rolled {rand}");
+
+                if (rand <= (lto.SpawnChance + (_spawnIncreaseMod * _daysSinceLastSpawn)))
                     SpawnLTO(lto);
+                else
+                    _daysSinceLastSpawn += 1;
             }
         }
     }
@@ -102,6 +112,7 @@ public class LTOSpawner : NetworkBehaviour
         SendSpawnEventClientRpc();
 
         _hasLTO = true;
+        _daysSinceLastSpawn = 0;
     }
 
     private void TestLTOLifetimes()
