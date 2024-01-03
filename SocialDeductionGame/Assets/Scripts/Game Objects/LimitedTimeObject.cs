@@ -6,13 +6,11 @@ using Unity.Netcode;
 public abstract class LimitedTimeObject : NetworkBehaviour
 {
     [SerializeField] protected int _life;
-    [SerializeField] protected LocationManager.LocationName _location;
 
     // ========== OVERRIDE CLASSES ==========
-    public virtual void SetupLTO(int life, LocationManager.LocationName location)
+    public virtual void SetupLTO(int life)
     {
         _life = life;
-        _location = location;
     }
 
     public virtual bool CoutdownLife()

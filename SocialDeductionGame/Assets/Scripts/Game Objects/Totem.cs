@@ -80,13 +80,13 @@ public class Totem : NetworkBehaviour, ICardPlayable
     public void Show()
     {
         _totemPannel.SetActive(true);
-        ForageUI.HideForageUI?.Invoke(_locationName);
+        ForageUI.HideForageUI?.Invoke();
     }
 
     public void Hide()
     {
         _totemPannel.SetActive(false);
-        ForageUI.ShowForageUI?.Invoke(_locationName);
+        ForageUI.ShowForageUI?.Invoke();
     }
 
     public void CloseUIOnStateChange()

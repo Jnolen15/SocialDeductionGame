@@ -35,6 +35,7 @@ public class Forage : NetworkBehaviour, ICardPicker
     [SerializeField] private NetworkVariable<bool> _netEventDebuffed = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netEventBuffed = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netTotemActive = new(writePerm: NetworkVariableWritePermission.Server);
+    private bool _locationActive;
 
     public delegate void LocationForageAction(LocationManager.LocationName locationName);
     public static event LocationForageAction OnLocationBuffEnabled;
@@ -255,14 +256,23 @@ public class Forage : NetworkBehaviour, ICardPicker
     public void Setup()
     {
         Debug.Log("Forage Setup");
+        _locationActive = true;
+
         _forageUI.Show();
     }
 
     public void Shutdown()
     {
+        _locationActive = false;
+
         _forageUI.ClearCards();
         _forageUI.HideCards();
         _forageUI.Hide();
+    }
+
+    public bool GetLocationActive()
+    {
+        return _locationActive;
     }
 
     public LocationManager.LocationName GetForageLocation()

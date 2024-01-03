@@ -83,7 +83,7 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
     private void OpenCacheClientRpc(ClientRpcParams clientRpcParams = default)
     {
         _pickCards.SetActive(true);
-        ForageUI.HideForageUI?.Invoke(_location);
+        ForageUI.HideForageUI?.Invoke();
         DealCards();
     }
 
@@ -188,7 +188,7 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
 
         ClearCards();
         _pickCards.SetActive(false);
-        ForageUI.ShowForageUI?.Invoke(_location);
+        ForageUI.ShowForageUI?.Invoke();
     }
     #endregion
 }

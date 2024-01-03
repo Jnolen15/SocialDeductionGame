@@ -24,7 +24,7 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private CanvasGroup _clawMarks;
     private Forage _forage;
 
-    public delegate void ForageUIAction(LocationManager.LocationName locationName);
+    public delegate void ForageUIAction();
     public static ForageUIAction HideForageUI;
     public static ForageUIAction ShowForageUI;
 
@@ -51,24 +51,15 @@ public class ForageUI : MonoBehaviour
     #region Functions
     public void Show()
     {
+        if (!_forage.GetLocationActive())
+            return;
+
         gameObject.SetActive(true);
     }
 
     public void Hide()
     {
         gameObject.SetActive(false);
-    }
-
-    private void Show(LocationManager.LocationName locationName)
-    {
-        if (locationName == _forage.GetForageLocation())
-            Show();
-    }
-
-    private void Hide(LocationManager.LocationName locationName)
-    {
-        if (locationName == _forage.GetForageLocation())
-            Hide();
     }
 
     public void ShowCards()
