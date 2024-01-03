@@ -26,7 +26,7 @@ public class NightEventResults : MonoBehaviour
     [SerializeField] private GameObject _playerNamePref;
 
     // ================== Setup ==================
-    public void DisplayResults(int[] cardIDs, ulong[] contributorIDS, int eventID, int playerNum, bool passed, bool bonus, Vector3 scores)
+    public void DisplayResults(int[] goodCardIDs, int[] badCardIDs, ulong[] contributorIDS, int eventID, int playerNum, bool passed, bool bonus, Vector3 scores)
     {
         ClearBoard();
 
@@ -55,10 +55,18 @@ public class NightEventResults : MonoBehaviour
 
         // Cards
         //SortCards(int[] cardIDs)
-        foreach (int cardID in cardIDs)
+        foreach (int cardID in goodCardIDs)
         {
             Card cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardArea).GetComponent<Card>();
             cardObj.SetupUI();
+            cardObj.GetComponentInChildren<CardVisual>().ShowOutline(Color.green);
+        }
+
+        foreach (int cardID in badCardIDs)
+        {
+            Card cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardArea).GetComponent<Card>();
+            cardObj.SetupUI();
+            cardObj.GetComponentInChildren<CardVisual>().ShowOutline(Color.red);
         }
 
         int extraPrimary = 0;

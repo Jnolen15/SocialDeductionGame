@@ -75,13 +75,13 @@ public class EventManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus, Vector3 scores)
+    private void UpdateEventUIClientRpc(int[] goodCardIDs, int[] badCardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus, Vector3 scores)
     {
         _nightEventThumbnail.SetEventResults(passed);
 
         // Show results
         _nightEventResults.gameObject.SetActive(true);
-        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, scores);
+        _nightEventResults.DisplayResults(goodCardIDs, badCardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, scores);
     }
 
     public void UpdateNightEventPicker()
@@ -401,13 +401,14 @@ public class EventManager : NetworkBehaviour
             SufferingManager.Instance.ModifySuffering(1, 102, true);
 
         // Combine lists for clients
-        List<int> cardIDList = new();
-        cardIDList.AddRange(primaryCards);
-        cardIDList.AddRange(secondaryCards);
-        cardIDList.AddRange(otherCards);
+        List<int> goodCardIDList = new();
+        goodCardIDList.AddRange(primaryCards);
+        goodCardIDList.AddRange(secondaryCards);
+        List<int> badCardIDList = new();
+        badCardIDList.AddRange(otherCards);
 
         // Update all clients visually
-        UpdateEventUIClientRpc(cardIDList.ToArray(), _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
+        UpdateEventUIClientRpc(goodCardIDList.ToArray(), badCardIDList.ToArray(), _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
             _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, scores);
     }
     #endregion
