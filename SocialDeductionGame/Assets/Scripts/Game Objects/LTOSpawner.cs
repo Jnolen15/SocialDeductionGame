@@ -61,6 +61,15 @@ public class LTOSpawner : NetworkBehaviour
     }
     #endregion
 
+    // ===================== TESTING =====================
+    /*private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            SpawnLTO(_ltoList[0]);
+        }
+    }*/
+
     // ===================== Function =====================
     private void TestSpawnLTO()
     {
