@@ -58,7 +58,6 @@ public class PlayerConnectionManager : NetworkBehaviour
             PlayerObject = playerObj;
         }
 
-
         // Functions
         public void SetName(string name)
         {
@@ -70,7 +69,7 @@ public class PlayerConnectionManager : NetworkBehaviour
             PlayerObject = playerObj;
         }
 
-        public void SetTeam(PlayerData.Team team)
+        public void SetPlayerTeam(PlayerData.Team team)
         {
             PlayerTeam = team;
             PlayerObject.GetComponent<PlayerData>().SetTeam(team);
@@ -81,11 +80,11 @@ public class PlayerConnectionManager : NetworkBehaviour
             PlayerStyleIndex = style;
             PlayerMaterialIndex = mat;
         }
+
         public void SetPlayerLiving(bool isLiving)
         {
             PlayerLiving = isLiving;
         }
-
 
         public int GetPlayerStyle()
         {
@@ -102,10 +101,16 @@ public class PlayerConnectionManager : NetworkBehaviour
             return PlayerLiving;
         }
 
+        public PlayerData.Team GetPlayerTeam()
+        {
+            return PlayerTeam;
+        }
+
         public override string ToString()
         {
             string outStr = PlayerName;
             outStr += ", On team " + PlayerTeam.ToString();
+            outStr += ", Is living " + GetPlayerLiving();
             outStr += ", With style" + PlayerStyleIndex + " and material " + PlayerMaterialIndex;
             if (PlayerObject)
                 outStr += " object is not null";
@@ -521,12 +526,22 @@ public class PlayerConnectionManager : NetworkBehaviour
             if (saboPlayers.Contains(playerID))
             {
                 Debug.Log($"<color=yellow>SERVER: </color>Assinging player {playerID} to team Saboteurs");
-                _playerDict[playerID].SetTeam(PlayerData.Team.Saboteurs);
+                _playerDict[playerID].SetPlayerTeam(PlayerData.Team.Saboteurs);
+
+                // Update that client
+                ClientRpcParams clientRpcParams = default;
+                clientRpcParams.Send.TargetClientIds = new ulong[] { playerID };
+                UpdatePlayerTeamClientRpc(playerID, PlayerData.Team.Saboteurs, clientRpcParams);
             }
             else
             {
                 Debug.Log($"<color=yellow>SERVER: </color>Assinging player {playerID} to team Survivors");
-                _playerDict[playerID].SetTeam(PlayerData.Team.Survivors);
+                _playerDict[playerID].SetPlayerTeam(PlayerData.Team.Survivors);
+
+                // Update that client
+                ClientRpcParams clientRpcParams = default;
+                clientRpcParams.Send.TargetClientIds = new ulong[] { playerID };
+                UpdatePlayerTeamClientRpc(playerID, PlayerData.Team.Survivors, clientRpcParams);
             }
         }
     }
@@ -539,6 +554,9 @@ public class PlayerConnectionManager : NetworkBehaviour
      * So for example clients could access what team a player is on and also (untested) their game object
      * In the future, may want to change it so that the client does not reiceive that info
      * As a cheat could be made to instantly see player teams
+     * 
+     * Acctualy no teams are never updated, and they start unassigned. So other players should see all teams unassinged
+     * Escept for their own team which should be set
     */
 
     [ClientRpc]
@@ -604,6 +622,18 @@ public class PlayerConnectionManager : NetworkBehaviour
         entry.SetPlayerLiving(playerLiving);
 
         Debug.Log($"<color=blue>CLIENT: </color> Updated player {playerID}'s living status to {playerLiving}");
+    }
+
+    [ClientRpc]
+    private void UpdatePlayerTeamClientRpc(ulong playerID, PlayerData.Team playerTeam, ClientRpcParams clientRpcParams = default)
+    {
+        if (IsServer)
+            return;
+
+        PlayerEntry entry = FindPlayerEntry(playerID);
+        entry.PlayerTeam = playerTeam;
+
+        Debug.Log($"<color=blue>CLIENT: </color> Updated player {playerID}'s team status to {playerTeam}");
     }
     #endregion
 
@@ -673,6 +703,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         return playerIDs;
     }
 
+
     // ~~~~~~~~~ Return Network Vairables ~~~~~~~~~
     // Server or Client
     public int GetNumConnectedPlayers()
@@ -693,6 +724,17 @@ public class PlayerConnectionManager : NetworkBehaviour
     {
         return NetworkManager.Singleton.LocalClientId;
     }
+
+    public bool GetLocalPlayerLiving()
+    {
+        return FindPlayerEntry(NetworkManager.Singleton.LocalClientId).GetPlayerLiving();
+    }
+
+    public PlayerData.Team GetLocalPlayerTeam()
+    {
+        return FindPlayerEntry(NetworkManager.Singleton.LocalClientId).GetPlayerTeam();
+    }
+
 
     // ~~~~~~~~~ Player Living Stuffs ~~~~~~~~~
     // Server or Client
@@ -734,13 +776,15 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         foreach (PlayerEntry playa in _playerDict.Values)
         {
-            if (playa.GetPlayerLiving() && playa.PlayerTeam == team)
+            if (playa.GetPlayerLiving() && playa.GetPlayerTeam() == team)
                 numAlive++;
         }
         Debug.Log("<color=yellow>SERVER: </color> Living members of team " + team.ToString() + " = " + numAlive);
         return numAlive;
     }
 
+
+    // ~~~~~~~~~ Team Stuffs ~~~~~~~~~
     // Server only
     public int GetNumSaboteurs()
     {

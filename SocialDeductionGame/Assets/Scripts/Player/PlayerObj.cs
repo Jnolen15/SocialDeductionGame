@@ -42,6 +42,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
             VivoxClient.OnBeginSpeaking += ToggleSpeakingIconActive;
             VivoxClient.OnEndSpeaking += ToggleSpeakingIconOff;
+
+            Campfire.OnTookFromFire += ToggleCampfireIconActive;
         }
         else
             Destroy(_cardHighlight); // A temp solution
@@ -78,6 +80,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
             VivoxClient.OnBeginSpeaking -= ToggleSpeakingIconActive;
             VivoxClient.OnEndSpeaking -= ToggleSpeakingIconOff;
+
+            Campfire.OnTookFromFire -= ToggleCampfireIconActive;
         }
     }
 

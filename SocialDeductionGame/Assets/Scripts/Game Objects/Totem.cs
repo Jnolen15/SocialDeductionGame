@@ -22,7 +22,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
     [SerializeField] private NetworkVariable<bool> _netIsActive = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netCooldown = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private List<TotemSlot> _totemSlots = new();
-    private PlayerData.Team _localTeam = PlayerData.Team.Unassigned;
+    [SerializeField] private PlayerData.Team _localTeam = PlayerData.Team.Unassigned;
 
     public delegate void TotemAction(LocationManager.LocationName locationName);
     public static event TotemAction OnLocationTotemEnable;
@@ -133,7 +133,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
 
     private void GetLocalTeam()
     {
-        _localTeam = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam();
+        _localTeam = PlayerConnectionManager.Instance.GetLocalPlayerTeam();
     }
     #endregion
 

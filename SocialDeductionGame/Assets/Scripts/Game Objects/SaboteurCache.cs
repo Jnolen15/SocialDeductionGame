@@ -30,7 +30,7 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
         _cardDropTable.VerifyCards();
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
 
-        _localTeam = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam();
+        _localTeam = PlayerConnectionManager.Instance.GetLocalPlayerTeam();
         if (_localTeam == PlayerData.Team.Saboteurs)
             _openButton.SetActive(true);
     }
@@ -41,6 +41,9 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
     public void AttemptOpen()
     {
         if (_localTeam != PlayerData.Team.Saboteurs || _opened)
+            return;
+
+        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
             return;
 
         if (SufferingManager.Instance.GetCurrentSufffering() >= 2)

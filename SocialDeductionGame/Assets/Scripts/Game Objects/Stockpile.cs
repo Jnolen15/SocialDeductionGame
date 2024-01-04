@@ -43,7 +43,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     // ================== Text ==================
     private void SetNumVisible()
     {
-        if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
             _numCardsPannel.SetActive(true);
     }
 

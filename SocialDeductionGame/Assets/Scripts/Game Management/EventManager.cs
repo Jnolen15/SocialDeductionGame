@@ -209,14 +209,7 @@ public class EventManager : NetworkBehaviour
     private void InvokeNightEventClientRpc(int eventID)
     {
         // Saboteurs not effected by night events
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
-        {
-            Debug.LogError("Cannot enact night event. Player object not found!");
-            return;
-        }
-
-        if (player.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
             return;
 
         Debug.Log("<color=blue>CLIENT: </color>Invoking night event!");
@@ -250,14 +243,7 @@ public class EventManager : NetworkBehaviour
     private void InvokeNightEventBonusClientRpc(int eventID)
     {
         // Saboteurs not effected by night event Bonuses
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
-        {
-            Debug.LogError("Cannot enact night event bonus. Player object not found!");
-            return;
-        }
-
-        if (player.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
             return;
 
         Debug.Log("<color=blue>CLIENT: </color>Invoking night event bonus!");

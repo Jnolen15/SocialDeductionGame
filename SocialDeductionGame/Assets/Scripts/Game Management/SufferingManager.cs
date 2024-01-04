@@ -56,7 +56,7 @@ public class SufferingManager : NetworkBehaviour
 
     private void Setup()
     {
-        if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
         {
             _isSabo = true;
             _sufferingUI.SetActive(true);

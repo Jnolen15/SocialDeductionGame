@@ -114,9 +114,10 @@ public class PlayerData : NetworkBehaviour
 
     // ================ Teams ================
     #region Teams
+    // Server
     public void SetTeam(Team team)
     {
-        Debug.Log($"Setting player {_netPlayerName.Value} to team {team}");
+        Debug.Log($"<color=yellow>SERVER: </color>Setting player {_netPlayerName.Value} to team {team}");
 
         _netTeam.Value = team;
     }

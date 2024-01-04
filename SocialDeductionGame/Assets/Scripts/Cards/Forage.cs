@@ -27,7 +27,6 @@ public class Forage : NetworkBehaviour, ICardPicker
     private CardManager _cardManager;
     private GameObject _playerObj;
     private HandManager _playerHandMan;
-    private PlayerHealth _playerHealth;
     [SerializeField] private GameObject _hazardCardPref;
 
     [Header("Variables")]
@@ -99,7 +98,6 @@ public class Forage : NetworkBehaviour, ICardPicker
         _playerObj = GameObject.FindGameObjectWithTag("Player");
         if (_playerObj != null)
         {
-            _playerHealth = _playerObj.GetComponent<PlayerHealth>();
             _playerHandMan = _playerObj.GetComponent<HandManager>();
         }
         else
@@ -116,7 +114,7 @@ public class Forage : NetworkBehaviour, ICardPicker
         if (!_playerObj)
             SetupPlayerConnections();
 
-        if (!_playerHealth.IsLiving())
+        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
             return;
 
         Debug.Log(gameObject.name + " Dealing cards");
