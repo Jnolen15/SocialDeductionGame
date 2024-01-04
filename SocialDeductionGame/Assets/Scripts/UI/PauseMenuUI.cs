@@ -7,8 +7,8 @@ using TMPro;
 public class PauseMenuUI : MonoBehaviour
 {
     // =================== Refrences ===================
-    [Header("Quit Menu")]
-    [SerializeField] private GameObject _quitMenu;
+    [Header("Pause Refrences")]
+    [SerializeField] private GameObject _pauseUI;
 
     // =================== Update ===================
     #region Update
@@ -16,11 +16,16 @@ public class PauseMenuUI : MonoBehaviour
     {
         // Quit Menu
         if (Input.GetKeyDown(KeyCode.Escape))
-            _quitMenu.SetActive(true);
+            TogglePause();
     }
     #endregion
 
     // =================== UI Functions ===================
+    public void TogglePause()
+    {
+        _pauseUI.SetActive(!_pauseUI.activeSelf);
+    }
+
     public void QuitGame()
     {
         Debug.Log("Quitting Game");
