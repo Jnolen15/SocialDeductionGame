@@ -25,6 +25,8 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     [SerializeField] private TextMeshPro _stateText;
     [SerializeField] private GameObject _foodMenu;
     [SerializeField] private GameObject _flameObj;
+    [SerializeField] private ParticleSystem _fireBusrtFX;
+    [SerializeField] private ParticleSystem _poisonFireBusrtFX;
     private CardManager _cardManager;
 
     public delegate void CampfireAction();
@@ -100,6 +102,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     public void AddFoodServerRpc(int servings)
     {
         _netServingsStored.Value += servings;
+        PortionsAddedVFXClientRpc(servings);
     }
 
     public void AddPoisonedFood(int servings)
@@ -112,6 +115,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     {
         _netIsPoisoned.Value = true;
         _netServingsStored.Value += servings;
+        PoisonAddedVFXClientRpc(servings);
     }
 
     private void RemovePoison()
@@ -120,6 +124,18 @@ public class Campfire : NetworkBehaviour, ICardPlayable
             return;
 
         _netIsPoisoned.Value = false;
+    }
+
+    [ClientRpc]
+    private void PortionsAddedVFXClientRpc(int servings)
+    {
+        _fireBusrtFX.Emit(servings * 3);
+    }
+
+    [ClientRpc]
+    private void PoisonAddedVFXClientRpc(int servings)
+    {
+        _poisonFireBusrtFX.Emit(servings * 3);
     }
 
     // ================== State Management ==================
