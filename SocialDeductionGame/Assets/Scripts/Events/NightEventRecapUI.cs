@@ -37,6 +37,7 @@ public class NightEventRecapUI : MonoBehaviour
     void OnEnable()
     {
         GameManager.OnStateMorning += CloseRecap;
+        GameManager.OnStateGameEnd += CloseRecap;
         PlayerHealth.OnHungerDrain += ShowHungerDrain;
         PlayerHealth.OnStarvation += ShowStarvation;
         PlayerHealth.OnDeath += ShowDeath;
@@ -49,6 +50,7 @@ public class NightEventRecapUI : MonoBehaviour
     private void OnDisable()
     {
         GameManager.OnStateMorning -= CloseRecap;
+        GameManager.OnStateGameEnd -= CloseRecap;
         PlayerHealth.OnHungerDrain -= ShowHungerDrain;
         PlayerHealth.OnStarvation -= ShowStarvation;
         PlayerHealth.OnDeath -= ShowDeath;

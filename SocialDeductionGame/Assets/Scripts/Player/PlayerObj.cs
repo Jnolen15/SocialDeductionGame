@@ -16,6 +16,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private GameObject _readyIcon;
     [SerializeField] private GameObject _saboIcon;
     [SerializeField] private GameObject _speakingIcon;
+    [SerializeField] private GameObject _survivorTeamPlate;
+    [SerializeField] private GameObject _saboteurTeamPlate;
     [SerializeField] private Transform _character;
     [SerializeField] private List<Material> _characterMatList = new();
     [SerializeField] private Material _ghostMat;
@@ -29,6 +31,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private NetworkVariable<bool> _netTookFromFire = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> _netIsReady = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> _netSpeaking = new(writePerm: NetworkVariableWritePermission.Owner);
+    private NetworkVariable<bool> _netSurvivorTeam = new(writePerm: NetworkVariableWritePermission.Owner);
+    private NetworkVariable<bool> _netSaboteurTeam = new(writePerm: NetworkVariableWritePermission.Owner);
 
     // ================== Setup ==================
     public override void OnNetworkSpawn()
@@ -39,6 +43,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         {
             GameManager.OnStateMorning += ToggleCampfireIconOff;
             GameManager.OnStateChange += ToggleReadyIconIconOff;
+            GameManager.OnStateGameEnd += ShowTeam;
 
             VivoxClient.OnBeginSpeaking += ToggleSpeakingIconActive;
             VivoxClient.OnEndSpeaking += ToggleSpeakingIconOff;
@@ -60,6 +65,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _netTookFromFire.OnValueChanged += UpdateCampfireIcon;
         _netIsReady.OnValueChanged += UpdateReadyIcon;
         _netSpeaking.OnValueChanged += UpdateSpeakingIcon;
+
+        _netSurvivorTeam.OnValueChanged += UpdateSurvivorTeamPlate;
+        _netSaboteurTeam.OnValueChanged += UpdateSaboteurTeamPlate;
     }
 
     private void OnDisable()
@@ -71,12 +79,16 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         _netIsReady.OnValueChanged -= UpdateReadyIcon;
         _netSpeaking.OnValueChanged -= UpdateSpeakingIcon;
 
+        _netSurvivorTeam.OnValueChanged -= UpdateSurvivorTeamPlate;
+        _netSaboteurTeam.OnValueChanged -= UpdateSaboteurTeamPlate;
+
         GameManager.OnStateIntro -= UpdateNameSaboColor;
 
         if (IsOwner)
         {
             GameManager.OnStateMorning -= ToggleCampfireIconOff;
             GameManager.OnStateChange -= ToggleReadyIconIconOff;
+            GameManager.OnStateGameEnd -= ShowTeam;
 
             VivoxClient.OnBeginSpeaking -= ToggleSpeakingIconActive;
             VivoxClient.OnEndSpeaking -= ToggleSpeakingIconOff;
@@ -194,6 +206,32 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private void UpdateSpeakingIcon(bool prev, bool next)
     {
         _speakingIcon.SetActive(next);
+    }
+
+    private void ShowTeam()
+    {
+        if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs)
+            _netSaboteurTeam.Value = true;
+        else
+            _netSurvivorTeam.Value = true;
+    }
+
+    private void UpdateSurvivorTeamPlate(bool prev, bool next)
+    {
+        _campfireIcon.SetActive(false);
+        _saboIcon.SetActive(false);
+        _readyIcon.SetActive(false);
+
+        _survivorTeamPlate.SetActive(next);
+    }
+
+    private void UpdateSaboteurTeamPlate(bool prev, bool next)
+    {
+        _campfireIcon.SetActive(false);
+        _saboIcon.SetActive(false);
+        _readyIcon.SetActive(false);
+
+        _saboteurTeamPlate.SetActive(next);
     }
     #endregion
 

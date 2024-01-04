@@ -44,19 +44,24 @@ public class TabButtonUI : MonoBehaviour
     {
         GameManager.OnStateMorning += ShowEventButton;
         GameManager.OnStateNight += HideEventButton;
+        GameManager.OnStateGameEnd += HideEventButton;
 
         GameManager.OnStateMorning += ShowMapButton;
         GameManager.OnStateAfternoon += HideMapButton;
+        GameManager.OnStateGameEnd += HideMapButton;
 
         GameManager.OnStateMorning += ShowCraftingButton;
         GameManager.OnStateEvening += HideCraftingButton;
+        GameManager.OnStateGameEnd += HideCraftingButton;
 
         GameManager.OnStateMorning += ShowHelpButton;
         GameManager.OnStateNight += HideHelpButton;
+        GameManager.OnStateGameEnd += HideHelpButton;
 
         GameManager.OnStateEvening += ShowExileButton;
         GameManager.OnStateNight += HideExileButton;
         ExileManager.OnExileVoteComplete += HideExileButton;
+        GameManager.OnStateGameEnd += HideExileButton;
     }
 
     private void Start()
@@ -72,19 +77,24 @@ public class TabButtonUI : MonoBehaviour
     {
         GameManager.OnStateMorning -= ShowEventButton;
         GameManager.OnStateNight -= HideEventButton;
+        GameManager.OnStateGameEnd -= HideEventButton;
 
         GameManager.OnStateMorning -= ShowMapButton;
         GameManager.OnStateAfternoon -= HideMapButton;
+        GameManager.OnStateGameEnd -= HideMapButton;
 
         GameManager.OnStateMorning -= ShowCraftingButton;
         GameManager.OnStateEvening -= HideCraftingButton;
+        GameManager.OnStateGameEnd -= HideCraftingButton;
 
         GameManager.OnStateMorning -= ShowHelpButton;
         GameManager.OnStateNight -= HideHelpButton;
+        GameManager.OnStateGameEnd -= HideHelpButton;
 
         GameManager.OnStateEvening -= ShowExileButton;
         GameManager.OnStateNight -= HideExileButton;
         ExileManager.OnExileVoteComplete -= HideExileButton;
+        GameManager.OnStateGameEnd -= HideExileButton;
     }
     #endregion
 

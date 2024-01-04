@@ -92,7 +92,9 @@ public class ForageUI : MonoBehaviour
             canvasCards.Add(cardCanvas);
         }
 
-        StartCoroutine(DealCardObjectsAnimated(canvasCards));
+        // Check game object active cuz its possible game ends and the object becomes unactive
+        if (gameObject.activeSelf)
+            StartCoroutine(DealCardObjectsAnimated(canvasCards));
     }
 
     private IEnumerator DealCardObjectsAnimated(List<CanvasGroup> cardObjs)
@@ -171,12 +173,13 @@ public class ForageUI : MonoBehaviour
 
     public void ShowClawMarks()
     {
+        CloseClaw();
+
         _clawMarks.gameObject.SetActive(true);
 
-        Sequence ClawSequence = DOTween.Sequence();
-        ClawSequence.Append(_clawMarks.transform.DOScale(new Vector3(1f, 1f, 1f), 0.1f))
-          .AppendInterval(1)
-          .Append(_clawMarks.DOFade(0, 2f).OnComplete(() => CloseClaw()));
+        _clawMarks.transform.DOScale(new Vector3(1f, 1f, 1f), 0.1f)
+            .OnComplete(() => _clawMarks.DOFade(0, 3f).SetEase(Ease.OutSine)
+                .OnComplete(() => CloseClaw()));
     }
 
     public void CloseClaw()

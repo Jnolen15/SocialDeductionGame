@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using TMPro;
+using DG.Tweening;
+using UnityEngine.UI;
 
 public class GameOverUI : MonoBehaviour
 {
     // =================== Refrences ===================
     [SerializeField] private GameObject _panel;
+    [SerializeField] private CanvasGroup _transitionPannel;
     [SerializeField] private TextMeshProUGUI _endScreenText;
 
     // =================== Setup ===================
@@ -28,6 +31,8 @@ public class GameOverUI : MonoBehaviour
     private void OnGameEnd(bool survivorWin)
     {
         Debug.Log("<color=yellow>SERVER: </color>SHOWING GAME OVER SCREEN");
+
+        AnimateTransition();
         Show();
 
         if (survivorWin)
@@ -41,7 +46,7 @@ public class GameOverUI : MonoBehaviour
         }
 
         // Pause Game
-        Time.timeScale = 0;
+        //Time.timeScale = 0;
     }
 
     public void ReturnToMainMenu()
@@ -60,5 +65,12 @@ public class GameOverUI : MonoBehaviour
     private void Hide()
     {
         _panel.SetActive(false);
+    }
+
+    private void AnimateTransition()
+    {
+        _transitionPannel.gameObject.SetActive(true);
+
+        _transitionPannel.DOFade(0, 2f).SetEase(Ease.OutSine).OnComplete(() => _transitionPannel.gameObject.SetActive(false));
     }
 }

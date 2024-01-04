@@ -2115,10 +2115,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3769029991069165933}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 3769029991069165929}
+        m_TargetAssemblyTypeName: NightEventResults, Assembly-CSharp
+        m_MethodName: Hide
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -3063,6 +3063,38 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7742954886902710695}
     m_Modifications:
+    - target: {fileID: 638617672488780895, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 638617672488780895, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 638617672488780895, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 638617672488780895, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2196349236471138798, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2196349236471138798, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2196349236471138798, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2196349236471138798, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4607174053628019438, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
       propertyPath: m_Name
       value: Night Event Card Visual

@@ -57,7 +57,8 @@ public class GameManager : NetworkBehaviour
         Evening,    // Results of night event contribution, take food from fire, vote to exile
         NightTransition,
         Night,      // Summary of night event effects / effects happen, saboteur picks new night event
-        MorningTransition
+        MorningTransition,
+        GameOver    // Game over state
     }
     [Header("Current State")]
     [SerializeField] private NetworkVariable<GameState> _netCurrentGameState = new(writePerm: NetworkVariableWritePermission.Server);
@@ -78,6 +79,7 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateToAction OnStateAfternoon;
     public static event ChangeStateToAction OnStateEvening;
     public static event ChangeStateToAction OnStateNight;
+    public static event ChangeStateToAction OnStateGameEnd;
 
     public static event Action<bool> OnGameEnd;
     #endregion
@@ -166,10 +168,10 @@ public class GameManager : NetworkBehaviour
         // FOR TESTING Skip to next state
         if (_doCheats && Input.GetKeyDown(KeyCode.S))
         {
-            _netCurrentGameState.Value++;
-
-            if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
-                _netCurrentGameState.Value = 0;
+            if (_netCurrentGameState.Value == GameState.MorningTransition)
+                _netCurrentGameState.Value = GameState.Morning;
+            else
+                _netCurrentGameState.Value++;
         }
     }
 
@@ -227,9 +229,10 @@ public class GameManager : NetworkBehaviour
         PlayerConnectionManager.Instance.UnreadyAllPlayers();
 
         // Progress to next state, looping back to morning if day over
-        _netCurrentGameState.Value++;
-        if (((int)_netCurrentGameState.Value) == System.Enum.GetValues(typeof(GameState)).Length)
+        if (_netCurrentGameState.Value == GameState.MorningTransition)
             _netCurrentGameState.Value = GameState.Morning;
+        else
+            _netCurrentGameState.Value++;
     }
 
     public void UpdateGameState(GameState prev, GameState current)
@@ -285,6 +288,10 @@ public class GameManager : NetworkBehaviour
             case GameState.MorningTransition:
                 if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
                 break;
+            case GameState.GameOver:
+                _locationManager.ForceLocation(LocationManager.LocationName.Camp);
+                OnStateGameEnd?.Invoke();
+                break;
         }
     }
 
@@ -315,28 +322,19 @@ public class GameManager : NetworkBehaviour
         if (_netDay.Value >= _numDaysTillRescue)
         {
             Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived. Survivor Win!");
-            SetSurvivorWinClientRpc();
+            EndGame(true);
         }
         else if (_rescueEarly)
         {
             Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived early. Survivor Win!");
             _rescueEarly = false;
-            SetSurvivorWinClientRpc();
+            EndGame(true);
         }
         else if (numLivingSaboteurs <= 0)
         {
             Debug.Log("<color=yellow>SERVER: </color>All Saboteurs are dead. Rescue arriving tomorrow.");
             _rescueEarly = true;
         }
-    }
-
-    [ClientRpc]
-    private void SetSurvivorWinClientRpc()
-    {
-        Debug.Log("<color=blue>CLIENT: </color> Survivors Win!");
-
-        // Show end screens
-        OnGameEnd?.Invoke(true);
     }
 
     // Check for game end via Saboteur win
@@ -354,24 +352,34 @@ public class GameManager : NetworkBehaviour
         if (PlayerConnectionManager.Instance.GetNumLivingPlayers() == 0)
         {
             Debug.Log("<color=yellow>SERVER: </color> All players have died, WIN!");
-            SetSaboteurWinClientRpc();
+            EndGame(false);
         }
 
         // If number of Saboteurs >= survivors
         if (numLivingSaboteurs >= numLivingSurvivors)
         {
             Debug.Log("<color=yellow>SERVER: </color> # of Saboteurs >= # of survivors, WIN!");
-            SetSaboteurWinClientRpc();
+            EndGame(false);
         }
     }
 
-    [ClientRpc]
-    private void SetSaboteurWinClientRpc()
+    private void EndGame(bool survivorWin)
     {
-        Debug.Log("<color=blue>CLIENT: </color> Saboteur Wins!");
+        if (!IsServer)
+            return;
+
+        _netCurrentGameState.Value = GameState.GameOver;
+
+        SetGameOverClientRpc(survivorWin);
+    }
+
+    [ClientRpc]
+    private void SetGameOverClientRpc(bool survivorWin)
+    {
+        Debug.Log("<color=blue>CLIENT: </color> Game over. Survivor win " + survivorWin);
 
         // Show end screens
-        OnGameEnd?.Invoke(false);
+        OnGameEnd?.Invoke(survivorWin);
     }
 
     #endregion

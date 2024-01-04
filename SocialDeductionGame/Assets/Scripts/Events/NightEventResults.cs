@@ -26,6 +26,24 @@ public class NightEventResults : MonoBehaviour
     [SerializeField] private GameObject _playerNamePref;
 
     // ================== Setup ==================
+    void OnEnable()
+    {
+        GameManager.OnStateNight += Hide;
+        GameManager.OnStateGameEnd += Hide;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.OnStateNight -= Hide;
+        GameManager.OnStateGameEnd -= Hide;
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+    // ================== Function ==================
     public void DisplayResults(int[] goodCardIDs, int[] badCardIDs, ulong[] contributorIDS, int eventID, int playerNum, bool passed, bool bonus, Vector3 scores)
     {
         ClearBoard();
