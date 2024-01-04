@@ -77,6 +77,16 @@ public class CardDropTable
 		}
 	}
 
+	public void VerifyCards()
+    {
+		// Verify that all card IDs in the list are in the card database
+		foreach (CardDropEntry cardDrop in CardDrops)
+		{
+			if (!CardDatabase.Instance.VerifyCard(cardDrop.CardID))
+				Debug.LogError($"CardDropTable contains card with ID {cardDrop.CardID} that is not in the CardDatabase");
+		}
+	}
+
 	/// <summary>
 	/// Picks and returns the loot drop item based on it's probability.
 	/// </summary>
@@ -96,5 +106,45 @@ public class CardDropTable
 
 		Debug.LogError("Item couldn't be picked... Be sure that all of your active loot drop tables have assigned at least one item!");
 		return 0;
+	}
+
+	/// <summary>
+	/// Picks and returns a list of drops, none of which are the same
+	/// </summary>
+	public List<int> PickCardDropsUnique(int numToPick)
+	{
+		List<int> cardList = new();
+
+		// Make sure list of cards is long enough
+		if (numToPick > CardDrops.Count)
+        {
+			Debug.LogWarning("Not enough cards in CardDrops to return a unique list of " + numToPick);
+			return cardList;
+		}
+
+        for (int i = 0; i < numToPick; i++)
+        {
+			float randomNum = Random.Range(0, _probabilityTotalWeight);
+			int dropID = 0;
+
+			// Find an item thats range contains randomNum
+			foreach (CardDropEntry cardDrop in CardDrops)
+			{
+				// If the random number matches the item's range, return card id
+				if (randomNum > cardDrop.ProbabilityRangeFrom && randomNum < cardDrop.ProbabilityRangeTo)
+				{
+					dropID = cardDrop.CardID;
+				}
+			}
+
+			// Has not yet been picked
+			if (!cardList.Contains(dropID))
+				cardList.Add(dropID);
+			// Was picked, try again
+			else
+				i--;
+		}
+
+		return cardList;
 	}
 }

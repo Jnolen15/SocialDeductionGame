@@ -119,7 +119,12 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
             }
         }
         else if (!_totem.GetTotemOnCooldown())
-            return true;
+        {
+            if(cardToPlay.HasTag("NonTotemable"))
+                return false;
+            else
+                return true;
+        }
         else
         {
             Debug.Log("Totem is inactive and on cooldown");

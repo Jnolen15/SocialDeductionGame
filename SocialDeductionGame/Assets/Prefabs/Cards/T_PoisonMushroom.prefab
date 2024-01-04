@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2924833847204252799
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2924833847204252798}
+  - component: {fileID: 2924833847204252796}
+  m_Layer: 5
+  m_Name: T_PoisonMushroom
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2924833847204252798
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2924833847204252799}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 420}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2924833847204252796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2924833847204252799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca346ab0050c74646b36c2977bc918aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cardID: 2011
+  _cardName: Poison Mushroom
+  _cardDescription: Will poison all food coocked with it. +1 Portions
+  _cardArt: {fileID: 0}
+  _cardArtAdjustments: {x: 1, y: 0, z: 0}
+  _cardArtDimensions: {x: 0, y: 0}
+  _tags:
+  - {fileID: 11400000, guid: 8b94e36dd60a2884680107d4e6873d9b, type: 2}
+  - {fileID: 11400000, guid: 0a600377c80d19843a387af0a435f67a, type: 2}
+  - {fileID: 11400000, guid: ec8bfffb31805f0418a20e63501c00cb, type: 2}
+  _cardPlayablePrefab: {fileID: 7172186348430946835, guid: 703e675326ef9a847bc9edc529ae2c3e, type: 3}
+  _cardSelectablePrefab: {fileID: 3778964478271374572, guid: b2a1d53ab49ad8447a7f41ed5ca64a9d, type: 3}
+  _cardUIPrefab: {fileID: 5427489456640813847, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
+  _servings: 1
+  _hpGain: 0

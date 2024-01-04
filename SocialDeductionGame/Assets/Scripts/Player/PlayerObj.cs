@@ -42,6 +42,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
             VivoxClient.OnBeginSpeaking += ToggleSpeakingIconActive;
             VivoxClient.OnEndSpeaking += ToggleSpeakingIconOff;
+
+            Campfire.OnTookFromFire += ToggleCampfireIconActive;
         }
         else
             Destroy(_cardHighlight); // A temp solution
@@ -78,6 +80,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
             VivoxClient.OnBeginSpeaking -= ToggleSpeakingIconActive;
             VivoxClient.OnEndSpeaking -= ToggleSpeakingIconOff;
+
+            Campfire.OnTookFromFire -= ToggleCampfireIconActive;
         }
     }
 
@@ -201,7 +205,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
         _playerHealth.ModifyHunger(servings, "Consumed Card");
 
-        if (hpGain > 0)
+        if (hpGain != 0)
             _playerHealth.ModifyHealth(hpGain, "Consumed Card");
     }
 }

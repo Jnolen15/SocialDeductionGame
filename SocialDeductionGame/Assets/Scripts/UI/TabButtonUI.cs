@@ -342,6 +342,9 @@ public class TabButtonUI : MonoBehaviour
         if (_exileTabHidden)
             return;
 
+        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
+            return;
+
         Debug.Log("Exile button pressed");
         OnExilePressed?.Invoke();
     }

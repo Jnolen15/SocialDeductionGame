@@ -9,6 +9,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     // Variables
     [SerializeField] private CardTag _cardTagAccepted;
     [SerializeField] private NetworkVariable<float> _netServingsStored = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netIsPoisoned = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private float _takeBufferTimeMax;
     private float _takeBufferTimer;
     public enum State
@@ -26,6 +27,8 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     [SerializeField] private GameObject _flameObj;
     private CardManager _cardManager;
 
+    public delegate void CampfireAction();
+    public static event CampfireAction OnTookFromFire;
 
     // ================== Setup ==================
     private void Awake()
@@ -35,6 +38,9 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         //GameManager.OnStateAfternoon += SetStateCooking;
         GameManager.OnStateEvening += SetStateFoodReady;
         GameManager.OnStateNight += SetStateExtingushed;
+
+        if(IsServer)
+            GameManager.OnStateMorning += RemovePoison;
     }
 
     public override void OnNetworkSpawn()
@@ -54,6 +60,9 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         //GameManager.OnStateAfternoon -= SetStateCooking;
         GameManager.OnStateEvening -= SetStateFoodReady;
         GameManager.OnStateNight -= SetStateExtingushed;
+
+        if (IsServer)
+            GameManager.OnStateMorning -= RemovePoison;
 
         // Always invoked the base 
         base.OnDestroy();
@@ -93,6 +102,26 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         _netServingsStored.Value += servings;
     }
 
+    public void AddPoisonedFood(int servings)
+    {
+        AddPoisonedFoodServerRpc(servings);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void AddPoisonedFoodServerRpc(int servings)
+    {
+        _netIsPoisoned.Value = true;
+        _netServingsStored.Value += servings;
+    }
+
+    private void RemovePoison()
+    {
+        if (!IsServer)
+            return;
+
+        _netIsPoisoned.Value = false;
+    }
+
     // ================== State Management ==================
     #region State Management
     public void SetStateExtingushed()
@@ -124,8 +153,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     public void TakeFood(int ammount)
     {
         // Quick and dirty way to prevent dead players from taking food (Change later)
-        GameObject playa = GameObject.FindGameObjectWithTag("Player");
-        if (!playa.GetComponent<PlayerHealth>().IsLiving())
+        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
             return;
 
         if (_takeBufferTimer > 0)
@@ -143,17 +171,30 @@ public class Campfire : NetworkBehaviour, ICardPlayable
 
         AddFoodServerRpc(-ammount);
 
-        // Quick and dirty, fix later
-        playa.GetComponentInChildren<PlayerObj>().ToggleCampfireIconActive();
+        OnTookFromFire?.Invoke();
 
-        if (ammount == 1)
-            _cardManager.GiveCard(2004);
-        else if (ammount == 2)
-            _cardManager.GiveCard(2005);
-        else if (ammount == 4)
-            _cardManager.GiveCard(2006);
+        // Give Poison Food
+        if (_netIsPoisoned.Value)
+        {
+            if (ammount == 1)
+                _cardManager.GiveCard(2012);
+            else if (ammount == 2)
+                _cardManager.GiveCard(2013);
+            else if (ammount == 4)
+                _cardManager.GiveCard(2014);
+        }
+        // Give normal food
         else
-            Debug.LogError("AMMOUNT TAKEN FROM FIRE NOT 1, 2 or 4 " + ammount);
+        {
+            if (ammount == 1)
+                _cardManager.GiveCard(2004);
+            else if (ammount == 2)
+                _cardManager.GiveCard(2005);
+            else if (ammount == 4)
+                _cardManager.GiveCard(2006);
+            else
+                Debug.LogError("AMMOUNT TAKEN FROM FIRE NOT 1, 2 or 4 " + ammount);
+        }
     }
     #endregion
 }

@@ -8,7 +8,7 @@ public class CardVisual : MonoBehaviour
 {
     // ================== Refrences ==================
     [SerializeField] private GameObject _tagIconPref;
-
+    [SerializeField] private Outline _cardOutline;
     [SerializeField] private TextMeshProUGUI _cardName;
     [SerializeField] private TextMeshProUGUI _cardDescription;
     [SerializeField] private Image _cardSprite;
@@ -35,5 +35,11 @@ public class CardVisual : MonoBehaviour
             TagIcon icon = Instantiate(_tagIconPref, _tagIconSlot).GetComponent<TagIcon>();
             icon.SetupIcon(tag.visual, tag.Name);
         }
+    }
+
+    public void ShowOutline(Color outlineColor)
+    {
+        _cardOutline.gameObject.SetActive(true);
+        _cardOutline.effectColor = outlineColor;
     }
 }

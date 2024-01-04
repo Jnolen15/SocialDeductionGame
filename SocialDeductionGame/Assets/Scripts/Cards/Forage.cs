@@ -3,18 +3,23 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class Forage : NetworkBehaviour
+public class Forage : NetworkBehaviour, ICardPicker
 {
     // ============== Parameters / Refrences / Variables ==============
     #region P / R / V
-    [Header("Parameters")]
+    [Header("Card Parameters")]
     [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
     [SerializeField] private int _uselessCardID;
     [SerializeField] private int _uselessOddsDefault;
     [SerializeField] private int _uselessOddsDebuffModifier;
+    [Header("Danger Parameters")]
     [SerializeField] private AnimationCurve _dangerLevelDrawChances;
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
+    [SerializeField] private float _dangerIncrementNum;
+    [SerializeField] private float _dangerPerPlayerScaleNum;
+    [SerializeField] private int _dangerLevelBase;
+    [Header("Location")]
     [SerializeField] private LocationManager.LocationName _locationName;
 
     [Header("Refrences")]
@@ -22,7 +27,6 @@ public class Forage : NetworkBehaviour
     private CardManager _cardManager;
     private GameObject _playerObj;
     private HandManager _playerHandMan;
-    private PlayerHealth _playerHealth;
     [SerializeField] private GameObject _hazardCardPref;
 
     [Header("Variables")]
@@ -30,6 +34,7 @@ public class Forage : NetworkBehaviour
     [SerializeField] private NetworkVariable<bool> _netEventDebuffed = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netEventBuffed = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netTotemActive = new(writePerm: NetworkVariableWritePermission.Server);
+    private bool _locationActive;
 
     public delegate void LocationForageAction(LocationManager.LocationName locationName);
     public static event LocationForageAction OnLocationBuffEnabled;
@@ -66,6 +71,7 @@ public class Forage : NetworkBehaviour
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
         _cardDropTable.ValidateTable();
+        _cardDropTable.VerifyCards();
     }
 
     private void OnDisable()
@@ -92,7 +98,6 @@ public class Forage : NetworkBehaviour
         _playerObj = GameObject.FindGameObjectWithTag("Player");
         if (_playerObj != null)
         {
-            _playerHealth = _playerObj.GetComponent<PlayerHealth>();
             _playerHandMan = _playerObj.GetComponent<HandManager>();
         }
         else
@@ -109,7 +114,7 @@ public class Forage : NetworkBehaviour
         if (!_playerObj)
             SetupPlayerConnections();
 
-        if (!_playerHealth.IsLiving())
+        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
             return;
 
         Debug.Log(gameObject.name + " Dealing cards");
@@ -138,7 +143,7 @@ public class Forage : NetworkBehaviour
         _forageUI.DealCardObjects(cardObjList);
 
         // Increase danger with each forage action
-        IncrementDanger(0.8f);
+        IncrementDanger(_dangerIncrementNum);
     }
 
     private GameObject HazardTest()
@@ -226,9 +231,9 @@ public class Forage : NetworkBehaviour
     }
     #endregion
 
-    // ============== Other ==============
-    #region Other
-    public void SelectCard(Card card)
+    // ============== Interface ==============
+    #region ICardPicker
+    public void PickCard(Card card)
     {
         // Give cards to Card Manager
         _cardManager.GiveCard(card.GetCardID());
@@ -236,7 +241,10 @@ public class Forage : NetworkBehaviour
         _forageUI.ClearCards();
         _forageUI.HideCards();
     }
+    #endregion
 
+    // ============== Other ==============
+    #region Other
     public void TakeNone()
     {
         _forageUI.ClearCards();
@@ -246,14 +254,23 @@ public class Forage : NetworkBehaviour
     public void Setup()
     {
         Debug.Log("Forage Setup");
+        _locationActive = true;
+
         _forageUI.Show();
     }
 
     public void Shutdown()
     {
+        _locationActive = false;
+
         _forageUI.ClearCards();
         _forageUI.HideCards();
         _forageUI.Hide();
+    }
+
+    public bool GetLocationActive()
+    {
+        return _locationActive;
     }
 
     public LocationManager.LocationName GetForageLocation()
@@ -284,7 +301,7 @@ public class Forage : NetworkBehaviour
         if (!IsServer)
             return;
 
-        SetDangerLevelServerRPC(0);
+        SetDangerLevelServerRPC(_dangerLevelBase);
     }
 
     public void IncrementDanger(float dangerInc)
@@ -302,7 +319,7 @@ public class Forage : NetworkBehaviour
         float tempDL = _netCurrentDanger.Value;
 
         // Calculate danger increment ammount (Scales per living player)
-        float incValue = (100f / (3f * PlayerConnectionManager.Instance.GetNumLivingPlayers()));
+        float incValue = (100f / (_dangerPerPlayerScaleNum * PlayerConnectionManager.Instance.GetNumLivingPlayers()));
         Debug.Log($"<color=yellow>SERVER: </color>incValue: {incValue} based on 100/({PlayerConnectionManager.Instance.GetNumLivingPlayers()}*3)");
         tempDL += (ammount * incValue);
         Debug.Log($"<color=yellow>SERVER: </color>Total value danger changed by = {tempDL} as {incValue} scaled by {ammount}");
@@ -321,7 +338,7 @@ public class Forage : NetworkBehaviour
     {
         Debug.Log($"<color=yellow>SERVER: </color>{gameObject.name} had its danger level set to {ammount}");
 
-        // Clamp HP within bounds
+        // Clamp within bounds
         if (ammount < 1)
             ammount = 1;
         else if (ammount > 100)

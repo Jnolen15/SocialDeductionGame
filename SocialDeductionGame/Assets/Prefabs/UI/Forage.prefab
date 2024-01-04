@@ -960,6 +960,8 @@ MonoBehaviour:
   _lowColor: {r: 0.9137255, g: 0.7647059, b: 0.16078432, a: 1}
   _medColor: {r: 0.8509804, g: 0.45490196, b: 0.09411765, a: 1}
   _highColor: {r: 0.80784315, g: 0.23529412, b: 0.09411765, a: 1}
+  _tierTwoHazardThreshold: 60
+  _tierThreeHazardThreshold: 90
   _takeNoneButton: {fileID: 7377980179221015422}
   _clawMarks: {fileID: 6951457792680627034}
 --- !u!1 &3238553329602390960
@@ -1138,8 +1140,11 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _tierTwoHazardThreshold: 50
-  _tierThreeHazardThreshold: 80
+  _tierTwoHazardThreshold: 60
+  _tierThreeHazardThreshold: 90
+  _dangerIncrementNum: 0.8
+  _dangerPerPlayerScaleNum: 3
+  _dangerLevelBase: 10
   _locationName: 0
   _forageUI: {fileID: 4011721465090627423}
   _hazardCardPref: {fileID: 7376748315988548449, guid: 928f42358a7dd524e8052c7d9a135188, type: 3}

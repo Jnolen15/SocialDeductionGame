@@ -18,9 +18,15 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private Color _lowColor = new Color32(233, 195, 41, 255);
     [SerializeField] private Color _medColor = new Color32(217, 116, 24, 255);
     [SerializeField] private Color _highColor = new Color32(206, 60, 24, 255);
+    [SerializeField] private int _tierTwoHazardThreshold;
+    [SerializeField] private int _tierThreeHazardThreshold;
     [SerializeField] private GameObject _takeNoneButton;
     [SerializeField] private CanvasGroup _clawMarks;
     private Forage _forage;
+
+    public delegate void ForageUIAction();
+    public static ForageUIAction HideForageUI;
+    public static ForageUIAction ShowForageUI;
 
     // ===================== Setup =====================
     #region Setup
@@ -28,15 +34,15 @@ public class ForageUI : MonoBehaviour
     {
         _forage = GetComponentInParent<Forage>();
 
-        Totem.OnTotemMenuOpened += OnTotemOpened;
-        Totem.OnTotemMenuClosed += OnTotemClosed;
+        ShowForageUI += Show;
+        HideForageUI += Hide;
         HazardCardVisual.OnHazardActivated += ShowClawMarks;
     }
 
     private void OnDestroy()
     {
-        Totem.OnTotemMenuOpened -= OnTotemOpened;
-        Totem.OnTotemMenuClosed -= OnTotemClosed;
+        ShowForageUI -= Show;
+        HideForageUI -= Hide;
         HazardCardVisual.OnHazardActivated -= ShowClawMarks;
     }
     #endregion
@@ -45,24 +51,15 @@ public class ForageUI : MonoBehaviour
     #region Functions
     public void Show()
     {
+        if (!_forage.GetLocationActive())
+            return;
+
         gameObject.SetActive(true);
     }
 
     public void Hide()
     {
         gameObject.SetActive(false);
-    }
-
-    private void OnTotemOpened(LocationManager.LocationName locationName)
-    {
-        if (locationName == _forage.GetForageLocation())
-            Hide();
-    }
-
-    private void OnTotemClosed(LocationManager.LocationName locationName)
-    {
-        if (locationName == _forage.GetForageLocation())
-            Show();
     }
 
     public void ShowCards()
@@ -132,7 +129,7 @@ public class ForageUI : MonoBehaviour
         else
             _dangerText.text = dangerNum.ToString("F1");
 
-        if (current <= 50)
+        if (current <= _tierTwoHazardThreshold)
         {
             _threatLevelText.text = "Low";
             //_threatLevelText.color = _lowColor;
@@ -140,7 +137,7 @@ public class ForageUI : MonoBehaviour
             _forageButton.GetComponent<Image>().color = _lowColor;
             _dangerIcon.sprite = _dangerIconStages[0];
         }
-        else if (50 < current && current <= 80)
+        else if (_tierTwoHazardThreshold < current && current <= _tierThreeHazardThreshold)
         {
             _threatLevelText.text = "Medium";
             //_threatLevelText.color = _medColor;
@@ -148,7 +145,7 @@ public class ForageUI : MonoBehaviour
             _forageButton.GetComponent<Image>().color = _medColor;
             _dangerIcon.sprite = _dangerIconStages[1];
         }
-        else if (80 < current)
+        else if (_tierThreeHazardThreshold < current)
         {
             _threatLevelText.text = "High";
             //_threatLevelText.color = _highColor;

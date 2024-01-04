@@ -75,13 +75,13 @@ public class EventManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void UpdateEventUIClientRpc(int[] cardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus, Vector3 scores)
+    private void UpdateEventUIClientRpc(int[] goodCardIDs, int[] badCardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus, Vector3 scores)
     {
         _nightEventThumbnail.SetEventResults(passed);
 
         // Show results
         _nightEventResults.gameObject.SetActive(true);
-        _nightEventResults.DisplayResults(cardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, scores);
+        _nightEventResults.DisplayResults(goodCardIDs, badCardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, scores);
     }
 
     public void UpdateNightEventPicker()
@@ -209,14 +209,7 @@ public class EventManager : NetworkBehaviour
     private void InvokeNightEventClientRpc(int eventID)
     {
         // Saboteurs not effected by night events
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
-        {
-            Debug.LogError("Cannot enact night event. Player object not found!");
-            return;
-        }
-
-        if (player.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
             return;
 
         Debug.Log("<color=blue>CLIENT: </color>Invoking night event!");
@@ -250,14 +243,7 @@ public class EventManager : NetworkBehaviour
     private void InvokeNightEventBonusClientRpc(int eventID)
     {
         // Saboteurs not effected by night event Bonuses
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
-        {
-            Debug.LogError("Cannot enact night event bonus. Player object not found!");
-            return;
-        }
-
-        if (player.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
             return;
 
         Debug.Log("<color=blue>CLIENT: </color>Invoking night event bonus!");
@@ -296,6 +282,10 @@ public class EventManager : NetworkBehaviour
         int saboCards = 0;
 
         int totCards = _stockpile.GetNumCards();
+
+        // Suffering tracking
+        bool attemptedSabotage = false;
+        bool successfulSabotage = false;
 
         // For pass to results screen
         List<int> primaryCards = new();
@@ -338,7 +328,16 @@ public class EventManager : NetworkBehaviour
             // If it does not match either +1 to sabo
             else
             {
-                saboCards++;
+                attemptedSabotage = true;
+
+                if (card.GetComponent<Card>().HasTag("Disruptive"))
+                {
+                    Debug.Log("<color=yellow>SERVER: </color>Disruptive card found, counting as 4");
+                    saboCards += 4;
+                }
+                else
+                    saboCards++;
+
                 otherCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"did not match either resources. Sabo cards now {saboCards}");
@@ -375,17 +374,27 @@ public class EventManager : NetworkBehaviour
             }
             // if its negitive, then event failed
             else
+            {
                 Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
+                successfulSabotage = true;
+            }
         }
 
+        // Award suffering
+        if(successfulSabotage)
+            SufferingManager.Instance.ModifySuffering(2, 103, true);
+        else if (attemptedSabotage)
+            SufferingManager.Instance.ModifySuffering(1, 102, true);
+
         // Combine lists for clients
-        List<int> cardIDList = new();
-        cardIDList.AddRange(primaryCards);
-        cardIDList.AddRange(secondaryCards);
-        cardIDList.AddRange(otherCards);
+        List<int> goodCardIDList = new();
+        goodCardIDList.AddRange(primaryCards);
+        goodCardIDList.AddRange(secondaryCards);
+        List<int> badCardIDList = new();
+        badCardIDList.AddRange(otherCards);
 
         // Update all clients visually
-        UpdateEventUIClientRpc(cardIDList.ToArray(), _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
+        UpdateEventUIClientRpc(goodCardIDList.ToArray(), badCardIDList.ToArray(), _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
             _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, scores);
     }
     #endregion
