@@ -10,7 +10,7 @@ public class HealthHungerViewer : MonoBehaviour
     [SerializeField] private GameObject _logMessagePref;
     [SerializeField] private Transform _hidden;
     [SerializeField] private Transform _shown;
-    private bool _isShown = true;
+    private bool _isShown;
     private GameManager _gameManager;
 
     // ==================== Setup ====================

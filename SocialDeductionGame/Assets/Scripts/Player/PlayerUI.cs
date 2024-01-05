@@ -17,9 +17,10 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private CanvasGroup _introRole;
     [SerializeField] private GameObject _introRoleSaboIcon;
     [SerializeField] private GameObject _introRoleSurvivorIcon;
-    [SerializeField] private GameObject _speakingIndicator;
-    [SerializeField] private TextMeshProUGUI _speakingIndicatorText;
-    [SerializeField] private GameObject _mutedIndicator;
+    [SerializeField] private Image _speakingIndicator;
+    [SerializeField] private TextMeshProUGUI _worldVoiceIndicator;
+    [SerializeField] private GameObject _saboVoiceIndicator;
+    //[SerializeField] private GameObject _mutedIndicator;
     #endregion
 
     // ================== Setup ==================
@@ -31,6 +32,7 @@ public class PlayerUI : MonoBehaviour
 
         GameManager.OnStateChange += StateChangeEvent;
         GameManager.OnStateIntro += DisplayRole;
+        PlayerHealth.OnDeath += SwapVoiceIndicator;
         VivoxClient.OnBeginSpeaking += SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking += SpeakingIndicatorOff;
 
@@ -47,6 +49,7 @@ public class PlayerUI : MonoBehaviour
     {
         GameManager.OnStateChange -= StateChangeEvent;
         GameManager.OnStateIntro -= DisplayRole;
+        PlayerHealth.OnDeath -= SwapVoiceIndicator;
         VivoxClient.OnBeginSpeaking -= SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking -= SpeakingIndicatorOff;
 
@@ -87,6 +90,9 @@ public class PlayerUI : MonoBehaviour
             roleText.text = "Saboteurs";
             roleText.color = Color.red;
             _introRoleSaboIcon.SetActive(true);
+
+            // Show sabo Voice channel
+            _saboVoiceIndicator.SetActive(true);
         }
 
         Sequence IntroRoleSequence = DOTween.Sequence();
@@ -108,36 +114,42 @@ public class PlayerUI : MonoBehaviour
     // Speaking
     public void SpeakingIndicatorOn(VivoxManager.ChannelSeshName channel)
     {
-        _speakingIndicator.SetActive(true);
+        _speakingIndicator.gameObject.SetActive(true);
 
         if (channel == VivoxManager.ChannelSeshName.World)
         {
-            _speakingIndicatorText.text = "World";
-            _speakingIndicatorText.color = Color.white;
+            _speakingIndicator.color = Color.white;
         }
         else if(channel == VivoxManager.ChannelSeshName.Death)
         {
-            _speakingIndicatorText.text = "Death";
-            _speakingIndicatorText.color = Color.blue;
+            _speakingIndicator.color = Color.blue;
         }
         else if (channel == VivoxManager.ChannelSeshName.Sabo)
         {
-            _speakingIndicatorText.text = "Saboteur";
-            _speakingIndicatorText.color = Color.red;
+            _speakingIndicator.color = Color.red;
         }
         else
         {
-            _speakingIndicatorText.text = channel.ToString();
-            _speakingIndicatorText.color = Color.white;
+            _worldVoiceIndicator.text = channel.ToString();
+            _worldVoiceIndicator.color = Color.white;
+            _speakingIndicator.color = Color.white;
         }
     }
 
     public void SpeakingIndicatorOff(VivoxManager.ChannelSeshName channel)
     {
-        _speakingIndicator.SetActive(false);
+        _speakingIndicator.gameObject.SetActive(false);
     }
-    
-    public void MutedIndicatorOn()
+
+    // Sawp Indicator to show death channel when die
+    private void SwapVoiceIndicator()
+    {
+        _saboVoiceIndicator.gameObject.SetActive(false);
+        _worldVoiceIndicator.text = "Death (Space)";
+        _worldVoiceIndicator.color = Color.blue;
+    }
+
+    /*public void MutedIndicatorOn()
     {
         _mutedIndicator.SetActive(true);
         _speakingIndicator.SetActive(false);
@@ -146,7 +158,7 @@ public class PlayerUI : MonoBehaviour
     public void MutedIndicatorOff()
     {
         _mutedIndicator.SetActive(false);
-    }
+    }*/
 
     #endregion
 }
