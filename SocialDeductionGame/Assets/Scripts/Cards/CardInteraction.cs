@@ -17,6 +17,7 @@ public class CardInteraction : MonoBehaviour,
     [SerializeField] private PlayerCardManager _playerCardManager;
     private GameObject _indicator;
     private bool _dragging;
+    private bool _dontHighlight;    // Cards should not highlight if another card is being highlighted
 
     public delegate void CardHighlightAction(Card cardHighlighted);
     public static event CardHighlightAction OnCardHighlighted;
@@ -28,17 +29,30 @@ public class CardInteraction : MonoBehaviour,
         _card = this.GetComponentInParent<Card>();
         _handManager = this.GetComponentInParent<HandManager>();
         _playerCardManager = this.GetComponentInParent<PlayerCardManager>();
+
+        OnCardHighlighted += OtherCardHighlighted;
+        OnCardUnhighlighted += OtherCardUnhighlighted;
+        GameManager.OnStateChange += LetGo;
+    }
+
+    private void OnDestroy()
+    {
+        OnCardHighlighted -= OtherCardHighlighted;
+        OnCardUnhighlighted -= OtherCardUnhighlighted;
+        GameManager.OnStateChange -= LetGo;
     }
 
     // =============== Interaction ===============
     public void OnPointerEnter(PointerEventData eventData)
     {
-        OnCardHighlighted?.Invoke(_card);
+        if(!_dontHighlight)
+            OnCardHighlighted?.Invoke(_card);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        OnCardUnhighlighted?.Invoke(_card);
+        if(!_dragging && !_dontHighlight)
+            OnCardUnhighlighted?.Invoke(_card);
     }
 
     // =============== Drag ===============
@@ -86,9 +100,33 @@ public class CardInteraction : MonoBehaviour,
         if(!playedToUI)
             _playerCardManager.TryCardPlay(_card);
 
+        LetGo();
+    }
+
+    private void LetGo()
+    {
         Destroy(_indicator);
         _indicator = null;
         _dragging = false;
+
+        if (!_dontHighlight)
+            OnCardUnhighlighted?.Invoke(_card);
+    }
+
+    private void LetGo(GameManager.GameState prev, GameManager.GameState current)
+    {
+        LetGo();
+    }
+
+    private void OtherCardHighlighted(Card otherCard)
+    {
+        if (otherCard != _card)
+            _dontHighlight = true;
+    }
+
+    private void OtherCardUnhighlighted(Card otherCard)
+    {
+        _dontHighlight = false;
     }
     #endregion
 }

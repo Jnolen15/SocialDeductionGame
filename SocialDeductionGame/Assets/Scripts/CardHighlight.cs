@@ -8,7 +8,7 @@ public class CardHighlight : MonoBehaviour
     [SerializeField] private GameObject _highlight;
     [SerializeField] private List<CardTag> _playableTag;
     [SerializeField] private bool _acceptAnyTag;
-    [SerializeField] private GameManager.GameState _state;
+    [SerializeField] private List<GameManager.GameState> _states;
     [SerializeField] private bool _acceptAnyState;
     private bool _setup;
 
@@ -41,20 +41,23 @@ public class CardHighlight : MonoBehaviour
         if (!cardHighlighted.HasAnyTag(_playableTag) && !_acceptAnyTag)
             return;
 
-        if (GameManager.Instance.GetCurrentGameState() != _state && !_acceptAnyState)
-            return;
-
-        _highlight.SetActive(true);
+        if (_acceptAnyState)
+            _highlight.SetActive(true);
+        else
+        {
+            foreach(GameManager.GameState state in _states)
+            {
+                if(state == GameManager.Instance.GetCurrentGameState())
+                {
+                    _highlight.SetActive(true);
+                    break;
+                }
+            }
+        }
     }
 
     private void OnCardUnhighlighted(Card cardHighlighted)
     {
-        if (!cardHighlighted.HasAnyTag(_playableTag) && !_acceptAnyTag)
-            return;
-
-        if (GameManager.Instance.GetCurrentGameState() != _state && !_acceptAnyState)
-            return;
-
         _highlight.SetActive(false);
     }
 }
