@@ -6,6 +6,8 @@ public class LocationInfoUI : MonoBehaviour
 {
     // ============== Variables / Refrences ==============
     [SerializeField] private LocationManager.LocationName _location;
+    [SerializeField] private GameObject _travelButton;
+    [SerializeField] private GameObject _currentLocationMsg;
     [SerializeField] private GameObject _buffIcon;
     [SerializeField] private GameObject _debuffIcon;
     [SerializeField] private GameObject _totemIcon;
@@ -13,6 +15,7 @@ public class LocationInfoUI : MonoBehaviour
     // ============== Setup ==============
     private void Awake()
     {
+        LocationManager.OnLocationChanged += UpdateMoveButton;
         Forage.OnLocationBuffEnabled += ShowBuffIcon;
         Forage.OnLocationBuffDisabled += HideBuffIcon;
         Forage.OnLocationDebuffEnabled += ShowDebuffIcon;
@@ -23,6 +26,7 @@ public class LocationInfoUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        LocationManager.OnLocationChanged += UpdateMoveButton;
         Forage.OnLocationBuffEnabled -= ShowBuffIcon;
         Forage.OnLocationBuffDisabled -= HideBuffIcon;
         Forage.OnLocationDebuffEnabled -= ShowDebuffIcon;
@@ -32,6 +36,20 @@ public class LocationInfoUI : MonoBehaviour
     }
 
     // ============== UI Functions ==============
+    private void UpdateMoveButton(LocationManager.LocationName location)
+    {
+        if (_location == location)
+        {
+            _travelButton.SetActive(false);
+            _currentLocationMsg.SetActive(true);
+        }
+        else
+        {
+            _travelButton.SetActive(true);
+            _currentLocationMsg.SetActive(false);
+        }
+    }
+
     private void ShowBuffIcon(LocationManager.LocationName location)
     {
         if(_location == location)

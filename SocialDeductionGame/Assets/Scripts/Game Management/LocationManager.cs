@@ -16,6 +16,7 @@ public class LocationManager : NetworkBehaviour
     // Events
     public delegate void ChangeLocationAction(LocationName newLocation);
     public static event ChangeLocationAction OnForceLocationChange;
+    public static event ChangeLocationAction OnLocationChanged;
 
     // Location
     public enum LocationName
@@ -57,6 +58,8 @@ public class LocationManager : NetworkBehaviour
     private void MoveToLocation(LocationName newLocation)
     {
         curLocalLocation = newLocation;
+
+        OnLocationChanged?.Invoke(newLocation);
 
         DisableAllLocations();
 
