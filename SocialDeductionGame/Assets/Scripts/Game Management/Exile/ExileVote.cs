@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 using Unity.Collections;
+using UnityEngine.UI;
 
 public class ExileVote : MonoBehaviour
 {
@@ -53,6 +54,7 @@ public class ExileVote : MonoBehaviour
             _buttonName.text = "Nobody";
             _resultsName.text = "Nobody";
             _deadName.text = "Nobody";
+            this.GetComponent<Image>().color = Color.gray;
         } else
         {
             _playerName = pName;
