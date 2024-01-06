@@ -52,37 +52,37 @@ public class LocationInfoUI : MonoBehaviour
 
     private void ShowBuffIcon(LocationManager.LocationName location)
     {
-        if(_location == location)
+        if(_location == location && _buffIcon != null)
             _buffIcon.SetActive(true);
     }
 
     private void HideBuffIcon(LocationManager.LocationName location)
     {
-        if (_location == location)
+        if (_location == location && _buffIcon != null)
             _buffIcon.SetActive(false);
     }
 
     private void ShowDebuffIcon(LocationManager.LocationName location)
     {
-        if (_location == location)
+        if (_location == location && _debuffIcon != null)
             _debuffIcon.SetActive(true);
     }
 
     private void HideDebuffIcon(LocationManager.LocationName location)
     {
-        if (_location == location)
+        if (_location == location && _debuffIcon != null)
             _debuffIcon.SetActive(false);
     }
 
     private void ShowTotemIcon(LocationManager.LocationName location)
     {
-        if (_location == location)
+        if (_location == location && _totemIcon != null)
             _totemIcon.SetActive(true);
     }
 
     private void HideTotemIcon(LocationManager.LocationName location)
     {
-        if (_location == location)
+        if (_location == location && _totemIcon != null)
             _totemIcon.SetActive(false);
     }
 }
