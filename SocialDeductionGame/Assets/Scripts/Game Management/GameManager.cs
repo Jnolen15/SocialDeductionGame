@@ -416,5 +416,34 @@ public class GameManager : NetworkBehaviour
 
         return 1;
     }
+
+    public bool InTransition()
+    {
+        switch (_netCurrentGameState.Value)
+        {
+            case GameState.Intro:
+                return false;
+            case GameState.Morning:
+                return false;
+            case GameState.AfternoonTransition:
+                return true;
+            case GameState.Afternoon:
+                return false;
+            case GameState.EveningTransition:
+                return true;
+            case GameState.Evening:
+                return false;
+            case GameState.NightTransition:
+                return true;
+            case GameState.Night:
+                return false;
+            case GameState.MorningTransition:
+                return true;
+            case GameState.GameOver:
+                return false;
+            default:
+                return true;
+        }
+    }
     #endregion
 }

@@ -137,6 +137,9 @@ public class PlayerData : NetworkBehaviour
         if (!_playerHealth.IsLiving())
             return;
 
+        if (GameManager.Instance.InTransition())
+            return;
+
         _playerObj.ToggleReadyIconActive();
         PlayerConnectionManager.Instance.ReadyPlayer();
     }
