@@ -109,7 +109,9 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
             if (!_netSlotActive.Value)
                 return false;
             else if (TestForMatchingTags(cardToPlay.GetCardID()))
+            {
                 return true;
+            }
             else
             {
                 // Flash rune red
@@ -118,16 +120,16 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
                 return false;
             }
         }
-        else if (!_totem.GetTotemOnCooldown())
+        else if (!_totem.GetTotemOnCooldown() && !_totem.GetTotemPrepped())
         {
-            if(cardToPlay.HasTag("NonTotemable"))
+            if (cardToPlay.HasTag("NonTotemable"))
                 return false;
             else
                 return true;
         }
         else
         {
-            Debug.Log("Totem is inactive and on cooldown");
+            Debug.Log("Totem is inactive / on cooldown / already prepped");
             return false;
         }
     }
@@ -157,12 +159,11 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
         // Add card
         _netSaboCard.Value = cardID;
         _netSlotActive.Value = true;
-        _currentTags.AddRange(ExtractTags(cardID));
 
         _totem.CardAddedToInactiveTotem();
 
         ShowCardClientRpc(cardID);
-        ShowTagsClientRpc(cardID);
+        AddTagsClientRpc(cardID);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -197,9 +198,11 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     }
 
     [ClientRpc]
-    private void ShowTagsClientRpc(int cardID)
+    private void AddTagsClientRpc(int cardID)
     {
         Debug.Log("Adding card to unactivated Totem slot locally");
+
+        _currentTags.AddRange(ExtractTags(cardID));
 
         // Instantiate Tags
         foreach (CardTag tag in ExtractTags(cardID))
