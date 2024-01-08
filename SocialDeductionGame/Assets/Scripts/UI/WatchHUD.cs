@@ -45,6 +45,8 @@ public class WatchHUD : MonoBehaviour
     [Header("Ready")]
     [SerializeField] private GameObject _readyButton;
     [SerializeField] private GameObject _readyButtonIcon;
+    [SerializeField] private Transform _readyOutPos;
+    [SerializeField] private Transform _readyInPos;
 
 
     private Dictionary<string, UIFlashObj> _flashDict = new();
@@ -422,8 +424,6 @@ public class WatchHUD : MonoBehaviour
     #region Day Info
     private void UpdateStateUI(GameManager.GameState prev, GameManager.GameState current)
     {
-        _gameStateText.text = current.ToString();
-
         _morningIcon.SetActive(false);
         _afternoonIcon.SetActive(false);
         _eveningIcon.SetActive(false);
@@ -431,17 +431,24 @@ public class WatchHUD : MonoBehaviour
 
         switch (current)
         {
+            case GameManager.GameState.Intro:
+                _gameStateText.text = current.ToString();
+                break;
             case GameManager.GameState.Morning:
                 _morningIcon.SetActive(true);
+                _gameStateText.text = current.ToString();
                 break;
             case GameManager.GameState.Afternoon:
                 _afternoonIcon.SetActive(true);
+                _gameStateText.text = current.ToString();
                 break;
             case GameManager.GameState.Evening:
                 _eveningIcon.SetActive(true);
+                _gameStateText.text = current.ToString();
                 break;
             case GameManager.GameState.Night:
                 _nightIcon.SetActive(true);
+                _gameStateText.text = current.ToString();
                 break;
         }
     }
@@ -469,11 +476,13 @@ public class WatchHUD : MonoBehaviour
 
     public void Ready()
     {
+        _readyButton.transform.position = _readyInPos.position;
         _readyButtonIcon.SetActive(true);
     }
 
     public void Unready()
     {
+        _readyButton.transform.position = _readyOutPos.position;
         _readyButtonIcon.SetActive(false);
     }
     #endregion
