@@ -19,7 +19,6 @@ public class PlayerData : NetworkBehaviour
 
     public NetworkVariable<FixedString32Bytes> _netPlayerName = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<ulong> _netPlayerID = new();
-    [SerializeField] private NetworkVariable<LocationManager.LocationName> _netCurrentLocation = new(writePerm: NetworkVariableWritePermission.Owner);
     public enum Team
     {
         Unassigned,
@@ -46,7 +45,6 @@ public class PlayerData : NetworkBehaviour
     {
         if (IsOwner)
         {
-            LocationManager.OnForceLocationChange += UpdateLocation;
             _netTeam.OnValueChanged += UpdateTeamText;
             _netCurrentMP.OnValueChanged += MovePointsModified;
             _netMaxMP.OnValueChanged += MaxMovePointsModified;
@@ -69,7 +67,6 @@ public class PlayerData : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        LocationManager.OnForceLocationChange -= UpdateLocation;
         _netTeam.OnValueChanged -= UpdateTeamText;
         _netCurrentMP.OnValueChanged -= MovePointsModified;
         _netMaxMP.OnValueChanged += MaxMovePointsModified;
@@ -150,23 +147,6 @@ public class PlayerData : NetworkBehaviour
     // Called when the player chooses a location on their map
     public void MoveLocation(string locationName)
     {
-        // Dont move if already at the same location
-        if (_netCurrentLocation.Value.ToString() == locationName)
-            return;
-
-        // Only spend movement if living, dead can move freely
-        if (_playerHealth.IsLiving())
-        {
-            if (GetMovementPoints() > 0)
-                SpendMovementPoint();
-            else
-            {
-                Debug.Log("<color=blue>CLIENT: </color>Cannot move, no points!");
-                OnNoMoreMovePoints?.Invoke(0, 0);
-                return;
-            }
-        }
-
         LocationManager.LocationName newLocation;
 
         switch (locationName)
@@ -189,21 +169,32 @@ public class PlayerData : NetworkBehaviour
                 break;
         }
 
+        // Dont move if already at the same location
+        if (_locationManager.GetCurrentLocalLocation() == newLocation)
+        {
+            Debug.Log("<color=blue>CLIENT: </color>Already at location, not moving");
+            return;
+        }
+
+        // Only spend movement if living, dead can move freely
+        if (_playerHealth.IsLiving())
+        {
+            if (GetMovementPoints() > 0)
+                SpendMovementPoint();
+            else
+            {
+                Debug.Log("<color=blue>CLIENT: </color>Cannot move, no points!");
+                OnNoMoreMovePoints?.Invoke(0, 0);
+                return;
+            }
+        }
+
         ChangeLocation(newLocation);
-    }
-
-    private void UpdateLocation(LocationManager.LocationName location)
-    {
-        Debug.Log("Updating player location to " + location.ToString());
-
-        _netCurrentLocation.Value = location;
     }
 
     private void ChangeLocation(LocationManager.LocationName newLocation)
     {
         _locationManager.SetLocation(newLocation);
-
-        UpdateLocation(newLocation);
     }
 
     // ==== MOVEMENT POINTS ====

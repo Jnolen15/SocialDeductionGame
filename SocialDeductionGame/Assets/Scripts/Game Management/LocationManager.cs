@@ -15,7 +15,6 @@ public class LocationManager : NetworkBehaviour
 
     // Events
     public delegate void ChangeLocationAction(LocationName newLocation);
-    public static event ChangeLocationAction OnForceLocationChange;
     public static event ChangeLocationAction OnLocationChanged;
 
     // Location
@@ -26,7 +25,7 @@ public class LocationManager : NetworkBehaviour
         Forest,
         Plateau
     }
-    [SerializeField] private LocationName curLocalLocation;
+    [SerializeField] private LocationName _curLocalLocation;
     #endregion
 
     // ============== Location Management ==============
@@ -36,34 +35,29 @@ public class LocationManager : NetworkBehaviour
     public void SetInitialLocation()
     {
         Debug.Log("<color=blue>CLIENT: </color>Setting player to camp");
-        OnForceLocationChange?.Invoke(LocationName.Camp);
         SetClientServerRpc(NetworkManager.Singleton.LocalClientId, LocationName.Camp);
-        MoveToLocation(LocationName.Camp);
     }
 
     public void SetLocation(LocationName newLocation)
     {
-        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, curLocalLocation, newLocation);
-        MoveToLocation(newLocation);
+        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, _curLocalLocation, newLocation);
     }
 
     public void ForceLocation(LocationName newLocation)
     {
-        OnForceLocationChange?.Invoke(newLocation);
-
-        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, curLocalLocation, newLocation);
-        MoveToLocation(newLocation);
+        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, _curLocalLocation, newLocation);
     }
 
-    private void MoveToLocation(LocationName newLocation)
+    [ClientRpc]
+    private void MoveToLocationClientRpc(LocationName newLocation, ClientRpcParams clientRpcParams = default)
     {
-        curLocalLocation = newLocation;
+        _curLocalLocation = newLocation;
 
         OnLocationChanged?.Invoke(newLocation);
 
         DisableAllLocations();
 
-        switch (curLocalLocation)
+        switch (_curLocalLocation)
         {
             case LocationName.Camp:
                 _campLocation.EnableLocation();
@@ -79,6 +73,7 @@ public class LocationManager : NetworkBehaviour
                 break;
             default:
                 Debug.LogError("MoveToLocation picked default case");
+                _campLocation.EnableLocation();
                 break;
         }
     }
@@ -101,6 +96,10 @@ public class LocationManager : NetworkBehaviour
             return;
         }
 
+        // Get Client
+        ClientRpcParams clientRpcParams = default;
+        clientRpcParams.Send.TargetClientIds = new ulong[] { clientID };
+
         // Get location refrences
         Location oldLocation = GetLocationFromName(oldLocationName);
         Location newLocation = GetLocationFromName(newLocationName);
@@ -112,6 +111,8 @@ public class LocationManager : NetworkBehaviour
         // Assign client to new location
         seatMan = newLocation.GetLocationSeatManager();
         seatMan.AssignSeat(clientID);
+
+        MoveToLocationClientRpc(newLocationName, clientRpcParams);
     }
 
     // Sets player to new seat location
@@ -119,12 +120,18 @@ public class LocationManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void SetClientServerRpc(ulong clientID, LocationName newLocationName)
     {
+        // Get Client
+        ClientRpcParams clientRpcParams = default;
+        clientRpcParams.Send.TargetClientIds = new ulong[] { clientID };
+
         // Get location refrence
         Location newLocation = GetLocationFromName(newLocationName);
 
         // Assign client to new location
         SeatManager seatMan = newLocation.GetLocationSeatManager();
         seatMan.AssignSeat(clientID);
+
+        MoveToLocationClientRpc(newLocationName, clientRpcParams);
     }
 
     private Location GetLocationFromName(LocationName locationName)
@@ -145,6 +152,12 @@ public class LocationManager : NetworkBehaviour
         }
     }
     #endregion
+
+    // ============== Helpers ==============
+    public LocationName GetCurrentLocalLocation()
+    {
+        return _curLocalLocation;
+    }
 
     // ============== Location Interaction ==============
     #region Location Interaction
