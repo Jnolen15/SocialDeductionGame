@@ -14,12 +14,16 @@ public class CharacterSelectUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _lobbyCode;
     [SerializeField] private TextMeshProUGUI _joinedPlayers;
     [SerializeField] private GameObject _loadScreen;
+    [SerializeField] private Transform _playerEntryZone;
+    [SerializeField] private GameObject _playerLobbyEntryPref;
     private bool _localPlayerReady;
 
     // ============== Setup ==============
     private void Awake()
     {
-        PlayerConnectionManager.OnPlayerConnect += UpdatePlayerCount;
+        //PlayerConnectionManager.OnPlayerConnect += UpdatePlayerCount;
+        PlayerConnectionManager.OnPlayerConnect += UpdatePlayerEntries;
+        PlayerConnectionManager.OnPlayerDisconnect += UpdatePlayerEntries;
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
         PlayerConnectionManager.OnAllPlayersReadyAlertClients += ShowLoad;
@@ -28,11 +32,15 @@ public class CharacterSelectUI : MonoBehaviour
     private void Start()
     {
         SetupLobbyInfoPannel();
+
+        UpdatePlayerEntries();
     }
 
     private void OnDestroy()
     {
-        PlayerConnectionManager.OnPlayerConnect -= UpdatePlayerCount;
+        //PlayerConnectionManager.OnPlayerConnect -= UpdatePlayerCount;
+        PlayerConnectionManager.OnPlayerConnect -= UpdatePlayerEntries;
+        PlayerConnectionManager.OnPlayerDisconnect -= UpdatePlayerEntries;
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
         PlayerConnectionManager.OnAllPlayersReadyAlertClients -= ShowLoad;
@@ -72,6 +80,22 @@ public class CharacterSelectUI : MonoBehaviour
         Debug.Log("PLAYER CONNECTED UPDATING COUNT");
         int numPlayers = PlayerConnectionManager.Instance.GetNumConnectedPlayers();
         _joinedPlayers.text = "Connected Players: " + numPlayers;
+    }
+
+    private async void UpdatePlayerEntries()
+    {
+        Debug.Log("Player count changed, updating entries");
+
+        foreach (Transform child in _playerEntryZone)
+            Destroy(child.gameObject);
+
+        List<Player> lobbyPlayers = await LobbyManager.Instance.GetLobbyPlayerListAsync();
+
+        foreach (Player player in lobbyPlayers)
+        {
+            PlayerLobbyEntry pEntry = Instantiate(_playerLobbyEntryPref, _playerEntryZone).GetComponent<PlayerLobbyEntry>();
+            pEntry.Setup(player.Data[LobbyManager.KEY_PLAYER_NAME].Value);
+        }
     }
 
     private void SetupLobbyInfoPannel()

@@ -36,7 +36,7 @@ public class LobbyManager : MonoBehaviour
     // ============== Variables ==============
     #region Variables
     private const string KEY_RELAY_JOIN_CODE = "KeyRelayJoinCode";
-    private const string KEY_PLAYER_NAME = "KeyPlayerName";
+    public const string KEY_PLAYER_NAME = "KeyPlayerName";
 
     [SerializeField] private bool _localTestMode;
     private Lobby _joinedLobby;
@@ -495,6 +495,15 @@ public class LobbyManager : MonoBehaviour
         };
 
         SendLobbyData();
+    }
+
+    public async Task<List<Player>> GetLobbyPlayerListAsync()
+    {
+        _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+
+        PrintPlayers(_joinedLobby);
+
+        return _joinedLobby.Players;
     }
 
     public void SendLobbyData()

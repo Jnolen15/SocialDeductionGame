@@ -124,7 +124,7 @@ public class PlayerConnectionManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netPlayersReadied = new(writePerm: NetworkVariableWritePermission.Server);
     private Dictionary<ulong, bool> _playerReadyDictionary = new();
 
-    public delegate void PlayerConnectionAction(ulong clientID);
+    public delegate void PlayerConnectionAction();
     public static event PlayerConnectionAction OnPlayerConnect;
     public static event PlayerConnectionAction OnPlayerDisconnect;
 
@@ -190,7 +190,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         // Update client dictionaries
         AddPlayerToDictionaryClientRpc(clientID, newPlayer);
 
-        OnPlayerConnect?.Invoke(clientID);
+        PlayerConnectedClientRpc();
     }
 
     private void ClientDisconnected(ulong clientID)
@@ -211,7 +211,19 @@ public class PlayerConnectionManager : NetworkBehaviour
         _playerDict.Remove(clientID);
         RemovePlayerFromDictionaryClientRpc(clientID);
 
-        OnPlayerDisconnect?.Invoke(clientID);
+        PlayerDisconnectedClientRpc();
+    }
+
+    [ClientRpc]
+    private void PlayerConnectedClientRpc()
+    {
+        OnPlayerConnect?.Invoke();
+    }
+
+    [ClientRpc]
+    private void PlayerDisconnectedClientRpc()
+    {
+        OnPlayerDisconnect?.Invoke();
     }
     #endregion
 
