@@ -10,6 +10,7 @@ public class LobbyEntryUI : MonoBehaviour
     // ============== Refrences ==============
     [SerializeField] private TextMeshProUGUI _lobbyName;
     [SerializeField] private TextMeshProUGUI _lobbyNumPlayers;
+    [SerializeField] private TextMeshProUGUI _lobbyMaxPlayers;
 
     // ============== Vairables ==============
     private Lobby _thisLobby;
@@ -20,7 +21,8 @@ public class LobbyEntryUI : MonoBehaviour
         _thisLobby = lobby;
 
         _lobbyName.text = lobby.Name;
-        _lobbyNumPlayers.text = lobby.Players.Count + "/8";
+        _lobbyNumPlayers.text = lobby.Players.Count.ToString();
+        _lobbyMaxPlayers.text = lobby.MaxPlayers.ToString();
     }
 
     public void JoinLobby()

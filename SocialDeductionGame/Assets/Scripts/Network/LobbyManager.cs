@@ -36,7 +36,6 @@ public class LobbyManager : MonoBehaviour
     // ============== Variables ==============
     #region Variables
     private const string KEY_RELAY_JOIN_CODE = "KeyRelayJoinCode";
-    private const string KEY_NUM_SABOTEURS = "KeyNumSaboteurs";
 
     [SerializeField] private bool _localTestMode;
     private Lobby _joinedLobby;
@@ -229,7 +228,6 @@ public class LobbyManager : MonoBehaviour
                 IsPrivate = lobbyData.IsPrivate,
                 Data = new Dictionary<string, DataObject> {
                     { KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) },
-                    { KEY_NUM_SABOTEURS, new DataObject(DataObject.VisibilityOptions.Member, lobbyData.NumSabos) },
                 },
             };
 
@@ -333,10 +331,10 @@ public class LobbyManager : MonoBehaviour
         {
             Debug.Log("<color=yellow>SERVER: </color>Deleting lobby");
 
-            await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
-
             // Disconnect from vivox channel
-            VivoxManager.Instance.LeaveLobbyChannel();
+            VivoxManager.Instance.LeaveAll();
+
+            await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
 
             _joinedLobby = null;
         }
@@ -355,10 +353,10 @@ public class LobbyManager : MonoBehaviour
         {
             Debug.Log("<color=purple>CONNECTION: </color>leaving lobby");
 
-            await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, AuthenticationService.Instance.PlayerId);
-
             // Disconnect from vivox channel
-            VivoxManager.Instance.LeaveLobbyChannel();
+            VivoxManager.Instance.LeaveAll();
+
+            await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, AuthenticationService.Instance.PlayerId);
 
             _joinedLobby = null;
         }
@@ -377,9 +375,9 @@ public class LobbyManager : MonoBehaviour
         {
             Debug.Log("<color=yellow>SERVER: </color>Kicking player: " + playerID);
 
-            await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, playerID);
-
             // Remove that player from lobby voice?
+
+            await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, playerID);
         }
         catch (LobbyServiceException e)
         {
@@ -463,15 +461,12 @@ public class LobbyManager : MonoBehaviour
         }
 
         Debug.Log("Creating Lobby Data");
-        Debug.Log("Number of saboteurs: " + _joinedLobby.Data[KEY_NUM_SABOTEURS].Value);
 
         _joinedLobbyData = new LobbyData
         {
             Name = _joinedLobby.Name,
             IsPrivate = _joinedLobby.IsPrivate,
-            MaxPlayers = 6,
-            NumSabos = _joinedLobby.Data[KEY_NUM_SABOTEURS].Value,
-            NumDays = 9
+            MaxPlayers = _joinedLobby.MaxPlayers,
         };
 
         SendLobbyData();

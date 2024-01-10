@@ -44,7 +44,7 @@ public class ConnectionManager : NetworkBehaviour
     // ============== Connections ==============
     public void CreateGame()
     {
-        NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApproval;
+        NetworkManager.Singleton.ConnectionApprovalCallback += ConnectionApproval;
         NetworkManager.Singleton.StartHost();
 
         LobbyManager.Instance.JoinLobbyVivoxChannel();
@@ -55,14 +55,14 @@ public class ConnectionManager : NetworkBehaviour
     {
         OnTryingToJoinGame?.Invoke();
 
-        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_ClientDisconnect;
+        NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnect;
         NetworkManager.Singleton.StartClient();
 
         LobbyManager.Instance.JoinLobbyVivoxChannel();
         LobbyManager.Instance.CreateLobbyData();
     }
 
-    private void NetworkManager_ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
+    private void ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
     {
         // If not in character select scene deny connection
         if (!SceneLoader.IsInScene(SceneLoader.Scene.CharacterSelectScene))
@@ -77,7 +77,7 @@ public class ConnectionManager : NetworkBehaviour
         connectionApprovalResponse.Approved = true;
     }
 
-    private void NetworkManager_ClientDisconnect(ulong playerID)
+    private void ClientDisconnect(ulong playerID)
     {
         OnFailedToJoinGame?.Invoke();
     }

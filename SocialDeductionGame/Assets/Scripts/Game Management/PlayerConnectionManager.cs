@@ -155,7 +155,6 @@ public class PlayerConnectionManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback += ClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SpawnPlayerPrefabs;
-            LobbyManager.OnLobbySendData += UpdateLobbyData;
         }
     }
 
@@ -168,7 +167,6 @@ public class PlayerConnectionManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback -= ClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= ClientDisconnected;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= SpawnPlayerPrefabs;
-            LobbyManager.OnLobbySendData -= UpdateLobbyData;
         }
         base.OnNetworkDespawn();
     }
@@ -214,12 +212,6 @@ public class PlayerConnectionManager : NetworkBehaviour
         TestAllPlayersReady();
 
         OnPlayerDisconnect?.Invoke(clientID);
-    }
-
-    private void UpdateLobbyData(LobbyData data)
-    {
-        _numSaboteurs = int.Parse(data.NumSabos);
-        Debug.Log("PlayerConnectionManager: Updated Num Sabos " + _numSaboteurs);
     }
     #endregion
 
@@ -491,10 +483,11 @@ public class PlayerConnectionManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        if(_numSaboteurs == 0)
+        _numSaboteurs = 1;
+
+        if (_numSaboteurs != 1 || _numSaboteurs != 2)
         {
-            Debug.LogError("LobbyManager: Number of Saboteurs is 0!");
-            return;
+            _numSaboteurs = 1;
         }
 
         Debug.Log("<color=yellow>SERVER: </color>Assigning player roles. Sabos: " + _numSaboteurs);
