@@ -21,6 +21,7 @@ public class LogViewer : MonoBehaviour
     [SerializeField] private bool _localTestMode;
     [SerializeField] private bool _dontTestWin;
     [SerializeField] private bool _doCheats;
+    [SerializeField] private bool _randomNames;
 
     // ============== Singleton pattern ==============
     #region Singleton
@@ -145,5 +146,10 @@ public class LogViewer : MonoBehaviour
     public bool GetLocalTestMode()
     {
         return _localTestMode;
+    }
+
+    public bool GetRandomNames()
+    {
+        return _randomNames;
     }
 }

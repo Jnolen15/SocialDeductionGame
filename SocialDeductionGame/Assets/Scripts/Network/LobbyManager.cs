@@ -36,6 +36,7 @@ public class LobbyManager : MonoBehaviour
     // ============== Variables ==============
     #region Variables
     private const string KEY_RELAY_JOIN_CODE = "KeyRelayJoinCode";
+    private const string KEY_PLAYER_NAME = "KeyPlayerName";
 
     [SerializeField] private bool _localTestMode;
     private Lobby _joinedLobby;
@@ -229,6 +230,7 @@ public class LobbyManager : MonoBehaviour
                 Data = new Dictionary<string, DataObject> {
                     { KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) },
                 },
+                Player = GetNewPlayer(),
             };
 
             _joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyData.Name, lobbyData.MaxPlayers, options);
@@ -237,6 +239,8 @@ public class LobbyManager : MonoBehaviour
 
             ConnectionManager.Instance.CreateGame();
             SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
+
+            PrintPlayers(_joinedLobby);
         }
         catch (LobbyServiceException e)
         {
@@ -251,13 +255,20 @@ public class LobbyManager : MonoBehaviour
 
         try
         {
-            _joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+            var options = new QuickJoinLobbyOptions
+            {
+                Player = GetNewPlayer(),
+            };
+
+            _joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync(options);
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
             ConnectionManager.Instance.JoinGame();
+
+            PrintPlayers(_joinedLobby);
         }
         catch (LobbyServiceException e)
         {
@@ -275,13 +286,20 @@ public class LobbyManager : MonoBehaviour
 
         try
         {
-            _joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+            var options = new JoinLobbyByCodeOptions
+            {
+                Player = GetNewPlayer(),
+            };
+
+            _joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, options);
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
             ConnectionManager.Instance.JoinGame();
+
+            PrintPlayers(_joinedLobby);
         }
         catch (LobbyServiceException e)
         {
@@ -299,13 +317,20 @@ public class LobbyManager : MonoBehaviour
 
         try
         {
-            _joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyID);
+            var options = new JoinLobbyByIdOptions
+            {
+                Player = GetNewPlayer(),
+            };
+
+            _joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyID, options);
 
             string relayJoinCode = _joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
             ConnectionManager.Instance.JoinGame();
+
+            PrintPlayers(_joinedLobby);
         }
         catch (LobbyServiceException e)
         {
@@ -475,6 +500,29 @@ public class LobbyManager : MonoBehaviour
     public void SendLobbyData()
     {
         OnLobbySendData?.Invoke(_joinedLobbyData);
+    }
+
+    private Player GetNewPlayer()
+    {
+        string playerName = PlayerPrefs.GetString(PlayerNamer.KEY_PLAYERNAME);
+
+        if (LogViewer.Instance.GetRandomNames())
+            playerName = "Gamer " + Random.Range(0, 1000);
+
+        return new Player
+        {
+            Data = new Dictionary<string, PlayerDataObject> {
+                { KEY_PLAYER_NAME, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, playerName )},
+            },
+        };
+    }
+
+    private void PrintPlayers(Lobby printLobby)
+    {
+        foreach(Player playa in printLobby.Players)
+        {
+            Debug.Log($"ID: {playa.Id}, Name: {playa.Data[KEY_PLAYER_NAME].Value}");
+        }
     }
     #endregion
 }

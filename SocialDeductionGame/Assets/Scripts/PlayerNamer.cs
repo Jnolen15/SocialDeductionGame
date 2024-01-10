@@ -7,14 +7,13 @@ public class PlayerNamer : MonoBehaviour
     // ============== Refrences ==============
     [SerializeField] private List<string> _randNameList = new List<string>();
 
-    private const string KEY_PLAYERNAME = "KeyPlayerName";
+    public const string KEY_PLAYERNAME = "KeyPlayerName";
 
     // ============== Setup ==============
     void Awake()
     {
         string playerName = PlayerPrefs.GetString(KEY_PLAYERNAME, "defaultName");
-
-        if(playerName == "defaultName")
+        if (playerName == "defaultName")
         {
             PlayerPrefs.SetString(KEY_PLAYERNAME, GetRandomName());
         }
