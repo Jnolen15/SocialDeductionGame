@@ -2,11 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using TMPro;
+using System.Text.RegularExpressions;
 
 public class MenuManager : MonoBehaviour
 {
     // ============== Refrences ==============
+    [SerializeField] private TMP_InputField _playerNameIF;
+    [SerializeField] private TextMeshProUGUI _playerNameText;
 
+    private PlayerNamer _playerNamer;
 
     // ============== Setup ==============
     private void Awake()
@@ -22,6 +27,13 @@ public class MenuManager : MonoBehaviour
             Destroy(ConnectionManager.Instance.gameObject);
     }
 
+    private void Start()
+    {
+        _playerNamer = this.GetComponent<PlayerNamer>();
+
+        UpdatePlayerName();
+    }
+
     // ============== Functions ==============
     public void Play()
     {
@@ -32,5 +44,23 @@ public class MenuManager : MonoBehaviour
     public void Quit()
     {
         Application.Quit();
+    }
+
+    public void OnEditNameField(string attemptedVal)
+    {
+        string cleanStr = Regex.Replace(attemptedVal, @"[^a-zA-Z0-9]", "");
+        _playerNameIF.text = cleanStr;
+    }
+
+    public void OnEndEditNameField(string attemptedVal)
+    {
+        _playerNamer.SetPlayerName(attemptedVal);
+
+        UpdatePlayerName();
+    }
+
+    private void UpdatePlayerName()
+    {
+        _playerNameText.text = _playerNamer.GetPlayerName();
     }
 }
