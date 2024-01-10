@@ -198,18 +198,18 @@ public class PlayerConnectionManager : NetworkBehaviour
         // When someone leaves count them as dead
         RecordPlayerDeathServerRpc(clientID);
 
+        /*// Test for ready again (In case all but player who left were ready)
+        // If player who left is ready, unready them, otherwise they will be counted when they should not
+        if (GetPlayerReadyByID(clientID))
+            UnreadyPlayerByID(clientID);
+        TestAllPlayersReady();*/
+
         Debug.Log($"<color=yellow>SERVER: </color> Client {clientID} disconnected");
         _netNumPlayers.Value--;
 
         // Update server and client dictionaries
         _playerDict.Remove(clientID);
         RemovePlayerFromDictionaryClientRpc(clientID);
-
-        // Test for ready again (In case all but player who left were ready)
-        // If player who left is ready, unready them, otherwise they will be counted when they should not
-        if (GetPlayerReadyByID(clientID))
-            UnreadyPlayerByID(clientID);
-        TestAllPlayersReady();
 
         OnPlayerDisconnect?.Invoke(clientID);
     }

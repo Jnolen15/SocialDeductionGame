@@ -168,7 +168,7 @@ public class LobbyManager : MonoBehaviour
                 {
                     Debug.Log("Refreshing Lobby List");
 
-                    _listRefreshTimer = 5f;
+                    _listRefreshTimer = 3f;
                     ListLobbies();
                 }
             }
