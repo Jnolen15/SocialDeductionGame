@@ -10,6 +10,7 @@ public class MenuManager : MonoBehaviour
     // ============== Refrences ==============
     [SerializeField] private TMP_InputField _playerNameIF;
     [SerializeField] private TextMeshProUGUI _playerNameText;
+    [SerializeField] private GameObject _playerNameLengthWarning;
 
     private PlayerNamer _playerNamer;
 
@@ -54,6 +55,14 @@ public class MenuManager : MonoBehaviour
 
     public void OnEndEditNameField(string attemptedVal)
     {
+        if(attemptedVal.Length < 2) 
+        {
+            _playerNameLengthWarning.SetActive(true);
+            return;
+        }
+        else
+            _playerNameLengthWarning.SetActive(false);
+
         _playerNamer.SetPlayerName(attemptedVal);
 
         UpdatePlayerName();
