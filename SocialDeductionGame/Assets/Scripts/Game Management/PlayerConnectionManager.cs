@@ -196,7 +196,8 @@ public class PlayerConnectionManager : NetworkBehaviour
     private void ClientDisconnected(ulong clientID)
     {
         // When someone leaves count them as dead
-        RecordPlayerDeathServerRpc(clientID);
+        if(SceneLoader.IsInScene(SceneLoader.Scene.IslandGameScene))
+            RecordPlayerDeathServerRpc(clientID);
 
         /*// Test for ready again (In case all but player who left were ready)
         // If player who left is ready, unready them, otherwise they will be counted when they should not
@@ -440,6 +441,13 @@ public class PlayerConnectionManager : NetworkBehaviour
         // Test out of game, AKA character select
         else
         {
+            // Make sure at least 4 players connected
+            if(GetNumConnectedPlayers() < 4 && !LogViewer.Instance.GetStartWithAny())
+            {
+                Debug.Log("<color=yellow>SERVER: </color>Can't start game, Not enough players");
+                return;
+            }
+
             // Otherwise check against total connected players
             if (_netPlayersReadied.Value >= GetNumConnectedPlayers())
             {

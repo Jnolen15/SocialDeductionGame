@@ -33174,7 +33174,7 @@ MonoBehaviour:
   _beachLocation: {fileID: 1183537070}
   _forestLocation: {fileID: 1119491582}
   _plateauLocation: {fileID: 1494442375}
-  curLocalLocation: 0
+  _curLocalLocation: 0
 --- !u!114 &1316379723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53284,6 +53284,30 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1110673301104074698, guid: ba9c9f5fdd00387419f01df30d9255a5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4956996940395187620, guid: ba9c9f5fdd00387419f01df30d9255a5, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4956996940395187620, guid: ba9c9f5fdd00387419f01df30d9255a5, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4956996941403200778, guid: ba9c9f5fdd00387419f01df30d9255a5, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4956996941403200778, guid: ba9c9f5fdd00387419f01df30d9255a5, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4956996941403200778, guid: ba9c9f5fdd00387419f01df30d9255a5, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8007811304307878074, guid: ba9c9f5fdd00387419f01df30d9255a5, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
