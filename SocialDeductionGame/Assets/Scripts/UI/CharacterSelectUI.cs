@@ -18,12 +18,12 @@ public class CharacterSelectUI : MonoBehaviour
     [SerializeField] private GameObject _playerLobbyEntryPref;
     private bool _localPlayerReady;
 
+    private float _updateLobbyTimer = 3f;
+
     // ============== Setup ==============
     private void Awake()
     {
         //PlayerConnectionManager.OnPlayerConnect += UpdatePlayerCount;
-        PlayerConnectionManager.OnPlayerConnect += UpdatePlayerEntries;
-        PlayerConnectionManager.OnPlayerDisconnect += UpdatePlayerEntries;
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
         PlayerConnectionManager.OnAllPlayersReadyAlertClients += ShowLoad;
@@ -39,11 +39,21 @@ public class CharacterSelectUI : MonoBehaviour
     private void OnDestroy()
     {
         //PlayerConnectionManager.OnPlayerConnect -= UpdatePlayerCount;
-        PlayerConnectionManager.OnPlayerConnect -= UpdatePlayerEntries;
-        PlayerConnectionManager.OnPlayerDisconnect -= UpdatePlayerEntries;
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
         PlayerConnectionManager.OnAllPlayersReadyAlertClients -= ShowLoad;
+    }
+
+    // ============== Update ==============
+    private void Update()
+    {
+        if (_updateLobbyTimer <= 0)
+        {
+            UpdatePlayerEntries();
+            _updateLobbyTimer = 3f;
+        }
+        else
+            _updateLobbyTimer -= Time.deltaTime;
     }
 
     // ============== Functions ==============
@@ -86,10 +96,10 @@ public class CharacterSelectUI : MonoBehaviour
     {
         Debug.Log("Player count changed, updating entries");
 
+        List<Player> lobbyPlayers = await LobbyManager.Instance.GetLobbyPlayerListAsync();
+
         foreach (Transform child in _playerEntryZone)
             Destroy(child.gameObject);
-
-        List<Player> lobbyPlayers = await LobbyManager.Instance.GetLobbyPlayerListAsync();
 
         foreach (Player player in lobbyPlayers)
         {
