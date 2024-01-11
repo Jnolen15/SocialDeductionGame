@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 public class CharacterSelectManager : NetworkBehaviour
 {
     // ============== Refrences ==============
-    [SerializeField] TMP_InputField _inputField;
     [SerializeField] private Transform _characterModel;
     private Transform _currentSelectedModel;
     [SerializeField] private List<Material> _characterMatList = new();
@@ -35,6 +34,8 @@ public class CharacterSelectManager : NetworkBehaviour
 
         _watchColorIndex = PlayerPrefs.GetInt("WatchColor");
             UpdateWatchVisual(_watchColorIndex);
+
+        SetPlayerName();
     }
 
     public override void OnNetworkDespawn()
@@ -68,16 +69,12 @@ public class CharacterSelectManager : NetworkBehaviour
 
     // ============== Character Customization ==============
     #region Character Customization
-    public void InputValueChanged(string attemptedVal)
+    private void SetPlayerName()
     {
-        string cleanStr = Regex.Replace(attemptedVal, @"[^a-zA-Z0-9]", "");
-        _inputField.text = cleanStr;
-    }
+        string playerName = PlayerPrefs.GetString(PlayerNamer.KEY_PLAYERNAME);
 
-    public void SetPlayerName(string newName)
-    {
-        Debug.Log("Name Recieved: " + newName);
-        PlayerConnectionManager.Instance.UpdatePlayerName(NetworkManager.Singleton.LocalClientId, newName);
+        Debug.Log("Name Recieved: " + playerName);
+        PlayerConnectionManager.Instance.UpdatePlayerName(NetworkManager.Singleton.LocalClientId, playerName);
     }
 
     public void SetPlayerVisuals(int style, int mat)

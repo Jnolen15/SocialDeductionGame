@@ -9,10 +9,14 @@ using TMPro;
 public class CharacterSelectUI : MonoBehaviour
 {
     // ============== Refrences ==============
+    [SerializeField] private Color _readyColor;
+    [SerializeField] private Color _unreadyColor;
     [SerializeField] private Image _readyButtonSprite;
+    [SerializeField] private TextMeshProUGUI _readyButtonText;
     [SerializeField] private TextMeshProUGUI _lobbyName;
     [SerializeField] private TextMeshProUGUI _lobbyCode;
-    [SerializeField] private TextMeshProUGUI _joinedPlayers;
+    [SerializeField] private GameObject _customizeMenu;
+    [SerializeField] private GameObject _voiceSettingsMenu;
     [SerializeField] private GameObject _loadScreen;
     [SerializeField] private Transform _playerEntryZone;
     [SerializeField] private GameObject _playerLobbyEntryPref;
@@ -57,12 +61,16 @@ public class CharacterSelectUI : MonoBehaviour
     }
 
     // ============== Functions ==============
-    public void ReturnToMainMenu()
+    public void ToggleCustomize()
     {
-        LobbyManager.Instance.DisconnectFromLobby();
-        VivoxManager.Instance.LeaveAll();
+        _customizeMenu.SetActive(true);
+        _voiceSettingsMenu.SetActive(false);
+    }
 
-        SceneLoader.Load(SceneLoader.Scene.MainMenu);
+    public void ToggleVoiceSettings()
+    {
+        _customizeMenu.SetActive(false);
+        _voiceSettingsMenu.SetActive(true);
     }
 
     public void ToggleReadyPlayer()
@@ -75,21 +83,16 @@ public class CharacterSelectUI : MonoBehaviour
 
     private void Ready()
     {
-        _readyButtonSprite.color = Color.green;
+        _readyButtonSprite.color = _readyColor;
+        _readyButtonText.text = "Readied!";
         _localPlayerReady = true;
     }
 
     private void Unready()
     {
-        _readyButtonSprite.color = Color.red;
+        _readyButtonSprite.color = _unreadyColor;
+        _readyButtonText.text = "Ready?";
         _localPlayerReady = false;
-    }
-
-    private void UpdatePlayerCount(ulong id)
-    {
-        Debug.Log("PLAYER CONNECTED UPDATING COUNT");
-        int numPlayers = PlayerConnectionManager.Instance.GetNumConnectedPlayers();
-        _joinedPlayers.text = "Connected Players: " + numPlayers;
     }
 
     private async void UpdatePlayerEntries()

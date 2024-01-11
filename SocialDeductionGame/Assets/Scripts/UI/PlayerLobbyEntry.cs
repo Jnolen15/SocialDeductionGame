@@ -13,6 +13,6 @@ public class PlayerLobbyEntry : MonoBehaviour
     public void Setup(string playerName)
     {
         _playerName.text = playerName;
-        this.GetComponent<Image>().color = Random.ColorHSV();
+        //this.GetComponent<Image>().color = Random.ColorHSV();
     }
 }
