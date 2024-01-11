@@ -423,6 +423,11 @@ public class VivoxManager : MonoBehaviour
     #endregion
 
     // ============== DEBUG ==============
+    public ConnectionState GetChannelState(IChannelSession channelSession)
+    {
+        return channelSession.ChannelState;
+    }
+
     private void OnParticipantValueUpdated(object sender, ValueEventArg<string, IParticipant> valueEventArg)
     {
         ValidateArgs(new object[] { sender, valueEventArg }); //see code from earlier in post

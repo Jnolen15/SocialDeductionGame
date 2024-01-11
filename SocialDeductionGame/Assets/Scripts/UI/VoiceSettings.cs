@@ -105,4 +105,13 @@ public class VoiceSettings : MonoBehaviour
         Debug.LogError("Device with name " + name + " not found!");
         return null;
     }
+
+    public void RemakeInitialConnection()
+    {
+        // Positional first (documention says always positional first)
+        VivoxManager.Instance.JoinWorldChannel(LobbyManager.Instance.GetLobbyId());
+
+        // Lobby channel
+        VivoxManager.Instance.JoinLobbyChannel(LobbyManager.Instance.GetLobbyId());
+    }
 }
