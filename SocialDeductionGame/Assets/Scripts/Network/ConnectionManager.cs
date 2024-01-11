@@ -47,7 +47,6 @@ public class ConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.ConnectionApprovalCallback += ConnectionApproval;
         NetworkManager.Singleton.StartHost();
 
-        LobbyManager.Instance.JoinLobbyVivoxChannel();
         LobbyManager.Instance.CreateLobbyData();
     }
 
@@ -58,7 +57,6 @@ public class ConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnect;
         NetworkManager.Singleton.StartClient();
 
-        LobbyManager.Instance.JoinLobbyVivoxChannel();
         LobbyManager.Instance.CreateLobbyData();
     }
 

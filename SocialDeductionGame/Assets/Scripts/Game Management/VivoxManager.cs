@@ -132,7 +132,7 @@ public class VivoxManager : MonoBehaviour
         ChannelType lobbyChannelType = ChannelType.NonPositional;
         Channel lobbyChannel = new Channel(lobbyId + "_lobby", lobbyChannelType, null);
 
-        JoinVivoxChannel(lobbyChannel, true, ChannelSeshName.Lobby);
+        JoinVivoxChannel(lobbyChannel, false, ChannelSeshName.Lobby);
     }
 
     public void JoinDeathChannel()
@@ -320,6 +320,10 @@ public class VivoxManager : MonoBehaviour
         if(channelName == ChannelSeshName.World)
         {
             LoginSession.SetTransmissionMode(TransmissionMode.Single, _worldChannelSession.Channel);
+        }
+        else if (channelName == ChannelSeshName.Lobby)
+        {
+            LoginSession.SetTransmissionMode(TransmissionMode.Single, _lobbyChannelSession.Channel);
         }
         else if (channelName == ChannelSeshName.Death)
         {

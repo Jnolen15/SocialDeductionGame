@@ -357,7 +357,7 @@ public class LobbyManager : MonoBehaviour
             Debug.Log("<color=yellow>SERVER: </color>Deleting lobby");
 
             // Disconnect from vivox channel
-            VivoxManager.Instance.LeaveAll();
+            VivoxManager.Instance.LeaveLobbyChannel();
 
             await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
 
@@ -379,7 +379,7 @@ public class LobbyManager : MonoBehaviour
             Debug.Log("<color=purple>CONNECTION: </color>leaving lobby");
 
             // Disconnect from vivox channel
-            VivoxManager.Instance.LeaveAll();
+            VivoxManager.Instance.LeaveLobbyChannel();
 
             await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, AuthenticationService.Instance.PlayerId);
 
@@ -449,22 +449,6 @@ public class LobbyManager : MonoBehaviour
     }*/
     #endregion
 
-    // ============== Vivox =============
-    #region Vivox
-    // Join in game positional and lobby channels
-    public void JoinLobbyVivoxChannel()
-    {
-        // Positional first (documention says always positional first)
-        VivoxManager.Instance.JoinWorldChannel(_joinedLobby.Id);
-
-        // Lobby channel
-        VivoxManager.Instance.JoinLobbyChannel(_joinedLobby.Id);
-        
-        // Death channel
-        //VivoxManager.Instance.JoinDeathChannel(_joinedLobby.Id);
-    }
-    #endregion
-
     // ============== Helpers =============
     #region Helpers
     public bool IsLobbyHost()
@@ -475,6 +459,11 @@ public class LobbyManager : MonoBehaviour
     public Lobby GetLobby()
     {
         return _joinedLobby;
+    }
+
+    public string GetLobbyId()
+    {
+        return _joinedLobby.Id;
     }
 
     public void CreateLobbyData()
