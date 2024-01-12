@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class VivoxLobbyClient : MonoBehaviour
 {
+    // ================== Refrences ==================
+    [SerializeField] private GameObject _micActiveIcon;
+
     // ================== Setup ==================
     #region Setup
     private void Start()
@@ -33,13 +36,23 @@ public class VivoxLobbyClient : MonoBehaviour
         if (Input.GetButtonDown("PTT"))
         {
             VivoxManager.Instance.SetTransmissionChannel(channel);
-            //OnBeginSpeaking?.Invoke(channel);
+            EnableMic();
         }
         else if (Input.GetButtonUp("PTT"))
         {
             VivoxManager.Instance.SetTransmissionNone();
-            //OnEndSpeaking?.Invoke(channel);
+            DisableMic();
         }
+    }
+
+    private void EnableMic()
+    {
+        _micActiveIcon.SetActive(true);
+    }
+
+    private void DisableMic()
+    {
+        _micActiveIcon.SetActive(false);
     }
     #endregion
 }
