@@ -10,14 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d3d4707064966bf4fafc78fa7e570f3a, type: 3}
-  m_Name: T_PolarBear
+  m_Name: T_JungleCat
   m_EditorClassIdentifier: 
   _hazardID: 1006
-  _hazardName: PolarBear
-  _hazardConsequences: -2 HP
+  _hazardName: Jungle Cat
+  _hazardConsequences: -2 Health.
   _hazardArt: {fileID: 0}
-  _hazardType: 0
   _dangerLevel: 2
-  _preventionTag: {fileID: 0}
+  _preventable: 0
   _damage: 2
   _hunger: 0

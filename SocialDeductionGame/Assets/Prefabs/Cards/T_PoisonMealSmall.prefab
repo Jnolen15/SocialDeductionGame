@@ -51,14 +51,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardID: 2012
   _cardName: Suspicious Small Meal
-  _cardDescription: 'A suspicious small meal.
-
-    60%:  +1 Portions
-
-    25%: -2
-    Hunger
-
-    15%: -1 Health'
+  _cardDescription: A suspicious small meal. Chance to instead loose 1 to 3 hunger.
   _cardArt: {fileID: 0}
   _cardArtAdjustments: {x: 0, y: 0, z: 0}
   _cardArtDimensions: {x: 0, y: 0}
@@ -70,3 +63,5 @@ MonoBehaviour:
   _cardUIPrefab: {fileID: 5427489456640813847, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
   _servings: 1
   _hpGain: 0
+  _looseLowEnd: 1
+  _looseHighEnd: 3

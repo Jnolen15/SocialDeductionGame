@@ -7,6 +7,8 @@ public class PoisonFoodCard : Card
     [Header("Poison Food Details")]
     [SerializeField] private int _servings;
     [SerializeField] private int _hpGain;
+    [SerializeField] private int _looseLowEnd;
+    [SerializeField] private int _looseHighEnd;
 
     public override void OnPlay(GameObject playLocation)
     {
@@ -18,23 +20,18 @@ public class PoisonFoodCard : Card
             {
                 int rand = Random.Range(0, 101);
                 Debug.Log("Ate Posion food, Rolling effect: " + rand);
-                // 60% chance that food works like normal
-                if(rand <= 60)
+                // 50% chance that food works like normal
+                if(rand <= 50)
                 {
                     player.Eat(_servings, _hpGain);
                     Debug.Log("Food works like normal");
                 }
-                // 25% chance food makes player loose 2 hunger
-                else if (rand > 60 && rand <= 85)
-                {
-                    player.Eat(-2, 0);
-                    Debug.Log("Player is sick, -2 hunger");
-                }
-                // 15% chance food makes player take 1 damage
+                // 50% chance food makes player loose some hunger
                 else
                 {
-                    player.Eat(0, -1);
-                    Debug.Log("Player is really sick -1 hp");
+                    int lossNum = Random.Range(_looseLowEnd, _looseHighEnd + 1);
+                    player.Eat(-lossNum, 0);
+                    Debug.Log($"Player is sick, -{lossNum} hunger");
                 }
             }
             else
