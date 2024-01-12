@@ -9,17 +9,25 @@ using TMPro;
 public class CharacterSelectUI : MonoBehaviour
 {
     // ============== Refrences ==============
+    [Header("UI Refrences")]
     [SerializeField] private Color _readyColor;
     [SerializeField] private Color _unreadyColor;
     [SerializeField] private Image _readyButtonSprite;
     [SerializeField] private TextMeshProUGUI _readyButtonText;
     [SerializeField] private TextMeshProUGUI _lobbyName;
     [SerializeField] private TextMeshProUGUI _lobbyCode;
+    [SerializeField] private GameObject _gameSettingsButton;
+    [SerializeField] private GameObject _gameSettingsMenu;
     [SerializeField] private GameObject _customizeMenu;
     [SerializeField] private GameObject _voiceSettingsMenu;
     [SerializeField] private GameObject _loadScreen;
     [SerializeField] private Transform _playerEntryZone;
     [SerializeField] private GameObject _playerLobbyEntryPref;
+
+    [Header("Game Rules")]
+    [SerializeField] private TextMeshProUGUI _numSabosText;
+    [SerializeField] private int _numSabosSelected;
+
     private bool _localPlayerReady;
 
     private float _updateLobbyTimer = 3f;
@@ -38,6 +46,12 @@ public class CharacterSelectUI : MonoBehaviour
         SetupLobbyInfoPannel();
 
         UpdatePlayerEntries();
+
+        if (!LobbyManager.Instance.IsLobbyHost())
+        {
+            _gameSettingsButton.SetActive(false);
+            ToggleCustomize();
+        }
     }
 
     private void OnDestroy()
@@ -60,15 +74,25 @@ public class CharacterSelectUI : MonoBehaviour
             _updateLobbyTimer -= Time.deltaTime;
     }
 
-    // ============== Functions ==============
+    // ============== Basic Functions ==============
+    #region Basic Functions
+    public void ToggleGameSettings()
+    {
+        _gameSettingsMenu.SetActive(true);
+        _customizeMenu.SetActive(false);
+        _voiceSettingsMenu.SetActive(false);
+    }
+
     public void ToggleCustomize()
     {
+        _gameSettingsMenu.SetActive(false);
         _customizeMenu.SetActive(true);
         _voiceSettingsMenu.SetActive(false);
     }
 
     public void ToggleVoiceSettings()
     {
+        _gameSettingsMenu.SetActive(false);
         _customizeMenu.SetActive(false);
         _voiceSettingsMenu.SetActive(true);
     }
@@ -130,5 +154,29 @@ public class CharacterSelectUI : MonoBehaviour
     private void ShowLoad()
     {
         _loadScreen.SetActive(true);
+    }
+
+    #endregion
+
+    // ============== Game Settings ==============
+    private void UpdateGameSettings()
+    {
+        PlayerConnectionManager.Instance.SetGameSettings(_numSabosSelected);
+    }
+
+    public void IncrementNumSabos()
+    {
+        _numSabosSelected = 2;
+        _numSabosText.text = _numSabosSelected.ToString();
+
+        UpdateGameSettings();
+    }
+
+    public void DecrementNumSabos()
+    {
+        _numSabosSelected = 1;
+        _numSabosText.text = _numSabosSelected.ToString();
+
+        UpdateGameSettings();
     }
 }

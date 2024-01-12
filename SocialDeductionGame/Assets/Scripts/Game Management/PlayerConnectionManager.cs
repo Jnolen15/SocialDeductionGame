@@ -25,7 +25,7 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     #region Variables and Refrences
-    private int _numSaboteurs;
+    [SerializeField] private int _numSaboteurs;
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netNumLivingPlayers = new(writePerm: NetworkVariableWritePermission.Server);
@@ -228,8 +228,8 @@ public class PlayerConnectionManager : NetworkBehaviour
     }
     #endregion
 
-    // ============== Player Setup ==============
-    #region Player Setup
+    // ============== Player / Game Setup ==============
+    #region Player / Game Setup
     private void SpawnPlayerPrefabs(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
         if (!IsServer)
@@ -294,6 +294,15 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         // Finish Setup Event
         OnPlayerSetupComplete?.Invoke();
+    }
+
+    public void SetGameSettings(int numSabos)
+    {
+        if (!IsServer)
+            return;
+
+        Debug.Log("<color=yellow>SERVER: </color>Updating game settings");
+        _numSaboteurs = numSabos;
     }
     #endregion
 
@@ -503,9 +512,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        _numSaboteurs = 1;
-
-        if (_numSaboteurs != 1 || _numSaboteurs != 2)
+        if (_numSaboteurs != 1 && _numSaboteurs != 2)
         {
             _numSaboteurs = 1;
         }
