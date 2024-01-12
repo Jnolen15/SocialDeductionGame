@@ -48,6 +48,7 @@ public class ConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.StartHost();
 
         LobbyManager.Instance.CreateLobbyData();
+        //LobbyManager.Instance.SubscribeToLobbyEvents();
     }
 
     public void JoinGame()
@@ -58,10 +59,14 @@ public class ConnectionManager : NetworkBehaviour
         NetworkManager.Singleton.StartClient();
 
         LobbyManager.Instance.CreateLobbyData();
+        //LobbyManager.Instance.SubscribeToLobbyEvents();
     }
 
     private void ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
     {
+        // NOTE: If connection approval is denied while the lobby is active the player's information will still be in the lobby
+        // Here is doesnt matter as if the game has already started the lobby shouldn't exist anymore anyway
+
         // If not in character select scene deny connection
         if (!SceneLoader.IsInScene(SceneLoader.Scene.CharacterSelectScene))
         {

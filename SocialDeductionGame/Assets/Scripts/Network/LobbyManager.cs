@@ -43,6 +43,7 @@ public class LobbyManager : MonoBehaviour
     private float _hearthbeatTimer;
     private float _listRefreshTimer;
     private LobbyData _joinedLobbyData;
+    private ILobbyEvents _lobbyEvents;
 
     public delegate void LobbyAction();
     public static event LobbyAction OnStartCreateLobby;
@@ -396,11 +397,17 @@ public class LobbyManager : MonoBehaviour
         if (!IsLobbyHost())
             return;
 
+        // NOTE:
+        // This propperly kicks the player, however im not sure
+        // How to get that the kicked player was kicked
+        // For them its like they are still in the lobby
+        // And when the game starts they are still in it
+        // So they have to disconnect on their end as well
+        // RN im just try / catching errors when the player updates the lobby list
+
         try
         {
             Debug.Log("<color=yellow>SERVER: </color>Kicking player: " + playerID);
-
-            // Remove that player from lobby voice?
 
             await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, playerID);
         }
@@ -409,18 +416,38 @@ public class LobbyManager : MonoBehaviour
             Debug.LogError(e);
         }
     }
+
+    // If _joinedLobby ever becomes null this is called
+    private void OnLostLobbyConnection()
+    {
+        Debug.Log("<color=blue>CLIENT: </color>Disconnected from lobby!");
+
+        // Leave voice
+        VivoxManager.Instance.LeaveAll();
+
+        _lobbyEvents = null;
+        _joinedLobby = null;
+
+        // Return to menu
+        SceneLoader.Load(SceneLoader.Scene.MainMenu);
+    }
     #endregion
 
+    // ============== Lobby Events =============
     #region Lobby Events
-    /*private async void SubscribeToLobbyEvents()
+    /*
+    public async void SubscribeToLobbyEvents()
     {
+        Debug.Log("<color=blue>CLIENT: </color>Subscribing to lobby events");
+
         var callbacks = new LobbyEventCallbacks();
         callbacks.LobbyChanged += OnLobbyChanged;
-        //callbacks.KickedFromLobby += OnKickedFromLobby;
-        //callbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
+        callbacks.KickedFromLobby += OnKickedFromLobby;
+        callbacks.LobbyEventConnectionStateChanged += OnLobbyEventConnectionStateChanged;
         try
         {
             _lobbyEvents = await Lobbies.Instance.SubscribeToLobbyEventsAsync(_joinedLobby.Id, callbacks);
+            Debug.Log("<color=blue>CLIENT: </color>Subscribed!");
         }
         catch (LobbyServiceException ex)
         {
@@ -436,6 +463,8 @@ public class LobbyManager : MonoBehaviour
 
     private void OnLobbyChanged(ILobbyChanges changes)
     {
+        Debug.Log("OnLobbyChanged not utilized");
+        
         if (changes.LobbyDeleted)
         {
             // Handle lobby being deleted
@@ -446,11 +475,36 @@ public class LobbyManager : MonoBehaviour
             changes.ApplyToLobby(_joinedLobby);
         }
         // Refresh the UI in some way
-    }*/
+    }
+
+    private void OnKickedFromLobby()
+    {
+        Debug.Log("<color=blue>CLIENT: </color>Kicked from lobby!");
+
+        // Leave voice
+        VivoxManager.Instance.LeaveAll();
+
+        _lobbyEvents = null;
+        _joinedLobby = null;
+
+        // Return to menu
+        SceneLoader.Load(SceneLoader.Scene.MainMenu);
+    }
+
+    private void OnLobbyEventConnectionStateChanged(LobbyEventConnectionState state)
+    {
+        Debug.Log("<color=blue>CLIENT: </color>Lobby event connection state changed:" + state);
+    }
+    */
     #endregion
 
     // ============== Helpers =============
     #region Helpers
+    public string GetHostID()
+    {
+        return _joinedLobby.HostId;
+    }
+
     public bool IsLobbyHost()
     {
         return (_joinedLobby != null && _joinedLobby.HostId == AuthenticationService.Instance.PlayerId);
@@ -488,11 +542,20 @@ public class LobbyManager : MonoBehaviour
 
     public async Task<List<Player>> GetLobbyPlayerListAsync()
     {
+        // Update lobby
         _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
 
         PrintPlayers(_joinedLobby);
 
-        return _joinedLobby.Players;
+        try
+        {
+            return _joinedLobby.Players;
+        }
+        catch (System.Exception)
+        {
+            Debug.LogError("Joined lobby has become null. Player has disconnected");
+            return null;
+        }
     }
 
     public void SendLobbyData()
@@ -517,9 +580,19 @@ public class LobbyManager : MonoBehaviour
 
     private void PrintPlayers(Lobby printLobby)
     {
-        foreach(Player playa in printLobby.Players)
+        Debug.Log("Number of players in lobby " + _joinedLobby.Players.Count);
+
+        try
         {
-            Debug.Log($"ID: {playa.Id}, Name: {playa.Data[KEY_PLAYER_NAME].Value}");
+            foreach (Player playa in printLobby.Players)
+            {
+                Debug.Log($"ID: {playa.Id}, Name: {playa.Data[KEY_PLAYER_NAME].Value}");
+            }
+        }
+        catch (System.Exception)
+        {
+            Debug.LogError("Null refrence while getting lobby player info. Player disconnected");
+            OnLostLobbyConnection();
         }
     }
     #endregion

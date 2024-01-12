@@ -6,8 +6,8 @@ public class ReturnToMain : MonoBehaviour
 {
     public void ReturnToMainMenu()
     {
-        LobbyManager.Instance.DisconnectFromLobby();
         VivoxManager.Instance.LeaveAll();
+        LobbyManager.Instance.DisconnectFromLobby();
 
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }

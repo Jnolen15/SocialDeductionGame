@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using TMPro;
 
@@ -39,6 +38,7 @@ public class CharacterSelectUI : MonoBehaviour
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
         PlayerConnectionManager.OnAllPlayersReadyAlertClients += ShowLoad;
+        PlayerLobbyEntry.OnKickPlayer += KickPlayer;
     }
 
     private void Start()
@@ -60,6 +60,7 @@ public class CharacterSelectUI : MonoBehaviour
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
         PlayerConnectionManager.OnAllPlayersReadyAlertClients -= ShowLoad;
+        PlayerLobbyEntry.OnKickPlayer -= KickPlayer;
     }
 
     // ============== Update ==============
@@ -74,8 +75,8 @@ public class CharacterSelectUI : MonoBehaviour
             _updateLobbyTimer -= Time.deltaTime;
     }
 
-    // ============== Basic Functions ==============
-    #region Basic Functions
+    // ============== UI Function ==============
+    #region UI Function
     public void ToggleGameSettings()
     {
         _gameSettingsMenu.SetActive(true);
@@ -97,14 +98,6 @@ public class CharacterSelectUI : MonoBehaviour
         _voiceSettingsMenu.SetActive(true);
     }
 
-    public void ToggleReadyPlayer()
-    {
-        if(!_localPlayerReady)
-            PlayerConnectionManager.Instance.ReadyPlayer();
-        else
-            PlayerConnectionManager.Instance.UnreadyPlayer();
-    }
-
     private void Ready()
     {
         _readyButtonSprite.color = _readyColor;
@@ -121,9 +114,12 @@ public class CharacterSelectUI : MonoBehaviour
 
     private async void UpdatePlayerEntries()
     {
-        Debug.Log("Player count changed, updating entries");
+        Debug.Log("Updating player entries");
 
         List<Player> lobbyPlayers = await LobbyManager.Instance.GetLobbyPlayerListAsync();
+
+        if (lobbyPlayers == null)
+            return;
 
         foreach (Transform child in _playerEntryZone)
             Destroy(child.gameObject);
@@ -131,7 +127,13 @@ public class CharacterSelectUI : MonoBehaviour
         foreach (Player player in lobbyPlayers)
         {
             PlayerLobbyEntry pEntry = Instantiate(_playerLobbyEntryPref, _playerEntryZone).GetComponent<PlayerLobbyEntry>();
-            pEntry.Setup(player.Data[LobbyManager.KEY_PLAYER_NAME].Value);
+
+            // If this is the host dont set a kick button
+            if (player.Id == LobbyManager.Instance.GetHostID())
+                pEntry.Setup(player, false);
+            // I the player is a host, add kick button
+            else
+                pEntry.Setup(player, LobbyManager.Instance.IsLobbyHost());
         }
     }
 
@@ -158,7 +160,25 @@ public class CharacterSelectUI : MonoBehaviour
 
     #endregion
 
+    // ============== Other Functions ==============
+    #region Other Functions
+    public void ToggleReadyPlayer()
+    {
+        if (!_localPlayerReady)
+            PlayerConnectionManager.Instance.ReadyPlayer();
+        else
+            PlayerConnectionManager.Instance.UnreadyPlayer();
+    }
+
+    private void KickPlayer(string playerID)
+    {
+        if(LobbyManager.Instance.IsLobbyHost())
+            LobbyManager.Instance.KickPlayerFromLobby(playerID);
+    }
+    #endregion
+
     // ============== Game Settings ==============
+    #region Game Settings
     private void UpdateGameSettings()
     {
         PlayerConnectionManager.Instance.SetGameSettings(_numSabosSelected);
@@ -179,4 +199,5 @@ public class CharacterSelectUI : MonoBehaviour
 
         UpdateGameSettings();
     }
+    #endregion
 }

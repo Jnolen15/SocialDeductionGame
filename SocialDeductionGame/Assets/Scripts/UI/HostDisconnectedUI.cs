@@ -33,6 +33,8 @@ public class HostDisconnectedUI : MonoBehaviour
         // Note, not entirely sure if this is right.
         // The lobby stops existing when entered a game so only try to disconnect from it in character select scene
 
+        VivoxManager.Instance.LeaveAll();
+
         if (SceneLoader.IsInScene(SceneLoader.Scene.CharacterSelectScene))
         {
             LobbyManager.Instance.DisconnectFromLobby();
@@ -41,8 +43,6 @@ public class HostDisconnectedUI : MonoBehaviour
         {
             ConnectionManager.Instance.Shutdown();
         }
-
-        VivoxManager.Instance.LeaveAll();
 
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
