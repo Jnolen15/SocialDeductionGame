@@ -23,12 +23,13 @@ public class GameManager : NetworkBehaviour
     // ================== Refrences ==================
     #region Variables, Refrences and Events
     [Header("State Timers")]
-    [SerializeField] private float _introTimerMax;
-    [SerializeField] private float _morningTimerMax;
-    [SerializeField] private float _afternoonTimerMax;
-    [SerializeField] private float _eveningTimerMax;
-    [SerializeField] private float _nightTimerMax;
-    [SerializeField] private float _transitionTimerMax;
+    private GameRules _gameRules;    // Server
+    private float _introTimerMax;
+    private float _morningTimerMax;
+    private float _afternoonTimerMax;
+    private float _eveningTimerMax;
+    private float _nightTimerMax;
+    private float _transitionTimerMax;
     [SerializeField] private NetworkVariable<float> _netIntroTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netMorningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
@@ -36,8 +37,6 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netTransitionTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private float _pauseTimer;
-    [Header("Win Settings")]
-    [SerializeField] private int _numDaysTillRescue;
     private bool _rescueEarly;
 
     private bool _dontTestWin;
@@ -101,6 +100,36 @@ public class GameManager : NetworkBehaviour
             PlayerConnectionManager.OnPlayerSetupComplete += PregameComplete;
             PlayerConnectionManager.OnAllPlayersReady += ProgressState;
             PlayerConnectionManager.OnPlayerDied += CheckSaboteurWin;
+
+            _gameRules = PlayerConnectionManager.Instance.GetGameRules();
+            SetupGameRules();
+        }
+    }
+
+    private void SetupGameRules()
+    {
+        _introTimerMax = _gameRules.IntroTimerMax;
+        _morningTimerMax = _gameRules.MorningTimerMax;
+        _afternoonTimerMax = _gameRules.AfternoonTimerMax;
+        _eveningTimerMax = _gameRules.EveningTimerMax;
+        _nightTimerMax = _gameRules.NightTimerMax;
+        _transitionTimerMax = _gameRules.TransitionTimerMax;
+
+        if(_gameRules.TimerLength == GameRules.TimerLengths.Shorter)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Setting timer length to shorter");
+            _morningTimerMax = _morningTimerMax - 30;
+            _afternoonTimerMax = _afternoonTimerMax - 20;
+            _eveningTimerMax = _eveningTimerMax - 20;
+            //_nightTimerMax = _nightTimerMax - 20;
+        }
+        else if (_gameRules.TimerLength == GameRules.TimerLengths.Longer)
+        {
+            Debug.Log("<color=yellow>SERVER: </color>Setting timer length to longer");
+            _morningTimerMax = _morningTimerMax + 30;
+            _afternoonTimerMax = _afternoonTimerMax + 20;
+            _eveningTimerMax = _eveningTimerMax + 20;
+            //_nightTimerMax = _nightTimerMax + 20;
         }
     }
 
@@ -319,7 +348,7 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log($"<color=yellow>SERVER: </color>Testing Survivor Win. Survivors living: {numLivingSurvivors} Saboteurs living: {numLivingSaboteurs}");
 
-        if (_netDay.Value >= _numDaysTillRescue)
+        if (_netDay.Value >= _gameRules.NumDaysToWin)
         {
             Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived. Survivor Win!");
             EndGame(true);

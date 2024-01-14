@@ -25,13 +25,16 @@ public class CharacterSelectUI : MonoBehaviour
 
     [Header("Game Rules")]
     [SerializeField] private TextMeshProUGUI _numSabosText;
-    [SerializeField] private int _numSabosSelected;
+    [SerializeField] private TextMeshProUGUI _numDaysText;
+    [SerializeField] private TextMeshProUGUI _timerLengthsText;
+    private GameRules _gameRules = new();
 
     private bool _localPlayerReady;
 
     private float _updateLobbyTimer = 3f;
 
     // ============== Setup ==============
+    #region Setup
     private void Awake()
     {
         //PlayerConnectionManager.OnPlayerConnect += UpdatePlayerCount;
@@ -62,8 +65,10 @@ public class CharacterSelectUI : MonoBehaviour
         PlayerConnectionManager.OnAllPlayersReadyAlertClients -= ShowLoad;
         PlayerLobbyEntry.OnKickPlayer -= KickPlayer;
     }
+    #endregion
 
     // ============== Update ==============
+    #region Update
     private void Update()
     {
         if (_updateLobbyTimer <= 0)
@@ -74,6 +79,7 @@ public class CharacterSelectUI : MonoBehaviour
         else
             _updateLobbyTimer -= Time.deltaTime;
     }
+    #endregion
 
     // ============== UI Function ==============
     #region UI Function
@@ -181,21 +187,61 @@ public class CharacterSelectUI : MonoBehaviour
     #region Game Settings
     private void UpdateGameSettings()
     {
-        PlayerConnectionManager.Instance.SetGameSettings(_numSabosSelected);
+        PlayerConnectionManager.Instance.SetGameSettings(_gameRules);
     }
 
     public void IncrementNumSabos()
     {
-        _numSabosSelected = 2;
-        _numSabosText.text = _numSabosSelected.ToString();
+        _gameRules.NumSaboteurs = 2;
+        _numSabosText.text = _gameRules.NumSaboteurs.ToString();
 
         UpdateGameSettings();
     }
 
     public void DecrementNumSabos()
     {
-        _numSabosSelected = 1;
-        _numSabosText.text = _numSabosSelected.ToString();
+        _gameRules.NumSaboteurs = 1;
+        _numSabosText.text = _gameRules.NumSaboteurs.ToString();
+
+        UpdateGameSettings();
+    }
+
+    public void IncrementDaysToWin()
+    {
+        if (_gameRules.NumDaysToWin < 9)
+            _gameRules.NumDaysToWin++;
+
+        _numDaysText.text = _gameRules.NumDaysToWin.ToString();
+
+        UpdateGameSettings();
+    }
+
+    public void DecrementDaysToWin()
+    {
+        if (_gameRules.NumDaysToWin > 7)
+            _gameRules.NumDaysToWin--;
+
+        _numDaysText.text = _gameRules.NumDaysToWin.ToString();
+
+        UpdateGameSettings();
+    }
+
+    public void IncrementTimerLengths()
+    {
+        if (_gameRules.TimerLength != GameRules.TimerLengths.Longer)
+            _gameRules.TimerLength++;
+
+        _timerLengthsText.text = _gameRules.TimerLength.ToString();
+
+        UpdateGameSettings();
+    }
+
+    public void DecrementTimerLengths()
+    {
+        if (_gameRules.TimerLength != GameRules.TimerLengths.Shorter)
+            _gameRules.TimerLength--;
+
+        _timerLengthsText.text = _gameRules.TimerLength.ToString();
 
         UpdateGameSettings();
     }

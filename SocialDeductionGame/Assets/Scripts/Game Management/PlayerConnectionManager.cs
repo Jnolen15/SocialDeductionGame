@@ -25,7 +25,8 @@ public class PlayerConnectionManager : NetworkBehaviour
 
     // ============== Variables ==============
     #region Variables and Refrences
-    [SerializeField] private int _numSaboteurs;
+    // Game rules
+    private GameRules _gameRules;
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private NetworkVariable<int> _netNumPlayers = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netNumLivingPlayers = new(writePerm: NetworkVariableWritePermission.Server);
@@ -296,13 +297,24 @@ public class PlayerConnectionManager : NetworkBehaviour
         OnPlayerSetupComplete?.Invoke();
     }
 
-    public void SetGameSettings(int numSabos)
+    public void SetGameSettings(GameRules gameRules)
     {
         if (!IsServer)
             return;
 
         Debug.Log("<color=yellow>SERVER: </color>Updating game settings");
-        _numSaboteurs = numSabos;
+        _gameRules = gameRules;
+    }
+
+    public GameRules GetGameRules()
+    {
+        if (!IsServer)
+        {
+            Debug.LogWarning("Only the server has access to game rules!");
+            return null;
+        }
+
+        return _gameRules;
     }
     #endregion
 
@@ -512,17 +524,17 @@ public class PlayerConnectionManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        if (_numSaboteurs != 1 && _numSaboteurs != 2)
+        if (_gameRules.NumSaboteurs != 1 && _gameRules.NumSaboteurs != 2)
         {
-            _numSaboteurs = 1;
+            _gameRules.NumSaboteurs = 1;
         }
 
-        Debug.Log("<color=yellow>SERVER: </color>Assigning player roles. Sabos: " + _numSaboteurs);
+        Debug.Log("<color=yellow>SERVER: </color>Assigning player roles. Sabos: " + _gameRules.NumSaboteurs);
 
         // Pick X random players to be saboteurs
         List<ulong> playerIDs = new(_playerDict.Keys);
         List<ulong> saboPlayers = new();
-        for(int i = 0; i < _numSaboteurs; i++)
+        for(int i = 0; i < _gameRules.NumSaboteurs; i++)
         {
             ulong rand = 99;
 
@@ -814,7 +826,7 @@ public class PlayerConnectionManager : NetworkBehaviour
             return -1;
         }
 
-        return _numSaboteurs;
+        return _gameRules.NumSaboteurs;
     }
     #endregion
 }
