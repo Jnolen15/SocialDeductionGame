@@ -24,12 +24,12 @@ public class GameManager : NetworkBehaviour
     #region Variables, Refrences and Events
     [Header("State Timers")]
     private GameRules _gameRules;    // Server
-    private float _introTimerMax;
-    private float _morningTimerMax;
-    private float _afternoonTimerMax;
-    private float _eveningTimerMax;
-    private float _nightTimerMax;
-    private float _transitionTimerMax;
+    private NetworkVariable<float> _introTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
+    private NetworkVariable<float> _morningTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
+    private NetworkVariable<float> _afternoonTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
+    private NetworkVariable<float> _eveningTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
+    private NetworkVariable<float> _nightTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
+    private NetworkVariable<float> _transitionTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netIntroTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netMorningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
@@ -108,27 +108,27 @@ public class GameManager : NetworkBehaviour
 
     private void SetupGameRules()
     {
-        _introTimerMax = _gameRules.IntroTimerMax;
-        _morningTimerMax = _gameRules.MorningTimerMax;
-        _afternoonTimerMax = _gameRules.AfternoonTimerMax;
-        _eveningTimerMax = _gameRules.EveningTimerMax;
-        _nightTimerMax = _gameRules.NightTimerMax;
-        _transitionTimerMax = _gameRules.TransitionTimerMax;
+        _introTimerMax.Value = _gameRules.IntroTimerMax;
+        _morningTimerMax.Value = _gameRules.MorningTimerMax;
+        _afternoonTimerMax.Value = _gameRules.AfternoonTimerMax;
+        _eveningTimerMax.Value = _gameRules.EveningTimerMax;
+        _nightTimerMax.Value = _gameRules.NightTimerMax;
+        _transitionTimerMax.Value = _gameRules.TransitionTimerMax;
 
         if(_gameRules.TimerLength == GameRules.TimerLengths.Shorter)
         {
             Debug.Log("<color=yellow>SERVER: </color>Setting timer length to shorter");
-            _morningTimerMax = _morningTimerMax - 30;
-            _afternoonTimerMax = _afternoonTimerMax - 20;
-            _eveningTimerMax = _eveningTimerMax - 20;
+            _morningTimerMax.Value = _morningTimerMax.Value - 30;
+            _afternoonTimerMax.Value = _afternoonTimerMax.Value - 20;
+            _eveningTimerMax.Value = _eveningTimerMax.Value - 20;
             //_nightTimerMax = _nightTimerMax - 20;
         }
         else if (_gameRules.TimerLength == GameRules.TimerLengths.Longer)
         {
             Debug.Log("<color=yellow>SERVER: </color>Setting timer length to longer");
-            _morningTimerMax = _morningTimerMax + 30;
-            _afternoonTimerMax = _afternoonTimerMax + 20;
-            _eveningTimerMax = _eveningTimerMax + 20;
+            _morningTimerMax.Value = _morningTimerMax.Value + 30;
+            _afternoonTimerMax.Value = _afternoonTimerMax.Value + 20;
+            _eveningTimerMax.Value = _eveningTimerMax.Value + 20;
             //_nightTimerMax = _nightTimerMax + 20;
         }
     }
@@ -277,7 +277,7 @@ public class GameManager : NetworkBehaviour
             case GameState.Intro:
                 if (IsServer)
                 {
-                    _netIntroTimer.Value = _introTimerMax;
+                    _netIntroTimer.Value = _introTimerMax.Value;
                     OnSetup?.Invoke();
                 }
                 OnStateIntro?.Invoke();
@@ -286,36 +286,36 @@ public class GameManager : NetworkBehaviour
             case GameState.Morning:
                 if (IsServer)
                 {
-                    _netMorningTimer.Value = _morningTimerMax;
+                    _netMorningTimer.Value = _morningTimerMax.Value;
                     IncrementDay();
                     CheckSurvivorWin();
                 }
                 OnStateMorning?.Invoke();
                 break;
             case GameState.AfternoonTransition:
-                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax.Value;
                 break;
             case GameState.Afternoon:
-                if(IsServer) _netAfternoonTimer.Value = _afternoonTimerMax;
+                if(IsServer) _netAfternoonTimer.Value = _afternoonTimerMax.Value;
                 _locationManager.ForceLocation(LocationManager.LocationName.Camp);
                 OnStateAfternoon?.Invoke();
                 break;
             case GameState.EveningTransition:
-                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax.Value;
                 break;
             case GameState.Evening:
-                if (IsServer) _netEveningTimer.Value = _eveningTimerMax;
+                if (IsServer) _netEveningTimer.Value = _eveningTimerMax.Value;
                 OnStateEvening?.Invoke();
                 break;
             case GameState.NightTransition:
-                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax.Value;
                 break;
             case GameState.Night:
-                if (IsServer) _netNightTimer.Value = _nightTimerMax;
+                if (IsServer) _netNightTimer.Value = _nightTimerMax.Value;
                 OnStateNight?.Invoke();
                 break;
             case GameState.MorningTransition:
-                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax;
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax.Value;
                 break;
             case GameState.GameOver:
                 _locationManager.ForceLocation(LocationManager.LocationName.Camp);
@@ -432,15 +432,15 @@ public class GameManager : NetworkBehaviour
             case 0:
                 return 1;
             case GameState.Intro:
-                return 1 - (_netIntroTimer.Value / _introTimerMax);
+                return 1 - (_netIntroTimer.Value / _introTimerMax.Value);
             case GameState.Morning:
-                return 1 - (_netMorningTimer.Value / _morningTimerMax);
+                return 1 - (_netMorningTimer.Value / _morningTimerMax.Value);
             case GameState.Afternoon:
-                return 1 - (_netAfternoonTimer.Value / _afternoonTimerMax);
+                return 1 - (_netAfternoonTimer.Value / _afternoonTimerMax.Value);
             case GameState.Evening:
-                return 1 - (_netEveningTimer.Value / _eveningTimerMax);
+                return 1 - (_netEveningTimer.Value / _eveningTimerMax.Value);
             case GameState.Night:
-                return 1 - (_netNightTimer.Value / _nightTimerMax);
+                return 1 - (_netNightTimer.Value / _nightTimerMax.Value);
         }
 
         return 1;
