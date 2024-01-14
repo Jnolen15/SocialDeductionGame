@@ -12,9 +12,6 @@ public abstract class Card : MonoBehaviour
     [TextArea]
     [SerializeField] protected string _cardDescription;
     [SerializeField] protected Sprite _cardArt;
-    [Header("Scale, YPos, ZRot")]
-    [SerializeField] protected Vector3 _cardArtAdjustments;
-    [SerializeField] protected Vector2 _cardArtDimensions;
     [SerializeField] protected List<CardTag> _tags;
 
     [Header("Card Prefabs")]
@@ -69,21 +66,21 @@ public abstract class Card : MonoBehaviour
     public virtual void SetupPlayable()
     {
         GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _cardArtAdjustments, _cardArtDimensions, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _tags);
     }
 
     // Selectable card for foraging
     public virtual void SetupSelectable()
     {
         GameObject cardVisual = Instantiate(_cardSelectablePrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _cardArtAdjustments, _cardArtDimensions, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _tags);
     }
 
     // Visual card for non-interactable UI
     public virtual void SetupUI()
     {
         GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _cardArtAdjustments, _cardArtDimensions, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _tags);
     }
 
     // Adding a card to the Stockpile which contributes to night events

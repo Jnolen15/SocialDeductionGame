@@ -8,15 +8,23 @@ public class HazardCardVisual : MonoBehaviour
 {
     // ================== Refrences ==================
     [Header("variables")]
-    [SerializeField] private Sprite _cardLow;
-    [SerializeField] private Sprite _cardMed;
-    [SerializeField] private Sprite _cardHigh;
+    [SerializeField] private Sprite _cardBackLow;
+    [SerializeField] private Sprite _cardBackMed;
+    [SerializeField] private Sprite _cardBackHigh;
+    [SerializeField] private Sprite _cardTitleLow;
+    [SerializeField] private Sprite _cardTitleMed;
+    [SerializeField] private Sprite _cardTitleHigh;
+    [SerializeField] private Sprite _cardDescLow;
+    [SerializeField] private Sprite _cardDescMed;
+    [SerializeField] private Sprite _cardDescHigh;
     [SerializeField] private Color _colorLow;
     [SerializeField] private Color _colorMed;
     [SerializeField] private Color _colorHigh;
 
     [Header("Refrences")]
-    [SerializeField] private Image _hazardCard;
+    [SerializeField] private Image _hazardCardBack;
+    [SerializeField] private Image _hazardCardTitle;
+    [SerializeField] private Image _hazardCardDesc;
     [SerializeField] private GameObject _slash;
     [SerializeField] private TextMeshProUGUI _hazardTitle;
     [SerializeField] private TextMeshProUGUI _hazardConsequences;
@@ -37,18 +45,24 @@ public class HazardCardVisual : MonoBehaviour
 
         if (dangerLevel == Hazard.DangerLevel.Low)
         {
-            _hazardCard.sprite = _cardLow;
-            _hazardTitle.color = _colorLow;
+            _hazardCardBack.sprite = _cardBackLow;
+            _hazardCardTitle.sprite = _cardTitleLow;
+            _hazardCardDesc.sprite = _cardDescLow;
+            //_hazardTitle.color = _colorLow;
         }
         else if (dangerLevel == Hazard.DangerLevel.Medium)
         {
-            _hazardCard.sprite = _cardMed;
-            _hazardTitle.color = _colorMed;
+            _hazardCardBack.sprite = _cardBackMed;
+            _hazardCardTitle.sprite = _cardDescMed;
+            _hazardCardDesc.sprite = _cardDescMed;
+            //_hazardTitle.color = _colorMed;
         }
         else if (dangerLevel == Hazard.DangerLevel.High)
         {
-            _hazardCard.sprite = _cardHigh;
-            _hazardTitle.color = _colorHigh;
+            _hazardCardBack.sprite = _cardBackHigh;
+            _hazardCardTitle.sprite = _cardTitleHigh;
+            _hazardCardDesc.sprite = _cardDescHigh;
+            //_hazardTitle.color = _colorHigh;
         }
     }
 
@@ -62,7 +76,7 @@ public class HazardCardVisual : MonoBehaviour
         if (!_hazardData.RunHazard(handMan))
         {
             // Hazard card prevented
-            _hazardCard.color = Color.grey;
+            _hazardCardBack.color = Color.grey;
             _slash.SetActive(true);
         }
         else
