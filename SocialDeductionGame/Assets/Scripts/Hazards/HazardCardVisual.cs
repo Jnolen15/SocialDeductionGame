@@ -25,6 +25,7 @@ public class HazardCardVisual : MonoBehaviour
     [SerializeField] private Image _hazardCardBack;
     [SerializeField] private Image _hazardCardTitle;
     [SerializeField] private Image _hazardCardDesc;
+    [SerializeField] private Image _hazardArt;
     [SerializeField] private GameObject _slash;
     [SerializeField] private TextMeshProUGUI _hazardTitle;
     [SerializeField] private TextMeshProUGUI _hazardConsequences;
@@ -41,6 +42,7 @@ public class HazardCardVisual : MonoBehaviour
         _hazardData = CardDatabase.Instance.GetHazard(hazardID);
         _hazardTitle.text = _hazardData.GetHazardName();
         _hazardConsequences.text = _hazardData.GetHazardConsequences();
+        _hazardArt.sprite = _hazardData.GetHazardArt();
         Hazard.DangerLevel dangerLevel = _hazardData.GetHazardDangerLevel();
 
         if (dangerLevel == Hazard.DangerLevel.Low)

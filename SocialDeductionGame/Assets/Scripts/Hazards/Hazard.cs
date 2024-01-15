@@ -34,6 +34,11 @@ public abstract class Hazard : ScriptableObject
         return _hazardName;
     }
 
+    public Sprite GetHazardArt()
+    {
+        return _hazardArt;
+    }
+
     public string GetHazardConsequences()
     {
         return _hazardConsequences;
