@@ -60,6 +60,9 @@ public class TransitionManager : MonoBehaviour
             case GameManager.GameState.MorningTransition:
                 TransitionIn();
                 break;
+            case GameManager.GameState.GameOver:
+                TransitionOut();
+                break;
         }
     }
 

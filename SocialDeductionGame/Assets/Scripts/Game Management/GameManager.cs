@@ -38,6 +38,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netTransitionTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private float _pauseTimer;
     private bool _rescueEarly;
+    private bool _gameOver;
 
     private bool _dontTestWin;
     private bool _doCheats;
@@ -121,7 +122,6 @@ public class GameManager : NetworkBehaviour
             _morningTimerMax.Value = _morningTimerMax.Value - 30;
             _afternoonTimerMax.Value = _afternoonTimerMax.Value - 20;
             _eveningTimerMax.Value = _eveningTimerMax.Value - 20;
-            //_nightTimerMax = _nightTimerMax - 20;
         }
         else if (_gameRules.TimerLength == GameRules.TimerLengths.Longer)
         {
@@ -129,7 +129,7 @@ public class GameManager : NetworkBehaviour
             _morningTimerMax.Value = _morningTimerMax.Value + 30;
             _afternoonTimerMax.Value = _afternoonTimerMax.Value + 20;
             _eveningTimerMax.Value = _eveningTimerMax.Value + 20;
-            //_nightTimerMax = _nightTimerMax + 20;
+            _nightTimerMax.Value = _nightTimerMax.Value + 10;
         }
     }
 
@@ -257,6 +257,13 @@ public class GameManager : NetworkBehaviour
         // Unready all players in case state progressed due to time
         PlayerConnectionManager.Instance.UnreadyAllPlayers();
 
+        // Win checking
+        if(_netCurrentGameState.Value == GameState.MorningTransition && CheckSurvivorWin())
+        {
+            EndGame(true);
+            return;
+        }
+
         // Progress to next state, looping back to morning if day over
         if (_netCurrentGameState.Value == GameState.MorningTransition)
             _netCurrentGameState.Value = GameState.Morning;
@@ -288,7 +295,6 @@ public class GameManager : NetworkBehaviour
                 {
                     _netMorningTimer.Value = _morningTimerMax.Value;
                     IncrementDay();
-                    CheckSurvivorWin();
                 }
                 OnStateMorning?.Invoke();
                 break;
@@ -338,10 +344,10 @@ public class GameManager : NetworkBehaviour
     #region Win Loss
 
     // Check for game end via survivor win
-    private void CheckSurvivorWin()
+    private bool CheckSurvivorWin()
     {
-        if (_dontTestWin)
-            return;
+        if (_dontTestWin || _gameOver)
+            return false;
 
         int numLivingSurvivors = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors);
         int numLivingSaboteurs = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
@@ -351,25 +357,27 @@ public class GameManager : NetworkBehaviour
         if (_netDay.Value >= _gameRules.NumDaysToWin)
         {
             Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived. Survivor Win!");
-            EndGame(true);
+            return true; // WIN
         }
         else if (_rescueEarly)
         {
             Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived early. Survivor Win!");
             _rescueEarly = false;
-            EndGame(true);
+            return true; // WIN
         }
         else if (numLivingSaboteurs <= 0)
         {
             Debug.Log("<color=yellow>SERVER: </color>All Saboteurs are dead. Rescue arriving tomorrow.");
             _rescueEarly = true;
         }
+
+        return false;
     }
 
     // Check for game end via Saboteur win
     private void CheckSaboteurWin()
     {
-        if (_dontTestWin)
+        if (_dontTestWin || _gameOver)
             return;
 
         int numLivingSurvivors = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors);
@@ -397,6 +405,7 @@ public class GameManager : NetworkBehaviour
         if (!IsServer)
             return;
 
+        _gameOver = true;
         _netCurrentGameState.Value = GameState.GameOver;
 
         SetGameOverClientRpc(survivorWin);

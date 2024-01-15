@@ -24,11 +24,13 @@ public class NightEventPicker : NetworkBehaviour
             _eventManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<EventManager>();
 
         GameManager.OnStateMorning += CloseEventPicker;
+        GameManager.OnStateGameEnd += CloseEventPicker;
     }
 
     public override void OnDestroy()
     {
         GameManager.OnStateMorning -= CloseEventPicker;
+        GameManager.OnStateGameEnd -= CloseEventPicker;
 
         base.OnDestroy();
     }
