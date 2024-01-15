@@ -75,13 +75,13 @@ public class EventManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void UpdateEventUIClientRpc(int[] goodCardIDs, int[] badCardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus, Vector3 scores)
+    private void UpdateEventUIClientRpc(int[] goodCardIDs, int[] badCardIDs, ulong[] contributorIDS, int eventID, bool passed, bool bonus, Vector2 objectivePoints, Vector3 bonusPoints)
     {
         _nightEventThumbnail.SetEventResults(passed);
 
         // Show results
         _nightEventResults.gameObject.SetActive(true);
-        _nightEventResults.DisplayResults(goodCardIDs, badCardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, scores);
+        _nightEventResults.DisplayResults(goodCardIDs, badCardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, objectivePoints, bonusPoints);
     }
 
     public void UpdateNightEventPicker()
@@ -291,7 +291,8 @@ public class EventManager : NetworkBehaviour
         List<int> primaryCards = new();
         List<int> secondaryCards = new();
         List<int> otherCards = new();
-        Vector3 scores = new Vector3(0, 0, 0);
+        Vector2 objectivePoints = new Vector2(0, 0); // X=Primary, Y=Secondary
+        Vector3 bonusPoints = new Vector3(0, 0, 0); // X=Total, Y=Good, Z=Bad
 
         // Loop through all cards
         for (int i = 0; i <= totCards; i++)
@@ -312,7 +313,7 @@ public class EventManager : NetworkBehaviour
             if (card.GetComponent<Card>().HasTag(nEvent.GetPrimaryResource()))
             {
                 primaryReq--;
-                scores.x++;
+                objectivePoints.x++;
                 primaryCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"contained tag {nEvent.GetPrimaryResource()}. Primary required remaining {primaryReq}");
@@ -320,7 +321,7 @@ public class EventManager : NetworkBehaviour
             else if (card.GetComponent<Card>().HasTag(nEvent.GetSecondaryResource()))
             {
                 secondaryReq--;
-                scores.y++;
+                objectivePoints.y++;
                 secondaryCards.Add(cardID);
                 Debug.Log($"<color=yellow>SERVER: </color>Card Tested: {card.GetComponent<Card>().GetCardName()}, " +
                             $"contained tag {nEvent.GetSecondaryResource()}. secondary required remaining {secondaryReq}");
@@ -344,6 +345,22 @@ public class EventManager : NetworkBehaviour
             }
         }
 
+        // Get ammount below 0 both are, subtract sabo from this num
+        int extraPrime = 0;
+        int extraSecondary = 0;
+        if (primaryReq <= 0)
+            extraPrime = Mathf.Abs(primaryReq);
+        if (secondaryReq <= 0)
+            extraSecondary = Mathf.Abs(secondaryReq);
+        int overBonus = extraPrime + extraSecondary;
+        bonusPoints.y = overBonus;
+        bonusPoints.z = saboCards;
+        Debug.Log($"<color=yellow>SERVER: </color>{overBonus} extra resources were added.");
+        overBonus -= saboCards;
+        Debug.Log($"<color=yellow>SERVER: </color>-{saboCards} bonus now {overBonus}.");
+
+        bonusPoints.x = overBonus;
+
         // After if both primary and secondary are not at or below 0 fail
         if (primaryReq > 0 || secondaryReq > 0)
         {
@@ -351,14 +368,6 @@ public class EventManager : NetworkBehaviour
         }
         else
         {
-            // Get ammount below 0 both are, subtract sabo from this num
-            int overBonus = Mathf.Abs(primaryReq) + Mathf.Abs(secondaryReq);
-            Debug.Log($"<color=yellow>SERVER: </color>{overBonus} extra resources were added.");
-            overBonus -= saboCards;
-            Debug.Log($"<color=yellow>SERVER: </color>-{saboCards} bonus now {overBonus}.");
-
-            scores.z = overBonus;
-
             // If num is still positive pass
             if (overBonus >= 0)
             {
@@ -375,13 +384,13 @@ public class EventManager : NetworkBehaviour
             // if its negitive, then event failed
             else
             {
-                Debug.Log("<color=yellow>SERVER: </color>Event Fail!");
+                Debug.Log("<color=yellow>SERVER: </color>Event sabotaged! Fail!");
                 successfulSabotage = true;
             }
         }
 
         // Award suffering
-        if(successfulSabotage)
+        if (successfulSabotage)
             SufferingManager.Instance.ModifySuffering(2, 103, true);
         else if (attemptedSabotage)
             SufferingManager.Instance.ModifySuffering(1, 102, true);
@@ -395,7 +404,7 @@ public class EventManager : NetworkBehaviour
 
         // Update all clients visually
         UpdateEventUIClientRpc(goodCardIDList.ToArray(), badCardIDList.ToArray(), _stockpile.GetContributorIDs(), _netCurrentNightEventID.Value, 
-            _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, scores);
+            _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, objectivePoints, bonusPoints);
     }
     #endregion
 }

@@ -327,7 +327,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 210, y: 0}
+  m_AnchoredPosition: {x: 292, y: 0}
   m_SizeDelta: {x: 67, y: 66}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8839327396358784684
@@ -520,7 +520,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 580, y: 80}
+  m_SizeDelta: {x: 715, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7847962508189831462
 CanvasRenderer:
@@ -550,7 +550,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Hunger Drain:    -2'
+  m_text: 'Daily Hunger Drain:    -2'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 744dcfa55d665fb428a454337938185f, type: 2}
   m_sharedMaterial: {fileID: -5811233463216366101, guid: 744dcfa55d665fb428a454337938185f, type: 2}
@@ -2287,7 +2287,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 390, y: -399.5}
+  m_AnchoredPosition: {x: 390, y: -330}
   m_SizeDelta: {x: 788, y: 116}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4624623744886590983
@@ -2766,6 +2766,38 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5340795800747814949}
     m_Modifications:
+    - target: {fileID: 638617672488780895, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 638617672488780895, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 638617672488780895, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 100.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 638617672488780895, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2196349236471138798, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2196349236471138798, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2196349236471138798, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 199.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2196349236471138798, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -25
+      objectReference: {fileID: 0}
     - target: {fileID: 4607174053628019438, guid: cf8b825e28138ec41a710da7e4585938, type: 3}
       propertyPath: m_Name
       value: Night Event Card Visual

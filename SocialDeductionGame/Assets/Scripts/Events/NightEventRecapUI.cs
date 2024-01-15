@@ -115,6 +115,7 @@ public class NightEventRecapUI : MonoBehaviour
             {
                 _resultText.text = "Passed with Bonus!";
                 _resultText.color = _goodColor;
+                _consequencesText.color = _goodColor;
                 _consequencesText.text = "Earned " + nEvent.GetEventBonuses();
             }
             else
@@ -127,6 +128,7 @@ public class NightEventRecapUI : MonoBehaviour
         {
             _resultText.text = "Failed.";
             _resultText.color = _badColor;
+            _consequencesText.color = _badColor;
             _consequencesText.text = nEvent.GetEventConsequences();
         }
     }

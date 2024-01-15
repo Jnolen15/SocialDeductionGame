@@ -44,7 +44,8 @@ public class NightEventResults : MonoBehaviour
     }
 
     // ================== Function ==================
-    public void DisplayResults(int[] goodCardIDs, int[] badCardIDs, ulong[] contributorIDS, int eventID, int playerNum, bool passed, bool bonus, Vector3 scores)
+    public void DisplayResults(int[] goodCardIDs, int[] badCardIDs, ulong[] contributorIDS, int eventID, int playerNum, 
+                                bool passed, bool bonus, Vector2 objectivePoints, Vector3 bonusPoints)
     {
         ClearBoard();
 
@@ -72,7 +73,6 @@ public class NightEventResults : MonoBehaviour
         }
 
         // Cards
-        //SortCards(int[] cardIDs)
         foreach (int cardID in goodCardIDs)
         {
             Card cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), _cardArea).GetComponent<Card>();
@@ -87,48 +87,41 @@ public class NightEventResults : MonoBehaviour
             cardObj.GetComponentInChildren<CardVisual>().ShowOutline(Color.red);
         }
 
-        int extraPrimary = 0;
-        int extraSecondary = 0;
-
         // Breakdown
         _primeTitle.text = eventDetails.GetPrimaryResource().Name;
-        if(scores.x < eventDetails.GetRequirements(playerNum).x) // Failed prime resource
+        if(objectivePoints.x < eventDetails.GetRequirements(playerNum).x) // Failed prime resource
         {
-            _primeScore.text = scores.x.ToString();
+            _primeScore.text = objectivePoints.x.ToString();
             _primeScore.color = Color.red;
         }
         else // Passed prime resource
         {
-            extraPrimary = (int)(scores.x - eventDetails.GetRequirements(playerNum).x);
             _primeScore.text = eventDetails.GetRequirements(playerNum).x.ToString();
             _primeScore.color = Color.green;
         }
 
         _secondTitle.text = eventDetails.GetSecondaryResource().Name;
-        if (scores.y < eventDetails.GetRequirements(playerNum).y) // Failed prime resource
+        if (objectivePoints.y < eventDetails.GetRequirements(playerNum).y) // Failed secondary resource
         {
-            _secondScore.text = scores.y.ToString();
+            _secondScore.text = objectivePoints.y.ToString();
             _secondScore.color = Color.red;
         }
-        else // Passed prime resource
+        else // Passed secondary resource
         {
-            extraSecondary = (int)(scores.y - eventDetails.GetRequirements(playerNum).y);
             _secondScore.text = eventDetails.GetRequirements(playerNum).y.ToString();
             _secondScore.color = Color.green;
         }
 
-        _bonusScore.text = scores.z.ToString();
-        if(scores.z < 0) // Sabotaged
+        _bonusScore.text = bonusPoints.x.ToString();
+        if(bonusPoints.x < 0) // Sabotaged
             _bonusScore.color = Color.red;
-        else if (scores.z < 2) // Extra, not enough for bonus
+        else if (bonusPoints.x < 2) // Extra, not enough for bonus
             _bonusScore.color = Color.white;
         else // Bonus
             _bonusScore.color = Color.green;
 
-        int bonusCorrectNum = (extraPrimary + extraSecondary);
-        int bonusIncorrectNum = (int)Mathf.Abs(scores.z - bonusCorrectNum);
-        _bonusCorrect.text = "+" + bonusCorrectNum.ToString() + " Correct";
-        _bonusIncorrect.text = "-" + bonusIncorrectNum.ToString() + " Incorrect";
+        _bonusCorrect.text = "+" + bonusPoints.y.ToString() + " Correct";
+        _bonusIncorrect.text = "-" + bonusPoints.z.ToString() + " Incorrect";
     }
 
     private void ClearBoard()

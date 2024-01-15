@@ -122,8 +122,8 @@ public class Forage : NetworkBehaviour, ICardPicker
         int numToDeal = 3;
         if (_netTotemActive.Value)
             numToDeal--;
-        if (_playerHandMan.CheckForForageGear(_locationName.ToString()))
-            numToDeal++;
+        // Add card draw bonus gear
+        numToDeal += _playerHandMan.CheckForForageGear(_locationName.ToString());
 
         List<GameObject> cardObjList = new();
 
