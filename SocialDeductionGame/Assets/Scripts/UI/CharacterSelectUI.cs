@@ -55,6 +55,10 @@ public class CharacterSelectUI : MonoBehaviour
             _gameSettingsButton.SetActive(false);
             ToggleCustomize();
         }
+        else
+        {
+            PlayerConnectionManager.Instance.SetGameSettings(_gameRules);
+        }
     }
 
     private void OnDestroy()

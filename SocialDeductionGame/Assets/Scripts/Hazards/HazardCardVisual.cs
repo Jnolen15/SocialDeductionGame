@@ -53,7 +53,7 @@ public class HazardCardVisual : MonoBehaviour
         else if (dangerLevel == Hazard.DangerLevel.Medium)
         {
             _hazardCardBack.sprite = _cardBackMed;
-            _hazardCardTitle.sprite = _cardDescMed;
+            _hazardCardTitle.sprite = _cardTitleMed;
             _hazardCardDesc.sprite = _cardDescMed;
             //_hazardTitle.color = _colorMed;
         }
