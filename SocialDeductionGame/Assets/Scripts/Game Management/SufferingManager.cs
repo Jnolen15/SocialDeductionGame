@@ -206,7 +206,17 @@ public class SufferingManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        ModifySuffering(PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs), 101, true);
+        int daily;
+        int teamDiff = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors) - PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
+
+        if (teamDiff <= 1)
+            daily = 1;
+        else if (teamDiff > 1 && teamDiff <= 3)
+            daily = 2;
+        else
+            daily = 3;
+
+        ModifySuffering(daily, 101, true);
     }
     #endregion
 }
