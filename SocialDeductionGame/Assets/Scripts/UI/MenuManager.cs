@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 public class MenuManager : MonoBehaviour
 {
     // ============== Refrences ==============
+    [SerializeField] private GameObject _tutorialMenu;
+    [SerializeField] private GameObject _settingsMenu;
     [SerializeField] private TMP_InputField _playerNameIF;
     [SerializeField] private TextMeshProUGUI _playerNameText;
     [SerializeField] private GameObject _playerNameLengthWarning;
@@ -40,6 +42,26 @@ public class MenuManager : MonoBehaviour
     {
         Debug.Log("Loading Lobby Scene");
         SceneLoader.Load(SceneLoader.Scene.LobbyScene);
+    }
+
+    public void ShowTutorial()
+    {
+        _tutorialMenu.SetActive(true);
+    }
+
+    public void HideTutorial()
+    {
+        _tutorialMenu.SetActive(false);
+    }
+
+    public void ShowSettings()
+    {
+        _settingsMenu.SetActive(true);
+    }
+
+    public void HideSettings()
+    {
+        _settingsMenu.SetActive(false);
     }
 
     public void Quit()

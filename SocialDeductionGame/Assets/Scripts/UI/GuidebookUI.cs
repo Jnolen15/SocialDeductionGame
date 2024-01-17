@@ -5,6 +5,8 @@ using UnityEngine;
 public class GuidebookUI : MonoBehaviour
 {
     // ================== Refrences ==================
+    [SerializeField] private GameObject _prevButton;
+    [SerializeField] private GameObject _nextButton;
     [SerializeField] private List<GameObject> _pageList;
     [SerializeField] private int _currentPage;
 
@@ -74,7 +76,18 @@ public class GuidebookUI : MonoBehaviour
             return;
         }
 
-        foreach(GameObject page in _pageList)
+        _currentPage = pageNum;
+
+        // Update buttons
+        _prevButton.SetActive(true);
+        _nextButton.SetActive(true);
+        if (pageNum == 0)
+            _prevButton.SetActive(false);
+        else if (pageNum == _pageList.Count-1)
+            _nextButton.SetActive(false);
+
+        // Update Pages
+        foreach (GameObject page in _pageList)
         {
             page.SetActive(false);
         }
