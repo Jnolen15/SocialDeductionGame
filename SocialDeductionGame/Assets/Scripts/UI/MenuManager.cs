@@ -10,8 +10,9 @@ public class MenuManager : MonoBehaviour
     // ============== Refrences ==============
     [SerializeField] private GameObject _tutorialMenu;
     [SerializeField] private GameObject _settingsMenu;
+    [SerializeField] private GameObject _feedbackMenu;
+    [SerializeField] private GameObject _bugReportMenu;
     [SerializeField] private TMP_InputField _playerNameIF;
-    [SerializeField] private TextMeshProUGUI _playerNameText;
     [SerializeField] private GameObject _playerNameLengthWarning;
 
     private PlayerNamer _playerNamer;
@@ -64,6 +65,26 @@ public class MenuManager : MonoBehaviour
         _settingsMenu.SetActive(false);
     }
 
+    public void ShowFeedback()
+    {
+        _feedbackMenu.SetActive(true);
+    }
+
+    public void HideFeedback()
+    {
+        _feedbackMenu.SetActive(false);
+    }
+
+    public void ShowBugReport()
+    {
+        _bugReportMenu.SetActive(true);
+    }
+
+    public void HideBugReport()
+    {
+        _bugReportMenu.SetActive(false);
+    }
+
     public void Quit()
     {
         Application.Quit();
@@ -92,6 +113,6 @@ public class MenuManager : MonoBehaviour
 
     private void UpdatePlayerName()
     {
-        _playerNameText.text = _playerNamer.GetPlayerName();
+        _playerNameIF.text = _playerNamer.GetPlayerName();
     }
 }
