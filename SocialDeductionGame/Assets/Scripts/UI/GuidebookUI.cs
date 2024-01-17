@@ -6,6 +6,7 @@ public class GuidebookUI : MonoBehaviour
 {
     // ================== Refrences ==================
     [SerializeField] private List<GameObject> _pageList;
+    [SerializeField] private int _currentPage;
 
     // ================== Setup ==================
     private void Start()
@@ -43,6 +44,27 @@ public class GuidebookUI : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
+    public void LastPage()
+    {
+        _currentPage--;
+
+        if (_currentPage <= 0)
+            _currentPage = 0;
+
+        SwitchToPage(_currentPage);
+    }
+
+    public void NextPage()
+    {
+        _currentPage++;
+
+        if (_currentPage >= _pageList.Count-1)
+            _currentPage = _pageList.Count-1;
+
+        SwitchToPage(_currentPage);
+    }
+
 
     public void SwitchToPage(int pageNum)
     {
