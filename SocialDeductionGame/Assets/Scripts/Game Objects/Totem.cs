@@ -206,7 +206,8 @@ public class Totem : NetworkBehaviour, ICardPlayable
             _openTotemButton.SetActive(true);
             OnLocationTotemEnable?.Invoke(_locationName);
 
-            HideStatus();
+            SetStatusText("Add cards with the matching tags to disable the totem.");
+
             HideActivateButton();
 
             if (IsServer)

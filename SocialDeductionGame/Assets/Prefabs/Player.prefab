@@ -614,7 +614,7 @@ RectTransform:
   m_GameObject: {fileID: 563112434494107899}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6591575361440083222}
@@ -623,7 +623,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -180, y: 50}
+  m_AnchoredPosition: {x: -245, y: 40.1}
   m_SizeDelta: {x: 233, y: 117}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &1526470081173361029
@@ -1315,7 +1315,7 @@ RectTransform:
   m_GameObject: {fileID: 2344688568110035435}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8272276401450484688}
@@ -1324,7 +1324,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 150}
+  m_AnchoredPosition: {x: 0, y: 120}
   m_SizeDelta: {x: 980, y: 1213}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1340567216471199461
@@ -1771,7 +1771,7 @@ RectTransform:
   m_GameObject: {fileID: 3624159005443276125}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalScale: {x: 2.1, y: 2.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8272276401450484688}
@@ -1779,7 +1779,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 35, y: 96}
+  m_AnchoredPosition: {x: 35, y: 127.9}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &3717359024868344230
@@ -3226,7 +3226,7 @@ RectTransform:
   m_GameObject: {fileID: 5966082040789829270}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1, y: 1, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3420618928380361181}
@@ -3235,7 +3235,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 240, y: 50}
+  m_AnchoredPosition: {x: 320, y: 40.1}
   m_SizeDelta: {x: 233, y: 117}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &7012314552099650916
@@ -8164,8 +8164,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 38, y: -320}
-  m_SizeDelta: {x: 810, y: 124}
+  m_AnchoredPosition: {x: 38, y: -394.8}
+  m_SizeDelta: {x: 842.3, y: 124}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8447457214098407073
 CanvasRenderer:
@@ -8195,7 +8195,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Make room in inventory by discarding a card, or discard this card.
+  m_text: Hand is full! Make room in inventory by discarding a card.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 744dcfa55d665fb428a454337938185f, type: 2}
   m_sharedMaterial: {fileID: -5811233463216366101, guid: 744dcfa55d665fb428a454337938185f, type: 2}
@@ -8537,7 +8537,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3711082047546145128
 RectTransform:
   m_ObjectHideFlags: 0
