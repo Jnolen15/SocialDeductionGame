@@ -85,6 +85,11 @@ public class MenuManager : MonoBehaviour
         _bugReportMenu.SetActive(false);
     }
 
+    public void OpenTwitterProfile()
+    {
+        Application.OpenURL("https://twitter.com/JaredNolen3");
+    }
+
     public void Quit()
     {
         Application.Quit();

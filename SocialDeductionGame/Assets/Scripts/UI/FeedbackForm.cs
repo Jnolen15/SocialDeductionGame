@@ -10,6 +10,7 @@ public class FeedbackForm : MonoBehaviour
     // ============== Refrences ==============
     [SerializeField] private GameObject _formContent;
     [SerializeField] private GameObject _submittedMessage;
+    [SerializeField] private GameObject _submitButton;
     [SerializeField] private ToggleGroup _enjoymentToggle;
     [SerializeField] private ToggleGroup _understandingToggle;
     [SerializeField] private ToggleGroup _preferedPlayersToggle;
@@ -21,9 +22,22 @@ public class FeedbackForm : MonoBehaviour
     // ============== Function ==============
     private void OnEnable()
     {
+        _submitButton.SetActive(false);
         _formContent.SetActive(true);
         _submittedMessage.SetActive(false);
         _reportField.text = "";
+    }
+
+    public void OnEditFeedbackInputField(string attemptedVal)
+    {
+        if (attemptedVal.Length >= 20)
+        {
+            _submitButton.SetActive(true);
+        }
+        else
+        {
+            _submitButton.SetActive(false);
+        }
     }
 
     public void Submit()

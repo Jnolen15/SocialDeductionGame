@@ -9,15 +9,29 @@ public class BugReport : MonoBehaviour
     // ============== Refrences ==============
     [SerializeField] private GameObject _formContent;
     [SerializeField] private GameObject _submittedMessage;
+    [SerializeField] private GameObject _submitButton;
     [SerializeField] private TMP_InputField _reportField;
     private string _url = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSe-ytpO01iO19FEfkX2Wx0rqWGqm2cjjKhkYE7BMe89gcrdOg/formResponse";
 
     // ============== Function ==============
     private void OnEnable()
     {
+        _submitButton.SetActive(false);
         _formContent.SetActive(true);
         _submittedMessage.SetActive(false);
         _reportField.text = "";
+    }
+
+    public void OnEditbugReportInputField(string attemptedVal)
+    {
+        if (attemptedVal.Length >= 20)
+        {
+            _submitButton.SetActive(true);
+        }
+        else
+        {
+            _submitButton.SetActive(false);
+        }
     }
 
     public void Submit()
