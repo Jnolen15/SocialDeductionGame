@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class NightEventCardVisual : MonoBehaviour
 {
     // ================== Refrences ==================
     [SerializeField] private GameObject _eventTagIconPref;
+    [SerializeField] private Image _eventArt;
     [SerializeField] private TextMeshProUGUI _eventTitle;
     [SerializeField] private TextMeshProUGUI _eventConsequences;
     [SerializeField] private TextMeshProUGUI _eventBonuses;
@@ -25,6 +27,7 @@ public class NightEventCardVisual : MonoBehaviour
         // Setup new
         _heldEventID = eventID;
         NightEvent eventData = CardDatabase.Instance.GetEvent(eventID);
+        _eventArt.sprite = eventData.GetEventArt();
         _eventTitle.text = eventData.GetEventName();
         _eventConsequences.text = "Fail: " + eventData.GetEventConsequences();
         _eventBonuses.text = $"Add {eventData.GetBonusRequirements()} additional cards: {eventData.GetEventBonuses()}";

@@ -36,6 +36,11 @@ public abstract class NightEvent : ScriptableObject
         return _eventName;
     }
 
+    public Sprite GetEventArt()
+    {
+        return _eventArt;
+    }
+
     public string GetEventConsequences()
     {
         return _eventConsequences;
