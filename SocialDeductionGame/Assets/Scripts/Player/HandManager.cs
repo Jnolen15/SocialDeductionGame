@@ -299,7 +299,7 @@ public class HandManager : NetworkBehaviour
         GameObject newGear = Instantiate(CardDatabase.Instance.GetCard(cardID), _gearSlots[gearSlot-1]);
         Gear newGearCard = newGear.GetComponent<Gear>();
 
-        newGearCard.SetupPlayable();
+        newGearCard.SetupUI();
         EquipToSlot(gearSlot, newGearCard);
 
         Debug.Log($"Equiping a gear card {newGearCard.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");

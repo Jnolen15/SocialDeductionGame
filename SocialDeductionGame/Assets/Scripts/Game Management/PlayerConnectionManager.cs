@@ -780,6 +780,10 @@ public class PlayerConnectionManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RecordPlayerDeathServerRpc(ulong id)
     {
+        // Check if player is dead first so they arent double counted
+        if (!FindPlayerEntry(id).GetPlayerLiving())
+            return;
+
         FindPlayerEntry(id).SetPlayerLiving(false);
         _netNumLivingPlayers.Value--;
         OnPlayerDied?.Invoke();
