@@ -93,6 +93,7 @@ public class WatchHUD : MonoBehaviour
         PlayerHealth.OnDeath += OnDeath;
         GameManager.OnStateChange += UpdateStateUI;
         GameManager.OnStateChange += EnableReadyButton;
+        GameManager.OnStateChange += OnStateChange;
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
     }
@@ -115,6 +116,7 @@ public class WatchHUD : MonoBehaviour
         PlayerHealth.OnDeath -= OnDeath;
         GameManager.OnStateChange -= UpdateStateUI;
         GameManager.OnStateChange -= EnableReadyButton;
+        GameManager.OnStateChange -= OnStateChange;
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
     }
@@ -482,8 +484,17 @@ public class WatchHUD : MonoBehaviour
 
     public void Unready()
     {
-        _readyButton.transform.position = _readyOutPos.position;
+        //_readyButton.transform.position = _readyOutPos.position;
         _readyButtonIcon.SetActive(false);
+    }
+
+    public void OnStateChange(GameManager.GameState prev, GameManager.GameState cur)
+    {
+        // Can't ready in transition
+        if (GameManager.Instance.InTransition() || GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Night)
+            _readyButton.transform.position = _readyInPos.position;
+        else
+            _readyButton.transform.position = _readyOutPos.position;
     }
     #endregion
 

@@ -122,6 +122,7 @@ public class GameManager : NetworkBehaviour
             _morningTimerMax.Value = _morningTimerMax.Value - 30;
             _afternoonTimerMax.Value = _afternoonTimerMax.Value - 20;
             _eveningTimerMax.Value = _eveningTimerMax.Value - 20;
+            _nightTimerMax.Value = _nightTimerMax.Value - 5;
         }
         else if (_gameRules.TimerLength == GameRules.TimerLengths.Longer)
         {

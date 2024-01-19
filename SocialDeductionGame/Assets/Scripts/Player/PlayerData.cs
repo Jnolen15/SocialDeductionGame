@@ -134,10 +134,16 @@ public class PlayerData : NetworkBehaviour
     #region Player Readying
     public void ReadyPlayer()
     {
+        // Can't ready in dead
         if (!_playerHealth.IsLiving())
             return;
 
+        // Can't ready in transition
         if (GameManager.Instance.InTransition())
+            return;
+
+        // Can't ready during night
+        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Night)
             return;
 
         _playerObj.ToggleReadyIconActive();
