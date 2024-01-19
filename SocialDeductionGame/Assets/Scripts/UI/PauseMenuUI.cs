@@ -9,6 +9,8 @@ public class PauseMenuUI : MonoBehaviour
     // =================== Refrences ===================
     [Header("Pause Refrences")]
     [SerializeField] private GameObject _pauseUI;
+    [SerializeField] private GameObject _voiceSettings;
+    [SerializeField] private GameObject _gameSettings;
 
     // =================== Update ===================
     #region Update
@@ -24,6 +26,18 @@ public class PauseMenuUI : MonoBehaviour
     public void TogglePause()
     {
         _pauseUI.SetActive(!_pauseUI.activeSelf);
+    }
+
+    public void ShowVoiceSettings()
+    {
+        _voiceSettings.SetActive(true);
+        _gameSettings.SetActive(false);
+    }
+
+    public void ShowGameSettings()
+    {
+        _voiceSettings.SetActive(false);
+        _gameSettings.SetActive(true);
     }
 
     public void QuitGame()
