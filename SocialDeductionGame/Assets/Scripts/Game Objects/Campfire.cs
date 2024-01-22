@@ -25,6 +25,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     [SerializeField] private TextMeshPro _stateText;
     [SerializeField] private GameObject _foodMenu;
     [SerializeField] private GameObject _flameObj;
+    [SerializeField] private AudioSource _audioSource;
     [SerializeField] private ParticleSystem _fireBusrtFX;
     [SerializeField] private ParticleSystem _poisonFireBusrtFX;
     private CardManager _cardManager;
@@ -144,6 +145,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         _stateText.text = _state.ToString();
         _flameObj.SetActive(false);
         _foodMenu.SetActive(false);
+        _audioSource.Pause();
     }
 
     public void SetStateCooking()
@@ -151,6 +153,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         _state = State.Cooking;
         _stateText.text = _state.ToString();
         _flameObj.SetActive(true);
+        _audioSource.Play();
     }
 
     public void SetStateFoodReady()
@@ -159,6 +162,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         _stateText.text = _state.ToString();
         _flameObj.SetActive(true);
         _foodMenu.SetActive(true);
+        _audioSource.Play();
     }
     #endregion
 

@@ -7,6 +7,7 @@ public class Location : MonoBehaviour
     // ============== Variables / Refrences ==============
     #region Variables / Refrences
     [SerializeField] private GameObject _locationDecor;
+    [SerializeField] private AudioSource _audioSource;
     [SerializeField] private Transform _locationCamPos;
     [SerializeField] private Forage _forage;
 
@@ -32,6 +33,9 @@ public class Location : MonoBehaviour
 
         _locationDecor.SetActive(true);
 
+        if(_audioSource)
+            _audioSource.Play();
+
         _mainCam.transform.position = _locationCamPos.localToWorldMatrix.GetPosition();
         _mainCam.transform.rotation = _locationCamPos.localToWorldMatrix.rotation;
 
@@ -44,6 +48,8 @@ public class Location : MonoBehaviour
         LocationShutdown();
 
         _locationDecor.SetActive(false);
+        if (_audioSource)
+            _audioSource.Pause();
     }
 
     public void LocationShutdown()
