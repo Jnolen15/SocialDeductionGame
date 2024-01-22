@@ -9,6 +9,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     // ================== Refrences ==================
     [SerializeField] private GameObject _numCardsPannel;
     [SerializeField] private TextMeshProUGUI _numCards;
+    [SerializeField] private ParticleSystem _dustFX;
     [SerializeField] private PlayRandomSound _randSound;
 
     // ================== Variables ==================
@@ -97,6 +98,8 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     public void AddCardsClientRpc()
     {
         _randSound.PlayRandom();
+
+        _dustFX.Emit(10);
     }
     #endregion
 
