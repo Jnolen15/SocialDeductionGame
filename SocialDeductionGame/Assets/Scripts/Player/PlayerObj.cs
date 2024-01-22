@@ -23,6 +23,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [SerializeField] private Material _ghostMat;
     private GameObject _model;
     [SerializeField] private CardHighlight _cardHighlight;
+    [SerializeField] private PlayRandomSound _randomSound;
 
     // ================== Variables ==================
     [SerializeField] private List<CardTag> _cardTagsAccepted = new();
@@ -35,6 +36,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private NetworkVariable<bool> _netSaboteurTeam = new(writePerm: NetworkVariableWritePermission.Owner);
 
     // ================== Setup ==================
+    #region Setup
     public override void OnNetworkSpawn()
     {
         GameManager.OnStateIntro += UpdateNameSaboColor;
@@ -112,9 +114,10 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         // Set Material
         _model.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[materialIndex];
     }
+    #endregion
 
     // ================== Info ==================
-    //
+    #region Info
     private void UpdateNameSaboColor()
     {
         if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs
@@ -142,6 +145,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         if(_model)
             _model.gameObject.GetComponent<SkinnedMeshRenderer>().material = _ghostMat;
     }
+    #endregion
 
     // ================== Interface ==================
     public bool CanPlayCardHere(Card cardToPlay)
@@ -240,6 +244,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     {
         if (!IsOwner)
             return;
+
+        _randomSound.PlayRandom();
 
         _playerHealth.ModifyHunger(servings, "Consumed Card");
 

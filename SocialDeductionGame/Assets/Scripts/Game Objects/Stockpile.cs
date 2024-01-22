@@ -9,6 +9,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     // ================== Refrences ==================
     [SerializeField] private GameObject _numCardsPannel;
     [SerializeField] private TextMeshProUGUI _numCards;
+    [SerializeField] private PlayRandomSound _randSound;
 
     // ================== Variables ==================
     [SerializeField] private bool _acceptingCards;
@@ -88,6 +89,14 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         if(!_contributorIDs.Contains(playerID))
             _contributorIDs.Add(playerID);
         _netCardsInStockpile.Value++;
+
+        AddCardsClientRpc();
+    }
+
+    [ClientRpc]
+    public void AddCardsClientRpc()
+    {
+        _randSound.PlayRandom();
     }
     #endregion
 

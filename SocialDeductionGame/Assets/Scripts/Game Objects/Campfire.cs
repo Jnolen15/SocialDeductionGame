@@ -26,6 +26,9 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     [SerializeField] private GameObject _foodMenu;
     [SerializeField] private GameObject _flameObj;
     [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _smallAdditionSFX;
+    [SerializeField] private AudioClip _mediumAdditionSFX;
+    [SerializeField] private AudioClip _largeAdditionSFX;
     [SerializeField] private ParticleSystem _fireBusrtFX;
     [SerializeField] private ParticleSystem _poisonFireBusrtFX;
     private CardManager _cardManager;
@@ -128,13 +131,31 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     [ClientRpc]
     private void PortionsAddedVFXClientRpc(int servings)
     {
+        PlayAdditionSound(servings);
         _fireBusrtFX.Emit(servings * 3);
     }
 
     [ClientRpc]
     private void PoisonAddedVFXClientRpc(int servings)
     {
+        PlayAdditionSound(servings);
         _poisonFireBusrtFX.Emit(servings * 3);
+    }
+
+    private void PlayAdditionSound(int servings)
+    {
+        if (servings == 2)
+        {
+            _audioSource.PlayOneShot(_mediumAdditionSFX);
+        }
+        else if (servings == 4)
+        {
+            _audioSource.PlayOneShot(_largeAdditionSFX);
+        }
+        else
+        {
+            _audioSource.PlayOneShot(_smallAdditionSFX);
+        }
     }
 
     // ================== State Management ==================

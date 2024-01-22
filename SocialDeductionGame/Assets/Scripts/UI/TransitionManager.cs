@@ -11,6 +11,7 @@ public class TransitionManager : MonoBehaviour
     [SerializeField] private Transform _transitionWave;
     [SerializeField] private int _hiddenPos;
     [SerializeField] private int _upPos;
+    [SerializeField] private PlayRandomSound _randSound;
 
     // ================== Setup ==================
     private void OnEnable()
@@ -69,6 +70,8 @@ public class TransitionManager : MonoBehaviour
     [Button]
     private void TransitionIn()
     {
+        _randSound.PlayRandom();
+
         _transitionWave.gameObject.SetActive(true);
 
         _transitionWave.DOLocalMoveY(_upPos, 1).SetEase(Ease.OutBack, 1);

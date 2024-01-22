@@ -12,6 +12,8 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _closedObj;
     [SerializeField] private GameObject _openedObj;
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _openSound;
     [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
     private bool _opened;
     private PlayerData.Team _localTeam;
@@ -78,6 +80,8 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
         _openButton.SetActive(false);
         _closedObj.SetActive(false);
         _openedObj.SetActive(true);
+
+        _audioSource.PlayOneShot(_openSound);
     }
     #endregion
 
