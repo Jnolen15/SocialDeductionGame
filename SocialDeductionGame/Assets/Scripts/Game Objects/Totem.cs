@@ -15,6 +15,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
     [SerializeField] private TextMeshProUGUI _totemStatusText;
     [SerializeField] private GameObject _activateTotemButton;
     [SerializeField] private TextMeshProUGUI _activateCostText;
+    private TotemSounds _totemSounds;
 
     // ================== Variables ==================
     [SerializeField] private LocationManager.LocationName _locationName;
@@ -51,7 +52,9 @@ public class Totem : NetworkBehaviour, ICardPlayable
 
     private void Start()
     {
-        foreach(TotemSlot slot in _totemSlots)
+        _totemSounds = this.GetComponent<TotemSounds>();
+
+        foreach (TotemSlot slot in _totemSlots)
         {
             slot.Setup(this);
         }
@@ -81,12 +84,18 @@ public class Totem : NetworkBehaviour, ICardPlayable
     #region UI
     public void Show()
     {
+        if(_totemSounds)
+            _totemSounds.PlayOpen();
+
         _totemPannel.SetActive(true);
         ForageUI.HideForageUI?.Invoke();
     }
 
     public void Hide()
     {
+        if (_totemSounds)
+            _totemSounds.PlayClose();
+
         _totemPannel.SetActive(false);
         ForageUI.ShowForageUI?.Invoke();
     }
@@ -219,6 +228,9 @@ public class Totem : NetworkBehaviour, ICardPlayable
         // Set totem deactive
         else
         {
+            if (_totemSounds)
+                _totemSounds.PlayDeactivated();
+
             _activeTotemEffects.SetActive(false);
             OnLocationTotemDisable?.Invoke(_locationName);
 
@@ -316,6 +328,9 @@ public class Totem : NetworkBehaviour, ICardPlayable
     [ClientRpc]
     private void ActivateTotemClientRpc()
     {
+        if (_totemSounds)
+            _totemSounds.PlayPrepped();
+
         _preppedTotemEffects.SetActive(true);
         HideActivateButton();
         SetStatusText("Totem will activate in the night");

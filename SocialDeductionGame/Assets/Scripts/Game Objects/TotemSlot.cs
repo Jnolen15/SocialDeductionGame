@@ -15,6 +15,7 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     [SerializeField] private Color _runeEmptyColor;
     [SerializeField] private Color _runeActiveColor;
     [SerializeField] private Color _runeWrongColor;
+    private TotemSounds _totemSounds;
 
     // ================== Variables ==================
     [SerializeField] private NetworkVariable<int> _netSaboCard = new(writePerm: NetworkVariableWritePermission.Server);
@@ -30,6 +31,8 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
     public void Setup(Totem totem)
     {
         _totem = totem;
+
+        _totemSounds = this.GetComponentInParent<TotemSounds>();
     }
 
     [ServerRpc]
@@ -110,6 +113,9 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
                 return false;
             else if (TestForMatchingTags(cardToPlay.GetCardID()))
             {
+                if (_totemSounds)
+                    _totemSounds.PlayAddCorrect();
+
                 return true;
             }
             else
@@ -117,15 +123,29 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
                 // Flash rune red
                 _runeImg.DOKill();
                 _runeImg.DOColor(_runeWrongColor, 1f).OnComplete(() => _runeImg.DOColor(_runeActiveColor, 1f));
+
+                if (_totemSounds)
+                    _totemSounds.PlayAddIncorrect();
+
                 return false;
             }
         }
         else if (!_totem.GetTotemOnCooldown() && !_totem.GetTotemPrepped())
         {
             if (cardToPlay.HasTag("NonTotemable"))
+            {
+                if (_totemSounds)
+                    _totemSounds.PlayAddIncorrect();
+
                 return false;
+            }
             else
+            {
+                if (_totemSounds)
+                    _totemSounds.PlayAddCorrect();
+
                 return true;
+            }
         }
         else
         {
