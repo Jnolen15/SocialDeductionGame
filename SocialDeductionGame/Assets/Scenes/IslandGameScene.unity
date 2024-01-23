@@ -251,6 +251,119 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ffa8f59f97997f644aa4d87ac5433d6c, type: 3}
+--- !u!1001 &6325363
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 1090956495}
+    m_Modifications:
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 721986087205386216, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+      propertyPath: m_Name
+      value: ButtonSounds
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+--- !u!224 &6325364 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 721986087205386215, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+  m_PrefabInstance: {fileID: 6325363}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6325365 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 721986087205386213, guid: 3838e4423bfa5014b8d00c285ffc1260, type: 3}
+  m_PrefabInstance: {fileID: 6325363}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 629c250d94b77c34d8e749a690b811d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &10267689
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27914,6 +28027,7 @@ RectTransform:
   - {fileID: 1833640145}
   - {fileID: 58384541}
   - {fileID: 1852473869}
+  - {fileID: 6325364}
   m_Father: {fileID: 1316379718}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -36560,6 +36674,7 @@ GameObject:
   - component: {fileID: 1443894935}
   - component: {fileID: 1443894934}
   - component: {fileID: 1443894933}
+  - component: {fileID: 1443894936}
   m_Layer: 5
   m_Name: VoteSpare
   m_TagString: Untagged
@@ -36682,6 +36797,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1443894931}
   m_CullTransparentMesh: 1
+--- !u!114 &1443894936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1443894931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6325365}
+          m_TargetAssemblyTypeName: ButtonSounds, Assembly-CSharp
+          m_MethodName: PlayRandomHover
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 4
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6325365}
+          m_TargetAssemblyTypeName: ButtonSounds, Assembly-CSharp
+          m_MethodName: PlayRandomClick
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1001 &1445055637
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46928,6 +47088,7 @@ GameObject:
   - component: {fileID: 1855426766}
   - component: {fileID: 1855426765}
   - component: {fileID: 1855426764}
+  - component: {fileID: 1855426767}
   m_Layer: 5
   m_Name: VoteExile
   m_TagString: Untagged
@@ -47050,6 +47211,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1855426762}
   m_CullTransparentMesh: 1
+--- !u!114 &1855426767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1855426762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6325365}
+          m_TargetAssemblyTypeName: ButtonSounds, Assembly-CSharp
+          m_MethodName: PlayRandomHover
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 4
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6325365}
+          m_TargetAssemblyTypeName: ButtonSounds, Assembly-CSharp
+          m_MethodName: PlayRandomClick
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1001 &1868753422
 PrefabInstance:
   m_ObjectHideFlags: 0
