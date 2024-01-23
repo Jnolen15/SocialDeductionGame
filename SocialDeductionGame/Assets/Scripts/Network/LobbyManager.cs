@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+using Unity.Services.Core.Environments;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
@@ -87,6 +88,9 @@ public class LobbyManager : MonoBehaviour
                 Debug.Log("TEST MODE ENABLED: Random profile assignemnet");
                 initializationOptions.SetProfile(Random.Range(0, 1000000).ToString());
             }
+
+            // Set environment
+            initializationOptions.SetEnvironmentName("demo");
 
             await UnityServices.InitializeAsync(initializationOptions);
 
