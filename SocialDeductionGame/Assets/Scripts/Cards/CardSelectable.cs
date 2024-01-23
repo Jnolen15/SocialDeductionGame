@@ -8,17 +8,22 @@ public class CardSelectable : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     // ============= Refrences / Variables =============
     private Card _card;
     private ICardPicker _cardPicker;
+    private PlayRandomSound _randSound;
 
     // ============= Setup =============
     void Start()
     {
         _card = GetComponentInParent<Card>();
         _cardPicker = GetComponentInParent<ICardPicker>();
+        _randSound = this.GetComponent<PlayRandomSound>();
     }
 
     // ============= Functions =============
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (_randSound)
+            _randSound.PlayRandom();
+
         transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
     }
 
@@ -29,6 +34,9 @@ public class CardSelectable : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     public void OnSelect()
     {
+        if (_randSound)
+            _randSound.PlayRandom();
+
         _cardPicker.PickCard(_card);
     }
 }

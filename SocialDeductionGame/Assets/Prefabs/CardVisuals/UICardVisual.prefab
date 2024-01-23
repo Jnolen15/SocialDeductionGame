@@ -378,6 +378,8 @@ GameObject:
   - component: {fileID: 5427489456640813845}
   - component: {fileID: 7414257654862318558}
   - component: {fileID: -8125686511084597820}
+  - component: {fileID: 5845049037419656942}
+  - component: {fileID: 5597645893151962282}
   m_Layer: 0
   m_Name: UICardVisual
   m_TagString: Untagged
@@ -451,6 +453,129 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &5845049037419656942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5427489456640813847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 732c6a8b81e8d014fbb9db55e9d3d849, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _audioSource: {fileID: 5597645893151962282}
+  _randomSounds:
+  - {fileID: 8300000, guid: 1e9409e20c758ed498ea71a05896f4e2, type: 3}
+  - {fileID: 8300000, guid: bff6eba7c316cac41859f7e9975684ac, type: 3}
+  - {fileID: 8300000, guid: 7ff5c8c0bbea632469bb19cfaebe03b5, type: 3}
+  - {fileID: 8300000, guid: b8cd7983941e13d43bafdef84b24372e, type: 3}
+  - {fileID: 8300000, guid: 61b7fb3af149e3d4784e271bb8de4a31, type: 3}
+  - {fileID: 8300000, guid: a022a8bd61eef5844b5c637cc9f03069, type: 3}
+  - {fileID: 8300000, guid: 692455aeff10864409d383e2fadc506e, type: 3}
+  - {fileID: 8300000, guid: de77a0197c12e1848a963dbf17d94b6d, type: 3}
+  - {fileID: 8300000, guid: ce0a5ccb933da814d9832dda3de71258, type: 3}
+  - {fileID: 8300000, guid: a8d471181815a1a4097a9c7ba5261a58, type: 3}
+  - {fileID: 8300000, guid: 367936960e1c5bd44990e404c76a973e, type: 3}
+  - {fileID: 8300000, guid: 016b34c2c91d60f4ca30e51613e51ada, type: 3}
+  - {fileID: 8300000, guid: 87ee4de6a9c389645bebe40e28018bb3, type: 3}
+--- !u!82 &5597645893151962282
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5427489456640813847}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: -1200062053179161928, guid: 27e49e17d517ac346b708e8520521f4b, type: 2}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 0.5
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &7125616115271452912
 GameObject:
   m_ObjectHideFlags: 0

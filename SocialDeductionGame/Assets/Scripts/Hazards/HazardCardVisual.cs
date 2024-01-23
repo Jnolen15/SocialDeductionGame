@@ -32,7 +32,7 @@ public class HazardCardVisual : MonoBehaviour
     private int _heldHazardID;
     private Hazard _hazardData;
 
-    public delegate void HazardVisualEvent();
+    public delegate void HazardVisualEvent(Hazard.DangerLevel level);
     public static event HazardVisualEvent OnHazardActivated;
 
     // ================== Setup ==================
@@ -84,7 +84,7 @@ public class HazardCardVisual : MonoBehaviour
         else
         {
             // Hazard card happened
-            OnHazardActivated?.Invoke();
+            OnHazardActivated?.Invoke(_hazardData.GetHazardDangerLevel());
         }
     }
 }

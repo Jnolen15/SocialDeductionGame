@@ -8,7 +8,8 @@ public class NightEventSelectable : MonoBehaviour
     // ================== Refrences ==================
     private NightEventCardVisual _event;
     private NightEventPicker _eventPicker;
-    [SerializeField] private TextMeshProUGUI _voteText; 
+    [SerializeField] private TextMeshProUGUI _voteText;
+    private PlayRandomSound _randSound;
     // ================== Variables ==================
     private bool _eventSelected;
 
@@ -22,6 +23,8 @@ public class NightEventSelectable : MonoBehaviour
     {
         _event = GetComponent<NightEventCardVisual>();
         _eventPicker = GetComponentInParent<NightEventPicker>();
+
+        _randSound = this.GetComponent<PlayRandomSound>();
     }
 
     // ================== Function ==================
@@ -35,6 +38,9 @@ public class NightEventSelectable : MonoBehaviour
             _eventSelected = true;
             _eventPicker.SelectEvent(_event.GetEventID());
             transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+
+            if (_randSound)
+                _randSound.PlayRandom();
         }
     }
 

@@ -22,6 +22,11 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private int _tierThreeHazardThreshold;
     [SerializeField] private GameObject _takeNoneButton;
     [SerializeField] private CanvasGroup _clawMarks;
+    [SerializeField] private PlayRandomSound _randSound;
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _hazardLowSFX;
+    [SerializeField] private AudioClip _hazardMediumSFX;
+    [SerializeField] private AudioClip _hazardHighSFX;
     private Forage _forage;
 
     public delegate void ForageUIAction();
@@ -108,6 +113,8 @@ public class ForageUI : MonoBehaviour
             else
                 PunchCard(cardObj.gameObject, 0.2f, 0.4f);
 
+            _randSound.PlayRandom();
+
             yield return new WaitForSeconds(0.1f);
         }
 
@@ -171,15 +178,33 @@ public class ForageUI : MonoBehaviour
         card.transform.DOPunchScale(new Vector3(size, size, size), duration, 6, 0.8f);
     }
 
-    public void ShowClawMarks()
+    public void ShowClawMarks(Hazard.DangerLevel level)
     {
         CloseClaw();
+
+        PlayHazardSFX(level);
 
         _clawMarks.gameObject.SetActive(true);
 
         _clawMarks.transform.DOScale(new Vector3(1f, 1f, 1f), 0.1f)
             .OnComplete(() => _clawMarks.DOFade(0, 3f).SetEase(Ease.OutSine)
                 .OnComplete(() => CloseClaw()));
+    }
+
+    private void PlayHazardSFX(Hazard.DangerLevel level)
+    {
+        if (level == Hazard.DangerLevel.High)
+        {
+            _audioSource.PlayOneShot(_hazardHighSFX);
+        }
+        else if (level == Hazard.DangerLevel.Medium)
+        {
+            _audioSource.PlayOneShot(_hazardMediumSFX);
+        }
+        else
+        {
+            _audioSource.PlayOneShot(_hazardLowSFX);
+        }
     }
 
     public void CloseClaw()

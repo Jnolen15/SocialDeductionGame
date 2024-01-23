@@ -15,6 +15,7 @@ public class CardInteraction : MonoBehaviour,
     [SerializeField] private Card _card;
     [SerializeField] private HandManager _handManager;
     [SerializeField] private PlayerCardManager _playerCardManager;
+    private PlayRandomSound _randSound;
     private GameObject _indicator;
     private bool _dragging;
     private bool _dontHighlight;    // Cards should not highlight if another card is being highlighted
@@ -29,6 +30,7 @@ public class CardInteraction : MonoBehaviour,
         _card = this.GetComponentInParent<Card>();
         _handManager = this.GetComponentInParent<HandManager>();
         _playerCardManager = this.GetComponentInParent<PlayerCardManager>();
+        _randSound = this.GetComponent<PlayRandomSound>();
 
         OnCardHighlighted += OtherCardHighlighted;
         OnCardUnhighlighted += OtherCardUnhighlighted;
@@ -45,8 +47,13 @@ public class CardInteraction : MonoBehaviour,
     // =============== Interaction ===============
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if(!_dontHighlight)
+        if (!_dontHighlight)
+        {
             OnCardHighlighted?.Invoke(_card);
+
+            if (_randSound)
+                _randSound.PlayRandom();
+        }
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -68,6 +75,9 @@ public class CardInteraction : MonoBehaviour,
         Canvas parentCanvas = gameObject.GetComponentInParent<Canvas>();
         _indicator = Instantiate(_dragIcon, parentCanvas.transform);
         _dragging = true;
+
+        if (_randSound)
+            _randSound.PlayRandom();
     }
 
     public void OnDrag(PointerEventData eventData)
