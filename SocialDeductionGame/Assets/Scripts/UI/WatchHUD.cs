@@ -47,6 +47,11 @@ public class WatchHUD : MonoBehaviour
     [SerializeField] private GameObject _readyButtonIcon;
     [SerializeField] private Transform _readyOutPos;
     [SerializeField] private Transform _readyInPos;
+    [Header("Sounds")]
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _beepSFX;
+    [SerializeField] private AudioClip _readySFX;
+    [SerializeField] private AudioClip _flatlineSFX;
 
 
     private Dictionary<string, UIFlashObj> _flashDict = new();
@@ -80,7 +85,6 @@ public class WatchHUD : MonoBehaviour
 
     // ================== Setup ==================
     #region Setup
-    // COMENTED OUT ONLY FOR TESTING
     public void OnEnable()
     {
         _playerData = this.GetComponentInParent<PlayerData>();
@@ -233,86 +237,6 @@ public class WatchHUD : MonoBehaviour
     }
     #endregion
 
-    // ================== UI TESTING DELETE LATER ==================
-    #region UI TESTING DELETE LATER
-    [Header("TESTING ONLY DELETE LATER")]
-    public int CurrentHP;
-    public int CurrentHunger;
-
-    [Button("TestSetColors")]
-    private void TestSetColors(WatchColors colors)
-    {
-        if (!colors)
-            return;
-
-        SetColorPallet(colors);
-    }
-
-    [Button("TestLooseHP")]
-    private void TestLooseHP(int num)
-    {
-        if(num == 0)
-            CurrentHP--;
-        else
-            CurrentHP -= num;
-
-        if (CurrentHP < 0)
-            CurrentHP = 0;
-        else if (CurrentHP > 6)
-            CurrentHP = 6;
-
-        UpdateHealth(-1, CurrentHP);
-    }
-
-    [Button("TestGainHP")]
-    private void TestGainHP(int num)
-    {
-        if (num == 0)
-            CurrentHP++;
-        else
-            CurrentHP += num;
-
-        if (CurrentHP < 0)
-            CurrentHP = 0;
-        else if (CurrentHP > 6)
-            CurrentHP = 6;
-
-        UpdateHealth(1, CurrentHP);
-    }
-
-    [Button("TestLooseHunger")]
-    private void TestLooseHunger(int num)
-    {
-        if (num == 0)
-            CurrentHunger--;
-        else
-            CurrentHunger -= num;
-
-        if (CurrentHunger < 0)
-            CurrentHunger = 0;
-        else if (CurrentHunger > 6)
-            CurrentHunger = 6;
-
-        UpdateHunger(-1, CurrentHunger);
-    }
-
-    [Button("TestGainHunger")]
-    private void TestGainHunger(int num)
-    {
-        if (num == 0)
-            CurrentHunger++;
-        else
-            CurrentHunger += num;
-
-        if (CurrentHunger < 0)
-            CurrentHunger = 0;
-        else if (CurrentHunger > 12)
-            CurrentHunger = 12;
-
-        UpdateHunger(1, CurrentHunger);
-    }
-    #endregion
-
     // ================== Player Name and Team ==================
     #region Player Name and Team
     public void UpdatePlayerNameText(FixedString32Bytes old, FixedString32Bytes current)
@@ -374,6 +298,10 @@ public class WatchHUD : MonoBehaviour
 
             place++;
         }
+
+        // Play SFX if lost
+        if (ModifiedAmmount < 0)
+            _audioSource.PlayOneShot(_beepSFX);
     }
 
     private void UpdateHunger(int ModifiedAmmount, int newTotal)
@@ -411,6 +339,10 @@ public class WatchHUD : MonoBehaviour
 
             place++;
         }
+
+        // Play SFX if lost
+        if (ModifiedAmmount < 0)
+            _audioSource.PlayOneShot(_beepSFX);
     }
 
     private void OnDeath()
@@ -419,6 +351,9 @@ public class WatchHUD : MonoBehaviour
 
         _playerStats.SetActive(false);
         _playerDead.SetActive(true);
+
+        // Play SFX
+        _audioSource.PlayOneShot(_flatlineSFX);
     }
     #endregion
 
@@ -478,6 +413,8 @@ public class WatchHUD : MonoBehaviour
 
     public void Ready()
     {
+        _audioSource.PlayOneShot(_readySFX);
+
         _readyButton.transform.position = _readyInPos.position;
         _readyButtonIcon.SetActive(true);
     }
