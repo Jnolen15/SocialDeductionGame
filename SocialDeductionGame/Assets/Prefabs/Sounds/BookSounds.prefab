@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &721986087205386216
+--- !u!1 &6996466741386603136
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,23 +8,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 721986087205386215}
-  - component: {fileID: 721986087205386213}
-  - component: {fileID: 721986087205386214}
+  - component: {fileID: 4200788245093756343}
+  - component: {fileID: 3422285334100869147}
+  - component: {fileID: 4044971110172487698}
   m_Layer: 5
-  m_Name: ButtonSounds
+  m_Name: BookSounds
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &721986087205386215
+--- !u!224 &4200788245093756343
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 721986087205386216}
+  m_GameObject: {fileID: 6996466741386603136}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -38,46 +38,43 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &721986087205386213
+--- !u!114 &3422285334100869147
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 721986087205386216}
+  m_GameObject: {fileID: 6996466741386603136}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 629c250d94b77c34d8e749a690b811d9, type: 3}
+  m_Script: {fileID: 11500000, guid: 732c6a8b81e8d014fbb9db55e9d3d849, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _audioSource: {fileID: 721986087205386214}
-  _hoverSounds:
-  - {fileID: 8300000, guid: c5ff087b885ca3648b8ef2ac1f28d184, type: 3}
-  - {fileID: 8300000, guid: b1bf056c446115e41881d1548199cffb, type: 3}
-  - {fileID: 8300000, guid: e3cf44c4fff00244698088d3e5dbdc82, type: 3}
-  - {fileID: 8300000, guid: 7c21be105f58b584580974354bb2538c, type: 3}
-  - {fileID: 8300000, guid: 67ff194c9e1a74f46909593dbf6e2e03, type: 3}
-  - {fileID: 8300000, guid: 9afb3b9ec8b669844a748320ad058166, type: 3}
-  _clickSounds:
-  - {fileID: 8300000, guid: 89083d5ab189e5d45890f18dc585a07e, type: 3}
-  - {fileID: 8300000, guid: d20ee9625b6db6a44a77f03310ae83b6, type: 3}
-  - {fileID: 8300000, guid: b24616a69c427b541ac9cf5e12c09429, type: 3}
-  - {fileID: 8300000, guid: 299a482ffdf29fe40857f07aa19ee7be, type: 3}
-  - {fileID: 8300000, guid: 5f2500380d6cbfd4b8ddf431bf40a2f4, type: 3}
-  - {fileID: 8300000, guid: b174fd1d053563e458e620e09c3c7053, type: 3}
---- !u!82 &721986087205386214
+  _audioSource: {fileID: 4044971110172487698}
+  _randomSounds:
+  - {fileID: 8300000, guid: 2e869cd36b6c7c94ab293449ec8cb839, type: 3}
+  - {fileID: 8300000, guid: be6aac60a47cbfa4e82593e5e93e4fd8, type: 3}
+  - {fileID: 8300000, guid: e9812e3940509414f90c4ff152c5e99e, type: 3}
+  - {fileID: 8300000, guid: f5676738fa5a51e48aee8f3092fdc87e, type: 3}
+  - {fileID: 8300000, guid: 85eb5150bc35c8b4ba19000e898160e7, type: 3}
+  - {fileID: 8300000, guid: 86cd155798e47b042b3e5972658e22ee, type: 3}
+  - {fileID: 8300000, guid: 5dc098f77ab92d24c8abd85123e0abf9, type: 3}
+  - {fileID: 8300000, guid: 4610973d6779ac14689d5a0412930096, type: 3}
+  - {fileID: 8300000, guid: ed4cbb99e89ed224b9a0db587514bd32, type: 3}
+  - {fileID: 8300000, guid: c4ee409e2fc67c2478b474c8d8af9e1b, type: 3}
+--- !u!82 &4044971110172487698
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 721986087205386216}
+  m_GameObject: {fileID: 6996466741386603136}
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -1200062053179161928, guid: 27e49e17d517ac346b708e8520521f4b, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.3
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0

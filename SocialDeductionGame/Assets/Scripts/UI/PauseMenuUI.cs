@@ -11,6 +11,7 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private GameObject _pauseUI;
     [SerializeField] private GameObject _voiceSettings;
     [SerializeField] private GameObject _gameSettings;
+    [SerializeField] private PlayRandomSound _randomBookSound;
 
     // =================== Update ===================
     #region Update
@@ -25,6 +26,7 @@ public class PauseMenuUI : MonoBehaviour
     // =================== UI Functions ===================
     public void TogglePause()
     {
+        _randomBookSound.PlayRandom();
         _pauseUI.SetActive(!_pauseUI.activeSelf);
     }
 

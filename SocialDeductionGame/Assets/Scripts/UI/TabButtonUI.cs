@@ -30,6 +30,10 @@ public class TabButtonUI : MonoBehaviour
     private bool _helpTabHidden;
     private bool _exileTabHidden;
 
+    [Header("Sounds")]
+    [SerializeField] private ButtonSounds _buttonSounds;
+    [SerializeField] private PlayRandomSound _bookSounds;
+
     public delegate void TabPressedAction();
     public static event TabPressedAction OnEventPressed;
     public static event TabPressedAction OnMapPressed;
@@ -229,6 +233,8 @@ public class TabButtonUI : MonoBehaviour
     public void EventHovered()
     {
         MouseEnter(_eventTab.transform);
+
+        _buttonSounds.PlayRandomHover();
     }
 
     public void EventPressed()
@@ -238,6 +244,8 @@ public class TabButtonUI : MonoBehaviour
 
         Debug.Log("Event button pressed");
         OnEventPressed?.Invoke();
+
+        _bookSounds.PlayRandom();
     }
     #endregion
 
@@ -258,6 +266,8 @@ public class TabButtonUI : MonoBehaviour
     public void MapHovered()
     {
         MouseEnter(_mapTab.transform);
+
+        _buttonSounds.PlayRandomHover();
     }
 
     public void MapPressed()
@@ -267,6 +277,8 @@ public class TabButtonUI : MonoBehaviour
 
         Debug.Log("Map button pressed");
         OnMapPressed?.Invoke();
+
+        _bookSounds.PlayRandom();
     }
     #endregion
 
@@ -287,6 +299,8 @@ public class TabButtonUI : MonoBehaviour
     public void CraftingHovered()
     {
         MouseEnter(_craftingTab.transform);
+
+        _buttonSounds.PlayRandomHover();
     }
 
     public void CraftingPressed()
@@ -296,6 +310,8 @@ public class TabButtonUI : MonoBehaviour
 
         Debug.Log("Crafting button pressed");
         OnCraftingPressed?.Invoke();
+
+        _bookSounds.PlayRandom();
     }
     #endregion
 
@@ -316,6 +332,8 @@ public class TabButtonUI : MonoBehaviour
     public void HelpHovered()
     {
         MouseEnter(_helpTab.transform);
+
+        _buttonSounds.PlayRandomHover();
     }
 
     public void HelpPressed()
@@ -325,6 +343,8 @@ public class TabButtonUI : MonoBehaviour
 
         Debug.Log("Help button pressed");
         OnHelpPressed?.Invoke();
+
+        _bookSounds.PlayRandom();
     }
     #endregion
 
@@ -345,6 +365,8 @@ public class TabButtonUI : MonoBehaviour
     public void ExileHovered()
     {
         MouseEnter(_exileTab.transform);
+
+        _buttonSounds.PlayRandomHover();
     }
 
     public void ExilePressed()
@@ -357,6 +379,8 @@ public class TabButtonUI : MonoBehaviour
 
         Debug.Log("Exile button pressed");
         OnExilePressed?.Invoke();
+
+        _bookSounds.PlayRandom();
     }
     #endregion
 }
