@@ -16485,7 +16485,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4029d58750984c4b95263058a0132d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tutorialMenu: {fileID: 1723020178}
+  _tutorialMenu: {fileID: 1723020181}
   _settingsMenu: {fileID: 1948739626}
   _feedbackMenu: {fileID: 490667662}
   _bugReportMenu: {fileID: 1319731035}
@@ -29740,11 +29740,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1716464514}
   m_CullTransparentMesh: 1
---- !u!1 &1723020178 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3172651097688353738, guid: 1361e20d98a079e429a3dded97e12678, type: 3}
+--- !u!114 &1723020181 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 151698575591335117, guid: 1361e20d98a079e429a3dded97e12678, type: 3}
   m_PrefabInstance: {fileID: 414835661}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3c4209a004e3aa4ea97851689cf38c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1732717341
 PrefabInstance:
   m_ObjectHideFlags: 0

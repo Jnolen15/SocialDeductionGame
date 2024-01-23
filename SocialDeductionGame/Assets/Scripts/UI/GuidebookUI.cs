@@ -5,10 +5,13 @@ using UnityEngine;
 public class GuidebookUI : MonoBehaviour
 {
     // ================== Refrences ==================
+    [SerializeField] private GameObject _uiElements;
     [SerializeField] private GameObject _prevButton;
     [SerializeField] private GameObject _nextButton;
     [SerializeField] private List<GameObject> _pageList;
     [SerializeField] private int _currentPage;
+    [SerializeField] private PlayRandomSound _randomBookSound;
+    [SerializeField] private PlayRandomSound _randomPageSound;
 
     // ================== Setup ==================
     private void Start()
@@ -17,7 +20,7 @@ public class GuidebookUI : MonoBehaviour
 
         TabButtonUI.OnHelpPressed += ToggleGuidebook;
 
-        gameObject.SetActive(false);
+        _uiElements.SetActive(false);
     }
 
     private void OnDestroy()
@@ -31,7 +34,7 @@ public class GuidebookUI : MonoBehaviour
     {
         Debug.Log("Toggle Guidebook");
 
-        if (!gameObject.activeSelf)
+        if (!_uiElements.activeSelf)
             Show();
         else
             Hide();
@@ -39,12 +42,16 @@ public class GuidebookUI : MonoBehaviour
 
     public void Show()
     {
-        gameObject.SetActive(true);
+        _uiElements.SetActive(true);
+
+        _randomBookSound.PlayRandom();
     }
 
     public void Hide()
     {
-        gameObject.SetActive(false);
+        _randomBookSound.PlayRandom();
+
+        _uiElements.SetActive(false);
     }
 
     public void LastPage()
@@ -93,6 +100,8 @@ public class GuidebookUI : MonoBehaviour
         }
 
         _pageList[pageNum].SetActive(true);
+
+        _randomPageSound.PlayRandom();
     }
     #endregion
 }

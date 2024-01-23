@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 public class MenuManager : MonoBehaviour
 {
     // ============== Refrences ==============
-    [SerializeField] private GameObject _tutorialMenu;
+    [SerializeField] private GuidebookUI _tutorialMenu;
     [SerializeField] private GameObject _settingsMenu;
     [SerializeField] private GameObject _feedbackMenu;
     [SerializeField] private GameObject _bugReportMenu;
@@ -47,12 +47,12 @@ public class MenuManager : MonoBehaviour
 
     public void ShowTutorial()
     {
-        _tutorialMenu.SetActive(true);
+        _tutorialMenu.Show();
     }
 
     public void HideTutorial()
     {
-        _tutorialMenu.SetActive(false);
+        _tutorialMenu.Hide();
     }
 
     public void ShowSettings()
