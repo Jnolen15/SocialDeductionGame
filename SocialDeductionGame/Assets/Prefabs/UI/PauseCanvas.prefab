@@ -281,6 +281,7 @@ GameObject:
   - component: {fileID: 1110673301104074697}
   - component: {fileID: 2939421963312052194}
   - component: {fileID: 7899818540173028271}
+  - component: {fileID: 145893863322308920}
   m_Layer: 5
   m_Name: PauseCanvas
   m_TagString: Untagged
@@ -420,6 +421,21 @@ MonoBehaviour:
     Height: 480
   - Width: 640
     Height: 360
+--- !u!114 &145893863322308920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110673301104074550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cc6288b7e9897a4e856885a45ac9c47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _ambienceSlider: {fileID: 9003423663489469094}
+  _sfxSlider: {fileID: 3201907553349295120}
+  _audioMixer: {fileID: 24100000, guid: 27e49e17d517ac346b708e8520521f4b, type: 2}
 --- !u!1 &1149369403928155776
 GameObject:
   m_ObjectHideFlags: 0
@@ -2261,13 +2277,25 @@ MonoBehaviour:
   m_FillRect: {fileID: 8153462168803334816}
   m_HandleRect: {fileID: 3745356808673720937}
   m_Direction: 0
-  m_MinValue: 0
+  m_MinValue: 0.0001
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.5
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 145893863322308920}
+        m_TargetAssemblyTypeName: VolumeSliders, Assembly-CSharp
+        m_MethodName: SetSFXVolume
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4570191093754814277
 GameObject:
   m_ObjectHideFlags: 0
@@ -5122,13 +5150,25 @@ MonoBehaviour:
   m_FillRect: {fileID: 2192051686832026646}
   m_HandleRect: {fileID: 1250476192645346029}
   m_Direction: 0
-  m_MinValue: 0
+  m_MinValue: 0.0001
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.5
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 145893863322308920}
+        m_TargetAssemblyTypeName: VolumeSliders, Assembly-CSharp
+        m_MethodName: SetAmbienceVolume
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8816426430346333488
 GameObject:
   m_ObjectHideFlags: 0
