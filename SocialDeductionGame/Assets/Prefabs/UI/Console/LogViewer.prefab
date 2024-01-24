@@ -550,7 +550,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4100117146376475089}
   m_HandleRect: {fileID: 4100117146376475090}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -915,6 +915,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 573a8671baa97e342845710c139c4772, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _logCanvas: {fileID: 4100117146528943026}
   _logPannel: {fileID: 4100117147273837779}
   _messageZone: {fileID: 4100117145787490036}
   _logMessagePref: {fileID: 5250100995569068184, guid: bee5c93e993035b4aad40f497ccb9587, type: 3}
@@ -923,9 +924,12 @@ MonoBehaviour:
   _localTestModeButton: {fileID: 5661560610542377619}
   _dontTestWinButton: {fileID: 8856113664541791361}
   _doCheatsButton: {fileID: 7442125157581126604}
+  _showLog: 0
   _localTestMode: 0
   _dontTestWin: 0
   _doCheats: 0
+  _randomNames: 0
+  _startWithAny: 0
 --- !u!1 &4100117146979033100
 GameObject:
   m_ObjectHideFlags: 0

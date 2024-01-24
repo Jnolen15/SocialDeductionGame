@@ -119,9 +119,9 @@ public class PlayerHealth : NetworkBehaviour
             return;
 
         if (ammount > 0)
-            OnHealthIncrease(ammount, mesage);
+            OnHealthIncrease?.Invoke(ammount, mesage);
         else
-            OnHealthDecrease(ammount, mesage);
+            OnHealthDecrease?.Invoke(ammount, mesage);
 
         ModifyHealthServerRPC(ammount, true);
     }
@@ -178,9 +178,9 @@ public class PlayerHealth : NetworkBehaviour
             return;
 
         if (ammount > 0)
-            OnHungerIncrease(ammount, mesage);
+            OnHungerIncrease?.Invoke(ammount, mesage);
         else
-            OnHungerDecrease(ammount, mesage);
+            OnHungerDecrease?.Invoke(ammount, mesage);
 
         ModifyHungerServerRPC(ammount, true);
     }

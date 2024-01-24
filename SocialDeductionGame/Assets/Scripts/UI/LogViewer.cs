@@ -6,6 +6,7 @@ using TMPro;
 
 public class LogViewer : MonoBehaviour
 {
+    [SerializeField] private GameObject _logCanvas;
     [SerializeField] private Transform _logPannel;
     [SerializeField] private Transform _messageZone;
     [SerializeField] private GameObject _logMessagePref;
@@ -18,6 +19,7 @@ public class LogViewer : MonoBehaviour
     [SerializeField] private GameObject _doCheatsButton;
 
     [Header("Cheats")]
+    [SerializeField] private bool _showLog;
     [SerializeField] private bool _localTestMode;
     [SerializeField] private bool _dontTestWin;
     [SerializeField] private bool _doCheats;
@@ -52,6 +54,9 @@ public class LogViewer : MonoBehaviour
         UpdateDontTestWinButton();
         UpdateDoCheatsButton();
         UpdateLocalTestModeButton();
+
+        if (!_showLog)
+            _logCanvas.SetActive(false);
     }
 
     void OnDisable()
@@ -63,7 +68,7 @@ public class LogViewer : MonoBehaviour
     // ==================== Update ====================
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.BackQuote))
+        if (Input.GetKeyDown(KeyCode.BackQuote) && _showLog)
         {
             ToggleVisible();
         }
