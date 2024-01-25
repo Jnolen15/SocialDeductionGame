@@ -26,7 +26,7 @@ public class LocationInfoUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        LocationManager.OnLocationChanged += UpdateMoveButton;
+        LocationManager.OnLocationChanged -= UpdateMoveButton;
         Forage.OnLocationBuffEnabled -= ShowBuffIcon;
         Forage.OnLocationBuffDisabled -= HideBuffIcon;
         Forage.OnLocationDebuffEnabled -= ShowDebuffIcon;

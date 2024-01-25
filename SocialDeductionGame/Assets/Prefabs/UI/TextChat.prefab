@@ -488,7 +488,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5744873627337060754
 RectTransform:
   m_ObjectHideFlags: 0
@@ -963,11 +963,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _messageInputField: {fileID: 4159568529704241727}
   _messageContent: {fileID: 6314509663047970735}
+  _saboChatButton: {fileID: 2927456372056630514}
+  _saboChatButtonImage: {fileID: 3830905494544750742}
   _saboChatIcon: {fileID: 1235179959661843627}
   _deathChatIcon: {fileID: 3801433398327289777}
   _textMessagePref: {fileID: 7105044309813581823, guid: c64716bb5bb377e4f83b60659e18d460, type: 3}
-  _saboChat: 0
-  _deadChat: 0
 --- !u!114 &8877033677258499553
 MonoBehaviour:
   m_ObjectHideFlags: 0

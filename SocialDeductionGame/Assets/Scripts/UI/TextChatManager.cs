@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using TMPro;
+using UnityEngine.UI;
 
 public class TextChatManager : NetworkBehaviour
 {
     // =============== Refrences / Variables ===============
     [SerializeField] private TMP_InputField _messageInputField;
     [SerializeField] private Transform _messageContent;
+    [SerializeField] private GameObject _saboChatButton;
+    [SerializeField] private Image _saboChatButtonImage;
     [SerializeField] private GameObject _saboChatIcon;
     [SerializeField] private GameObject _deathChatIcon;
     [SerializeField] private GameObject _textMessagePref;
     private bool _inSaboChat;
+    private bool _saboChatActive;
     private bool _inDeadChat;
 
     private ulong _localPlayerID;
@@ -76,12 +80,14 @@ public class TextChatManager : NetworkBehaviour
 
         LocationManager.OnLocationChanged += UpdateLocation;
         PlayerHealth.OnDeath += EnterDeathChat;
+        GameManager.OnStateIntro += EnterSaboChat;
     }
 
     private void OnDisable()
     {
         LocationManager.OnLocationChanged -= UpdateLocation;
         PlayerHealth.OnDeath -= EnterDeathChat;
+        GameManager.OnStateIntro -= EnterSaboChat;
     }
 
     // =============== Function ===============
@@ -102,6 +108,8 @@ public class TextChatManager : NetworkBehaviour
 
         if (_inDeadChat)
             channel = ChatChannel.Dead;
+        else if(_saboChatActive)
+            channel = ChatChannel.Saboteur;
         else
             channel = _currentLocationChannel;
 
@@ -118,13 +126,22 @@ public class TextChatManager : NetworkBehaviour
     [ClientRpc]
     private void RecieveChatMessageClientRpc(ChatMessage msg)
     {
-        Debug.Log($"Message recieved from {msg.SenderName}, at {msg.Channel}: {msg.MSG}");
+        //Debug.Log($"Message recieved from {msg.SenderName}, at {msg.Channel}: {msg.MSG}");
 
+        // Determine if chat should be rejected
         if (msg.Channel == ChatChannel.Dead)
         {
             if (!_inDeadChat)
             {
                 Debug.Log("Message rejected. Not dead");
+                return;
+            }
+        }
+        else if (msg.Channel == ChatChannel.Saboteur)
+        {
+            if(!_inSaboChat)
+            {
+                Debug.Log("Message rejected. Not Saboteur");
                 return;
             }
         }
@@ -136,7 +153,6 @@ public class TextChatManager : NetworkBehaviour
 
         TextChatMessage chatMsg = Instantiate(_textMessagePref, _messageContent).GetComponent<TextChatMessage>();
 
-        //chatMsg.Setup(msg, "player", ChatChannel.Camp);
         chatMsg.Setup(msg.MSG, msg.SenderName, msg.Channel);
 
         chatMsg.transform.SetAsFirstSibling();
@@ -164,16 +180,38 @@ public class TextChatManager : NetworkBehaviour
         }
     }
 
+    public void EnterSaboChat()
+    {
+        Debug.Log("entered saboteur chat");
+
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
+        {
+            _saboChatButton.SetActive(true);
+            _inSaboChat = true;
+        }
+    }
+
     public void ToggleSaboChat()
     {
-        _inSaboChat = !_inSaboChat;
+        if (_inDeadChat)
+            return;
 
-        _saboChatIcon.SetActive(_inSaboChat);
+        _saboChatActive = !_saboChatActive;
+
+        _saboChatIcon.SetActive(_saboChatActive);
+
+        if (_saboChatActive)
+            _saboChatButtonImage.color = Color.grey;
+        else
+            _saboChatButtonImage.color = Color.white;
     }
 
     public void EnterDeathChat()
     {
         _inDeadChat = true;
         _deathChatIcon.SetActive(true);
+
+        _saboChatButton.SetActive(false);
+        _saboChatIcon.SetActive(false);
     }
 }
