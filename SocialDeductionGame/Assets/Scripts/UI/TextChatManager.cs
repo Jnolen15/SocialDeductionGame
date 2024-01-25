@@ -12,13 +12,11 @@ public class TextChatManager : NetworkBehaviour
     [SerializeField] private GameObject _saboChatIcon;
     [SerializeField] private GameObject _deathChatIcon;
     [SerializeField] private GameObject _textMessagePref;
+    private bool _inSaboChat;
+    private bool _inDeadChat;
 
     private ulong _localPlayerID;
     private string _localPlayerName;
-
-    // just for testing
-    [SerializeField] private bool _saboChat;
-    [SerializeField] private bool _deadChat;
 
     public enum ChatChannel 
     {
@@ -29,7 +27,7 @@ public class TextChatManager : NetworkBehaviour
         Saboteur,
         Dead
     }
-    private ChatChannel _currentChannel;
+    private ChatChannel _currentLocationChannel;
 
     public class ChatMessage : INetworkSerializable
     {
@@ -77,11 +75,13 @@ public class TextChatManager : NetworkBehaviour
         _localPlayerName = PlayerConnectionManager.Instance.GetPlayerNameByID(_localPlayerID);
 
         LocationManager.OnLocationChanged += UpdateLocation;
+        PlayerHealth.OnDeath += EnterDeathChat;
     }
 
     private void OnDisable()
     {
         LocationManager.OnLocationChanged -= UpdateLocation;
+        PlayerHealth.OnDeath -= EnterDeathChat;
     }
 
     // =============== Function ===============
@@ -98,7 +98,14 @@ public class TextChatManager : NetworkBehaviour
 
     private void SendChatMessage(string message)
     {
-        ChatMessage newMessage = new ChatMessage(message, _localPlayerName, _currentChannel);
+        ChatChannel channel;
+
+        if (_inDeadChat)
+            channel = ChatChannel.Dead;
+        else
+            channel = _currentLocationChannel;
+
+        ChatMessage newMessage = new ChatMessage(message, _localPlayerName, channel);
         SendChatMessageServerRpc(newMessage);
     }
 
@@ -113,7 +120,15 @@ public class TextChatManager : NetworkBehaviour
     {
         Debug.Log($"Message recieved from {msg.SenderName}, at {msg.Channel}: {msg.MSG}");
 
-        if(msg.Channel != _currentChannel)
+        if (msg.Channel == ChatChannel.Dead)
+        {
+            if (!_inDeadChat)
+            {
+                Debug.Log("Message rejected. Not dead");
+                return;
+            }
+        }
+        else if(msg.Channel != _currentLocationChannel)
         {
             Debug.Log("Message rejected. Not at same location");
             return;
@@ -132,34 +147,33 @@ public class TextChatManager : NetworkBehaviour
         switch (location)
         {
             case LocationManager.LocationName.Camp:
-                _currentChannel = ChatChannel.Camp;
+                _currentLocationChannel = ChatChannel.Camp;
                 break;
             case LocationManager.LocationName.Beach:
-                _currentChannel = ChatChannel.Beach;
+                _currentLocationChannel = ChatChannel.Beach;
                 break;
             case LocationManager.LocationName.Forest:
-                _currentChannel = ChatChannel.Forest;
+                _currentLocationChannel = ChatChannel.Forest;
                 break;
             case LocationManager.LocationName.Plateau:
-                _currentChannel = ChatChannel.Plateau;
+                _currentLocationChannel = ChatChannel.Plateau;
                 break;
             default:
-                _currentChannel = ChatChannel.Camp;
+                _currentLocationChannel = ChatChannel.Camp;
                 break;
         }
     }
 
     public void ToggleSaboChat()
     {
-        _saboChat = !_saboChat;
+        _inSaboChat = !_inSaboChat;
 
-        _saboChatIcon.SetActive(_saboChat);
+        _saboChatIcon.SetActive(_inSaboChat);
     }
 
-    public void ToggleDeathChat()
+    public void EnterDeathChat()
     {
-        _deadChat = !_deadChat;
-
-        _deathChatIcon.SetActive(_deadChat);
+        _inDeadChat = true;
+        _deathChatIcon.SetActive(true);
     }
 }

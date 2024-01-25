@@ -100,7 +100,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -237,7 +237,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _messageText: {fileID: 1588275851119517823}
-  _nameText: {fileID: 4750205210123013104}
+  _channleNameText: {fileID: 4750205210123013104}
   _saboColor: {r: 0.6886792, g: 0.24363652, b: 0.24363652, a: 1}
   _deadColor: {r: 0.14684944, g: 0.25313455, b: 0.5660378, a: 1}
 --- !u!1 &8406860115054304084
@@ -333,7 +333,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding:
     m_Left: 25
-    m_Right: 80
+    m_Right: 25
     m_Top: 25
     m_Bottom: 20
   m_ChildAlignment: 1
@@ -357,7 +357,7 @@ GameObject:
   - component: {fileID: 5520925098124015123}
   - component: {fileID: 4750205210123013104}
   m_Layer: 5
-  m_Name: PlayerName
+  m_Name: ChannelName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -411,7 +411,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Players Name Goes Here
+  m_text: Channel Name Goes Here
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 744dcfa55d665fb428a454337938185f, type: 2}
   m_sharedMaterial: {fileID: -5811233463216366101, guid: 744dcfa55d665fb428a454337938185f, type: 2}
