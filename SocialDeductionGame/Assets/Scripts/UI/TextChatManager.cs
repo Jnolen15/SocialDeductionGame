@@ -6,12 +6,15 @@ using TMPro;
 
 public class TextChatManager : NetworkBehaviour
 {
-    // =============== Setup ===============
+    // =============== Refrences / Variables ===============
     [SerializeField] private TMP_InputField _messageInputField;
     [SerializeField] private Transform _messageContent;
     [SerializeField] private GameObject _saboChatIcon;
     [SerializeField] private GameObject _deathChatIcon;
     [SerializeField] private GameObject _textMessagePref;
+
+    private ulong _localPlayerID;
+    private string _localPlayerName;
 
     // just for testing
     [SerializeField] private bool _saboChat;
@@ -26,7 +29,7 @@ public class TextChatManager : NetworkBehaviour
         Saboteur,
         Dead
     }
-
+    private ChatChannel _currentChannel;
 
     public class ChatMessage : INetworkSerializable
     {
@@ -67,8 +70,85 @@ public class TextChatManager : NetworkBehaviour
         }
     }
 
+    // =============== Setup ===============
+    public override void OnNetworkSpawn()
+    {
+        _localPlayerID = PlayerConnectionManager.Instance.GetLocalPlayersID();
+        _localPlayerName = PlayerConnectionManager.Instance.GetPlayerNameByID(_localPlayerID);
+
+        LocationManager.OnLocationChanged += UpdateLocation;
+    }
+
+    private void OnDisable()
+    {
+        LocationManager.OnLocationChanged -= UpdateLocation;
+    }
 
     // =============== Function ===============
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (!string.IsNullOrWhiteSpace(_messageInputField.text))
+                SendChatMessage(_messageInputField.text);
+
+            _messageInputField.text = "";
+        }
+    }
+
+    private void SendChatMessage(string message)
+    {
+        ChatMessage newMessage = new ChatMessage(message, _localPlayerName, _currentChannel);
+        SendChatMessageServerRpc(newMessage);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SendChatMessageServerRpc(ChatMessage msg)
+    {
+        RecieveChatMessageClientRpc(msg);
+    }
+
+    [ClientRpc]
+    private void RecieveChatMessageClientRpc(ChatMessage msg)
+    {
+        Debug.Log($"Message recieved from {msg.SenderName}, at {msg.Channel}: {msg.MSG}");
+
+        if(msg.Channel != _currentChannel)
+        {
+            Debug.Log("Message rejected. Not at same location");
+            return;
+        }
+
+        TextChatMessage chatMsg = Instantiate(_textMessagePref, _messageContent).GetComponent<TextChatMessage>();
+
+        //chatMsg.Setup(msg, "player", ChatChannel.Camp);
+        chatMsg.Setup(msg.MSG, msg.SenderName, msg.Channel);
+
+        chatMsg.transform.SetAsFirstSibling();
+    }
+
+    private void UpdateLocation(LocationManager.LocationName location)
+    {
+        switch (location)
+        {
+            case LocationManager.LocationName.Camp:
+                _currentChannel = ChatChannel.Camp;
+                break;
+            case LocationManager.LocationName.Beach:
+                _currentChannel = ChatChannel.Beach;
+                break;
+            case LocationManager.LocationName.Forest:
+                _currentChannel = ChatChannel.Forest;
+                break;
+            case LocationManager.LocationName.Plateau:
+                _currentChannel = ChatChannel.Plateau;
+                break;
+            default:
+                _currentChannel = ChatChannel.Camp;
+                break;
+        }
+    }
+
     public void ToggleSaboChat()
     {
         _saboChat = !_saboChat;
@@ -81,38 +161,5 @@ public class TextChatManager : NetworkBehaviour
         _deadChat = !_deadChat;
 
         _deathChatIcon.SetActive(_deadChat);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            if (!string.IsNullOrWhiteSpace(_messageInputField.text))
-            {
-                ChatMessage newMessage = new ChatMessage(_messageInputField.text, "Player", ChatChannel.Camp);
-                SendChatMessageServerRpc(newMessage);
-            }
-
-            _messageInputField.text = "";
-        }
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void SendChatMessageServerRpc(ChatMessage msg)
-    {
-        RecieveChatMessageClientRpc(msg);
-    }
-
-    [ClientRpc]
-    private void RecieveChatMessageClientRpc(ChatMessage msg)
-    {
-        Debug.Log("Message recieved: " + msg.MSG);
-
-        TextChatMessage chatMsg = Instantiate(_textMessagePref, _messageContent).GetComponent<TextChatMessage>();
-
-        //chatMsg.Setup(msg, "player", ChatChannel.Camp);
-        chatMsg.Setup(msg.MSG, msg.SenderName, msg.Channel);
-
-        chatMsg.transform.SetAsFirstSibling();
     }
 }
