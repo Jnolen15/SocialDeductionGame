@@ -8,6 +8,10 @@ using UnityEngine.UI;
 public class TextChatManager : NetworkBehaviour
 {
     // =============== Refrences / Variables ===============
+    [SerializeField] private Transform _chatArea;
+    [SerializeField] private Transform _outPos;
+    [SerializeField] private Transform _inPos;
+    [SerializeField] private GameObject _messageNotif;
     [SerializeField] private TMP_InputField _messageInputField;
     [SerializeField] private Transform _messageContent;
     [SerializeField] private GameObject _saboChatButton;
@@ -15,6 +19,8 @@ public class TextChatManager : NetworkBehaviour
     [SerializeField] private GameObject _saboChatIcon;
     [SerializeField] private GameObject _deathChatIcon;
     [SerializeField] private GameObject _textMessagePref;
+    [SerializeField] private PlayRandomSound _randSound;
+    private bool _chatOpen = false;
     private bool _inSaboChat;
     private bool _saboChatActive;
     private bool _inDeadChat;
@@ -91,6 +97,19 @@ public class TextChatManager : NetworkBehaviour
     }
 
     // =============== Function ===============
+    public void ToggleChatOpen()
+    {
+        _chatOpen = !_chatOpen;
+
+        if(!_chatOpen)
+            _chatArea.position = _inPos.position;
+        else
+        {
+            _messageNotif.SetActive(false);
+            _chatArea.position = _outPos.position;
+        }
+    }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Return))
@@ -156,6 +175,12 @@ public class TextChatManager : NetworkBehaviour
         chatMsg.Setup(msg.MSG, msg.SenderName, msg.Channel);
 
         chatMsg.transform.SetAsFirstSibling();
+
+        _randSound.PlayRandom();
+
+        // Show notif if chat minimized
+        if (!_chatOpen)
+            _messageNotif.SetActive(true);
     }
 
     private void UpdateLocation(LocationManager.LocationName location)
