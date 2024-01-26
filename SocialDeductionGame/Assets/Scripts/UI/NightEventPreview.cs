@@ -22,19 +22,26 @@ public class NightEventPreview : MonoBehaviour
     // =================== Setup ===================
     private void OnEnable()
     {
-        GameManager.OnStateMorning += DisplayLargeEvent;
+        //GameManager.OnStateMorning += DisplayLargeEvent;
+        GameManager.OnStateMorning += Show;
         GameManager.OnStateNight += ClearEventResults;
-        TabButtonUI.OnEventPressed += Show;
+        TabButtonUI.OnEventPressed += ToggleShow;
     }
 
     private void OnDisable()
     {
-        GameManager.OnStateMorning -= DisplayLargeEvent;
+        //GameManager.OnStateMorning -= DisplayLargeEvent;
+        GameManager.OnStateMorning -= Show;
         GameManager.OnStateNight -= ClearEventResults;
-        TabButtonUI.OnEventPressed -= Show;
+        TabButtonUI.OnEventPressed -= ToggleShow;
     }
 
     // =================== UI ===================
+    private void ToggleShow()
+    {
+        _eventPreviewPage.SetActive(!_eventPreviewPage.activeSelf);
+    }
+
     public void Show()
     {
         _eventPreviewPage.SetActive(true);

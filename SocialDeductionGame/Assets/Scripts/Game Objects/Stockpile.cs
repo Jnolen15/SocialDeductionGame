@@ -7,6 +7,7 @@ using TMPro;
 public class Stockpile : NetworkBehaviour, ICardPlayable
 {
     // ================== Refrences ==================
+    [SerializeField] private GameObject _saboNotif;
     [SerializeField] private GameObject _numCardsPannel;
     [SerializeField] private TextMeshProUGUI _numCards;
     [SerializeField] private ParticleSystem _dustFX;
@@ -46,12 +47,20 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     private void SetNumVisible()
     {
         if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
+        {
             _numCardsPannel.SetActive(true);
+            _saboNotif.SetActive(true);
+        }
     }
 
     private void UpdateCardsText(int prev, int next)
     {
         _numCards.text = next.ToString();
+    }
+
+    public void HideSaboNotif()
+    {
+        _saboNotif.SetActive(false);
     }
 
     // ================== Interface ==================
