@@ -11,6 +11,8 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private Transform _cardZone;
     [SerializeField] private GameObject _forageButton;
     [SerializeField] private GameObject _totemWarning;
+    [SerializeField] private GameObject _debuffWarning;
+    [SerializeField] private GameObject _buffWarning;
     [SerializeField] private TextMeshProUGUI _threatLevelText;
     [SerializeField] private TextMeshProUGUI _dangerText;
     [SerializeField] private Image _dangerIcon;
@@ -166,10 +168,17 @@ public class ForageUI : MonoBehaviour
 
     public void UpdateTotemWarning(bool totemActive)
     {
-        if (totemActive)
-            _totemWarning.SetActive(true);
-        else
-            _totemWarning.SetActive(false);
+        _totemWarning.SetActive(totemActive);
+    }
+
+    public void UpdateDebuffWarning(bool debuffActive)
+    {
+        _debuffWarning.SetActive(debuffActive);
+    }
+    
+    public void UpdateBuffWarning(bool buffActive)
+    {
+        _buffWarning.SetActive(buffActive);
     }
 
     public void PunchCard(GameObject card, float size, float duration)

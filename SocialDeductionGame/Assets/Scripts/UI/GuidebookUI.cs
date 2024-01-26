@@ -19,6 +19,7 @@ public class GuidebookUI : MonoBehaviour
         Debug.Log("Guidebook setup");
 
         TabButtonUI.OnHelpPressed += ToggleGuidebook;
+        GameManager.OnStateChange += StateClose;
 
         _uiElements.SetActive(false);
     }
@@ -26,6 +27,7 @@ public class GuidebookUI : MonoBehaviour
     private void OnDestroy()
     {
         TabButtonUI.OnHelpPressed -= ToggleGuidebook;
+        GameManager.OnStateChange -= StateClose;
     }
 
     // ================== UI ==================
@@ -38,6 +40,11 @@ public class GuidebookUI : MonoBehaviour
             Show();
         else
             Hide();
+    }
+
+    private void StateClose(GameManager.GameState prev, GameManager.GameState cur)
+    {
+        Hide();
     }
 
     public void Show()

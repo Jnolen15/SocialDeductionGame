@@ -36,7 +36,7 @@ public class CardHighlight : MonoBehaviour
     // ================== Function ==================
     private void OnCardHighlighted(Card cardHighlighted)
     {
-        Debug.Log("OnCardHighlighted", gameObject);
+        //Debug.Log("OnCardHighlighted", gameObject);
 
         if (!cardHighlighted.HasAnyTag(_playableTag) && !_acceptAnyTag)
             return;

@@ -296,6 +296,16 @@ public class Forage : NetworkBehaviour, ICardPicker
         _forageUI.UpdateTotemWarning(_netTotemActive.Value);
     }
 
+    private void UpdateDebuffUI(bool eventDebuffed)
+    {
+        _forageUI.UpdateDebuffWarning(eventDebuffed);
+    }
+
+    private void UpdateBuffUI(bool eventBuffed)
+    {
+        _forageUI.UpdateBuffWarning(eventBuffed);
+    }
+
     private void ResetDangerLevel()
     {
         if (!IsServer)
@@ -364,7 +374,9 @@ public class Forage : NetworkBehaviour, ICardPicker
 
     private void SendDebuffedEvent(bool prev, bool current)
     {
-        if(current)
+        UpdateDebuffUI(current);
+
+        if (current)
             OnLocationDebuffEnabled?.Invoke(_locationName);
         else
             OnLocationDebuffDisabled?.Invoke(_locationName);
@@ -384,7 +396,9 @@ public class Forage : NetworkBehaviour, ICardPicker
 
     private void SendBuffedEvent(bool prev, bool current)
     {
-        if(current)
+        UpdateBuffUI(current);
+
+        if (current)
             OnLocationBuffEnabled?.Invoke(_locationName);
         else
             OnLocationBuffDisabled?.Invoke(_locationName);

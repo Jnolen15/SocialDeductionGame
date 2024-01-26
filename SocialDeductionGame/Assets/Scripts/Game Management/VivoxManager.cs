@@ -305,7 +305,7 @@ public class VivoxManager : MonoBehaviour
     #region Other
     public void SetTransmissionAll()
     {
-        Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to all");
+        //Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to all");
         LoginSession.SetTransmissionMode(TransmissionMode.All);
 
         /*foreach (ChannelId id in LoginSession.TransmittingChannels)
@@ -316,7 +316,7 @@ public class VivoxManager : MonoBehaviour
 
     public void SetTransmissionChannel(ChannelSeshName channelName)
     {
-        Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to single " + channelName);
+        //Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to single " + channelName);
         if(channelName == ChannelSeshName.World)
         {
             LoginSession.SetTransmissionMode(TransmissionMode.Single, _worldChannelSession.Channel);
@@ -341,7 +341,7 @@ public class VivoxManager : MonoBehaviour
 
     public void SetTransmissionNone()
     {
-        Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to none");
+        //Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to none");
         LoginSession.SetTransmissionMode(TransmissionMode.None);
     }
 

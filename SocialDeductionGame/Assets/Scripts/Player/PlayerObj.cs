@@ -168,7 +168,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public void ToggleReadyIconIconOff(GameManager.GameState prev, GameManager.GameState current)
     {
-        Debug.Log("Toggling ready icon off");
+        //Debug.Log("Toggling ready icon off");
         _netIsReady.Value = false;
     }
 
@@ -184,7 +184,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public void ToggleCampfireIconOff()
     {
-        Debug.Log("Toggling campfire icon off");
+        //Debug.Log("Toggling campfire icon off");
         _netTookFromFire.Value = false;
     }
 
@@ -203,7 +203,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public void ToggleSpeakingIconOff(VivoxManager.ChannelSeshName channel)
     {
-        Debug.Log("Toggling speaking icon off");
+        //Debug.Log("Toggling speaking icon off");
         _netSpeaking.Value = false;
     }
 
