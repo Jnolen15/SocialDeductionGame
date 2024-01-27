@@ -71,7 +71,6 @@ public class Forage : NetworkBehaviour, ICardPicker
     {
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
         _cardDropTable.ValidateTable();
-        _cardDropTable.VerifyCards();
     }
 
     private void OnDisable()
@@ -436,7 +435,7 @@ public class Forage : NetworkBehaviour, ICardPicker
 
     private void ClearBuffs()
     {
-        Debug.Log(gameObject.name + " clearing buffs");
+        Debug.Log(_locationName + " clearing buffs");
         _netEventDebuffed.Value = false;
         _netEventBuffed.Value = false;
     }

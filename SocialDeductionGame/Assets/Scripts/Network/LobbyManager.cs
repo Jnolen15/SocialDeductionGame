@@ -546,8 +546,14 @@ public class LobbyManager : MonoBehaviour
 
     public async Task<List<Player>> GetLobbyPlayerListAsync()
     {
+        if (_joinedLobby == null)
+            return null;
+
         // Update lobby
         _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+
+        if (_joinedLobby == null)
+            return null;
 
         PrintPlayers(_joinedLobby);
 

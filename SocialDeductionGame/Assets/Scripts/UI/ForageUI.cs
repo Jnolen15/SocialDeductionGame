@@ -22,6 +22,7 @@ public class ForageUI : MonoBehaviour
     [SerializeField] private Color _highColor = new Color32(206, 60, 24, 255);
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
+    [SerializeField] private GameObject _cardbackground;
     [SerializeField] private GameObject _takeNoneButton;
     [SerializeField] private CanvasGroup _clawMarks;
     [SerializeField] private PlayRandomSound _randSound;
@@ -72,6 +73,7 @@ public class ForageUI : MonoBehaviour
     public void ShowCards()
     {
         _forageButton.SetActive(false);
+        _cardbackground.SetActive(true);
         _takeNoneButton.SetActive(true);
         _cardZone.gameObject.SetActive(true);
     }
@@ -79,6 +81,7 @@ public class ForageUI : MonoBehaviour
     public void HideCards()
     {
         _forageButton.SetActive(true);
+        _cardbackground.SetActive(false);
         _takeNoneButton.SetActive(false);
         _cardZone.gameObject.SetActive(false);
     }
@@ -106,12 +109,17 @@ public class ForageUI : MonoBehaviour
 
     private IEnumerator DealCardObjectsAnimated(List<CanvasGroup> cardObjs)
     {
+        bool hadHazard = false;
+
         foreach (CanvasGroup cardObj in cardObjs)
         {
             cardObj.DOFade(1, 0.2f);
 
             if(cardObj.tag == "HazardCard")
+            {
                 PunchCard(cardObj.gameObject, 0.3f, 0.6f);
+                hadHazard = true;
+            }
             else
                 PunchCard(cardObj.gameObject, 0.2f, 0.4f);
 
@@ -119,6 +127,11 @@ public class ForageUI : MonoBehaviour
 
             yield return new WaitForSeconds(0.1f);
         }
+
+        if(hadHazard)
+            yield return new WaitForSeconds(0.6f);
+        else
+            yield return new WaitForSeconds(0.4f);
 
         foreach (CanvasGroup cardObj in cardObjs)
             cardObj.blocksRaycasts = true;

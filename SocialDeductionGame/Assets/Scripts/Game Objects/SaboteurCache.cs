@@ -30,7 +30,6 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
     private void Start()
     {
         _cardDropTable.ValidateTable();
-        _cardDropTable.VerifyCards();
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
 
         _localTeam = PlayerConnectionManager.Instance.GetLocalPlayerTeam();

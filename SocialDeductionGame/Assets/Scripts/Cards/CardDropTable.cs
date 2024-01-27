@@ -79,6 +79,9 @@ public class CardDropTable
 
 	public void VerifyCards()
     {
+		if (!CardDatabase.Instance)
+			return;
+
 		// Verify that all card IDs in the list are in the card database
 		foreach (CardDropEntry cardDrop in CardDrops)
 		{

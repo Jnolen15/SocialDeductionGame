@@ -12,7 +12,7 @@ public class CharacterSelectManager : NetworkBehaviour
     private Transform _currentSelectedModel;
     [SerializeField] private List<Material> _characterMatList = new();
     [SerializeField] private GameObject _watchVisual;
-    [SerializeField] private TextMeshProUGUI _watchColorName = new();
+    [SerializeField] private TextMeshProUGUI _watchColorName;
     [SerializeField] private List<WatchColors> _watchColorList = new();
 
     // ================== Variables ==================
