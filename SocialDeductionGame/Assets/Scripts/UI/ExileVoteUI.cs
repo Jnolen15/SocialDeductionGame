@@ -8,6 +8,7 @@ public class ExileVoteUI : MonoBehaviour
 {
     // ================== Refrences / Variables ==================
     [SerializeField] private GameObject _book;
+    [SerializeField] private TextMeshProUGUI _calledByNameText;
     [SerializeField] private Transform _voteArea;
     [SerializeField] private GameObject _exileVotePrefab;
     [SerializeField] private Image _voteTimerFill;
@@ -58,9 +59,11 @@ public class ExileVoteUI : MonoBehaviour
         }
     }
 
-    public void UpdateExileUI()
+    public void UpdateExileUI(string calledByName)
     {
         Show();
+
+        _calledByNameText.text = calledByName;
 
         // Reset vote objects
         foreach (Transform exilevote in _voteArea)

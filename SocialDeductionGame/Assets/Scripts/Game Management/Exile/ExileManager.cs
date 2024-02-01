@@ -211,13 +211,13 @@ public class ExileManager : NetworkBehaviour
         }
         else
         {
-            StartExileServerRpc();
+            StartExileServerRpc(PlayerConnectionManager.Instance.GetLocalPlayersID());
         }
     }
 
     // ~~~~~~ Exile Function ~~~~~~
     [ServerRpc(RequireOwnership = false)]
-    public void StartExileServerRpc(ServerRpcParams serverRpcParams = default)
+    public void StartExileServerRpc(ulong calledByID, ServerRpcParams serverRpcParams = default)
     {
         if (_exileVoteStarted)
         {
@@ -243,11 +243,11 @@ public class ExileManager : NetworkBehaviour
         _netExileVoteTimer.Value = _exileVoteTimerMax;
 
         // Show UI
-        ShowExileUIClientRpc();
+        ShowExileUIClientRpc(calledByID);
     }
 
     [ClientRpc]
-    public void ShowExileUIClientRpc()
+    public void ShowExileUIClientRpc(ulong calledByID)
     {
         // Dont let dead players vote
         if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
@@ -256,7 +256,7 @@ public class ExileManager : NetworkBehaviour
             return;
         }
 
-        _exileUI.UpdateExileUI();
+        _exileUI.UpdateExileUI(PlayerConnectionManager.Instance.GetPlayerNameByID(calledByID));
     }
 
     public void SubmitVote(ulong playerID, ulong VotedID)
