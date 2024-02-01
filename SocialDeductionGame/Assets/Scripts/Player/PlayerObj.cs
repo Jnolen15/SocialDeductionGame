@@ -123,8 +123,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
         if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs
                 && GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Saboteurs)
         {
-            if(!IsOwner)
-                _namePlate.color = Color.red;
+            //if (!IsOwner)
+            _namePlate.color = Color.red;
 
             _saboIcon.SetActive(true);
         }
@@ -134,8 +134,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     {
         _namePlate.text = next.ToString();
 
-        if (IsOwner)
-            _namePlate.color = Color.green;
+        //if (IsOwner)
+        //    _namePlate.color = Color.green;
     }
 
     private void OnLivingChanged(bool prev, bool next)
@@ -195,7 +195,7 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
     public void ToggleSpeakingIconActive(VivoxManager.ChannelSeshName channel)
     {
-        if (channel == VivoxManager.ChannelSeshName.Sabo)
+        if (channel == VivoxManager.ChannelSeshName.Sabo || channel == VivoxManager.ChannelSeshName.Death)
             return;
 
         _netSpeaking.Value = true;

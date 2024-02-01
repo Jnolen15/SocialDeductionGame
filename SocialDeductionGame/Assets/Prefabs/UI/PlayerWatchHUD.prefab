@@ -318,6 +318,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4024783060936112724}
   - component: {fileID: -7496973952662677558}
+  - component: {fileID: 3295227356158811686}
   - component: {fileID: 4455444847191946156}
   m_Layer: 5
   m_Name: PlayerWatchHUD
@@ -376,6 +377,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e7be1aa55007c7b46b4c40a33f2d05f0, type: 2}
   - {fileID: 11400000, guid: e28ab11295bcb964cbcc185785817cf6, type: 2}
   - {fileID: 11400000, guid: 369bbc1ec07c0ba44b67106b991d3ce7, type: 2}
+  _watchCanvasGroup: {fileID: 3295227356158811686}
   _flashDuration: 0.2
   _flashPause: 1
   _nameText: {fileID: 8519965513489095269}
@@ -420,6 +422,18 @@ MonoBehaviour:
   _beepSFX: {fileID: 8300000, guid: 69bd552463488b24e84f8efa3a15e93c, type: 3}
   _readySFX: {fileID: 8300000, guid: b72860f1dab338f468428a4b06d3f8de, type: 3}
   _flatlineSFX: {fileID: 8300000, guid: 88cc42f12b4b5b346ae713b95b03a802, type: 3}
+--- !u!225 &3295227356158811686
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 456700422824792403}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!82 &4455444847191946156
 AudioSource:
   m_ObjectHideFlags: 0

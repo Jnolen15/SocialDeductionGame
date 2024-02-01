@@ -18,6 +18,7 @@ public class WatchHUD : MonoBehaviour
     [SerializeField] private WatchColors _watchColors;
     [SerializeField] private List<WatchColors> _watchColorList;
     [Header("UI Params")]
+    [SerializeField] private CanvasGroup _watchCanvasGroup;
     [SerializeField] private float _flashDuration;
     [SerializeField] private float _flashPause;
     private float _curFlashTime;
@@ -98,6 +99,7 @@ public class WatchHUD : MonoBehaviour
         GameManager.OnStateChange += UpdateStateUI;
         GameManager.OnStateChange += EnableReadyButton;
         GameManager.OnStateChange += OnStateChange;
+        GameManager.OnGameEnd += OnGameEnd;
         PlayerConnectionManager.OnPlayerReady += Ready;
         PlayerConnectionManager.OnPlayerUnready += Unready;
     }
@@ -121,6 +123,7 @@ public class WatchHUD : MonoBehaviour
         GameManager.OnStateChange -= UpdateStateUI;
         GameManager.OnStateChange -= EnableReadyButton;
         GameManager.OnStateChange -= OnStateChange;
+        GameManager.OnGameEnd -= OnGameEnd;
         PlayerConnectionManager.OnPlayerReady -= Ready;
         PlayerConnectionManager.OnPlayerUnready -= Unready;
     }
@@ -354,6 +357,12 @@ public class WatchHUD : MonoBehaviour
 
         // Play SFX
         _audioSource.PlayOneShot(_flatlineSFX);
+    }
+
+    private void OnGameEnd(bool survivorWin)
+    {
+        _watchCanvasGroup.alpha = 0;
+        _watchCanvasGroup.interactable = false;
     }
     #endregion
 

@@ -10,6 +10,7 @@ public class VivoxClient : NetworkBehaviour
     [SerializeField] private Vector3 _cachedPos;
     [SerializeField] private bool _deathChannel;
     [SerializeField] private bool _saboChannel;
+    private bool _gameOver;
     private PlayerData _playerData;
 
     public delegate void SpeakingAction(VivoxManager.ChannelSeshName channelName);
@@ -28,6 +29,7 @@ public class VivoxClient : NetworkBehaviour
             PlayerHealth.OnDeath += TransitionDeathSpeak;
             VivoxManager.OnDeathChannelJoined += JoinedDeathChannel;
             GameManager.OnStateIntro += OnIntro;
+            GameManager.OnGameEnd += OnGameEnd;
         }
         else
         {
@@ -49,6 +51,7 @@ public class VivoxClient : NetworkBehaviour
         PlayerHealth.OnDeath -= TransitionDeathSpeak;
         VivoxManager.OnDeathChannelJoined -= JoinedDeathChannel;
         GameManager.OnStateIntro -= OnIntro;
+        GameManager.OnGameEnd -= OnGameEnd;
     }
 
     // Sometimes players do not disconnect from lobby VC in time before game starts
@@ -64,6 +67,12 @@ public class VivoxClient : NetworkBehaviour
         
         if (_playerData.GetPlayerTeam() == PlayerData.Team.Saboteurs)
             JoinSaboChannel();
+    }
+
+    private void OnGameEnd(bool survivorWin)
+    {
+        _gameOver = true;
+        _deathChannel = false;
     }
     #endregion
 
@@ -140,6 +149,9 @@ public class VivoxClient : NetworkBehaviour
 
     private void JoinedDeathChannel()
     {
+        if (_gameOver)
+            return;
+
         _deathChannel = true;
         Debug.Log("<color=green>VIVOX: </color>Now speaking in death channel");
     }

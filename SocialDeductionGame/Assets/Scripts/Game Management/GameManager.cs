@@ -355,7 +355,8 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log($"<color=yellow>SERVER: </color>Testing Survivor Win. Survivors living: {numLivingSurvivors} Saboteurs living: {numLivingSaboteurs}");
 
-        if (_netDay.Value >= _gameRules.NumDaysToWin)
+        // Check if its days to win -1 because it checks before updating day
+        if (_netDay.Value >= _gameRules.NumDaysToWin-1)
         {
             Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived. Survivor Win!");
             return true; // WIN
