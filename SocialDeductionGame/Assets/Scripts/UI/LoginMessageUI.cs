@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class LoginMessageUI : MonoBehaviour
 {
     // ============== Variables ==============
+    [SerializeField] private TextMeshProUGUI _message;
+    [SerializeField] private GameObject _returnToMain;
     private bool _lobbyLoginComplete;
     private bool _vivoxLoginComplete;
 
@@ -14,6 +17,8 @@ public class LoginMessageUI : MonoBehaviour
         LobbyManager.OnAlreadyLoggedIn += Hide;
         LobbyManager.OnLoginComplete += LobbyLoginSuccess;
         VivoxManager.OnLoginSuccess += VivoxLoginSuccess;
+        LobbyManager.OnFailLogin += LobbyLoginFail;
+        LobbyManager.OnFailedLobbyRefresh += LobbyFetchFail;
     }
 
     private void OnDestroy()
@@ -21,6 +26,8 @@ public class LoginMessageUI : MonoBehaviour
         LobbyManager.OnAlreadyLoggedIn -= Hide;
         LobbyManager.OnLoginComplete -= LobbyLoginSuccess;
         VivoxManager.OnLoginSuccess -= VivoxLoginSuccess;
+        LobbyManager.OnFailLogin -= LobbyLoginFail;
+        LobbyManager.OnFailedLobbyRefresh -= LobbyFetchFail;
     }
 
     // ============== UI Functions ==============
@@ -49,13 +56,29 @@ public class LoginMessageUI : MonoBehaviour
         CheckComplete();
     }
 
+    private void LobbyLoginFail(string reason)
+    {
+        Show();
+
+        _message.text = reason;
+        _returnToMain.SetActive(true);
+    }
+    
+    private void LobbyFetchFail()
+    {
+        Show();
+
+        _message.text = "Failed to fetch lobbies. Lost connection.";
+        _returnToMain.SetActive(true);
+    }
+
     private void Show()
     {
-        gameObject.SetActive(true);
+        this.gameObject.SetActive(true);
     }
 
     private void Hide()
     {
-        gameObject.SetActive(false);
+        this.gameObject.SetActive(false);
     }
 }

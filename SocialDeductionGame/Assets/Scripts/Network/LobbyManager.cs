@@ -55,6 +55,10 @@ public class LobbyManager : MonoBehaviour
     public static event LobbyAction OnFailCodeJoin;
     public static event LobbyAction OnLoginComplete;
     public static event LobbyAction OnAlreadyLoggedIn;
+    public static event LobbyAction OnFailedLobbyRefresh;
+
+    public delegate void LobbyStringAction(string reason);
+    public static event LobbyStringAction OnFailLogin;
 
     public delegate void LobbyListAction(List<Lobby> lobbyList);
     public static event LobbyListAction OnLobbyListChanged;
@@ -79,6 +83,7 @@ public class LobbyManager : MonoBehaviour
 
     private async void InitializeUnityAuthentication()
     {
+        // Initialize unity services
         if(UnityServices.State != ServicesInitializationState.Initialized)
         {
             InitializationOptions initializationOptions = new();
@@ -92,17 +97,43 @@ public class LobbyManager : MonoBehaviour
             // Set environment
             initializationOptions.SetEnvironmentName("demo");
 
-            await UnityServices.InitializeAsync(initializationOptions);
-
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-
-            VivoxManager.Instance.VivoxLogin();
-
-            OnLoginComplete?.Invoke();
+            try
+            {
+                await UnityServices.InitializeAsync(initializationOptions);
+            }
+            catch (System.Exception e)
+            {
+                OnFailLogin?.Invoke("Failed to initialize unity services");
+                Debug.Log("Failed to initialize unity services");
+                throw e;
+            }
         } else
         {
-            OnAlreadyLoggedIn?.Invoke();
             Debug.Log("Unity Services already initialized!");
+        }
+
+        // Sign in with authentication service and vivox
+        if (!AuthenticationService.Instance.IsSignedIn)
+        {
+            try
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+                VivoxManager.Instance.VivoxLogin();
+            }
+            catch (System.Exception e)
+            {
+                OnFailLogin?.Invoke("Authentication or Vivox login failure");
+                Debug.Log("Authentication or Vivox login failure");
+                throw e;
+            }
+
+            OnLoginComplete?.Invoke();
+        }
+        else
+        {
+            OnAlreadyLoggedIn?.Invoke();
+            Debug.Log("Already Logged in!");
         }
     }
     #endregion
@@ -215,9 +246,9 @@ public class LobbyManager : MonoBehaviour
         catch (LobbyServiceException e)
         {
             Debug.LogError(e);
+
+            OnFailedLobbyRefresh?.Invoke();
         }
-
-
     }
 
     public async void CreateLobby(LobbyData lobbyData)

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class HostDisconnectedUI : MonoBehaviour
+public class DisconnectionUI : MonoBehaviour
 {
     // =================== Refrences ===================
-    [SerializeField] private GameObject _panel;
+    [SerializeField] private GameObject _hostDisconnectPanel;
+    [SerializeField] private GameObject _playerDisconnectPanel;
 
     // =================== Setup ===================
     private void Start()
@@ -17,15 +18,22 @@ public class HostDisconnectedUI : MonoBehaviour
     private void OnDisable()
     {
         if(NetworkManager.Singleton != null)
+        {
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnDisconnectCallback;
+        }
     }
 
     // =================== UI Functions ===================
+    private void OnTransportFailCallback()
+    {
+        ShowPlayerDisconnect();
+    }
+
     private void OnDisconnectCallback(ulong clientID)
     {
         // Server host disconnected
         if (clientID == NetworkManager.ServerClientId)
-            Show();
+            ShowHostDisconnect();
     }
 
     public void ReturnToMainMenu()
@@ -47,13 +55,18 @@ public class HostDisconnectedUI : MonoBehaviour
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
     }
 
-    private void Show()
+    private void ShowPlayerDisconnect()
     {
-        _panel.SetActive(true);
+        _playerDisconnectPanel.SetActive(true);
     }
 
-    private void Hide()
+    private void ShowHostDisconnect()
     {
-        _panel.SetActive(false);
+        _hostDisconnectPanel.SetActive(true);
+    }
+
+    private void HideHostDisconnect()
+    {
+        _hostDisconnectPanel.SetActive(false);
     }
 }
