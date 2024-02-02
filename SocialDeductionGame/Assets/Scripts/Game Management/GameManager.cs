@@ -265,6 +265,9 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
+        // If a timer was paused, reset pause duration
+        _pauseTimer = 0;
+
         // Progress to next state, looping back to morning if day over
         if (_netCurrentGameState.Value == GameState.MorningTransition)
             _netCurrentGameState.Value = GameState.Morning;
