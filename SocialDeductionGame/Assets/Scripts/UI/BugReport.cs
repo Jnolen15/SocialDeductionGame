@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -48,12 +50,33 @@ public class BugReport : MonoBehaviour
     IEnumerator SubmitBugReport(string str)
     {
         WWWForm form = new WWWForm();
+        // Response
         form.AddField("entry.1058178460", str);
+
+        // Log File        
+        form.AddField("entry.1238921461", ReadPlayerLogFile());
 
         UnityWebRequest www = UnityWebRequest.Post(_url, form);
 
         Submitted();
 
         yield return www.SendWebRequest();
+    }
+
+    string ReadPlayerLogFile()
+    {
+        string logFilePath = Path.Combine(Application.persistentDataPath, "Player.log");
+
+        try
+        {
+            using FileStream fileStream = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using StreamReader streamReader = new StreamReader(fileStream);
+            return streamReader.ReadToEnd();
+        }
+        catch (IOException ex)
+        {
+            //Debug.LogError($"Error reading log file: {ex.Message}");
+            return $"Error reading log file: {ex.Message}";
+        }
     }
 }
