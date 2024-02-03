@@ -14,6 +14,7 @@ using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Vivox;
 using VivoxUnity;
+using Unity.Services.Analytics;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -100,6 +101,15 @@ public class LobbyManager : MonoBehaviour
             try
             {
                 await UnityServices.InitializeAsync(initializationOptions);
+                Debug.Log("unity Services Initialized");
+
+                if (PlayerPrefs.GetInt("AnalyticsConsent") == 1)
+                {
+                    Debug.Log("Analytics Consent provided, starting collection");
+                    AnalyticsService.Instance.StartDataCollection();
+                }
+                else
+                    Debug.Log("Analytics Consent denied");
             }
             catch (System.Exception e)
             {
@@ -118,6 +128,7 @@ public class LobbyManager : MonoBehaviour
             try
             {
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                Debug.Log("AuthenticationService sign in complete");
 
                 VivoxManager.Instance.VivoxLogin();
             }
