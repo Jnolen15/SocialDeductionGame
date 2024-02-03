@@ -103,6 +103,9 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     [ServerRpc(RequireOwnership = false)]
     public void AddFoodServerRpc(int servings)
     {
+        // Track Analytics
+        AnalyticsTracker.Instance.TrackMealsCooked(servings);
+
         _netServingsStored.Value += servings;
         PortionsAddedVFXClientRpc(servings);
     }
@@ -115,6 +118,9 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     [ServerRpc(RequireOwnership = false)]
     public void AddPoisonedFoodServerRpc(int servings)
     {
+        // Track Analytics
+        AnalyticsTracker.Instance.TrackMealsPoisoned();
+
         _netIsPoisoned.Value = true;
         _netServingsStored.Value += servings;
         PoisonAddedVFXClientRpc(servings);

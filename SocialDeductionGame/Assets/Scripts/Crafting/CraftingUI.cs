@@ -95,6 +95,10 @@ public class CraftingUI : MonoBehaviour
         {
             Debug.Log("Crafting Success!");
 
+            // Track Analytics
+            int curDay = GameManager.Instance.GetCurrentDay();
+            AnalyticsTracker.Instance.TrackItemsCrafted(curDay, _currentBlueprint.GetCardID());
+
             // Give crafted card
             _cardManager.GiveCard(_currentBlueprint.GetCardID());
         }

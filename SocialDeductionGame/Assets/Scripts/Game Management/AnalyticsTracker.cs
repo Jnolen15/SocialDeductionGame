@@ -76,6 +76,39 @@ public class AnalyticsTracker : MonoBehaviour
                 };
         AnalyticsService.Instance.RecordEvent(totemEvent);
     }
+    
+    public void TrackTotemDeactivated(int day)
+    {
+        CustomEvent totemEvent = new CustomEvent("TotemDeactivated")
+                {
+                    { "EndingDay", day },
+                };
+        AnalyticsService.Instance.RecordEvent(totemEvent);
+    }
+
+    public void TrackMealsPoisoned()
+    {
+        AnalyticsService.Instance.RecordEvent("MealPoisoned");
+    }
+
+    public void TrackMealsCooked(int portions)
+    {
+        CustomEvent campfireEvent = new CustomEvent("MealsCooked")
+        {
+            { "Portions", portions },
+        };
+        AnalyticsService.Instance.RecordEvent(campfireEvent);
+    }
+
+    public void TrackItemsCrafted(int day, int cardID)
+    {
+        CustomEvent craftedEvent = new CustomEvent("ItemsCrafted")
+                {
+                    { "EndingDay", day },
+                    { "CardID", cardID },
+                };
+        AnalyticsService.Instance.RecordEvent(craftedEvent);
+    }
 
     public void TrackStockpileResult(bool wasSuccessful, bool earnedBonus, bool wasSabotaged)
     {

@@ -239,6 +239,13 @@ public class Totem : NetworkBehaviour, ICardPlayable
             _activeTotemEffects.SetActive(false);
             OnLocationTotemDisable?.Invoke(_locationName);
 
+            if (IsServer)
+            {
+                // Track analytics
+                int curDay = GameManager.Instance.GetCurrentDay();
+                AnalyticsTracker.Instance.TrackTotemDeactivated(curDay);
+            }
+
             SetStatusText($"Totem is on cooldown for {_netCooldown.Value} days.");
         }
     }
