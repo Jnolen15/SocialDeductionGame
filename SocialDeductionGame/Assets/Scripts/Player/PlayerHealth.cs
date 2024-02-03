@@ -123,6 +123,9 @@ public class PlayerHealth : NetworkBehaviour
         else
             OnHealthDecrease?.Invoke(ammount, mesage);
 
+        // Track Analytics
+        AnalyticsTracker.Instance.TrackPlayerTakeDamage(ammount, mesage);
+
         ModifyHealthServerRPC(ammount, true);
     }
 
@@ -149,7 +152,13 @@ public class PlayerHealth : NetworkBehaviour
 
         // Death Check
         if (_netCurrentHP.Value == 0)
+        {
             _netIsLiving.Value = false;
+
+            // Track Analytics
+            int day = GameManager.Instance.GetCurrentDay();
+            AnalyticsTracker.Instance.TrackPlayerDeath(day);
+        }
     }
 
     // called when _netIsLiving changes, triggers OnDeath event

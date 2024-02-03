@@ -287,7 +287,7 @@ public class LobbyManager : MonoBehaviour
             ConnectionManager.Instance.CreateGame();
             SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
 
-            AnalyticsService.Instance.RecordEvent("LobbyCreated");
+            AnalyticsTracker.Instance.TrackLobbyCreated();
 
             PrintPlayers(_joinedLobby);
         }
@@ -317,7 +317,7 @@ public class LobbyManager : MonoBehaviour
 
             ConnectionManager.Instance.JoinGame();
 
-            AnalyticsService.Instance.RecordEvent("LobbyQuickJoin");
+            AnalyticsTracker.Instance.TrackQuickJoin();
 
             PrintPlayers(_joinedLobby);
         }
@@ -350,7 +350,7 @@ public class LobbyManager : MonoBehaviour
 
             ConnectionManager.Instance.JoinGame();
 
-            AnalyticsService.Instance.RecordEvent("LobbyJoinWithCode");
+            AnalyticsTracker.Instance.TrackCodeJoin();
 
             PrintPlayers(_joinedLobby);
         }
@@ -383,7 +383,7 @@ public class LobbyManager : MonoBehaviour
 
             ConnectionManager.Instance.JoinGame();
 
-            AnalyticsService.Instance.RecordEvent("LobbyJoinWithID");
+            AnalyticsTracker.Instance.TrackIDJoin();
 
             PrintPlayers(_joinedLobby);
         }

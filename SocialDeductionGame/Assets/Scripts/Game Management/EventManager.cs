@@ -395,6 +395,9 @@ public class EventManager : NetworkBehaviour
         else if (attemptedSabotage)
             SufferingManager.Instance.ModifySuffering(1, 102, true);
 
+        // Track Analytics
+        AnalyticsTracker.Instance.TrackStockpileResult(_netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, attemptedSabotage);
+
         // Combine lists for clients
         List<int> goodCardIDList = new();
         goodCardIDList.AddRange(primaryCards);

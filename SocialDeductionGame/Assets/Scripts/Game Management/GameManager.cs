@@ -5,6 +5,7 @@ using Unity.Netcode;
 using TMPro;
 using System.Linq;
 using System;
+using Unity.Services.Analytics;
 
 public class GameManager : NetworkBehaviour
 {
@@ -132,6 +133,9 @@ public class GameManager : NetworkBehaviour
             _eveningTimerMax.Value = _eveningTimerMax.Value + 20;
             _nightTimerMax.Value = _nightTimerMax.Value + 10;
         }
+
+        // Track Analytics
+        AnalyticsTracker.Instance.TrackGameSettings(_gameRules.NumSaboteurs, _gameRules.NumDaysToWin, _gameRules.TimerLength.ToString());
     }
 
     private void OnDisable()
@@ -412,6 +416,11 @@ public class GameManager : NetworkBehaviour
 
         _gameOver = true;
         _netCurrentGameState.Value = GameState.GameOver;
+
+        // Record analyitic data
+        int numPlayers = PlayerConnectionManager.Instance.GetNumConnectedPlayers();
+        int numSabos = PlayerConnectionManager.Instance.GetNumSaboteurs();
+        AnalyticsTracker.Instance.TrackGameEnd(survivorWin, GetCurrentDay(), numPlayers, numSabos);
 
         SetGameOverClientRpc(survivorWin);
     }

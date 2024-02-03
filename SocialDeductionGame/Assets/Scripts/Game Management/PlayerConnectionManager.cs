@@ -243,7 +243,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         Debug.Log("<color=yellow>SERVER: </color> In Island Game Scene, spawning player prefabs", gameObject);
 
         // Spawn a player prefab for each connected player
-        foreach(ulong clientID in NetworkManager.Singleton.ConnectedClientsIds)
+        foreach (ulong clientID in NetworkManager.Singleton.ConnectedClientsIds)
         {
             Debug.Log("<color=yellow>SERVER: </color> Spawning prefab for client " + clientID, gameObject);
             GameObject playerObj = Instantiate(_playerPrefab);

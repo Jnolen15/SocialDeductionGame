@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using TMPro;
+using Unity.Services.Analytics;
 
 public class Totem : NetworkBehaviour, ICardPlayable
 {
@@ -223,6 +224,10 @@ public class Totem : NetworkBehaviour, ICardPlayable
             {
                 foreach (TotemSlot slot in _totemSlots)
                     slot.TotemActivatedServerRpc();
+
+                // Track analytics
+                int curDay = GameManager.Instance.GetCurrentDay();
+                AnalyticsTracker.Instance.TrackTotemActivated(curDay);
             }
         }
         // Set totem deactive

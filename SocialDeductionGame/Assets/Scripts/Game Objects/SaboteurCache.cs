@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using DG.Tweening;
+using Unity.Services.Analytics;
 
 public class SaboteurCache : LimitedTimeObject, ICardPicker
 {
@@ -68,6 +69,9 @@ public class SaboteurCache : LimitedTimeObject, ICardPicker
             }
         };
 
+        // Track analytics
+        int curDay = GameManager.Instance.GetCurrentDay();
+        AnalyticsTracker.Instance.TrackCacheOpen(curDay);
 
         OpenCacheClientRpc(clientRpcParams);
         SetCacheOpenedClientRpc();
