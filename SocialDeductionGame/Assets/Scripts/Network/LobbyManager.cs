@@ -287,6 +287,8 @@ public class LobbyManager : MonoBehaviour
             ConnectionManager.Instance.CreateGame();
             SceneLoader.LoadNetwork(SceneLoader.Scene.CharacterSelectScene);
 
+            AnalyticsService.Instance.RecordEvent("LobbyCreated");
+
             PrintPlayers(_joinedLobby);
         }
         catch (LobbyServiceException e)
@@ -314,6 +316,8 @@ public class LobbyManager : MonoBehaviour
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
             ConnectionManager.Instance.JoinGame();
+
+            AnalyticsService.Instance.RecordEvent("LobbyQuickJoin");
 
             PrintPlayers(_joinedLobby);
         }
@@ -346,6 +350,8 @@ public class LobbyManager : MonoBehaviour
 
             ConnectionManager.Instance.JoinGame();
 
+            AnalyticsService.Instance.RecordEvent("LobbyJoinWithCode");
+
             PrintPlayers(_joinedLobby);
         }
         catch (LobbyServiceException e)
@@ -376,6 +382,8 @@ public class LobbyManager : MonoBehaviour
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
 
             ConnectionManager.Instance.JoinGame();
+
+            AnalyticsService.Instance.RecordEvent("LobbyJoinWithID");
 
             PrintPlayers(_joinedLobby);
         }
