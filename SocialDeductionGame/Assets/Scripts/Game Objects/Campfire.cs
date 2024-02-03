@@ -6,7 +6,7 @@ using TMPro;
 
 public class Campfire : NetworkBehaviour, ICardPlayable
 {
-    // Variables
+    // ================== Variables ==================
     [SerializeField] private CardTag _cardTagAccepted;
     [SerializeField] private NetworkVariable<float> _netServingsStored = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netIsPoisoned = new(writePerm: NetworkVariableWritePermission.Server);
@@ -20,10 +20,13 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     }
     [SerializeField] private State _state;
 
-    // Refrences
+    // ================== Refrences ==================
     [SerializeField] private TextMeshProUGUI _servingsText;
     [SerializeField] private TextMeshPro _stateText;
     [SerializeField] private GameObject _foodMenu;
+    [SerializeField] private CanvasGroup _takeSmallButton;
+    [SerializeField] private CanvasGroup _takeMediumButton;
+    [SerializeField] private CanvasGroup _takelargeButton;
     [SerializeField] private GameObject _flameObj;
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private AudioClip _smallAdditionSFX;
@@ -37,6 +40,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
     public static event CampfireAction OnTookFromFire;
 
     // ================== Setup ==================
+    #region Setup
     private void Awake()
     {
         _netServingsStored.OnValueChanged += UpdateServingsText;
@@ -71,6 +75,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         // Always invoked the base 
         base.OnDestroy();
     }
+    #endregion
 
     // ================== Update ==================
     private void Update()
@@ -79,11 +84,31 @@ public class Campfire : NetworkBehaviour, ICardPlayable
             _takeBufferTimer -= Time.deltaTime;
     }
 
-    // ================== Text ==================
+    // ================== UI ==================
+    #region UI
     private void UpdateServingsText(float prev, float next)
     {
         _servingsText.text = next.ToString();
+
+        UpdateButtonCanvasGroups(next);
     }
+
+    private void UpdateButtonCanvasGroups(float servingsLeft)
+    {
+        _takeSmallButton.alpha = 1;
+        _takeMediumButton.alpha = 1;
+        _takelargeButton.alpha = 1;
+
+        if (servingsLeft < 1)
+            _takeSmallButton.alpha = 0.5f;
+
+        if (servingsLeft < 2)
+            _takeMediumButton.alpha = 0.5f;
+
+        if (servingsLeft < 4)
+            _takelargeButton.alpha = 0.5f;
+    }
+    #endregion
 
     // ================== Interface ==================
     public bool CanPlayCardHere(Card cardToPlay)
@@ -94,7 +119,8 @@ public class Campfire : NetworkBehaviour, ICardPlayable
         return false;
     }
 
-    // ================== Functions ==================
+    // ================== Add Food ==================
+    #region Add Food
     public void AddFood(int servings)
     {
         AddFoodServerRpc(servings);
@@ -163,6 +189,7 @@ public class Campfire : NetworkBehaviour, ICardPlayable
             _audioSource.PlayOneShot(_smallAdditionSFX);
         }
     }
+    #endregion
 
     // ================== State Management ==================
     #region State Management

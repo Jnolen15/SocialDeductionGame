@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 8335076610680574310}
   - component: {fileID: 4505071235582169000}
   - component: {fileID: 7938166355700787196}
+  - component: {fileID: 1452647005909312166}
   m_Layer: 6
   m_Name: TakeFour
   m_TagString: Untagged
@@ -270,6 +271,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!225 &1452647005909312166
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 990459948364351440}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1171379028990396266
 GameObject:
   m_ObjectHideFlags: 0
@@ -1982,6 +1995,7 @@ GameObject:
   - component: {fileID: 5477706080621863656}
   - component: {fileID: 7292797191198195758}
   - component: {fileID: 8754429727182579537}
+  - component: {fileID: 7725876572604278020}
   m_Layer: 6
   m_Name: TakeOne
   m_TagString: Untagged
@@ -2105,6 +2119,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!225 &7725876572604278020
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5161747149684331010}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5323995590566413203
 GameObject:
   m_ObjectHideFlags: 0
@@ -8049,6 +8075,7 @@ GameObject:
   - component: {fileID: 1069157716702433856}
   - component: {fileID: 4237707436712508036}
   - component: {fileID: 2767027641009736420}
+  - component: {fileID: 1899879418639782952}
   m_Layer: 6
   m_Name: TakeTwo
   m_TagString: Untagged
@@ -8172,6 +8199,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!225 &1899879418639782952
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7886381733319866445}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7910086278920997622
 GameObject:
   m_ObjectHideFlags: 0
@@ -9423,6 +9462,9 @@ MonoBehaviour:
   _servingsText: {fileID: 3823787713739006281}
   _stateText: {fileID: 8773767253166585118}
   _foodMenu: {fileID: 8773767252071637550}
+  _takeSmallButton: {fileID: 7725876572604278020}
+  _takeMediumButton: {fileID: 1899879418639782952}
+  _takelargeButton: {fileID: 1452647005909312166}
   _flameObj: {fileID: 7910086278920997622}
   _audioSource: {fileID: 2037083412430274536}
   _smallAdditionSFX: {fileID: 8300000, guid: 08e0bf092358d114880291f89f597ef7, type: 3}
