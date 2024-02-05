@@ -10,7 +10,7 @@ public class NightEventPicker : NetworkBehaviour
     [SerializeField] private GameObject _eventMenu;
     [SerializeField] private GameObject _eventSelectable;
     [SerializeField] private Transform _eventCardArea;
-    [SerializeField] private List<NightEventSelectable> _selectableEventList = new();
+    [SerializeField] private List<NightEventVoteCapsule> _selectableEventList = new();
 
     private int _currentSelectedEvent;
 
@@ -70,13 +70,13 @@ public class NightEventPicker : NetworkBehaviour
         foreach (int eventID in events)
         {
             GameObject eventCard = Instantiate(_eventSelectable, _eventCardArea);
-            eventCard.GetComponent<NightEventCardVisual>().Setup(eventID, PlayerConnectionManager.Instance.GetNumLivingPlayers());
-            AddToList(eventCard.GetComponent<NightEventSelectable>());
+            eventCard.GetComponent<NightEventVoteCapsule>().Setup(eventID, PlayerConnectionManager.Instance.GetNumLivingPlayers());
+            AddToList(eventCard.GetComponent<NightEventVoteCapsule>());
             Debug.Log("<color=blue>CLIENT: </color>Made new event card " + eventCard.name);
         }
     }
 
-    public void AddToList(NightEventSelectable eventSelectable)
+    public void AddToList(NightEventVoteCapsule eventSelectable)
     {
         _selectableEventList.Add(eventSelectable);
     }
@@ -113,7 +113,7 @@ public class NightEventPicker : NetworkBehaviour
         if (nightEventID == 0)
             return;
 
-        foreach (NightEventSelectable eventSelectable in _selectableEventList)
+        foreach (NightEventVoteCapsule eventSelectable in _selectableEventList)
             eventSelectable.Deselect();
 
         DeselectEventServerRpc(nightEventID);
@@ -132,7 +132,7 @@ public class NightEventPicker : NetworkBehaviour
     private void SetEventVotesClientRpc(int[] voteNums)
     {
         int i = 0;
-        foreach(NightEventSelectable eventSelectable in _selectableEventList)
+        foreach(NightEventVoteCapsule eventSelectable in _selectableEventList)
         {
             eventSelectable.UpdateVotes(voteNums[i]);
             i++;

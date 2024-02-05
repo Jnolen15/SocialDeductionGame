@@ -11,24 +11,26 @@ public class NightEventRecapUI : MonoBehaviour
     [SerializeField] private Color _goodColor;
     [SerializeField] private Color _badColor;
 
+    [Header("Reacp")]
+    [SerializeField] private GameObject _recapBook;
+    [SerializeField] private Transform _recapZone;
+
     [Header("Survivor Reacp")]
-    [SerializeField] private GameObject _survivorRecap;
-    [SerializeField] private Transform _survivorRecapZone;
+    [SerializeField] private GameObject _nightEventPage;
     [SerializeField] private NightEventCardVisual _eventCard;
     [SerializeField] private TextMeshProUGUI _resultText;
     [SerializeField] private TextMeshProUGUI _consequencesText;
 
     [Header("Sabotuer Reacp")]
-    [SerializeField] private GameObject _saborRecap;
-    [SerializeField] private Transform _saboRecapZone;
+    [SerializeField] private GameObject _eventVotePage;
 
     [Header("Night Recap Objs")]
     [SerializeField] private GameObject _genericRecapMessage;
+    [SerializeField] private GameObject _eventRecap;
     [SerializeField] private GameObject _hungerDrain;
     [SerializeField] private GameObject _starvation;
     [SerializeField] private GameObject _death;
 
-    private GameObject _recapObject;
     private PlayerData.Team _localTeam;
     private List<GameObject> _extraRecapObjects = new();
 
@@ -67,17 +69,15 @@ public class NightEventRecapUI : MonoBehaviour
         if (current == PlayerData.Team.Survivors)
         {
             _localTeam = PlayerData.Team.Survivors;
-            _recapObject = _survivorRecap;
+
+            _nightEventPage.SetActive(true);
+            _eventRecap.SetActive(true);
         }
         else
         {
             _localTeam = PlayerData.Team.Saboteurs;
-            _recapObject = _saborRecap;
 
-            // Move recap objects to survivor recap
-            _hungerDrain.transform.SetParent(_saboRecapZone);
-            _starvation.transform.SetParent(_saboRecapZone);
-            _death.transform.SetParent(_saboRecapZone);
+            _eventVotePage.SetActive(true);
         }
     }
     #endregion
@@ -86,7 +86,7 @@ public class NightEventRecapUI : MonoBehaviour
     #region Function
     public void OpenRecap()
     {
-        _recapObject.SetActive(true);
+        _recapBook.SetActive(true);
     }
 
     public void CloseRecap()
@@ -101,7 +101,7 @@ public class NightEventRecapUI : MonoBehaviour
         }
         _extraRecapObjects.Clear();
 
-        _recapObject.SetActive(false);
+        _recapBook.SetActive(false);
     }
 
     public void UpdateNightEvent(int eventID, int playerNum, bool passed, bool bonus)
@@ -122,6 +122,7 @@ public class NightEventRecapUI : MonoBehaviour
             {
                 _resultText.text = "Passed.";
                 _resultText.color = _goodColor;
+                _consequencesText.color = _neutralColor;
                 _consequencesText.text = "No consequences";
             }
         } else
@@ -181,14 +182,11 @@ public class NightEventRecapUI : MonoBehaviour
 
     private void ShowCustomEventMessage(string msg, Color color)
     {
-        GameObject recapMessage = Instantiate(_genericRecapMessage, _survivorRecapZone);
+        GameObject recapMessage = Instantiate(_genericRecapMessage, _recapZone);
         recapMessage.GetComponentInChildren<TextMeshProUGUI>().text = msg;
         recapMessage.GetComponentInChildren<TextMeshProUGUI>().color = color;
 
         _extraRecapObjects.Add(recapMessage);
-
-        if (_localTeam == PlayerData.Team.Saboteurs)
-            recapMessage.transform.SetParent(_saboRecapZone);
     }
     #endregion
 }

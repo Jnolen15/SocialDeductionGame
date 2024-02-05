@@ -47,6 +47,14 @@ public class LobbyManager : MonoBehaviour
     private LobbyData _joinedLobbyData;
     private ILobbyEvents _lobbyEvents;
 
+    [Header("Environment")]
+    [SerializeField] private UnityServicesEnvironment _enviromnet;
+    public enum UnityServicesEnvironment
+    {
+        production,
+        demo,
+    }
+
     public delegate void LobbyAction();
     public static event LobbyAction OnStartCreateLobby;
     public static event LobbyAction OnFailCreateLobby;
@@ -96,7 +104,9 @@ public class LobbyManager : MonoBehaviour
             }
 
             // Set environment
-            initializationOptions.SetEnvironmentName("demo");
+            Debug.Log("Using environment: " + _enviromnet.ToString());
+            initializationOptions.SetEnvironmentName(_enviromnet.ToString());
+            //initializationOptions.SetEnvironmentName("demo");
 
             try
             {
