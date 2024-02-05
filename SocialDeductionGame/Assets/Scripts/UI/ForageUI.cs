@@ -74,7 +74,7 @@ public class ForageUI : MonoBehaviour
     {
         _forageButton.SetActive(false);
         _cardbackground.SetActive(true);
-        _takeNoneButton.SetActive(true);
+        //_takeNoneButton.SetActive(true);
         _cardZone.gameObject.SetActive(true);
     }
 
@@ -135,6 +135,8 @@ public class ForageUI : MonoBehaviour
 
         foreach (CanvasGroup cardObj in cardObjs)
             cardObj.blocksRaycasts = true;
+
+        _takeNoneButton.SetActive(true);
     }
 
     public void ClearCards()
