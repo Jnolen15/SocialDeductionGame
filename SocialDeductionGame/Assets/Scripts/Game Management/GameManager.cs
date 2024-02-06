@@ -101,7 +101,7 @@ public class GameManager : NetworkBehaviour
         {
             PlayerConnectionManager.OnPlayerSetupComplete += PregameComplete;
             PlayerConnectionManager.OnAllPlayersReady += ProgressState;
-            PlayerConnectionManager.OnPlayerDied += CheckSaboteurWin;
+            PlayerConnectionManager.OnPlayerDied += OnPlayerDied;
 
             _gameRules = PlayerConnectionManager.Instance.GetGameRules();
             SetupGameRules();
@@ -146,7 +146,7 @@ public class GameManager : NetworkBehaviour
         {
             PlayerConnectionManager.OnPlayerSetupComplete -= PregameComplete;
             PlayerConnectionManager.OnAllPlayersReady -= ProgressState;
-            PlayerConnectionManager.OnPlayerDied -= CheckSaboteurWin;
+            PlayerConnectionManager.OnPlayerDied -= OnPlayerDied;
         }
     }
     #endregion
@@ -262,15 +262,25 @@ public class GameManager : NetworkBehaviour
         // Unready all players in case state progressed due to time
         PlayerConnectionManager.Instance.UnreadyAllPlayers();
 
-        // Win checking
-        if(_netCurrentGameState.Value == GameState.MorningTransition && CheckSurvivorWin())
-        {
-            EndGame(true);
-            return;
-        }
-
         // If a timer was paused, reset pause duration
         _pauseTimer = 0;
+
+        // Win checking
+        if (_netCurrentGameState.Value == GameState.MorningTransition)
+        {
+            // If players died in the night
+            if (CheckSaboteurWin())
+            {
+                EndGame(false);
+                return;
+            }
+            // If survivors made it to last day
+            else if (CheckSurvivorWin())
+            {
+                EndGame(true);
+                return;
+            }
+        }
 
         // Progress to next state, looping back to morning if day over
         if (_netCurrentGameState.Value == GameState.MorningTransition)
@@ -383,11 +393,21 @@ public class GameManager : NetworkBehaviour
         return false;
     }
 
+    private void OnPlayerDied()
+    {
+        // Dont end game during night
+        if (_netCurrentGameState.Value == GameState.Night)
+            return;
+
+        if (CheckSaboteurWin())
+            EndGame(false);
+    }
+
     // Check for game end via Saboteur win
-    private void CheckSaboteurWin()
+    private bool CheckSaboteurWin()
     {
         if (_dontTestWin || _gameOver)
-            return;
+            return false;
 
         int numLivingSurvivors = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors);
         int numLivingSaboteurs = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
@@ -398,15 +418,17 @@ public class GameManager : NetworkBehaviour
         if (PlayerConnectionManager.Instance.GetNumLivingPlayers() == 0)
         {
             Debug.Log("<color=yellow>SERVER: </color> All players have died, WIN!");
-            EndGame(false);
+            return true;
         }
 
         // If number of Saboteurs >= survivors
         if (numLivingSaboteurs >= numLivingSurvivors)
         {
             Debug.Log("<color=yellow>SERVER: </color> # of Saboteurs >= # of survivors, WIN!");
-            EndGame(false);
+            return true;
         }
+
+        return false;
     }
 
     private void EndGame(bool survivorWin)
