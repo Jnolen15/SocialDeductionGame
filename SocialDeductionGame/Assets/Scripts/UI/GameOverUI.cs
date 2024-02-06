@@ -12,6 +12,7 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private GameObject _panel;
     [SerializeField] private CanvasGroup _transitionPannel;
     [SerializeField] private TextMeshProUGUI _endScreenText;
+    [SerializeField] private GameObject _feedbackMenu;
 
     // =================== Setup ===================
     private void Awake()
@@ -55,6 +56,11 @@ public class GameOverUI : MonoBehaviour
         ConnectionManager.Instance.Shutdown();
 
         SceneLoader.Load(SceneLoader.Scene.MainMenu);
+    }
+
+    public void ShowFeedbackMenu()
+    {
+        _feedbackMenu.SetActive(true);
     }
 
     private void Show()

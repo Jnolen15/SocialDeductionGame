@@ -16,7 +16,6 @@ public class FeedbackForm : MonoBehaviour
     [SerializeField] private ToggleGroup _preferedPlayersToggle;
     [SerializeField] private ToggleGroup _preferedSabosToggle;
     [SerializeField] private TMP_InputField _reportField;
-    [SerializeField] private PlayerNamer _playerNamer;
     private string _url = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSdpq2tb7bDDeOYWss6Ry2gRUt8F29uuoL5miulWN2HxDC5OxA/formResponse";
 
     // ============== Function ==============
@@ -67,9 +66,7 @@ public class FeedbackForm : MonoBehaviour
             pss = toggle.name;
         }
 
-        string pName = "Player";
-        if (_playerNamer.GetPlayerName() != null)
-            pName = _playerNamer.GetPlayerName();
+        string pName = PlayerPrefs.GetString(PlayerNamer.KEY_PLAYERNAME);
 
         Debug.Log($"Submitting feedback: Player {pName} Enjoyment {ejs}, Undestanding {us}, Players {pps}, Sabos {pss}, Open {_reportField.text}");
 
