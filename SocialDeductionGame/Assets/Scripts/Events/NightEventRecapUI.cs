@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class NightEventRecapUI : MonoBehaviour
 {
@@ -32,6 +34,7 @@ public class NightEventRecapUI : MonoBehaviour
     [SerializeField] private GameObject _death;
 
     private PlayerData.Team _localTeam;
+    private List<CanvasGroup> _recapObjectsToAnimate = new();
     private List<GameObject> _extraRecapObjects = new();
 
     // ================== Setup ==================
@@ -87,6 +90,8 @@ public class NightEventRecapUI : MonoBehaviour
     public void OpenRecap()
     {
         _recapBook.SetActive(true);
+
+        StartCoroutine(AnimateEventObjects());
     }
 
     public void CloseRecap()
@@ -100,6 +105,8 @@ public class NightEventRecapUI : MonoBehaviour
             Destroy(_extraRecapObjects[i]);
         }
         _extraRecapObjects.Clear();
+
+        _recapObjectsToAnimate.Clear();
 
         _recapBook.SetActive(false);
     }
@@ -133,7 +140,46 @@ public class NightEventRecapUI : MonoBehaviour
             _consequencesText.text = nEvent.GetEventConsequences();
         }
     }
+    #endregion
 
+    #region Animate
+    private IEnumerator AnimateEventObjects()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        // Get objects to animate and set invisible
+        foreach (Transform child in _recapZone)
+        {
+            if (child.gameObject.activeSelf)
+            {
+                CanvasGroup eventObj = child.GetComponent<CanvasGroup>();
+
+                _recapObjectsToAnimate.Add(eventObj);
+
+                eventObj.alpha = 0;
+            }
+        }
+
+        yield return new WaitForSeconds(0.6f);
+
+        foreach (CanvasGroup eventObj in _recapObjectsToAnimate)
+        {
+            eventObj.DOFade(1, 0.2f);
+
+            PunchObj(eventObj.gameObject, 0.1f, 0.8f);
+
+            yield return new WaitForSeconds(0.8f);
+        }
+    }
+
+    public void PunchObj(GameObject eventObj, float size, float duration)
+    {
+        eventObj.transform.DOKill();
+        eventObj.transform.DOPunchScale(new Vector3(size, size, size), duration, 6, 0.8f);
+    }
+    #endregion
+
+    #region Recap Objects
     private void ShowHungerDrain()
     {
         _hungerDrain.SetActive(true);

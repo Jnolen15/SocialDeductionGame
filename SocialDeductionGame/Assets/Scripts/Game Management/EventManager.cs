@@ -104,10 +104,10 @@ public class EventManager : NetworkBehaviour
 
     public void ShowRecap()
     {
-        _nightEventRecap.OpenRecap();
-
         if (_localplayerTeam == PlayerData.Team.Survivors)
             _nightEventRecap.UpdateNightEvent(_netPreviousNightEventID.Value, _netNumEventPlayers.Value, _netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value);
+
+        _nightEventRecap.OpenRecap();
     }
     #endregion
 
