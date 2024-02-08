@@ -37,7 +37,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netTransitionTimer = new(writePerm: NetworkVariableWritePermission.Server);
-    private float _pauseTimer;
+    private NetworkVariable<float> _netPauseTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private bool _rescueEarly;
     private bool _gameOver;
 
@@ -212,9 +212,9 @@ public class GameManager : NetworkBehaviour
     private void RunTimer(NetworkVariable<float> timer)
     {
         // Pause Timer
-        if(_pauseTimer >= 0)
+        if(_netPauseTimer.Value >= 0)
         {
-            _pauseTimer -= Time.deltaTime;
+            _netPauseTimer.Value -= Time.deltaTime;
         }
         // Normal state timer
         else
@@ -241,7 +241,7 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log($"<color=yellow>SERVER: </color> Pausing {_netCurrentGameState.Value} timer for {time} seconds.");
 
-        _pauseTimer += time;
+        _netPauseTimer.Value += time;
     }
     #endregion
 
@@ -263,7 +263,7 @@ public class GameManager : NetworkBehaviour
         PlayerConnectionManager.Instance.UnreadyAllPlayers();
 
         // If a timer was paused, reset pause duration
-        _pauseTimer = 0;
+        _netPauseTimer.Value = 0;
 
         // Win checking
         if (_netCurrentGameState.Value == GameState.MorningTransition)
@@ -468,6 +468,14 @@ public class GameManager : NetworkBehaviour
     public int GetCurrentDay()
     {
         return _netDay.Value;
+    }
+
+    public bool GetTimerPaused()
+    {
+        if (_netPauseTimer.Value >= 0)
+            return true;
+
+        return false;
     }
 
     public float GetStateTimer()
