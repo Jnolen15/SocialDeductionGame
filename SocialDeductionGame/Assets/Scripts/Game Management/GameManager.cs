@@ -321,7 +321,7 @@ public class GameManager : NetworkBehaviour
                 break;
             case GameState.Afternoon:
                 if(IsServer) _netAfternoonTimer.Value = _afternoonTimerMax.Value;
-                _locationManager.ForceLocation(LocationManager.LocationName.Camp);
+                ReturnPlayerToCamp();
                 OnStateAfternoon?.Invoke();
                 break;
             case GameState.EveningTransition:
@@ -342,7 +342,7 @@ public class GameManager : NetworkBehaviour
                 if (IsServer) _netTransitionTimer.Value = _transitionTimerMax.Value;
                 break;
             case GameState.GameOver:
-                _locationManager.ForceLocation(LocationManager.LocationName.Camp);
+                ReturnPlayerToCamp();
                 OnStateGameEnd?.Invoke();
                 break;
         }
@@ -355,6 +355,11 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("<color=yellow>SERVER: </color> Incrementing Day");
         _netDay.Value++;
+    }
+
+    public void ReturnPlayerToCamp()
+    {
+        _locationManager.ForceLocation(LocationManager.LocationName.Camp);
     }
     #endregion
 

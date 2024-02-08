@@ -18,21 +18,20 @@ public class ExileManager : NetworkBehaviour
     private Dictionary<ulong, string> _playerTrialVoteDictionary = new();
 
     [Header("Phase 1: Exile Vote")]
+    [SerializeField] private float _exileVoteTimerMax;
+    [SerializeField] private NetworkVariable<float> _netExileVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> _netExileVoteActive = new();
     private List<ExileVoteEntry> _voteList = new();
     private bool _exileVoteStarted;
 
-    [SerializeField] private float _exileVoteTimerMax;
-    [SerializeField] private NetworkVariable<float> _netExileVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
-
     [Header("Phase 2: Trial Vote")]
+    [SerializeField] private float _trialVoteTimerMax;
+    [SerializeField] private NetworkVariable<float> _netTrialVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> _netTrialActive = new();
     private NetworkVariable<ulong> _netOnTrialPlayerID = new();
     private NetworkVariable<int> _netExileVotes = new();
     private NetworkVariable<int> _netSpareVotes = new();
-
-    [SerializeField] private float _trialVoteTimerMax;
-    [SerializeField] private NetworkVariable<float> _netTrialVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private VolcanoLocation _volcanoLocation;
 
     public delegate void VoteEvent();
     public static event VoteEvent OnExileVoteComplete;
@@ -378,6 +377,16 @@ public class ExileManager : NetworkBehaviour
         {
             _playerTrialVoteDictionary[pID] = "none";
         }
+        _volcanoLocation.ClearTrialSeat();
+        _volcanoLocation.ClearSeats();
+
+        // Move players to volcano
+        _volcanoLocation.AssignTrialSeat(playerID);
+        foreach (ulong pID in PlayerConnectionManager.Instance.GetPlayerIDs())
+        {
+            if (pID != playerID)
+                _volcanoLocation.AssignCouncilSeat(pID);
+        }
 
         // Add time
         if (_gameManager != null)
@@ -396,6 +405,9 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     private void SetupPhaseTwoClientRpc(ulong playerID)
     {
+        // Move players to volcano
+        _volcanoLocation.EnableLocation();
+
         // Dont let dead players vote
         if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
         {
@@ -521,6 +533,8 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     private void TrialVoteEndedClientRpc()
     {
+        GameManager.Instance.ReturnPlayerToCamp();
+        _volcanoLocation.DisableLocation();
         _trialUI.VoteEnded();
     }
 
