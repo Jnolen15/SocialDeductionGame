@@ -4263,6 +4263,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 330446596, guid: 1108c1b1697c5eb4c81c60ef19526733, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2694566669582941673, guid: 1108c1b1697c5eb4c81c60ef19526733, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_01 (3)
@@ -6407,6 +6411,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2487412169665720786, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
   m_PrefabInstance: {fileID: 243525996}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &243525998 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 523561210, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
+  m_PrefabInstance: {fileID: 243525996}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &244633781 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1743846555744686435, guid: 61bec5611be6d804ea8058462f496b8d, type: 3}
@@ -6612,6 +6621,11 @@ PrefabInstance:
 --- !u!4 &252705894 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2487412169665720786, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
+  m_PrefabInstance: {fileID: 252705893}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &252705895 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 523561210, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
   m_PrefabInstance: {fileID: 252705893}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &253955157
@@ -8630,6 +8644,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1524050469010959266, guid: 229af2b6b995f2c40a59cf0af2e3c82b, type: 3}
   m_PrefabInstance: {fileID: 320483734}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &321154688
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 321154689}
+  m_Layer: 0
+  m_Name: VolcanoExileCamPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &321154689
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 321154688}
+  m_LocalRotation: {x: -0.2542145, y: 0.50092894, z: -0.1567978, w: -0.8123175}
+  m_LocalPosition: {x: 68.833466, y: 17.273449, z: 237.32976}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 711707214}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &322855723 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9091986759469415902, guid: b96ac4a5c87d0d7459b98dedad99cf52, type: 3}
@@ -12735,6 +12780,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 330446596, guid: 1108c1b1697c5eb4c81c60ef19526733, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2694566669582941673, guid: 1108c1b1697c5eb4c81c60ef19526733, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_01
@@ -12967,7 +13016,7 @@ Transform:
   - {fileID: 1676672104}
   - {fileID: 1768958315}
   m_Father: {fileID: 711707214}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &448878414 stripped
 Transform:
@@ -15841,6 +15890,11 @@ PrefabInstance:
 --- !u!4 &569654115 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2487412169665720786, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
+  m_PrefabInstance: {fileID: 569654114}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &569654116 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 523561210, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
   m_PrefabInstance: {fileID: 569654114}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &574650638
@@ -20295,6 +20349,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1890840027}
+  - {fileID: 321154689}
   - {fileID: 1279345427}
   - {fileID: 447387444}
   m_Father: {fileID: 0}
@@ -20334,13 +20389,14 @@ MonoBehaviour:
   _locationDecor: {fileID: 447387443}
   _audioSource: {fileID: 0}
   _locationCamPos: {fileID: 1890840027}
-  _trialSeat: {fileID: 1700922935}
+  _exileCamPos: {fileID: 321154689}
+  _trialSeat: {fileID: 1700922936}
   _councilSeats:
-  - {fileID: 1645443289}
-  - {fileID: 569654115}
-  - {fileID: 1419365416}
-  - {fileID: 252705894}
-  - {fileID: 243525997}
+  - {fileID: 1645443290}
+  - {fileID: 569654116}
+  - {fileID: 1419365417}
+  - {fileID: 252705895}
+  - {fileID: 243525998}
 --- !u!1001 &711734298
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22656,6 +22712,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 604975484, guid: aa4e5f944cc601d4b94bd9a289eed5fd, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 149805710701245664, guid: aa4e5f944cc601d4b94bd9a289eed5fd, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -24277,6 +24337,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 1220502794, guid: c669b4fac71e5fc44a29d853dbd8a9f6, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 50631401841075563, guid: c669b4fac71e5fc44a29d853dbd8a9f6, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_Spread_03
@@ -26771,6 +26835,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 1735134185, guid: 7e3d9b88013f8a0418b948e14454b577, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5049816035245951046, guid: 7e3d9b88013f8a0418b948e14454b577, type: 3}
       propertyPath: m_RootOrder
       value: 9
@@ -27400,6 +27468,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 1060420714, guid: 990c058d8fcd8f34daa3a02cf5253bf2, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2602451029321741735, guid: 990c058d8fcd8f34daa3a02cf5253bf2, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_03 (1)
@@ -30632,6 +30704,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: -8055291973257094528, guid: 0db31075a7eadc746b41c20e3ed74a38, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 357223116612181799, guid: 0db31075a7eadc746b41c20e3ed74a38, type: 3}
       propertyPath: m_Name
       value: SM_Env_Rock_Cliff_07
@@ -35871,7 +35947,7 @@ Transform:
   - {fileID: 243525997}
   - {fileID: 1700922935}
   m_Father: {fileID: 711707214}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1280750760
 PrefabInstance:
@@ -36812,6 +36888,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 1060420714, guid: 990c058d8fcd8f34daa3a02cf5253bf2, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2602451029321741735, guid: 990c058d8fcd8f34daa3a02cf5253bf2, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_03
@@ -36929,6 +37009,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 604975484, guid: aa4e5f944cc601d4b94bd9a289eed5fd, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 149805710701245664, guid: aa4e5f944cc601d4b94bd9a289eed5fd, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -38300,6 +38384,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 1314001111, guid: 3e2502f01f961b240a8a6c572be3bcf3, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3925971017226929698, guid: 3e2502f01f961b240a8a6c572be3bcf3, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_Spread_01 (1)
@@ -40410,6 +40498,11 @@ PrefabInstance:
 --- !u!4 &1419365416 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2487412169665720786, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
+  m_PrefabInstance: {fileID: 1419365415}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1419365417 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 523561210, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
   m_PrefabInstance: {fileID: 1419365415}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1425259136
@@ -43623,6 +43716,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 242651620, guid: 963561d19150b1743989c13f99f159aa, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2454471806871614816, guid: 963561d19150b1743989c13f99f159aa, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_05 (1)
@@ -46463,6 +46560,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 330446596, guid: 1108c1b1697c5eb4c81c60ef19526733, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2694566669582941673, guid: 1108c1b1697c5eb4c81c60ef19526733, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_01 (4)
@@ -47217,6 +47318,11 @@ PrefabInstance:
 --- !u!4 &1645443289 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2487412169665720786, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
+  m_PrefabInstance: {fileID: 1645443288}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1645443290 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 523561210, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
   m_PrefabInstance: {fileID: 1645443288}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1646747077
@@ -48484,6 +48590,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1279345427}
     m_Modifications:
+    - target: {fileID: 1498368981635168680, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2487412169665720786, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -48541,6 +48651,11 @@ PrefabInstance:
 --- !u!4 &1700922935 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2487412169665720786, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
+  m_PrefabInstance: {fileID: 1700922934}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1700922936 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 523561210, guid: 5e73e6f6a2a5028429d6168025910396, type: 3}
   m_PrefabInstance: {fileID: 1700922934}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1704729064
@@ -52282,6 +52397,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 330446596, guid: 1108c1b1697c5eb4c81c60ef19526733, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2694566669582941673, guid: 1108c1b1697c5eb4c81c60ef19526733, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_01 (1)
@@ -52361,6 +52480,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 242651620, guid: 963561d19150b1743989c13f99f159aa, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2454471806871614816, guid: 963561d19150b1743989c13f99f159aa, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_05 (2)
@@ -54052,6 +54175,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 1735134185, guid: 7e3d9b88013f8a0418b948e14454b577, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5049816035245951046, guid: 7e3d9b88013f8a0418b948e14454b577, type: 3}
       propertyPath: m_RootOrder
       value: 15
@@ -57507,6 +57634,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 840316340, guid: 9119c4f4de22cc149b952b830f677843, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1559594230412574214, guid: 9119c4f4de22cc149b952b830f677843, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_02 (1)
@@ -58413,6 +58544,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 1314001111, guid: 3e2502f01f961b240a8a6c572be3bcf3, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3925971017226929698, guid: 3e2502f01f961b240a8a6c572be3bcf3, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_Spread_01
@@ -59867,6 +60002,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1794377713}
     m_Modifications:
+    - target: {fileID: 840316340, guid: 9119c4f4de22cc149b952b830f677843, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1559594230412574214, guid: 9119c4f4de22cc149b952b830f677843, type: 3}
       propertyPath: m_Name
       value: SM_Env_Lava_River_02 (2)

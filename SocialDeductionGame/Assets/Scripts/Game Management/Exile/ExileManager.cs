@@ -502,8 +502,9 @@ public class ExileManager : NetworkBehaviour
                 int day = GameManager.Instance.GetCurrentDay();
                 AnalyticsTracker.Instance.TrackPlayerExiled(wasSurvivor, day);
 
-                // Kill Plauer
-                playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
+                // Extend timer and show exile scene
+                GameManager.Instance.PauseCurrentTimer(2f);
+                StartCoroutine(PlayExileScene(playerToExecute));
             }
             else
             {
@@ -514,14 +515,16 @@ public class ExileManager : NetworkBehaviour
         else if(_netExileVotes.Value < _netSpareVotes.Value)
         {
             Debug.Log("<color=yellow>SERVER: </color> Majority voted spare, no punishement");
+
+            TrialVoteEndedClientRpc();
         }
         // Tie
         else
         {
             Debug.Log("<color=yellow>SERVER: </color> Tie for highest vote, no punishement");
-        }
 
-        TrialVoteEndedClientRpc();
+            TrialVoteEndedClientRpc();
+        }
     }
 
     [ClientRpc]
@@ -536,6 +539,27 @@ public class ExileManager : NetworkBehaviour
         GameManager.Instance.ReturnPlayerToCamp();
         _volcanoLocation.DisableLocation();
         _trialUI.VoteEnded();
+    }
+
+    private IEnumerator PlayExileScene(GameObject playerToExecute)
+    {
+        PlayExileSceneClientRpc();
+
+        yield return new WaitForSeconds(0.4f);
+
+        // Kill Player
+        playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
+        playerToExecute.GetComponentInChildren<PlayerObj>().EnableRagdollClientRpc();
+
+        yield return new WaitForSeconds(3f);
+
+        TrialVoteEndedClientRpc();
+    }
+
+    [ClientRpc]
+    private void PlayExileSceneClientRpc()
+    {
+        _volcanoLocation.SwapToExileCam();
     }
 
     #endregion

@@ -4,27 +4,34 @@ using UnityEngine;
 
 public class RagdollControl : MonoBehaviour
 {
+    // ================== Refrences / Variables ==================
+    [SerializeField] private Transform _character;
+    [SerializeField] private List<Material> _characterMatList = new();
     [SerializeField] private float _thrust;
+    private GameObject _model;
     private Rigidbody[] _rigidbodies;
     private Animator _animator;
 
-    void Start()
+    // ================== Setup ==================
+    public void Setup(int styleIndex, int materialIndex)
     {
         _rigidbodies = this.GetComponentsInChildren<Rigidbody>();
         _animator = GetComponent<Animator>();
 
         DisableRagdoll();
+
+        // Set style
+        _character.GetChild(0).gameObject.SetActive(false);
+
+        // Set correct model active
+        _model = _character.GetChild(styleIndex).gameObject;
+        _model.SetActive(true);
+
+        // Set Material
+        _model.GetComponent<SkinnedMeshRenderer>().material = _characterMatList[materialIndex];
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            EnableRagdoll();
-            _rigidbodies[0].AddForce(-transform.forward * _thrust, ForceMode.Impulse);
-        }
-    }
-
+    // ================== Function ==================
     private void DisableRagdoll()
     {
         foreach(Rigidbody rb in _rigidbodies)
@@ -35,7 +42,7 @@ public class RagdollControl : MonoBehaviour
         _animator.enabled = true;
     }
 
-    private void EnableRagdoll()
+    public void EnableRagdoll()
     {
         foreach (Rigidbody rb in _rigidbodies)
         {

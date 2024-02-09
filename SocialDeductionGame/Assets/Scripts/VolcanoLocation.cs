@@ -10,6 +10,7 @@ public class VolcanoLocation : NetworkBehaviour
     [SerializeField] private GameObject _locationDecor;
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private Transform _locationCamPos;
+    [SerializeField] private Transform _exileCamPos;
     private Camera _mainCam;
 
     [Header("Player Seating Positions")]
@@ -44,6 +45,12 @@ public class VolcanoLocation : NetworkBehaviour
 
         _mainCam.transform.position = _locationCamPos.localToWorldMatrix.GetPosition();
         _mainCam.transform.rotation = _locationCamPos.localToWorldMatrix.rotation;
+    }
+
+    public void SwapToExileCam()
+    {
+        _mainCam.transform.position = _exileCamPos.localToWorldMatrix.GetPosition();
+        _mainCam.transform.rotation = _exileCamPos.localToWorldMatrix.rotation;
     }
 
     public void DisableLocation()
@@ -130,6 +137,11 @@ public class VolcanoLocation : NetworkBehaviour
             return;
 
         _trialSeatPlayer = 999;
+    }
+
+    public Transform GetTrialSeat()
+    {
+        return _trialSeat;
     }
     #endregion
 }
