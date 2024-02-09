@@ -35,6 +35,8 @@ public class ExileManager : NetworkBehaviour
 
     public delegate void VoteEvent();
     public static event VoteEvent OnExileVoteComplete;
+    public static event VoteEvent OnTrialVoteStarted;
+    public static event VoteEvent OnTrialVoteEnded;
     #endregion
 
     #region ExileVoteEntry
@@ -417,6 +419,8 @@ public class ExileManager : NetworkBehaviour
         {
             _trialUI.Setup(playerID, true);
         }
+
+        OnTrialVoteStarted?.Invoke();
     }
 
     public void SubmitExileVote()
@@ -539,6 +543,7 @@ public class ExileManager : NetworkBehaviour
         GameManager.Instance.ReturnPlayerToCamp();
         _volcanoLocation.DisableLocation();
         _trialUI.VoteEnded();
+        OnTrialVoteEnded?.Invoke();
     }
 
     private IEnumerator PlayExileScene(GameObject playerToExecute)
