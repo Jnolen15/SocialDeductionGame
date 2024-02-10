@@ -146,6 +146,13 @@ public class PlayerData : NetworkBehaviour
         if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Night)
             return;
 
+        // Can't ready during timer pause (trial vote)
+        if (GameManager.Instance.GetTimerPaused())
+        {
+            Debug.Log("Timer is paused, can't ready");
+            return;
+        }
+
         _playerObj.ToggleReadyIconActive();
         PlayerConnectionManager.Instance.ReadyPlayer();
     }

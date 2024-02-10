@@ -40,12 +40,12 @@ public class LocationManager : NetworkBehaviour
 
     public void SetLocation(LocationName newLocation)
     {
-        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, _curLocalLocation, newLocation);
+        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, _curLocalLocation, newLocation, false);
     }
 
     public void ForceLocation(LocationName newLocation)
     {
-        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, _curLocalLocation, newLocation);
+        MoveClientServerRpc(NetworkManager.Singleton.LocalClientId, _curLocalLocation, newLocation, true);
     }
 
     [ClientRpc]
@@ -88,9 +88,9 @@ public class LocationManager : NetworkBehaviour
 
     // Removes player from previous seat location and sets them to the new seat location
     [ServerRpc(RequireOwnership = false)]
-    private void MoveClientServerRpc(ulong clientID, LocationName oldLocationName, LocationName newLocationName)
+    private void MoveClientServerRpc(ulong clientID, LocationName oldLocationName, LocationName newLocationName, bool ignoreSame)
     {
-        if(oldLocationName == newLocationName)
+        if(!ignoreSame && oldLocationName == newLocationName)
         {
             Debug.Log("<color=yellow>SERVER: </color>Old and new locations are the same. Not updating seats");
             return;

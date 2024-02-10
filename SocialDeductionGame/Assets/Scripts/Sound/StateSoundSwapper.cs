@@ -16,11 +16,15 @@ public class StateSoundSwapper : MonoBehaviour
     private void Awake()
     {
         GameManager.OnStateChange += UpdateAudio;
+        ExileManager.OnTrialVoteStarted += PauseAudio;
+        ExileManager.OnTrialVoteEnded += PlayAudio;
     }
 
     private void OnDestroy()
     {
         GameManager.OnStateChange -= UpdateAudio;
+        ExileManager.OnTrialVoteStarted -= PauseAudio;
+        ExileManager.OnTrialVoteEnded -= PlayAudio;
     }
     #endregion
 
@@ -37,5 +41,15 @@ public class StateSoundSwapper : MonoBehaviour
             _audioSource.clip = _eveningClip;
             _audioSource.Play();
         }
+    }
+
+    private void PauseAudio()
+    {
+        _audioSource.Pause();
+    }
+
+    private void PlayAudio()
+    {
+        _audioSource.Play();
     }
 }

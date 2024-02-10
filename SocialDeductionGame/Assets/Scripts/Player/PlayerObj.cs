@@ -24,6 +24,10 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private GameObject _model;
     [SerializeField] private CardHighlight _cardHighlight;
     [SerializeField] private PlayRandomSound _randomSound;
+    [SerializeField] private GameObject _ragdollPref;
+    private RagdollControl _currentRagdoll;
+    private int _localStyleIndex;
+    private int _localMatIndex;
 
     // ================== Variables ==================
     [SerializeField] private List<CardTag> _cardTagsAccepted = new();
@@ -102,7 +106,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [ClientRpc]
     public void UpdateCharacterModelClientRPC(int styleIndex, int materialIndex)
     {
-        //Debug.Log("Updating Character");
+        _localStyleIndex = styleIndex;
+        _localMatIndex = materialIndex;
 
         // Set initial inactive
         _character.GetChild(0).gameObject.SetActive(false);
@@ -251,5 +256,14 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
 
         if (hpGain != 0)
             _playerHealth.ModifyHealth(hpGain, "Consumed Card");
+    }
+
+    // ================== Animation / Ragdoll ==================    
+    [ClientRpc]
+    public void EnableRagdollClientRpc()
+    {
+        _currentRagdoll = Instantiate(_ragdollPref, transform.position, transform.rotation).GetComponent<RagdollControl>();
+        _currentRagdoll.Setup(_localStyleIndex, _localMatIndex);
+        _currentRagdoll.EnableRagdoll();
     }
 }

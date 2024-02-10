@@ -18,24 +18,25 @@ public class ExileManager : NetworkBehaviour
     private Dictionary<ulong, string> _playerTrialVoteDictionary = new();
 
     [Header("Phase 1: Exile Vote")]
+    [SerializeField] private float _exileVoteTimerMax;
+    [SerializeField] private NetworkVariable<float> _netExileVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> _netExileVoteActive = new();
     private List<ExileVoteEntry> _voteList = new();
     private bool _exileVoteStarted;
 
-    [SerializeField] private float _exileVoteTimerMax;
-    [SerializeField] private NetworkVariable<float> _netExileVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
-
     [Header("Phase 2: Trial Vote")]
+    [SerializeField] private float _trialVoteTimerMax;
+    [SerializeField] private NetworkVariable<float> _netTrialVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> _netTrialActive = new();
     private NetworkVariable<ulong> _netOnTrialPlayerID = new();
     private NetworkVariable<int> _netExileVotes = new();
     private NetworkVariable<int> _netSpareVotes = new();
-
-    [SerializeField] private float _trialVoteTimerMax;
-    [SerializeField] private NetworkVariable<float> _netTrialVoteTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private VolcanoLocation _volcanoLocation;
 
     public delegate void VoteEvent();
     public static event VoteEvent OnExileVoteComplete;
+    public static event VoteEvent OnTrialVoteStarted;
+    public static event VoteEvent OnTrialVoteEnded;
     #endregion
 
     #region ExileVoteEntry
@@ -378,6 +379,16 @@ public class ExileManager : NetworkBehaviour
         {
             _playerTrialVoteDictionary[pID] = "none";
         }
+        _volcanoLocation.ClearTrialSeat();
+        _volcanoLocation.ClearSeats();
+
+        // Move players to volcano
+        _volcanoLocation.AssignTrialSeat(playerID);
+        foreach (ulong pID in PlayerConnectionManager.Instance.GetPlayerIDs())
+        {
+            if (pID != playerID)
+                _volcanoLocation.AssignCouncilSeat(pID);
+        }
 
         // Add time
         if (_gameManager != null)
@@ -396,6 +407,9 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     private void SetupPhaseTwoClientRpc(ulong playerID)
     {
+        // Move players to volcano
+        _volcanoLocation.EnableLocation();
+
         // Dont let dead players vote
         if (!PlayerConnectionManager.Instance.GetPlayerLivingByID(PlayerConnectionManager.Instance.GetLocalPlayersID()))
         {
@@ -405,6 +419,8 @@ public class ExileManager : NetworkBehaviour
         {
             _trialUI.Setup(playerID, true);
         }
+
+        OnTrialVoteStarted?.Invoke();
     }
 
     public void SubmitExileVote()
@@ -490,8 +506,9 @@ public class ExileManager : NetworkBehaviour
                 int day = GameManager.Instance.GetCurrentDay();
                 AnalyticsTracker.Instance.TrackPlayerExiled(wasSurvivor, day);
 
-                // Kill Plauer
-                playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
+                // Extend timer and show exile scene
+                GameManager.Instance.PauseCurrentTimer(2f);
+                StartCoroutine(PlayExileScene(playerToExecute));
             }
             else
             {
@@ -502,14 +519,16 @@ public class ExileManager : NetworkBehaviour
         else if(_netExileVotes.Value < _netSpareVotes.Value)
         {
             Debug.Log("<color=yellow>SERVER: </color> Majority voted spare, no punishement");
+
+            TrialVoteEndedClientRpc();
         }
         // Tie
         else
         {
             Debug.Log("<color=yellow>SERVER: </color> Tie for highest vote, no punishement");
-        }
 
-        TrialVoteEndedClientRpc();
+            TrialVoteEndedClientRpc();
+        }
     }
 
     [ClientRpc]
@@ -521,7 +540,31 @@ public class ExileManager : NetworkBehaviour
     [ClientRpc]
     private void TrialVoteEndedClientRpc()
     {
+        GameManager.Instance.ReturnPlayerToCamp();
+        _volcanoLocation.DisableLocation();
         _trialUI.VoteEnded();
+        OnTrialVoteEnded?.Invoke();
+    }
+
+    private IEnumerator PlayExileScene(GameObject playerToExecute)
+    {
+        PlayExileSceneClientRpc();
+
+        yield return new WaitForSeconds(0.4f);
+
+        // Kill Player
+        playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
+        playerToExecute.GetComponentInChildren<PlayerObj>().EnableRagdollClientRpc();
+
+        yield return new WaitForSeconds(3f);
+
+        TrialVoteEndedClientRpc();
+    }
+
+    [ClientRpc]
+    private void PlayExileSceneClientRpc()
+    {
+        _volcanoLocation.SwapToExileCam();
     }
 
     #endregion
