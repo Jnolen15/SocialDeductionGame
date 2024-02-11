@@ -400,9 +400,13 @@ public class GameManager : NetworkBehaviour
 
     private void OnPlayerDied()
     {
+        Debug.Log("<color=yellow>SERVER: </color> player died, testing win.");
+
         // Dont end game during night
         if (_netCurrentGameState.Value == GameState.Night)
             return;
+
+        Debug.Log("<color=yellow>SERVER: </color> State is not night, continuing with win check");
 
         if (CheckSaboteurWin())
             EndGame(false);

@@ -553,10 +553,11 @@ public class ExileManager : NetworkBehaviour
         yield return new WaitForSeconds(0.4f);
 
         // Kill Player
-        playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
         playerToExecute.GetComponentInChildren<PlayerObj>().EnableRagdollClientRpc();
 
         yield return new WaitForSeconds(3f);
+
+        playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
 
         TrialVoteEndedClientRpc();
     }

@@ -49,6 +49,9 @@ public class RagdollControl : MonoBehaviour
             rb.isKinematic = false;
         }
 
+        if (_rigidbodies.Length > 0)
+            _rigidbodies[0].AddForce(transform.forward * _thrust, ForceMode.Impulse);
+
         _animator.enabled = false;
     }
 }

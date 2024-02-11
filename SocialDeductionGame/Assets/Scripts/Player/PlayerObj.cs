@@ -262,6 +262,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     [ClientRpc]
     public void EnableRagdollClientRpc()
     {
+        if (_model)
+            _model.gameObject.GetComponent<SkinnedMeshRenderer>().material = _ghostMat;
+
         _currentRagdoll = Instantiate(_ragdollPref, transform.position, transform.rotation).GetComponent<RagdollControl>();
         _currentRagdoll.Setup(_localStyleIndex, _localMatIndex);
         _currentRagdoll.EnableRagdoll();
