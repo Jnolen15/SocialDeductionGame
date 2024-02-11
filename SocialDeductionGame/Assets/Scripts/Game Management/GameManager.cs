@@ -231,8 +231,15 @@ public class GameManager : NetworkBehaviour
     // Calculate timer speed up modifier based on number of players ready
     private float CalculateTimerMod()
     {
-        float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.GetNumLivingPlayers());
-        return (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
+        if(PlayerConnectionManager.Instance.GetNumLivingPlayers() == 0)
+        {
+            return 1f;
+        }
+        else
+        {
+            float percentReady = ((float)PlayerConnectionManager.Instance.GetNumReadyPlayers() / (float)PlayerConnectionManager.Instance.GetNumLivingPlayers());
+            return (_playerReadyTimerModCurve.Evaluate(percentReady) + 1f);
+        }
     }
 
     public void PauseCurrentTimer(float time)

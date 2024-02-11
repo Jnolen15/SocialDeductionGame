@@ -16,6 +16,7 @@ public class NightEventRecapUI : MonoBehaviour
     [Header("Reacp")]
     [SerializeField] private GameObject _recapBook;
     [SerializeField] private Transform _recapZone;
+    [SerializeField] private GameObject _closeTab;
 
     [Header("Survivor Reacp")]
     [SerializeField] private GameObject _nightEventPage;
@@ -90,6 +91,7 @@ public class NightEventRecapUI : MonoBehaviour
     public void OpenRecap()
     {
         _recapBook.SetActive(true);
+        _closeTab.SetActive(false);
 
         StartCoroutine(AnimateEventObjects());
     }
@@ -170,6 +172,8 @@ public class NightEventRecapUI : MonoBehaviour
 
             yield return new WaitForSeconds(0.8f);
         }
+
+        _closeTab.SetActive(true);
     }
 
     public void PunchObj(GameObject eventObj, float size, float duration)

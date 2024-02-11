@@ -56,13 +56,9 @@ public class NightEventVoteCapsule : MonoBehaviour
         GameObject primaryResource = Instantiate(_eventTagIconPref, _eventTagIconSlot);
         primaryResource.GetComponent<TagIcon>().SetupIcon(primaryTag.visual, primaryTag.name);
 
-        Vector2 requirements = eventData.GetRequirements(playerNum);
-        if (requirements.y > 0)
-        {
-            CardTag secondaryTag = eventData.GetSecondaryResource();
-            GameObject secondaryResource = Instantiate(_eventTagIconPref, _eventTagIconSlot);
-            secondaryResource.GetComponent<TagIcon>().SetupIcon(secondaryTag.visual, secondaryTag.name);
-        }
+        CardTag secondaryTag = eventData.GetSecondaryResource();
+        GameObject secondaryResource = Instantiate(_eventTagIconPref, _eventTagIconSlot);
+        secondaryResource.GetComponent<TagIcon>().SetupIcon(secondaryTag.visual, secondaryTag.name);
     }
     #endregion
 
