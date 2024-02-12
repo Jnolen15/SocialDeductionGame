@@ -19,6 +19,7 @@ public class ExileVoteUI : MonoBehaviour
     private void Start()
     {
         GameManager.OnStateNight += Hide;
+        ExileManager.OnTrialVoteEnded += Hide;
 
         _exileManager = gameObject.GetComponentInParent<ExileManager>();
     }
@@ -26,6 +27,7 @@ public class ExileVoteUI : MonoBehaviour
     private void OnDestroy()
     {
         GameManager.OnStateNight -= Hide;
+        ExileManager.OnTrialVoteEnded -= Hide;
     }
     #endregion
 

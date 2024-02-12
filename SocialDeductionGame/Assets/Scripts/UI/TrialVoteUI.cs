@@ -86,10 +86,15 @@ public class TrialVoteUI : MonoBehaviour
         _spareVoteText.text = SpareVotes.ToString();
     }
 
-    public void VoteEnded()
+    public void VoteEnded(bool wasExiled)
     {
         _voteText.SetActive(true);
         _voteButtons.SetActive(false);
+
+        if(!wasExiled)
+            _subtitle.text = "Was Spared.";
+        else
+            _subtitle.text = "Was Exiled.";
 
         _closeButton.SetActive(true);
     }

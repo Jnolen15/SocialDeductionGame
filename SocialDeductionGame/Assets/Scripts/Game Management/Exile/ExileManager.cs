@@ -11,6 +11,8 @@ public class ExileManager : NetworkBehaviour
     #region Refrences and Variables
     [SerializeField] private ExileVoteUI _exileUI;
     [SerializeField] private TrialVoteUI _trialUI;
+    [SerializeField] private GameObject _roleReveal;
+    [SerializeField] private TextMeshProUGUI _roleRevealText;
     private GameManager _gameManager;
 
     private NetworkVariable<int> _netPlayersVoted = new();
@@ -513,7 +515,7 @@ public class ExileManager : NetworkBehaviour
                 AnalyticsTracker.Instance.TrackPlayerExiled(wasSurvivor, day);
 
                 // Extend timer and show exile scene
-                GameManager.Instance.PauseCurrentTimer(5f);
+                GameManager.Instance.PauseCurrentTimer(6f);
                 StartCoroutine(PlayExileScene(playerToExecute, wasSurvivor));
             }
             else
@@ -526,23 +528,24 @@ public class ExileManager : NetworkBehaviour
         {
             Debug.Log("<color=yellow>SERVER: </color> Majority voted spare, no punishement");
 
-            TrialVoteEndedClientRpc();
+            TrialVoteEndedClientRpc(false);
         }
         // Tie
         else
         {
             Debug.Log("<color=yellow>SERVER: </color> Tie for highest vote, no punishement");
 
-            TrialVoteEndedClientRpc();
+            TrialVoteEndedClientRpc(false);
         }
     }
     
     [ClientRpc]
-    private void TrialVoteEndedClientRpc()
+    private void TrialVoteEndedClientRpc(bool wasExiled)
     {
         GameManager.Instance.ReturnPlayerToCamp();
         _volcanoLocation.DisableLocation();
-        _trialUI.VoteEnded();
+        _trialUI.VoteEnded(wasExiled);
+        _roleReveal.SetActive(false);
         OnTrialVoteEnded?.Invoke();
     }
 
@@ -555,18 +558,36 @@ public class ExileManager : NetworkBehaviour
         // Kill Player
         playerToExecute.GetComponentInChildren<PlayerObj>().EnableRagdollClientRpc();
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(2f);
+
+        RevealRoleClientRpc(wasSurvivor);
+
+        yield return new WaitForSeconds(3f);
 
         playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
 
-        TrialVoteEndedClientRpc();
+        TrialVoteEndedClientRpc(true);
     }
 
+    [ClientRpc]
+    private void RevealRoleClientRpc(bool wasSurvivor)
+    {
+        _roleReveal.SetActive(true);
+
+        string pname = PlayerConnectionManager.Instance.GetPlayerNameByID(_netOnTrialPlayerID.Value);
+
+        if (wasSurvivor)
+            _roleRevealText.text = pname + " was a Survivor.";
+        else
+            _roleRevealText.text = pname + " was a Saboteur.";
+    }
+    
     [ClientRpc]
     private void PlayExileSceneClientRpc(bool wasSurvivor)
     {
         _volcanoLocation.SetExileTeam(wasSurvivor);
         _volcanoLocation.SwapToExileCam();
+        _trialUI.VoteEnded(true);
     }
 
     #endregion
