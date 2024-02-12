@@ -9,6 +9,7 @@ public class TransitionManager : MonoBehaviour
     [Header("Transition Screens")]
     [SerializeField] private GameObject _waitingForPlayersTS;
     [SerializeField] private Transform _transitionWave;
+    [SerializeField] private CanvasGroup _transitionBlack;
     [SerializeField] private int _hiddenPos;
     [SerializeField] private int _upPos;
     [SerializeField] private PlayRandomSound _randSound;
@@ -18,12 +19,16 @@ public class TransitionManager : MonoBehaviour
     {
         GameManager.OnStateIntro += HideWaitingForPlayersTS;
         GameManager.OnStateChange += Transition;
+        //ExileManager.OnTrialVoteStarted += TransitionBlackFade;
+        //ExileManager.OnTrialVoteEnded += TransitionBlackFade;
     }
 
     private void OnDisable()
     {
         GameManager.OnStateIntro -= HideWaitingForPlayersTS;
         GameManager.OnStateChange -= Transition;
+        //ExileManager.OnTrialVoteStarted -= TransitionBlackFade;
+        //ExileManager.OnTrialVoteEnded -= TransitionBlackFade;
     }
 
     // ================== State Transitions ==================
@@ -81,6 +86,17 @@ public class TransitionManager : MonoBehaviour
     private void TransitionOut()
     {
         _transitionWave.DOLocalMoveY(_hiddenPos, 1).SetEase(Ease.InOutBack).OnComplete(() => { _transitionWave.gameObject.SetActive(false); });
+    }
+
+    public void TransitionBlackFade()
+    {
+        _transitionBlack.gameObject.SetActive(true);
+
+        _transitionBlack.DOFade(1, 0.5f).OnComplete(
+            () => _transitionBlack.DOFade(0, 1f).OnComplete(
+                () => { _transitionBlack.gameObject.SetActive(false); }
+                )
+            );
     }
     #endregion
 }

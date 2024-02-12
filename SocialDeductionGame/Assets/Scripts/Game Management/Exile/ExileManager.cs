@@ -478,6 +478,12 @@ public class ExileManager : NetworkBehaviour
         UpdateTrialResultsClientRpc(_netExileVotes.Value, _netSpareVotes.Value);
     }
 
+    [ClientRpc]
+    private void UpdateTrialResultsClientRpc(int exileVotes, int SpareVotes)
+    {
+        _trialUI.UpdateTrialResults(exileVotes, SpareVotes);
+    }
+
     private void RunTiralVoteCompleteion()
     {
         if (!IsServer)
@@ -507,12 +513,12 @@ public class ExileManager : NetworkBehaviour
                 AnalyticsTracker.Instance.TrackPlayerExiled(wasSurvivor, day);
 
                 // Extend timer and show exile scene
-                GameManager.Instance.PauseCurrentTimer(2f);
-                StartCoroutine(PlayExileScene(playerToExecute));
+                GameManager.Instance.PauseCurrentTimer(5f);
+                StartCoroutine(PlayExileScene(playerToExecute, wasSurvivor));
             }
             else
             {
-                Debug.Log("<color=yellow>SERVER: </color> TOP VOTED PLAYER NOT FOUND!");
+                Debug.LogError("<color=yellow>SERVER: </color> TOP VOTED PLAYER NOT FOUND!");
             }
         }
         // Majority spare
@@ -530,12 +536,6 @@ public class ExileManager : NetworkBehaviour
             TrialVoteEndedClientRpc();
         }
     }
-
-    [ClientRpc]
-    private void UpdateTrialResultsClientRpc(int exileVotes, int SpareVotes)
-    {
-        _trialUI.UpdateTrialResults(exileVotes, SpareVotes);
-    }
     
     [ClientRpc]
     private void TrialVoteEndedClientRpc()
@@ -546,16 +546,16 @@ public class ExileManager : NetworkBehaviour
         OnTrialVoteEnded?.Invoke();
     }
 
-    private IEnumerator PlayExileScene(GameObject playerToExecute)
+    private IEnumerator PlayExileScene(GameObject playerToExecute, bool wasSurvivor)
     {
-        PlayExileSceneClientRpc();
+        PlayExileSceneClientRpc(wasSurvivor);
 
         yield return new WaitForSeconds(0.4f);
 
         // Kill Player
         playerToExecute.GetComponentInChildren<PlayerObj>().EnableRagdollClientRpc();
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(4f);
 
         playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
 
@@ -563,8 +563,9 @@ public class ExileManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void PlayExileSceneClientRpc()
+    private void PlayExileSceneClientRpc(bool wasSurvivor)
     {
+        _volcanoLocation.SetExileTeam(wasSurvivor);
         _volcanoLocation.SwapToExileCam();
     }
 

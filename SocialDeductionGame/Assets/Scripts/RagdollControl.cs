@@ -54,4 +54,9 @@ public class RagdollControl : MonoBehaviour
 
         _animator.enabled = false;
     }
+
+    public void DestroyRagdoll()
+    {
+        Destroy(gameObject);
+    }
 }
