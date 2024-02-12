@@ -2,6 +2,7 @@ public class GameRules
 {
     // ========== Custopmizeable Game Rules ==========
     public int NumSaboteurs;
+    public bool RoleReveal;
     public int NumDaysToWin;
     public TimerLengths TimerLength;
     public enum TimerLengths
@@ -22,13 +23,15 @@ public class GameRules
     public GameRules()
     {
         NumSaboteurs = 1;
+        RoleReveal = true;
         NumDaysToWin = 8;
         TimerLength = TimerLengths.Normal;
     }
 
-    public GameRules(int numSabos, int numDays, TimerLengths timerLengths)
+    public GameRules(int numSabos, bool revealRoles, int numDays, TimerLengths timerLengths)
     {
         NumSaboteurs = numSabos;
+        RoleReveal = revealRoles;
         NumDaysToWin = numDays;
         TimerLength = timerLengths;
     }

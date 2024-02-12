@@ -27,6 +27,7 @@ public class CharacterSelectUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _numSabosText;
     [SerializeField] private TextMeshProUGUI _numDaysText;
     [SerializeField] private TextMeshProUGUI _timerLengthsText;
+    [SerializeField] private Toggle _roleRevealToggle;
     private GameRules _gameRules = new();
 
     private bool _localPlayerReady;
@@ -246,6 +247,13 @@ public class CharacterSelectUI : MonoBehaviour
             _gameRules.TimerLength--;
 
         _timerLengthsText.text = _gameRules.TimerLength.ToString();
+
+        UpdateGameSettings();
+    }
+
+    public void OnRoleRevealToggle()
+    {
+        _gameRules.RoleReveal = _roleRevealToggle.isOn;
 
         UpdateGameSettings();
     }

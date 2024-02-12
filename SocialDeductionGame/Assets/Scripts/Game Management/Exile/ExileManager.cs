@@ -14,6 +14,7 @@ public class ExileManager : NetworkBehaviour
     [SerializeField] private GameObject _roleReveal;
     [SerializeField] private TextMeshProUGUI _roleRevealText;
     private GameManager _gameManager;
+    private GameRules _gameRules;    // Server
 
     private NetworkVariable<int> _netPlayersVoted = new();
     private Dictionary<ulong, bool> _playerExileVoteDictionary = new();
@@ -83,6 +84,9 @@ public class ExileManager : NetworkBehaviour
     private void Start()
     {
         _gameManager = this.GetComponent<GameManager>();
+
+        if(IsServer)
+            _gameRules = PlayerConnectionManager.Instance.GetGameRules();
     }
 
     public override void OnNetworkDespawn()
@@ -551,7 +555,7 @@ public class ExileManager : NetworkBehaviour
 
     private IEnumerator PlayExileScene(GameObject playerToExecute, bool wasSurvivor)
     {
-        PlayExileSceneClientRpc(wasSurvivor);
+        PlayExileSceneClientRpc(wasSurvivor, _gameRules.RoleReveal);
 
         yield return new WaitForSeconds(0.4f);
 
@@ -560,7 +564,8 @@ public class ExileManager : NetworkBehaviour
 
         yield return new WaitForSeconds(2f);
 
-        RevealRoleClientRpc(wasSurvivor);
+        if(_gameRules.RoleReveal)
+            RevealRoleClientRpc(wasSurvivor);
 
         yield return new WaitForSeconds(3f);
 
@@ -583,10 +588,9 @@ public class ExileManager : NetworkBehaviour
     }
     
     [ClientRpc]
-    private void PlayExileSceneClientRpc(bool wasSurvivor)
+    private void PlayExileSceneClientRpc(bool wasSurvivor, bool revealRoles)
     {
-        _volcanoLocation.SetExileTeam(wasSurvivor);
-        _volcanoLocation.SwapToExileCam();
+        _volcanoLocation.PlayExileScene(wasSurvivor, revealRoles);
         _trialUI.VoteEnded(true);
     }
 

@@ -26,7 +26,7 @@ public class LavaCollision : MonoBehaviour
         {
             _randSound.PlayRandom();
 
-            if (_volcanoLocation.GetWasSurvivor())
+            if (_volcanoLocation.GetWasSurvivor() || !_volcanoLocation.GetRevealRoles())
                 SurvivorBurnFX(other.ClosestPoint(transform.position));
             else
                 SaboteurBurnFX(other.ClosestPoint(transform.position));

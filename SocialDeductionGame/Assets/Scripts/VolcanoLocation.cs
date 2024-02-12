@@ -14,6 +14,7 @@ public class VolcanoLocation : NetworkBehaviour
     private Camera _mainCam;
 
     private bool _wasSurvivor;
+    private bool _revealRoles;
 
     [Header("Player Seating Positions")]
     [SerializeField] private Transform _trialSeat;
@@ -149,15 +150,21 @@ public class VolcanoLocation : NetworkBehaviour
 
     // ================== Other ==================
     #region Other
-
-    public void SetExileTeam(bool wasSurvivor)
+    public void PlayExileScene(bool wasSurvivor, bool revealRoles)
     {
         _wasSurvivor = wasSurvivor;
+        _revealRoles = revealRoles;
+        SwapToExileCam();
     }
 
     public bool GetWasSurvivor()
     {
         return _wasSurvivor;
+    }
+    
+    public bool GetRevealRoles()
+    {
+        return _revealRoles;
     }
 
     #endregion
