@@ -38,7 +38,6 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netTransitionTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<float> _netPauseTimer = new(writePerm: NetworkVariableWritePermission.Server);
-    private bool _rescueEarly;
     private bool _gameOver;
 
     private bool _dontTestWin;
@@ -390,16 +389,10 @@ public class GameManager : NetworkBehaviour
             Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived. Survivor Win!");
             return true; // WIN
         }
-        else if (_rescueEarly)
-        {
-            Debug.Log("<color=yellow>SERVER: </color>Rescue has arrived early. Survivor Win!");
-            _rescueEarly = false;
-            return true; // WIN
-        }
         else if (numLivingSaboteurs <= 0)
         {
-            Debug.Log("<color=yellow>SERVER: </color>All Saboteurs are dead. Rescue arriving tomorrow.");
-            _rescueEarly = true;
+            Debug.Log("<color=yellow>SERVER: </color>All Saboteurs are dead. Survivor Win!");
+            return true; // WIN
         }
 
         return false;
