@@ -13,7 +13,6 @@ public class ExileManager : NetworkBehaviour
     [SerializeField] private TrialVoteUI _trialUI;
     [SerializeField] private GameObject _roleReveal;
     [SerializeField] private TextMeshProUGUI _roleRevealText;
-    private GameManager _gameManager;
     private GameRules _gameRules;    // Server
 
     private NetworkVariable<int> _netPlayersVoted = new();
@@ -83,8 +82,6 @@ public class ExileManager : NetworkBehaviour
 
     private void Start()
     {
-        _gameManager = this.GetComponent<GameManager>();
-
         if(IsServer)
             _gameRules = PlayerConnectionManager.Instance.GetGameRules();
     }
@@ -397,10 +394,7 @@ public class ExileManager : NetworkBehaviour
         }
 
         // Add time
-        if (_gameManager != null)
-            _gameManager.PauseCurrentTimer(_trialVoteTimerMax);
-        else
-            Debug.LogWarning("Exile Manager does not have Game Manager Refrence!");
+        GameManager.Instance.PauseCurrentTimer(_trialVoteTimerMax);
 
         // Start
         _netOnTrialPlayerID.Value = playerID;
