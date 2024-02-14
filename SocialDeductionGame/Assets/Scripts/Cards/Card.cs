@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Card : MonoBehaviour
+public abstract class Card : MonoBehaviour, IKeywordKeeper
 {
     [Header("Card ID Type -, Card ---")]
     [SerializeField] protected int _cardID;
@@ -11,6 +11,7 @@ public abstract class Card : MonoBehaviour
     [SerializeField] protected string _cardName;
     [TextArea]
     [SerializeField] protected string _cardDescription;
+    [SerializeField] protected List<KeywordSO> _keywords;
     [SerializeField] protected Sprite _cardArt;
     [SerializeField] protected List<CardTag> _tags;
 
@@ -20,6 +21,7 @@ public abstract class Card : MonoBehaviour
     [SerializeField] protected GameObject _cardUIPrefab;
 
     // ========== Getters ==========
+    #region Getters
     public int GetCardID()
     {
         return _cardID;
@@ -34,8 +36,10 @@ public abstract class Card : MonoBehaviour
     {
         return new List<CardTag>(_tags);
     }
+    #endregion
 
     // ========== Tags ==========
+    #region Tags
     public bool HasTag(CardTag t)
     {
         return _tags.Contains(t);
@@ -60,8 +64,10 @@ public abstract class Card : MonoBehaviour
 
         return false;
     }
+    #endregion
 
     // ========== Card Functionality ==========
+    #region Card Functionality
     // Playable card for in the playerss hand
     public virtual void SetupPlayable()
     {
@@ -95,7 +101,18 @@ public abstract class Card : MonoBehaviour
         else
             Debug.LogError("Card was played on a location it can't do anything with");
     }
+    #endregion
 
     // ========== OVERRIDE CLASSES ==========
+    #region Override Classes
     public abstract void OnPlay(GameObject playLocation);
+    #endregion
+
+    // ========== INTERFACE ==========
+    #region Interface
+    public List<KeywordSO> GetKeywords()
+    {
+        return _keywords;
+    }
+    #endregion
 }
