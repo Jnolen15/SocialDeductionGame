@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class HazardCardVisual : MonoBehaviour
+public class HazardCardVisual : MonoBehaviour, IKeywordKeeper
 {
     // ================== Refrences ==================
     [Header("variables")]
@@ -36,6 +36,7 @@ public class HazardCardVisual : MonoBehaviour
     public static event HazardVisualEvent OnHazardActivated;
 
     // ================== Setup ==================
+    #region Setup
     public void Setup(int hazardID)
     {
         _heldHazardID = hazardID;
@@ -67,7 +68,10 @@ public class HazardCardVisual : MonoBehaviour
             //_hazardTitle.color = _colorHigh;
         }
     }
+    #endregion
 
+    // ================== Function ==================
+    #region Function
     public int GetHazardID()
     {
         return _heldHazardID;
@@ -86,5 +90,12 @@ public class HazardCardVisual : MonoBehaviour
             // Hazard card happened
             OnHazardActivated?.Invoke(_hazardData.GetHazardDangerLevel());
         }
+    }
+    #endregion
+
+    // ========== INTERFACE ==========
+    public List<KeywordSO> GetKeywords()
+    {
+        return _hazardData.GetHazardKeywords();
     }
 }

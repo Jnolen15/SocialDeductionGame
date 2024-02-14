@@ -13,7 +13,7 @@ public class KeywordDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     void Start()
     {
-        var keywordKeeper = transform.parent.GetComponentInParent<IKeywordKeeper>();
+        var keywordKeeper = GetComponentInParent<IKeywordKeeper>();
 
         if (keywordKeeper != null)
             _keywords = keywordKeeper.GetKeywords();

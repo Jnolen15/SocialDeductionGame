@@ -11,6 +11,7 @@ public abstract class Hazard : ScriptableObject
     [SerializeField] protected string _hazardName;
     [TextArea]
     [SerializeField] protected string _hazardConsequences;
+    [SerializeField] protected List<KeywordSO> _hazardKeywords;
     [SerializeField] protected Sprite _hazardArt;
     public enum DangerLevel
     {
@@ -44,6 +45,11 @@ public abstract class Hazard : ScriptableObject
         return _hazardConsequences;
     }
     
+    public List<KeywordSO> GetHazardKeywords()
+    {
+        return _hazardKeywords;
+    }
+    
     public DangerLevel GetHazardDangerLevel()
     {
         return _dangerLevel;
@@ -51,6 +57,7 @@ public abstract class Hazard : ScriptableObject
     #endregion
 
     // ========== OVERRIDE CLASSES ==========
+    #region Override Classes
     public virtual bool RunHazard(HandManager handMan)
     {
         if (!TestForPrevention(handMan))
@@ -88,4 +95,5 @@ public abstract class Hazard : ScriptableObject
 
     // The gameplay consecqunces of the hazard
     public abstract void InvokeHazardConsequence();
+    #endregion
 }
