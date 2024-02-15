@@ -50,9 +50,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cardID: 2008
-  _cardName: Fruit Cluster (2)
-  _cardDescription: A cluster of 2 fruit, can be eaten raw or cooked. +1 portions.
-    Using will pick off 1 fruit.
+  _cardName: Fruit Cluster
+  _cardDescription: '<style="Hunger">+1</style> Pickable(2)
+
+    <style="Flavor">A
+    cluster of fruit</style>'
+  _keywords:
+  - {fileID: 11400000, guid: e1abc7aa3a88a084ea296628b2c6001a, type: 2}
   _cardArt: {fileID: 21300000, guid: abd621c179c007a46a5331c43467d181, type: 3}
   _tags:
   - {fileID: 11400000, guid: 0a600377c80d19843a387af0a435f67a, type: 2}

@@ -51,7 +51,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardID: 2004
   _cardName: Small Meal
-  _cardDescription: A small meal. +1 portions.
+  _cardDescription: '<style="Hunger">+1</style>
+
+    <style="Flavor">Better than
+    nothing.</style> '
+  _keywords: []
   _cardArt: {fileID: 21300000, guid: 0e6df6ee3e40d0e4dbaae7ac6379cd54, type: 3}
   _tags:
   - {fileID: 11400000, guid: a5ced97b2788927488950ea2b641c351, type: 2}

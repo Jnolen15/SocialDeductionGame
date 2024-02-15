@@ -51,7 +51,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardID: 2002
   _cardName: Medium Raw Food
-  _cardDescription: Must be cooked. A bit of food. +2 portions.
+  _cardDescription: '+2 Portions.
+
+    <style="Flavor">A bit of food.</style>'
+  _keywords:
+  - {fileID: 11400000, guid: fbe35ea82a958e34d8098adfb855c395, type: 2}
   _cardArt: {fileID: 21300000, guid: 8f2463b51d2291b4cb9d865aa2dfae7b, type: 3}
   _tags:
   - {fileID: 11400000, guid: 0a600377c80d19843a387af0a435f67a, type: 2}

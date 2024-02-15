@@ -51,7 +51,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardID: 2003
   _cardName: Large Raw Food
-  _cardDescription: Must be cooked. A good bit of food. +4 portions.
+  _cardDescription: '+4 Portions.
+
+    <style="Flavor">A good bit of food.</style>'
+  _keywords:
+  - {fileID: 11400000, guid: fbe35ea82a958e34d8098adfb855c395, type: 2}
   _cardArt: {fileID: 21300000, guid: 8eb20197366475a4c96055e54d8fe9b3, type: 3}
   _tags:
   - {fileID: 11400000, guid: 0a600377c80d19843a387af0a435f67a, type: 2}

@@ -51,7 +51,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardID: 2007
   _cardName: Fruit
-  _cardDescription: A piece of fruit, can be eaten raw or cooked. +1 portions.
+  _cardDescription: '<style="Hunger">+1</style>
+
+    <style="Flavor">A piece of fruit</style>'
+  _keywords: []
   _cardArt: {fileID: 21300000, guid: 38bcfdefaaac05c4c8ef2b9a82cb3533, type: 3}
   _tags:
   - {fileID: 11400000, guid: 0a600377c80d19843a387af0a435f67a, type: 2}
