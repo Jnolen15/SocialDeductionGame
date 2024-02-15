@@ -51,8 +51,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardID: 4002
   _cardName: Dagger
-  _cardDescription: Negates the effects of low and medium danger hazards. 1 in 3
-    chance to break after use.
+  _cardDescription: Negates the effects of low and medium danger hazards. <style="Keyword">Flimsy.</style>
+  _keywords:
+  - {fileID: 11400000, guid: 50143164094bc6d45bd752e53bab0174, type: 2}
+  - {fileID: 11400000, guid: db30aedddd352f64d8b69da0e655d955, type: 2}
   _cardArt: {fileID: 21300000, guid: d227ce2b90b72f74dbb57e65bcd6284c, type: 3}
   _tags:
   - {fileID: 11400000, guid: f4abbad926680224cbba12f037ef5f56, type: 2}
