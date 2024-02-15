@@ -58,6 +58,7 @@ public abstract class NightEvent : ScriptableObject
 
     public int GetBonusRequirements()
     {
+        // If this is changed will have to update night event card string to use function again
         return 2;
     }
 
