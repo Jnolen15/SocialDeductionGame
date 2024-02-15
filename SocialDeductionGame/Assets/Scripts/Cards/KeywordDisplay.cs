@@ -10,13 +10,30 @@ public class KeywordDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     [SerializeField] private GameObject _keywordPopup;
     private List<KeywordSO> _keywords = new();
     private List<GameObject> _popups = new();
+    IKeywordKeeper _keywordKeeper;
+    private bool _initialized;
 
-    void Start()
+    // ============= Setup =============
+    private void Start()
     {
-        var keywordKeeper = GetComponentInParent<IKeywordKeeper>();
+        _keywordKeeper = GetComponentInParent<IKeywordKeeper>();
+    }
 
-        if (keywordKeeper != null)
-            _keywords = keywordKeeper.GetKeywords();
+    private void Update()
+    {
+        if (!_initialized)
+            Initialize();
+    }
+
+    private void Initialize()
+    {
+        if (_keywordKeeper != null)
+        {
+            if (_keywordKeeper.GetKeywords() != null)
+                _keywords = _keywordKeeper.GetKeywords();
+            else
+                return;
+        }
         else
         {
             Debug.LogError("Keyword Keeper not found!");
@@ -33,6 +50,8 @@ public class KeywordDisplay : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         LayoutRebuilder.ForceRebuildLayoutImmediate(_displayZone);
 
         HidePopups();
+
+        _initialized = true;
     }
 
     // ============= Interfaces =============

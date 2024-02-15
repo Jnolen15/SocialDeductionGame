@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3d4707064966bf4fafc78fa7e570f3a, type: 3}
   m_Name: T_Boar
   m_EditorClassIdentifier: 
-  _hazardID: 1004
+  _hazardID: 1003
   _hazardName: Boar
-  _hazardConsequences: -1 Health.
+  _hazardConsequences: <style="Health">-1</style>
+  _hazardKeywords: []
   _hazardArt: {fileID: 21300000, guid: 7803406d1b9d5a8499c2f2c1d01b445e, type: 3}
   _dangerLevel: 1
   _preventable: 1

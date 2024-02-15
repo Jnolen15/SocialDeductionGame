@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02f64ab01f184d740936901b3072631c, type: 3}
   m_Name: T_MudSlide
   m_EditorClassIdentifier: 
-  _hazardID: 1007
+  _hazardID: 1006
   _hazardName: Mud Slide
-  _hazardConsequences: Loose all cards and gear.
+  _hazardConsequences: <style="Keyword">Lose</style> all cards and gear.
+  _hazardKeywords:
+  - {fileID: 11400000, guid: 6edde8af39897d54995f3d2e47801b55, type: 2}
+  - {fileID: 11400000, guid: 3db6de2dfaefad14783102ca8961d47f, type: 2}
   _hazardArt: {fileID: 21300000, guid: 88da2d1ee7e67a3478eacb7919286775, type: 3}
   _dangerLevel: 2
   _preventable: 1

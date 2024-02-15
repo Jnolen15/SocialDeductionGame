@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2e25bbd5974cea4e8c71f491a115681, type: 3}
   m_Name: T_CarnivorousPlant
   m_EditorClassIdentifier: 
-  _hazardID: 1005
+  _hazardID: 1004
   _hazardName: Huge Carnivorous Plant
-  _hazardConsequences: Lose two random cards.
+  _hazardConsequences: <style="Keyword">Lose [2]</style>
+  _hazardKeywords:
+  - {fileID: 11400000, guid: 3db6de2dfaefad14783102ca8961d47f, type: 2}
   _hazardArt: {fileID: 21300000, guid: 7803406d1b9d5a8499c2f2c1d01b445e, type: 3}
   _dangerLevel: 1
   _preventable: 1
