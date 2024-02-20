@@ -10,12 +10,9 @@ public class Totem : NetworkBehaviour, ICardPlayable
     // ================== Refrences ==================
     [SerializeField] private GameObject _preppedTotemEffects;
     [SerializeField] private GameObject _activeTotemEffects;
-    [SerializeField] private GameObject _openTotemButton;
-    [SerializeField] private GameObject _totemPannel;
+    [SerializeField] private GameObject _activateTotemButton;
     [SerializeField] private GameObject _totemStatus;
     [SerializeField] private TextMeshProUGUI _totemStatusText;
-    [SerializeField] private GameObject _activateTotemButton;
-    [SerializeField] private TextMeshProUGUI _activateCostText;
     private TotemSounds _totemSounds;
 
     // ================== Variables ==================
@@ -24,24 +21,19 @@ public class Totem : NetworkBehaviour, ICardPlayable
     [SerializeField] private NetworkVariable<bool> _netIsPrepped = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netIsActive = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netCooldown = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private NetworkVariable<int> _currentCost = new(writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private List<TotemSlot> _totemSlots = new();
     [SerializeField] private PlayerData.Team _localTeam = PlayerData.Team.Unassigned;
 
     public delegate void TotemAction(LocationManager.LocationName locationName);
     public static event TotemAction OnLocationTotemEnable;
     public static event TotemAction OnLocationTotemDisable;
-    public static event TotemAction OnTotemMenuOpened;
-    public static event TotemAction OnTotemMenuClosed;
 
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
     {
         GameManager.OnStateIntro += InitialButtonSetup;
-        GameManager.OnStateAfternoon += CloseUIOnStateChange;
         _netIsActive.OnValueChanged += ToggleVisibility;
-        _netCooldown.OnValueChanged += UpdateStatus;
+        _netCooldown.OnValueChanged += UpdateCooldownStatus;
 
         if (IsServer)
         {
@@ -54,21 +46,13 @@ public class Totem : NetworkBehaviour, ICardPlayable
     private void Start()
     {
         _totemSounds = this.GetComponent<TotemSounds>();
-
-        foreach (TotemSlot slot in _totemSlots)
-        {
-            slot.Setup(this);
-        }
-
-        _totemPannel.SetActive(false);
     }
 
     public override void OnDestroy()
     {
         GameManager.OnStateIntro -= InitialButtonSetup;
-        GameManager.OnStateAfternoon -= CloseUIOnStateChange;
         _netIsActive.OnValueChanged -= ToggleVisibility;
-        _netCooldown.OnValueChanged -= UpdateStatus;
+        _netCooldown.OnValueChanged -= UpdateCooldownStatus;
 
         if (IsServer)
         {
@@ -83,33 +67,13 @@ public class Totem : NetworkBehaviour, ICardPlayable
 
     // ================== UI ==================
     #region UI
-    public void Show()
-    {
-        if(_totemSounds)
-            _totemSounds.PlayOpen();
-
-        _totemPannel.SetActive(true);
-        ForageUI.HideForageUI?.Invoke();
-    }
-
-    public void Hide()
-    {
-        if (_totemSounds)
-            _totemSounds.PlayClose();
-
-        _totemPannel.SetActive(false);
-        ForageUI.ShowForageUI?.Invoke();
-    }
-
-    public void CloseUIOnStateChange()
-    {
-        _totemPannel.SetActive(false);
-    }
-
     private void SetStatusText(string status)
     {
-        _totemStatus.SetActive(true);
-        _totemStatusText.text = status;
+        if (_localTeam == PlayerData.Team.Saboteurs)
+        {
+            _totemStatus.SetActive(true);
+            _totemStatusText.text = status;
+        }
     }
 
     private void HideStatus()
@@ -117,18 +81,19 @@ public class Totem : NetworkBehaviour, ICardPlayable
         _totemStatus.SetActive(false);
     }
 
-    private void UpdateStatus(int prev, int current)
+    private void UpdateCooldownStatus(int prev, int current)
     {
         if (current > 0)
             SetStatusText($"Totem is on cooldown for {current} days.");
-        else
-            SetStatusText("Add cards to prepare totem for activation.");
     }
 
-    private void ShowActivateButton(int cost)
+    private void TryEnableActiavteButton()
     {
-        _activateTotemButton.SetActive(true);
-        _activateCostText.text = cost.ToString();
+        // Only sabos, can see totem button
+        if (_localTeam == PlayerData.Team.Saboteurs)
+            _activateTotemButton.SetActive(true);
+        else
+            _activateTotemButton.SetActive(false);
     }
 
     private void HideActivateButton()
@@ -154,11 +119,6 @@ public class Totem : NetworkBehaviour, ICardPlayable
         return _netCooldown.Value > 0;
     }
 
-    public bool CanPlayCardHere(Card cardToPlay)
-    {
-        return true;
-    }
-
     private void GetLocalTeam()
     {
         _localTeam = PlayerConnectionManager.Instance.GetLocalPlayerTeam();
@@ -172,10 +132,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
         if (_localTeam == PlayerData.Team.Unassigned)
             GetLocalTeam();
 
-        if (_localTeam == PlayerData.Team.Saboteurs)
-            _openTotemButton.SetActive(true);
-        else
-            _openTotemButton.SetActive(false);
+        TryEnableActiavteButton();
     }
 
     private void SetTotemDormant()
@@ -185,20 +142,14 @@ public class Totem : NetworkBehaviour, ICardPlayable
 
         _isDormant = true;
 
-        foreach (TotemSlot slot in _totemSlots)
-            slot.TotemDeactivatedServerRpc();
-
         SetTotemDormantClientRpc();
     }
 
     [ClientRpc]
     private void SetTotemDormantClientRpc()
     {
-        // If player is sabo, can see dormant button while dormant
-        if (_localTeam == PlayerData.Team.Saboteurs)
-            _openTotemButton.SetActive(true);
-        else
-            _openTotemButton.SetActive(false);
+        HideStatus();
+        TryEnableActiavteButton();
     }
     #endregion
 
@@ -213,18 +164,14 @@ public class Totem : NetworkBehaviour, ICardPlayable
         {
             _preppedTotemEffects.SetActive(false);
             _activeTotemEffects.SetActive(true);
-            _openTotemButton.SetActive(true);
+            _activateTotemButton.SetActive(true);
             OnLocationTotemEnable?.Invoke(_locationName);
 
-            SetStatusText("Add cards with the matching tags to disable the totem.");
-
             HideActivateButton();
+            HideStatus();
 
             if (IsServer)
             {
-                foreach (TotemSlot slot in _totemSlots)
-                    slot.TotemActivatedServerRpc();
-
                 // Track analytics
                 int curDay = GameManager.Instance.GetCurrentDay();
                 AnalyticsTracker.Instance.TrackTotemActivated(curDay);
@@ -266,7 +213,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
             SetTotemDormant();
     }
 
-    // Call from server
+    // Call from server, sets active at night if prepped
     private void ToggleActive()
     {
         if (!IsServer)
@@ -280,54 +227,21 @@ public class Totem : NetworkBehaviour, ICardPlayable
         }
     }
 
-    // Called by Server
-    public void CardAddedToInactiveTotem()
+    // ================== Player interaction ==================
+    public void AttemptActivateTotem()
     {
-        if (!IsServer)
-            return;
-
         if (_netIsPrepped.Value)
         {
-            Debug.LogWarning("Totem is already prepped! Should not accept card");
+            Debug.LogWarning("Totem is already prepped!");
             return;
         }
 
-        // CALCULATE COST BASED ON NUMBER OF CARDS
-        int numCards = 0;
-        foreach (TotemSlot slot in _totemSlots)
-        {
-            if (slot.HasSaboCard())
-                numCards++;
-        }
-
-        if(numCards <= 1)
-            _currentCost.Value = 2;
-        else if(numCards == 2)
-            _currentCost.Value = 3;
-        else
-            _currentCost.Value = 4;
-
-        ShowActivateTotemButtonClientRpc(_currentCost.Value);
-    }
-
-    [ClientRpc]
-    private void ShowActivateTotemButtonClientRpc(int cost)
-    {
-        if (_localTeam != PlayerData.Team.Saboteurs)
+        if (SufferingManager.Instance.GetCurrentSufffering() < 2)
             return;
 
-        HideStatus();
-        ShowActivateButton(cost);
-    }
+        SufferingManager.Instance.ModifySuffering(-2, 204, false);
 
-    // Player pressed activate button
-    public void ActivateTotem()
-    {
-        if (SufferingManager.Instance.GetCurrentSufffering() >= _currentCost.Value)
-        {
-            SufferingManager.Instance.ModifySuffering(-_currentCost.Value, 201, false);
-            ActivateTotemServerRpc();
-        }
+        ActivateTotemServerRpc();
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -348,30 +262,28 @@ public class Totem : NetworkBehaviour, ICardPlayable
         SetStatusText("Totem will activate in the night");
     }
 
-    // Called by Server
-    public void CardAddedToActiveTotem()
+    public bool CanPlayCardHere(Card cardToPlay)
     {
-        if (!IsServer)
-            return;
+        if (cardToPlay.HasTag("Totem") && _netIsActive.Value)
+            return true;
 
-        // Test if all totem slots are full
-        bool complete = true;
-        foreach (TotemSlot slot in _totemSlots)
-        {
-            if (!slot.GetCardSatesfied())
-            {
-                complete = false;
-                break;
-            }
-        }
+        return false;
+    }
 
-        // Deactivate totem and go on cooldown
-        if (complete)
-        {
-            Debug.Log("<color=yellow>SERVER: </color>All cards successfully added, Disabling totem");
-            _netCooldown.Value = 2;
-            _netIsActive.Value = false;
-        }
+    public void DeactivateTotem()
+    {
+        if (_totemSounds)
+            _totemSounds.PlayClose();
+
+        DeactivateTotemServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void DeactivateTotemServerRpc()
+    {
+        Debug.Log("<color=yellow>SERVER: </color>Key successfully added, Disabling totem");
+        _netCooldown.Value = 2;
+        _netIsActive.Value = false;
     }
     #endregion
 }

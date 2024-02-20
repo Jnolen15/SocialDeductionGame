@@ -180,7 +180,7 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
         _netSaboCard.Value = cardID;
         _netSlotActive.Value = true;
 
-        _totem.CardAddedToInactiveTotem();
+        //_totem.CardAddedToInactiveTotem();
 
         ShowCardClientRpc(cardID);
         AddTagsClientRpc(cardID);
@@ -198,7 +198,7 @@ public class TotemSlot : NetworkBehaviour, ICardUIPlayable
             _netCorrectCardAdded.Value = true;
             ShowCardClientRpc(cardID);
 
-            _totem.CardAddedToActiveTotem();
+            //_totem.CardAddedToActiveTotem();
         }
         else
         {
