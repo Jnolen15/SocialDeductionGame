@@ -11,14 +11,16 @@ public class CardVisual : MonoBehaviour
     [SerializeField] private Outline _cardOutline;
     [SerializeField] private TextMeshProUGUI _cardName;
     [SerializeField] private TextMeshProUGUI _cardDescription;
+    [SerializeField] private TextMeshProUGUI _cardFlavor;
     [SerializeField] private Image _cardSprite;
     [SerializeField] private Transform _tagIconSlot;
 
     // ================== Setup ==================
-    public void Setup(string name, string description, Sprite art, List<CardTag> tags)
+    public void Setup(string name, string description, string flavor, Sprite art, List<CardTag> tags)
     {
         _cardName.text = name;
         _cardDescription.text = description;
+        _cardFlavor.text = flavor;
 
         if(art != null)
         {

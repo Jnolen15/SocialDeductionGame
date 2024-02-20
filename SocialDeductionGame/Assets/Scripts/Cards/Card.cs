@@ -11,6 +11,8 @@ public abstract class Card : MonoBehaviour, IKeywordKeeper
     [SerializeField] protected string _cardName;
     [TextArea]
     [SerializeField] protected string _cardDescription;
+    [TextArea]
+    [SerializeField] protected string _cardFlavor;
     [SerializeField] protected List<KeywordSO> _keywords;
     [SerializeField] protected Sprite _cardArt;
     [SerializeField] protected List<CardTag> _tags;
@@ -68,25 +70,25 @@ public abstract class Card : MonoBehaviour, IKeywordKeeper
 
     // ========== Card Functionality ==========
     #region Card Functionality
-    // Playable card for in the playerss hand
+    // Playable card for in the players hand
     public virtual void SetupPlayable()
     {
         GameObject cardVisual = Instantiate(_cardPlayablePrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardFlavor, _cardArt, _tags);
     }
 
     // Selectable card for foraging
     public virtual void SetupSelectable()
     {
         GameObject cardVisual = Instantiate(_cardSelectablePrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardFlavor, _cardArt, _tags);
     }
 
     // Visual card for non-interactable UI
     public virtual void SetupUI()
     {
         GameObject cardVisual = Instantiate(_cardUIPrefab, transform);
-        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardArt, _tags);
+        cardVisual.GetComponent<CardVisual>().Setup(_cardName, _cardDescription, _cardFlavor, _cardArt, _tags);
     }
 
     // Adding a card to the Stockpile which contributes to night events
