@@ -194,7 +194,7 @@ public class Forage : NetworkBehaviour, ICardPicker
 
     private GameObject ChooseCard()
     {
-        int cardID;
+        int cardID = -1;
 
         // Test for useless card
         int uselessOdds = _uselessOddsDefault;
@@ -204,14 +204,21 @@ public class Forage : NetworkBehaviour, ICardPicker
             uselessOdds -= _uselessOddsDebuffModifier;
         int rand = (Random.Range(0, 100));
         Debug.Log($"Useless Odds are {uselessOdds}, rolled a {rand}");
-        if (uselessOdds >= rand)
+        if (uselessOdds >= rand) // Test for a useless card
         {
             cardID = _uselessCardID;
             Debug.Log("Picked Useless Card " + cardID);
         }
-        else
+        else if (_netTotemActive.Value) // If totem is active, chance to spawn key
         {
-            // Pick and deal random foraged card
+            int keyRand = Random.Range(0, 4);
+            Debug.Log($"Totem active, testing for key spawn. Rolled {keyRand}");
+            if (keyRand == 3)
+                cardID = 1005;
+        }
+
+        if(cardID == -1) // Pick and deal random foraged card if useless or key was not picked
+        {
             cardID = _cardDropTable.PickCardDrop();
             Debug.Log("Picked Card " + cardID);
         }
