@@ -9,9 +9,13 @@ public class CardBonus : EventBonus
     [SerializeField] private int _cardID;
 
     // ========== METHOD OVERRIDES ==========
-    public override void InvokeBonus()
+    public override void InvokeBonus(GameObject player = null)
     {
-        CardManager cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
+        Debug.LogWarning("CardBonus envoked, but is non-functional!");
+        // Since bonuses have been changed to invoked on the server
+        // This no longer workds. Hwoever it is un-used
+        // If it is to be used again, likely have to make CardManager a network object
+        /*CardManager cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
 
         if (cardManager == null)
         {
@@ -19,6 +23,6 @@ public class CardBonus : EventBonus
             return;
         }
 
-        cardManager.GiveCard(_cardID);
+        cardManager.GiveCard(_cardID);*/
     }
 }

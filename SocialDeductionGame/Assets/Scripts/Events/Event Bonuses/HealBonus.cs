@@ -11,10 +11,8 @@ public class HealBonus : EventBonus
     [SerializeField] private int _hunger;
 
     // ========== METHOD OVERRIDES ==========
-    public override void InvokeBonus()
+    public override void InvokeBonus(GameObject player = null)
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-
         if (player == null)
         {
             Debug.LogError("Cannot enact night event. Player object not found!");

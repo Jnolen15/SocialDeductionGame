@@ -181,7 +181,7 @@ public class EventManager : NetworkBehaviour
                     InvokeGlobalNightEventBonusServerRpc(_netCurrentNightEventID.Value);
                 // Otherwise the event is invoted on each player object
                 else
-                    InvokeNightEventBonusClientRpc(_netCurrentNightEventID.Value);
+                    InvokeNightEventBonusServerRpc(_netCurrentNightEventID.Value);
             }
         }
         else
@@ -242,7 +242,7 @@ public class EventManager : NetworkBehaviour
                     else
                         Debug.LogError("<color=yellow>Server: </color>No Night Event found");
                 }
-                else { Debug.Log($"<color=yellow>Server: </color>Player {playerID} is a sabot and not effected by event"); }
+                else { Debug.Log($"<color=yellow>Server: </color>Player {playerID} is a sabo and not effected by event"); }
             }
             else { Debug.LogError($"Player ID:{playerID}'s game object could not be found or returned null"); }
         }
@@ -264,22 +264,34 @@ public class EventManager : NetworkBehaviour
     }
 
     // Gets event from database and invokes bonus
-    [ClientRpc]
-    private void InvokeNightEventBonusClientRpc(int eventID)
+    [ServerRpc]
+    private void InvokeNightEventBonusServerRpc(int eventID)
     {
-        // Saboteurs not effected by night event Bonuses
-        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
-            return;
+        List<ulong> playerIDs = PlayerConnectionManager.Instance.GetLivingPlayerIDs();
 
-        Debug.Log("<color=blue>CLIENT: </color>Invoking night event bonus!");
+        foreach (ulong playerID in playerIDs)
+        {
+            GameObject playerObj = PlayerConnectionManager.Instance.GetPlayerObjectByID(playerID);
 
-        // Invoke Night Event Bonus
-        NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
+            if (playerObj != null)
+            {
+                // If they are not a sabotuer, invoke the night event and pass the game object
+                if (PlayerConnectionManager.Instance.GetPlayerTeamByID(playerID) == PlayerData.Team.Survivors)
+                {
+                    Debug.Log($"<color=yellow>Server: </color>Invoking night bonus on player {playerID}!");
 
-        if (nEvent)
-            nEvent.InvokeBonus();
-        else
-            Debug.LogError("<color=blue>CLIENT: </color>No Night Event found");
+                    // Invoke Night Event Bonus
+                    NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
+
+                    if (nEvent)
+                        nEvent.InvokeBonus(playerObj);
+                    else
+                        Debug.LogError("<color=yellow>Server: </color>No Night Event found");
+                }
+                else { Debug.Log($"<color=yellow>Server: </color>Player {playerID} is a sabo and not effected by bonus"); }
+            }
+            else { Debug.LogError($"Player ID:{playerID}'s game object could not be found or returned null"); }
+        }
     }
 
     [ServerRpc]

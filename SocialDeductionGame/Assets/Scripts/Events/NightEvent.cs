@@ -84,9 +84,9 @@ public abstract class NightEvent : ScriptableObject
     public abstract void InvokeEvent(GameObject player = null);
 
     // The gameplay Bonuses of the event
-    public virtual void InvokeBonus()
+    public virtual void InvokeBonus(GameObject player = null)
     {
         Debug.Log("Invoking Event Bonus");
-        _eventBonus.InvokeBonus();
+        _eventBonus.InvokeBonus(player);
     }
 }
