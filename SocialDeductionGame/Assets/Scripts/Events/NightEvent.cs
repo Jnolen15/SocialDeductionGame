@@ -15,7 +15,7 @@ public abstract class NightEvent : ScriptableObject
     [TextArea]
     [SerializeField] private string _eventBonuses;
     [SerializeField] private Sprite _eventArt;
-    [SerializeField] private bool _serverInvoked;
+    [SerializeField] private bool _globallyInvoked;
 
     [Header("Required Resources")]
     [SerializeField] private EventRequirementsSO _requirements;
@@ -51,9 +51,9 @@ public abstract class NightEvent : ScriptableObject
         return _eventBonuses;
     }
 
-    public bool GetEventIsServerInvoked()
+    public bool GetEventIsGloballyInvoked()
     {
-        return _serverInvoked;
+        return _globallyInvoked;
     }
 
     public int GetBonusRequirements()
@@ -80,7 +80,8 @@ public abstract class NightEvent : ScriptableObject
 
     // ========== OVERRIDE Functions ==========
     // The gameplay consecqunces of the event
-    public abstract void InvokeEvent();
+    // Called only by the server
+    public abstract void InvokeEvent(GameObject player = null);
 
     // The gameplay Bonuses of the event
     public virtual void InvokeBonus()

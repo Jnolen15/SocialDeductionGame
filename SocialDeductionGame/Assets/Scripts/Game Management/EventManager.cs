@@ -21,6 +21,9 @@ public class EventManager : NetworkBehaviour
     private NightEventPreview _nightEventThumbnail;
     private PlayerData.Team _localplayerTeam;
 
+    public delegate void EventManagerEvent();
+    public static event EventManagerEvent OnAfterNightEvent;
+
     // ================== Setup ==================
     #region Setup
     public override void OnNetworkSpawn()
@@ -111,7 +114,7 @@ public class EventManager : NetworkBehaviour
     }
     #endregion
 
-    // ================== Night Events ==================
+    // ================== Event Setup ==================
     #region Night Events
     // Checks if event ID is correct then updates the networked night event id
     [ServerRpc(RequireOwnership = false)]
@@ -156,7 +159,10 @@ public class EventManager : NetworkBehaviour
         // Update the event UI
         UpdateEventUI();
     }
+    #endregion
 
+    // ================== Event Execution ==================
+    #region Event Execution
     [ServerRpc]
     private void DoEventServerRpc()
     {
@@ -170,28 +176,32 @@ public class EventManager : NetworkBehaviour
             if (_netEarnedBonusNightEvent.Value)
             {
                 Debug.Log("<color=yellow>Server: </color>Event Bonus Earned!");
-                // Invoke Server event bonus
-                if (CardDatabase.Instance.GetEvent(_netCurrentNightEventID.Value).GetEventIsServerInvoked())
-                    InvokeNightEventBonusServerRpc(_netCurrentNightEventID.Value);
-                // Invoke client event bonus
+                // Globaly invoked events are invoked just once
+                if (CardDatabase.Instance.GetEvent(_netCurrentNightEventID.Value).GetEventIsGloballyInvoked())
+                    InvokeGlobalNightEventBonusServerRpc(_netCurrentNightEventID.Value);
+                // Otherwise the event is invoted on each player object
                 else
                     InvokeNightEventBonusClientRpc(_netCurrentNightEventID.Value);
             }
         }
         else
         {
-            // Invoke Server event
-            if (CardDatabase.Instance.GetEvent(_netCurrentNightEventID.Value).GetEventIsServerInvoked())
-                InvokeNightEventServerRpc(_netCurrentNightEventID.Value);
-            // Invoke client event
+            Debug.Log("<color=yellow>Server: </color>Event failed, time for suffering");
+            // Globaly invoked events are invoked just once
+            if (CardDatabase.Instance.GetEvent(_netCurrentNightEventID.Value).GetEventIsGloballyInvoked())
+                InvokeGlobalNightEventServerRpc(_netCurrentNightEventID.Value);
+            // Otherwise the event is invoted on each player object
             else
-                InvokeNightEventClientRpc(_netCurrentNightEventID.Value);
+                InvokePlayerNightEventServerRpc(_netCurrentNightEventID.Value);
         }
+
+        // Let clients know night event has completed
+        AfterNightEventServerRpc();
     }
 
     // Gets event from database and invokes it on server
     [ServerRpc]
-    private void InvokeNightEventServerRpc(int eventID)
+    private void InvokeGlobalNightEventServerRpc(int eventID)
     {
         Debug.Log("<color=yellow>Server: </color>Invoking server event");
 
@@ -205,27 +215,42 @@ public class EventManager : NetworkBehaviour
     }
 
     // Gets event from database and invokes it on each client
-    [ClientRpc]
-    private void InvokeNightEventClientRpc(int eventID)
+    [ServerRpc]
+    private void InvokePlayerNightEventServerRpc(int eventID)
     {
-        // Saboteurs not effected by night events
-        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
-            return;
+        // Get a list of all player ids
+        List<ulong> playerIDs = PlayerConnectionManager.Instance.GetLivingPlayerIDs();
 
-        Debug.Log("<color=blue>CLIENT: </color>Invoking night event!");
+        // Cycle through all players
+        foreach (ulong playerID in playerIDs)
+        {
+            // Get player object
+            GameObject playerObj = PlayerConnectionManager.Instance.GetPlayerObjectByID(playerID);
 
-        // Invoke Night Event
-        NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
+            if(playerObj != null)
+            {
+                // If they are not a sabotuer, invoke the night event and pass the game object
+                if (PlayerConnectionManager.Instance.GetPlayerTeamByID(playerID) == PlayerData.Team.Survivors)
+                {
+                    Debug.Log($"<color=yellow>Server: </color>Invoking night event on player {playerID}!");
 
-        if (nEvent)
-            nEvent.InvokeEvent();
-        else
-            Debug.LogError("<color=blue>CLIENT: </color>No Night Event found");
+                    // Invoke Night Event
+                    NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);
+
+                    if (nEvent)
+                        nEvent.InvokeEvent(playerObj);
+                    else
+                        Debug.LogError("<color=yellow>Server: </color>No Night Event found");
+                }
+                else { Debug.Log($"<color=yellow>Server: </color>Player {playerID} is a sabot and not effected by event"); }
+            }
+            else { Debug.LogError($"Player ID:{playerID}'s game object could not be found or returned null"); }
+        }
     }
 
     // Gets event from database and invokes bonus
     [ServerRpc]
-    private void InvokeNightEventBonusServerRpc(int eventID)
+    private void InvokeGlobalNightEventBonusServerRpc(int eventID)
     {
         Debug.Log("<color=yellow>SERVER: </color>Invoking server event bonus");
 
@@ -257,6 +282,16 @@ public class EventManager : NetworkBehaviour
             Debug.LogError("<color=blue>CLIENT: </color>No Night Event found");
     }
 
+    [ServerRpc]
+    private void AfterNightEventServerRpc()
+    {
+        Debug.Log("<color=yellow>Server: </color>Night event completed, Sending event to start hunger drain.");
+        OnAfterNightEvent?.Invoke();
+    }
+    #endregion
+
+    // ================== Event Testing ==================
+    #region Event Testing
     // Tests if event was successfully prevented via correct resourcess in pile
     // Only the server runs this
     private void TestEvent()

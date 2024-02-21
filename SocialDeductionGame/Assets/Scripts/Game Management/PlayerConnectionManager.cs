@@ -832,5 +832,16 @@ public class PlayerConnectionManager : NetworkBehaviour
 
         return _gameRules.NumSaboteurs;
     }
+
+    public PlayerData.Team GetPlayerTeamByID(ulong id)
+    {
+        if (!IsServer)
+        {
+            Debug.LogError("Server only function not called by server");
+            return PlayerData.Team.Unassigned;
+        }
+
+        return FindPlayerEntry(id).GetPlayerTeam();
+    }
     #endregion
 }

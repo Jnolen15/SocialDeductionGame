@@ -11,17 +11,17 @@ public class DamageEvent : NightEvent
     [SerializeField] private int _hunger;
 
     // ========== METHOD OVERRIDES ==========
-    public override void InvokeEvent()
+    public override void InvokeEvent(GameObject player = null)
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-
         if (player == null)
         {
-            Debug.LogError("Cannot enact night event. Player object not found!");
+            Debug.LogError("<color=yellow>Server: </color>Cannot enact night event. Player object not given!");
             return;
         }
 
-        player.GetComponent<PlayerHealth>().ModifyHealth(-_dmg, "DamageEvent Event Consequence");
-        player.GetComponent<PlayerHealth>().ModifyHunger(-_hunger, "DamageEvent Event Consequence");
+        PlayerHealth pHealth = player.GetComponent<PlayerHealth>();
+
+        pHealth.ModifyHealth(-_dmg, "DamageEvent Event Consequence");
+        pHealth.ModifyHunger(-_hunger, "DamageEvent Event Consequence");
     }
 }
