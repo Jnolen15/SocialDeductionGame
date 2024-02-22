@@ -31,6 +31,7 @@ public class NightEventRecapUI : MonoBehaviour
     [SerializeField] private GameObject _genericRecapMessage;
     [SerializeField] private GameObject _eventRecap;
     [SerializeField] private GameObject _hungerDrain;
+    [SerializeField] private TextMeshProUGUI _hungerDrainText;
     [SerializeField] private GameObject _starvation;
     [SerializeField] private GameObject _death;
 
@@ -184,9 +185,10 @@ public class NightEventRecapUI : MonoBehaviour
     #endregion
 
     #region Recap Objects
-    private void ShowHungerDrain()
+    private void ShowHungerDrain(int value)
     {
         _hungerDrain.SetActive(true);
+        _hungerDrainText.text = "Daily Hunger Drain:    -" + value.ToString();
     }
 
     private void ShowStarvation()

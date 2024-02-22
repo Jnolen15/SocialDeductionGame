@@ -14,6 +14,8 @@ public class PlayerHealth : NetworkBehaviour
     [SerializeField] private int _maxHunger;
     [SerializeField] private NetworkVariable<int> _netCurrentHunger = new(writePerm: NetworkVariableWritePermission.Server);
     public NetworkVariable<bool> _netIsLiving = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netHungerLossIncreased = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netHungerLossDiminished = new(writePerm: NetworkVariableWritePermission.Server);
 
     private bool _doCheats;
 
@@ -24,8 +26,10 @@ public class PlayerHealth : NetworkBehaviour
 
     public delegate void HealthEvent();
     public static event HealthEvent OnDeath;
-    public static event HealthEvent OnHungerDrain;
     public static event HealthEvent OnStarvation;
+
+    public delegate void IntHealthEvent(int value);
+    public static event IntHealthEvent OnHungerDrain;
 
     // The following events are for the HealthHungerViewer debug UI
     public delegate void DetailHealthHungerEvent(int ModifiedAmmount, string cause);
@@ -239,26 +243,52 @@ public class PlayerHealth : NetworkBehaviour
 
         Debug.Log($"{NetworkObject.OwnerClientId} hunger  drain");
 
+        int drainValue = 2;
+
+        if(_netHungerLossIncreased.Value == true)
+        {
+            _netHungerLossIncreased.Value = false;
+            drainValue = 3;
+        }
+
+        if(_netHungerLossDiminished.Value == true)
+        {
+            _netHungerLossDiminished.Value = false;
+            return;
+        }
+
         // loose HP if hunger is less than 2
         bool starved = false;
-        if (_netCurrentHunger.Value < 2)
+        if (_netCurrentHunger.Value < drainValue)
         {
             ModifyHealth(-1, "Starvation");
             starved = true;
         }
 
-        ModifyHunger(-2, "Hunger Drain");
+        ModifyHunger(-drainValue, "Hunger Drain");
 
-        HungerDrainClientRpc(starved, clientRpcParams);
+        HungerDrainClientRpc(drainValue, starved, clientRpcParams);
     }
 
     [ClientRpc]
-    private void HungerDrainClientRpc(bool starved, ClientRpcParams clientRpcParams = default)
+    private void HungerDrainClientRpc(int drainNum, bool starved, ClientRpcParams clientRpcParams = default)
     {
-        OnHungerDrain?.Invoke();
+        OnHungerDrain?.Invoke(drainNum);
 
         if(starved)
             OnStarvation?.Invoke();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void HungerDrainIncreaseServerRpc()
+    {
+        _netHungerLossIncreased.Value = true;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void HungerDrainDiminishServerRpc()
+    {
+        _netHungerLossDiminished.Value = true;
     }
     #endregion
 

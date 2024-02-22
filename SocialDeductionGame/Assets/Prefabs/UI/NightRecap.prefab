@@ -694,7 +694,7 @@ GameObject:
   - component: {fileID: 7847962508189831462}
   - component: {fileID: 3450345848032037120}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: HDText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1936,6 +1936,7 @@ MonoBehaviour:
   _genericRecapMessage: {fileID: 6092779401382253503, guid: f8f73d05972b8dd438657846c354416a, type: 3}
   _eventRecap: {fileID: 84397543735764104}
   _hungerDrain: {fileID: 7326402225581231460}
+  _hungerDrainText: {fileID: 3450345848032037120}
   _starvation: {fileID: 5401427084288288600}
   _death: {fileID: 1202998151571630617}
 --- !u!114 &6034638266261446685
@@ -2556,7 +2557,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 410, y: -325}
+  m_AnchoredPosition: {x: 423.2708, y: -58}
   m_SizeDelta: {x: 788, y: 116}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4624623744886590983

@@ -9,16 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e72f1ae1f2c2b74db098be57c3cac79, type: 3}
+  m_Script: {fileID: 11500000, guid: ba75a06fb9b62684781e3d6f6e0b9934, type: 3}
   m_Name: Monkeys
   m_EditorClassIdentifier: 
   _eventID: 1004
   _eventName: Thieving Monkeys
-  _eventConsequences: All players <style="Hunger">-3</style>.
-  _eventBonuses: Gain a meduim meal.
+  _eventConsequences: Hunger drain set to <style="Hunger">-3</style>.
+  _eventBonuses: Hunger Drain set to 0.
   _eventArt: {fileID: 21300000, guid: 38c76c9c0a5a129429e99b6df0e368ca, type: 3}
-  _serverInvoked: 0
+  _globallyInvoked: 0
   _requirements: {fileID: 11400000, guid: f2050725077683a48bbb89b1e947ebe0, type: 2}
-  _eventBonus: {fileID: 11400000, guid: 530feb0897337cb409846f293e593cd4, type: 2}
-  _dmg: 0
-  _hunger: 3
+  _eventBonus: {fileID: 11400000, guid: 5e28f120a0bf4aa40a46dda7a88ed2e2, type: 2}
