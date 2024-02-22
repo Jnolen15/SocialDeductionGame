@@ -8,21 +8,28 @@ public class LTOSpawner : NetworkBehaviour
 {
     // ===================== Refrences / Variables =====================
     [SerializeField] private List<LimitedTimeObjectEntry> _ltoList;
-    [SerializeField] private List<Transform> _spawnPointList;
-    [SerializeField] private LimitedTimeObject _currentLTO;
-    [SerializeField] private LocationManager.LocationName _locationName;
+    [SerializeField] private List<LTOSpawnLocation> _ltoSpawnLocationList;
     [SerializeField] private int _spawnIncreaseMod;
-    private int _daysSinceLastSpawn;
-    private bool _hasLTO;
-    //private Dictionary<Transform, ILimitedTimeObject> _spawnPointDict;
 
     [System.Serializable]
     public class LimitedTimeObjectEntry
     {
-        public int AvailableAfterDay;
-        public float SpawnChance;
-        public int Lifetime;
         public GameObject LTOPrefab;
+        public int Lifetime;
+        public int AvailableAfterDay;
+        public float BaseSpawnChance;
+        [Header("Dont set")]
+        public float CurrentSpawnChance;
+        public int DaysSinceLastSpawn;
+    }
+
+    [System.Serializable]
+    public class LTOSpawnLocation
+    {
+        public LocationManager.LocationName LocationName;
+        public Transform SpawnPoint;
+        public LimitedTimeObject CurrentLTO;
+        public bool HasLTO;
     }
 
     public delegate void LTOAction(LocationManager.LocationName locationName);
@@ -38,14 +45,6 @@ public class LTOSpawner : NetworkBehaviour
             GameManager.OnStateAfternoon += TestSpawnLTO;
             GameManager.OnStateEvening += TestLTOLifetimes;
         }
-    }
-
-    private void Start()
-    {
-        /*foreach (Transform trans in _spawnPointList)
-        {
-            _spawnPointDict.Add(trans, null);
-        }*/
     }
 
     public override void OnDestroy()
@@ -71,57 +70,81 @@ public class LTOSpawner : NetworkBehaviour
     }*/
 
     // ===================== Function =====================
+    private LimitedTimeObjectEntry GetLTOObject()
+    {
+        foreach (LimitedTimeObjectEntry lto in _ltoList)
+        {
+            if (lto.AvailableAfterDay <= GameManager.Instance.GetCurrentDay())
+            {
+                // The longer since a spawn, the more likely one is
+                int rand = Random.Range(0, 101);
+
+                Debug.Log($"<color=yellow>SERVER: </color>Testing LTO Spawn Base {lto.BaseSpawnChance} + " +
+                    $"{(_spawnIncreaseMod * lto.DaysSinceLastSpawn)}, Days since last {lto.DaysSinceLastSpawn}. Rolled {rand}");
+
+                if (rand <= (lto.BaseSpawnChance + (_spawnIncreaseMod * lto.DaysSinceLastSpawn)))
+                {
+                    lto.DaysSinceLastSpawn = 0;
+                    return lto;
+                }
+                else
+                    lto.DaysSinceLastSpawn += 1;
+            }
+        }
+
+        return null;
+    }
+
+    private LTOSpawnLocation GetOpenSpawnLocation()
+    {
+        foreach (LTOSpawnLocation location in _ltoSpawnLocationList)
+        {
+            if (!location.HasLTO)
+            {
+                return location;
+            }
+        }
+
+        return null;
+    }
+
     private void TestSpawnLTO()
     {
         if (!IsServer)
             return;
 
-        if (_hasLTO)
-            return;
-
-        // Go through LTO list
-        foreach (LimitedTimeObjectEntry lto in _ltoList)
+        // Check to see if any LTOs can be spawned
+        LimitedTimeObjectEntry ltoToSpawn = GetLTOObject();
+        if (ltoToSpawn == null)
         {
-            // Tf after day
-            if(lto.AvailableAfterDay <= GameManager.Instance.GetCurrentDay())
-            {
-                // Test to see if its spawned.
-                // If not spawned, days since last spawn increases
-                // Spawn mod * days since last is added to spawn chance.
-                // So the longer since a spawn, the more likely one is
-
-                int rand = Random.Range(0, 101);
-
-                Debug.Log($"<color=yellow>SERVER: </color>Testing LTO Spawn Base {lto.SpawnChance} + " +
-                    $"{(_spawnIncreaseMod * _daysSinceLastSpawn)}, Days since last {_daysSinceLastSpawn}. Rolled {rand}");
-
-                if (rand <= (lto.SpawnChance + (_spawnIncreaseMod * _daysSinceLastSpawn)))
-                    SpawnLTO(lto);
-                else
-                    _daysSinceLastSpawn += 1;
-            }
+            Debug.Log("No LTO qualified to spawn");
+            return;
         }
+
+        // Check free locations to spawn it at
+        LTOSpawnLocation locationToSpawn = GetOpenSpawnLocation();
+        if (locationToSpawn == null)
+        {
+            Debug.Log("All LTO Locations full!");
+            return;
+        }
+
+        // Spawn it
+        SpawnLTO(ltoToSpawn, locationToSpawn);
     }
 
-    private void SpawnLTO(LimitedTimeObjectEntry lto)
+    private void SpawnLTO(LimitedTimeObjectEntry lto, LTOSpawnLocation location)
     {
-        Debug.Log("<color=yellow>SERVER: </color> Spawning LTO!");
+        Debug.Log($"<color=yellow>SERVER: </color> Spawning LTO {lto.LTOPrefab.name} at {location.LocationName}");
 
-        // If spawned, instantiate prefab, setup: Give it lifetime
-        // Spawn it on position and update dictionary
-        // Send spawn event for night recap
-        int rand = Random.Range(0, _spawnPointList.Count);
+        location.CurrentLTO = Instantiate(lto.LTOPrefab, location.SpawnPoint).GetComponent<LimitedTimeObject>();
+        location.CurrentLTO.GetComponent<NetworkObject>().Spawn();
 
-        _currentLTO = Instantiate(lto.LTOPrefab, _spawnPointList[rand]).GetComponent<LimitedTimeObject>();
-        _currentLTO.GetComponent<NetworkObject>().Spawn();
+        location.CurrentLTO.SetupLTO(lto.Lifetime+1);
 
-        //_spawnPointDict[_spawnPointList[rand]] = newLTO;
-        _currentLTO.SetupLTO(lto.Lifetime+1);
+        SendSpawnEventClientRpc(location.LocationName);
 
-        SendSpawnEventClientRpc();
-
-        _hasLTO = true;
-        _daysSinceLastSpawn = 0;
+        location.HasLTO = true;
     }
 
     private void TestLTOLifetimes()
@@ -129,36 +152,39 @@ public class LTOSpawner : NetworkBehaviour
         if (!IsServer)
             return;
 
-        if (!_hasLTO)
-            return;
-
-        // Coutdown life and test to see if died
-        if (_currentLTO.CoutdownLife())
+        foreach (LTOSpawnLocation location in _ltoSpawnLocationList)
         {
-            Debug.Log("<color=yellow>SERVER: </color> LTO out of life, destroying");
+            if (!location.HasLTO)
+                return;
 
-            // if so despawn it
-            //_currentLTO.GetComponent<NetworkObject>().Despawn();
-            Destroy(_currentLTO.gameObject);
-            //_currentLTO.DestroySelf();
+            // Coutdown life and test to see if died
+            if (location.CurrentLTO.CoutdownLife())
+            {
+                Debug.Log("<color=yellow>SERVER: </color> LTO out of life, destroying");
 
-            // Send Despawn event for night recap
-            SendDespawnEventClientRpc();
+                // if so despawn it
+                //_currentLTO.GetComponent<NetworkObject>().Despawn();
+                Destroy(location.CurrentLTO.gameObject);
+                //_currentLTO.DestroySelf();
 
-            _currentLTO = null;
-            _hasLTO = false;
+                // Send Despawn event for night recap
+                SendDespawnEventClientRpc(location.LocationName);
+
+                location.CurrentLTO = null;
+                location.HasLTO = false;
+            }
         }
     }
 
     [ClientRpc]
-    private void SendSpawnEventClientRpc()
+    private void SendSpawnEventClientRpc(LocationManager.LocationName locationName)
     {
-        OnLTOSpawned?.Invoke(_locationName);
+        OnLTOSpawned?.Invoke(locationName);
     }
 
     [ClientRpc]
-    private void SendDespawnEventClientRpc()
+    private void SendDespawnEventClientRpc(LocationManager.LocationName locationName)
     {
-        OnLTODespawned?.Invoke(_locationName);
+        OnLTODespawned?.Invoke(locationName);
     }
 }
