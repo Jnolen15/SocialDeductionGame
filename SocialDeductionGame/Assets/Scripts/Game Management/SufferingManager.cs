@@ -40,8 +40,8 @@ public class SufferingManager : NetworkBehaviour
     {
         GameManager.OnStateIntro += Setup;
 
-        if(IsServer)
-            GameManager.OnStateMorning += DailySuffering;
+        //if(IsServer)
+        //    GameManager.OnStateMorning += DailySuffering;
 
         InitializeSingleton();
     }
@@ -50,8 +50,8 @@ public class SufferingManager : NetworkBehaviour
     {
         GameManager.OnStateIntro -= Setup;
 
-        if(IsServer)
-            GameManager.OnStateMorning -= DailySuffering;
+        //if(IsServer)
+        //    GameManager.OnStateMorning -= DailySuffering;
     }
 
     private void Setup()

@@ -236,10 +236,10 @@ public class Totem : NetworkBehaviour, ICardPlayable
             return;
         }
 
-        if (SufferingManager.Instance.GetCurrentSufffering() < 2)
+        if (SufferingManager.Instance.GetCurrentSufffering() < 1)
             return;
 
-        SufferingManager.Instance.ModifySuffering(-2, 204, false);
+        SufferingManager.Instance.ModifySuffering(-1, 201, false);
 
         ActivateTotemServerRpc();
     }

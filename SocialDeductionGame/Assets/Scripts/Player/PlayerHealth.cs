@@ -68,7 +68,7 @@ public class PlayerHealth : NetworkBehaviour
         if (IsOwner)
         {
             ModifyHealthServerRPC(4, false, "InitialSet");
-            ModifyHungerServerRPC(6, false, "InitialSet");
+            ModifyHungerServerRPC(4, false, "InitialSet");
         }
     }
 
