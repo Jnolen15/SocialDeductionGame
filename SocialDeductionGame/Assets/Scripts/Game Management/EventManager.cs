@@ -230,7 +230,8 @@ public class EventManager : NetworkBehaviour
             if(playerObj != null)
             {
                 // If they are not a sabotuer, invoke the night event and pass the game object
-                if (PlayerConnectionManager.Instance.GetPlayerTeamByID(playerID) == PlayerData.Team.Survivors)
+                if (PlayerConnectionManager.Instance.GetPlayerTeamByID(playerID) == PlayerData.Team.Survivors 
+                    && playerObj.GetComponent<PlayerHealth>().IsLiving())
                 {
                     Debug.Log($"<color=yellow>Server: </color>Invoking night event on player {playerID}!");
 
@@ -276,7 +277,8 @@ public class EventManager : NetworkBehaviour
             if (playerObj != null)
             {
                 // If they are not a sabotuer, invoke the night event and pass the game object
-                if (PlayerConnectionManager.Instance.GetPlayerTeamByID(playerID) == PlayerData.Team.Survivors)
+                if (PlayerConnectionManager.Instance.GetPlayerTeamByID(playerID) == PlayerData.Team.Survivors 
+                    && playerObj.GetComponent<PlayerHealth>().IsLiving())
                 {
                     Debug.Log($"<color=yellow>Server: </color>Invoking night bonus on player {playerID}!");
 

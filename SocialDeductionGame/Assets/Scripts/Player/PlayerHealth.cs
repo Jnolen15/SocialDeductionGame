@@ -241,6 +241,9 @@ public class PlayerHealth : NetworkBehaviour
             }
         };
 
+        if (!IsLiving())
+            return;
+
         Debug.Log($"{NetworkObject.OwnerClientId} hunger  drain");
 
         int drainValue = 2;
