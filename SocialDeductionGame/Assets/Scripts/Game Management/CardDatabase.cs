@@ -20,6 +20,9 @@ public class CardDatabase : MonoBehaviour
     // ============== Cards ==============
     #region Cards
     //  ===== Global Card List =====
+    [Header("Returned when card not found")]
+    [SerializeField] private CardEntry _bugCard;
+    [Header("Card Database")]
     [SerializeField] private List<CardEntry> _globalCardList = new List<CardEntry>();
     [System.Serializable]
     public class CardEntry
@@ -44,16 +47,16 @@ public class CardDatabase : MonoBehaviour
     }
 
     // ===== Card Functions =====
-    public bool VerifyCard(int cardID)
+    public int VerifyCard(int cardID)
     {
         foreach (CardEntry card in _globalCardList)
         {
             if (card.CardID == cardID)
-                return true;
+                return cardID;
         }
 
-        Debug.LogError($"Card with ID:{cardID} not found in global card list.");
-        return false;
+        Debug.LogWarning($"Card with ID:{cardID} not found in global card list, Giving Bug");
+        return _bugCard.CardID;
     }
 
     public GameObject GetCard(int cardID)
@@ -64,8 +67,8 @@ public class CardDatabase : MonoBehaviour
                 return card.CardObj;
         }
 
-        Debug.LogError($"Card with ID:{cardID} not found in global card list.");
-        return null;
+        Debug.LogWarning($"Card with ID:{cardID} not found in global card list, Giving Bug");
+        return _bugCard.CardObj;
     }
 
     public string GetCardName(int cardID)

@@ -96,6 +96,11 @@ public class PlayerCardManager : NetworkBehaviour
         if (!_pHealth.IsLiving())
             return;
 
+        for (int i = 0; i < cardIDs.Length; i++)
+        {
+            cardIDs[i] = CardDatabase.Instance.VerifyCard(cardIDs[i]);
+        }
+
         DrawCardsServerRPC(cardIDs);
     }
 

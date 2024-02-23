@@ -100,11 +100,7 @@ public class ForageDeck : NetworkBehaviour
             Debug.Log("Picked Card " + cardID);
         }
 
-        if (!CardDatabase.Instance.VerifyCard(cardID))
-        {
-            Debug.Log("Card ID could not be verified. Picking new from drop table");
-            cardID = _cardDropTable.PickCardDrop();
-        }
+        cardID = CardDatabase.Instance.VerifyCard(cardID);
 
         return cardID;
     }

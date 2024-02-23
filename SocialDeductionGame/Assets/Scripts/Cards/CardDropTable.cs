@@ -126,7 +126,7 @@ public class CardDropTable
 		// Verify that all card IDs in the list are in the card database
 		foreach (CardDropEntry cardDrop in CardDrops)
 		{
-			if (!CardDatabase.Instance.VerifyCard(cardDrop.CardID))
+			if (CardDatabase.Instance.VerifyCard(cardDrop.CardID) == 9999)
 				Debug.LogError($"CardDropTable contains card with ID {cardDrop.CardID} that is not in the CardDatabase");
 		}
 	}
