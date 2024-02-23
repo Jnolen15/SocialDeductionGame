@@ -41,13 +41,13 @@ public class CardManager : MonoBehaviour
     // ================== Forage ==================
     #region Forage
     // ~~~~~~~~ Events ~~~~~~~~
-    public delegate void InjectCardsAction(LocationManager.LocationName locationName, int cardID, int num);
+    public delegate void InjectCardsAction(LocationManager.LocationName locationName, int cardID, float weight, int num);
     public static event InjectCardsAction OnInjectCards;
 
     // Should only be called from the server
-    public void InjectCards(LocationManager.LocationName locationName, int cardID, int num)
+    public void InjectCards(LocationManager.LocationName locationName, int cardID, float weight, int num)
     {
-        OnInjectCards?.Invoke(locationName, cardID, num);
+        OnInjectCards?.Invoke(locationName, cardID, weight, num);
     }
     #endregion
 }

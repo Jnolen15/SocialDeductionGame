@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Code inspired by Hyper Fox Studios https://hyperfoxstudios.com/category/tutorial/
+// Base code inspired by Hyper Fox Studios https://hyperfoxstudios.com/category/tutorial/
 
 [System.Serializable]
 public class CardDropTable
@@ -19,8 +19,12 @@ public class CardDropTable
         // The higher the weight, the higher chance of being picked
         public float ProbabilityWeight;
 
-        // Displayed only as an information. DO not be set manually via inspector!
-        public float ProbabilityPercent;
+		// If a card is marked as limited it will be removed from the deck when NumberInDeck reaches 0
+		public bool LimitedNumber;
+		public int NumberInDeck;
+
+		// Displayed only as an information. DO not be set manually via inspector!
+		public float ProbabilityPercent;
 
 		// Assigned via ValidateTable function. They represent the range where the item will be picked.
 		[HideInInspector]
@@ -29,9 +33,17 @@ public class CardDropTable
         public float ProbabilityRangeTo;
 
 		public CardDropEntry(int cardID, float weight)
+		{
+			CardID = cardID;
+			ProbabilityWeight = weight;
+		}
+
+		public CardDropEntry(int cardID, float weight, int num)
         {
 			CardID = cardID;
 			ProbabilityWeight = weight;
+			LimitedNumber = true;
+			NumberInDeck = num;
 		}
     }
 
@@ -42,18 +54,19 @@ public class CardDropTable
 	// Sum of all weights of items.
 	private float _probabilityTotalWeight;
 
-	// ============== Card Addition ==============
-	public void ClearCards()
+    // ============== Card Addition ==============
+	#region Card Addition
+    public void ClearCards()
     {
 		Debug.Log("Clearing CardDrops");
 		CardDrops.Clear();
 	}
 
-	public void AddCard(int cardID, float weight)
+	public void AddLimitedCard(int cardID, float weight, int num)
     {
-		Debug.Log("Adding card " + cardID);
+		Debug.Log("Adding limited card " + cardID);
 
-		CardDrops.Add(new CardDropEntry(cardID, weight));
+		CardDrops.Add(new CardDropEntry(cardID, weight, num));
 
 		ValidateTable();
     }
@@ -74,14 +87,29 @@ public class CardDropTable
 
 		ValidateTable();
 	}
+	#endregion
 
-	// ============== Drop table validation ==============
-	#region
+	// ============== Card Removal ==============
+	#region Card Removal
 	/// <summary>
-	/// Calculates the percentage and asigns the probabilities how many times
-	/// the items can be picked. Function used also to validate data when tweaking numbers in editor.
-	/// </summary>	
-	public void ValidateTable()
+	/// Picks and returns the loot drop item based on it's probability.
+	/// </summary>
+	private void RemoveFromDeck(CardDropEntry cardDrop)
+    {
+		Debug.Log("Removing card from deck" + cardDrop.CardName);
+		CardDrops.Remove(cardDrop);
+
+		ValidateTable();
+	}
+    #endregion
+
+    // ============== Drop table validation ==============
+    #region
+    /// <summary>
+    /// Calculates the percentage and asigns the probabilities how many times
+    /// the items can be picked. Function used also to validate data when tweaking numbers in editor.
+    /// </summary>	
+    public void ValidateTable()
 	{
 		if (CardDrops == null || CardDrops.Count <= 0)
 			return;
@@ -147,6 +175,14 @@ public class CardDropTable
 			// If the random number matches the item's range, return card id
 			if (randomNum > cardDrop.ProbabilityRangeFrom && randomNum < cardDrop.ProbabilityRangeTo)
 			{
+                if (cardDrop.LimitedNumber)
+                {
+					cardDrop.NumberInDeck--;
+
+					if (cardDrop.NumberInDeck <= 0)
+						RemoveFromDeck(cardDrop);
+				}
+
 				return cardDrop.CardID;
 			}
 		}

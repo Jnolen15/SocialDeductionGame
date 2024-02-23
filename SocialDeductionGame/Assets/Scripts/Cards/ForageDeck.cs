@@ -25,6 +25,14 @@ public class ForageDeck : MonoBehaviour
     }
     #endregion
 
+    // ============== Inject Cards ==============
+    #region Inject Cards
+    public void InjectCard(int cardID, float weight, int num)
+    {
+        _cardDropTable.AddLimitedCard(cardID, weight, num);
+    }
+    #endregion
+
     // ============== Choose and Deal ==============
     #region Choose and Deal
     public int[] DrawCards(int numToDeal, int uselessOdds, bool totemActive, float dangerLevel, Hazard.DangerLevel dangerTier)

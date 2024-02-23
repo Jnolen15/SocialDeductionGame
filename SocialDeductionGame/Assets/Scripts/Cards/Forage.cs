@@ -103,7 +103,7 @@ public class Forage : NetworkBehaviour, ICardPicker
 
     // ============== Inject Cards ==============
     #region Inject Cards
-    private void InjectCards(LocationManager.LocationName locationName, int cardID, int num)
+    private void InjectCards(LocationManager.LocationName locationName, int cardID, float weight, int num)
     {
         if (!IsServer)
             return;
@@ -111,7 +111,7 @@ public class Forage : NetworkBehaviour, ICardPicker
         if (_locationName != locationName)
             return;
 
-        //_injectedCards.Add(cardID, num);
+        _forageDeck.InjectCard(cardID, weight, num);
 
         Debug.Log($"{_locationName} had {num} card(s) with ID: {cardID} injected");
     }
