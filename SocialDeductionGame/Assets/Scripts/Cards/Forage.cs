@@ -129,11 +129,30 @@ public class Forage : NetworkBehaviour, ICardPicker
 
         Debug.Log(gameObject.name + " Dealing cards");
 
+        // Get card draw bonuses from player gear
+        int drawBonus = _playerHandMan.CheckForForageGear(_locationName.ToString()); // bonus from gear
+
+        GetDeltCardsServerRpc(drawBonus);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void GetDeltCardsServerRpc(int drawBonus, ServerRpcParams serverRpcParams = default)
+    {
+        // Get client data
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { clientId }
+            }
+        };
+
         // Get Num to draw
         int numToDeal = 3;
+        numToDeal += drawBonus;
         if (_netTotemActive.Value)
             numToDeal--;
-        numToDeal += _playerHandMan.CheckForForageGear(_locationName.ToString()); // bonus from gear
 
         // Calc useless odds
         int uselessOdds = _uselessOddsDefault;
@@ -150,12 +169,19 @@ public class Forage : NetworkBehaviour, ICardPicker
             dangerTier = Hazard.DangerLevel.High;
 
         // Draw Cards
-        List<int> cardIDList = _forageDeck.DrawCards(numToDeal, uselessOdds, _netTotemActive.Value, _netCurrentDanger.Value, dangerTier);
+        int[] cardIDList = _forageDeck.DrawCards(numToDeal, uselessOdds, _netTotemActive.Value, _netCurrentDanger.Value, dangerTier);
+
+        GetDeltCardsClientRpc(cardIDList, clientRpcParams);
+    }
+
+    [ClientRpc]
+    public void GetDeltCardsClientRpc(int[] cardIDList, ClientRpcParams clientRpcParams = default)
+    {
         List<GameObject> cardObjList = new();
 
         foreach (int cardID in cardIDList)
         {
-            if(cardID < 1000) // hazard
+            if (cardID < 1000) // hazard
             {
                 cardObjList.Add(CreateHazard(cardID));
             }

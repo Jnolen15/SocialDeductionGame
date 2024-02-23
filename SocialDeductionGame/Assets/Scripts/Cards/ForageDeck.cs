@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Netcode;
 
-public class ForageDeck : NetworkBehaviour
+public class ForageDeck : MonoBehaviour
 {
     // ============== Parameters / Refrences / Variables ==============
     #region P / R / V
@@ -28,7 +27,7 @@ public class ForageDeck : NetworkBehaviour
 
     // ============== Choose and Deal ==============
     #region Choose and Deal
-    public List<int> DrawCards(int numToDeal, int uselessOdds, bool totemActive, float dangerLevel, Hazard.DangerLevel dangerTier)
+    public int[] DrawCards(int numToDeal, int uselessOdds, bool totemActive, float dangerLevel, Hazard.DangerLevel dangerTier)
     {
         Debug.Log($"Getting cards from {_locationName}'s deck");
 
@@ -48,7 +47,7 @@ public class ForageDeck : NetworkBehaviour
             cardIDList.Insert(Random.Range(0, cardIDList.Count), hazardCardID);
         }
 
-        return cardIDList;
+        return cardIDList.ToArray();
     }
 
     private int HazardTest(float dangerLevel, Hazard.DangerLevel dangerTier)
