@@ -27,6 +27,12 @@ public class CardDropTable
         public float ProbabilityRangeFrom;
         [HideInInspector]
         public float ProbabilityRangeTo;
+
+		public CardDropEntry(int cardID, float weight)
+        {
+			CardID = cardID;
+			ProbabilityWeight = weight;
+		}
     }
 
 	// List of card IDs that may be dropped
@@ -36,6 +42,41 @@ public class CardDropTable
 	// Sum of all weights of items.
 	private float _probabilityTotalWeight;
 
+	// ============== Card Addition ==============
+	public void ClearCards()
+    {
+		Debug.Log("Clearing CardDrops");
+		CardDrops.Clear();
+	}
+
+	public void AddCard(int cardID, float weight)
+    {
+		Debug.Log("Adding card " + cardID);
+
+		CardDrops.Add(new CardDropEntry(cardID, weight));
+
+		ValidateTable();
+    }
+
+	public void AddCards(int[] cardIDs, float[] weights)
+	{
+		if(cardIDs.Length != weights.Length)
+        {
+			Debug.LogWarning("Card ID and Weight array lengths do not match! Cards not added");
+			return;
+        }
+
+        for (int i = 0; i < cardIDs.Length; i++)
+        {
+			Debug.Log("Adding card " + cardIDs[i]);
+			CardDrops.Add(new CardDropEntry(cardIDs[i], weights[i]));
+		}
+
+		ValidateTable();
+	}
+
+	// ============== Drop table validation ==============
+	#region
 	/// <summary>
 	/// Calculates the percentage and asigns the probabilities how many times
 	/// the items can be picked. Function used also to validate data when tweaking numbers in editor.
@@ -89,11 +130,14 @@ public class CardDropTable
 				Debug.LogError($"CardDropTable contains card with ID {cardDrop.CardID} that is not in the CardDatabase");
 		}
 	}
+    #endregion
 
-	/// <summary>
-	/// Picks and returns the loot drop item based on it's probability.
-	/// </summary>
-	public int PickCardDrop()
+    // ============== Card Picking ==============
+    #region
+    /// <summary>
+    /// Picks and returns the loot drop item based on it's probability.
+    /// </summary>
+    public int PickCardDrop()
 	{
 		float randomNum = Random.Range(0, _probabilityTotalWeight);
 
@@ -150,4 +194,5 @@ public class CardDropTable
 
 		return cardList;
 	}
+    #endregion
 }

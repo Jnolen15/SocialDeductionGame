@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2137d1433b41d4c4695c1ac46974866d, type: 3}
+  m_Name: PlateauDrops
+  m_EditorClassIdentifier: 
+  CardDrops:
+  - CardName: Plants
+    CardID: 1003
+    ProbabilityWeight: 50
+  - CardName: Wood
+    CardID: 1001
+    ProbabilityWeight: 5
+  - CardName: Stone
+    CardID: 1002
+    ProbabilityWeight: 5
+  - CardName: Small Raw Food
+    CardID: 2001
+    ProbabilityWeight: 30
+  - CardName: Medium Raw Food
+    CardID: 2002
+    ProbabilityWeight: 5
+  - CardName: Aloe
+    CardID: 3001
+    ProbabilityWeight: 4
+  - CardName: Runestone
+    CardID: 1004
+    ProbabilityWeight: 1

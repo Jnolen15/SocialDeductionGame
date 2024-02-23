@@ -1356,6 +1356,7 @@ GameObject:
   - component: {fileID: 3238553330213436422}
   - component: {fileID: 8414024033324291447}
   - component: {fileID: 3238553330213436417}
+  - component: {fileID: 7117549570035783718}
   m_Layer: 0
   m_Name: Forage
   m_TagString: Untagged
@@ -1413,6 +1414,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardDropTable:
     CardDrops: []
+  _forageDrops: {fileID: 0}
   _uselessCardID: 9001
   _uselessOddsDefault: 50
   _uselessOddsDebuffModifier: 25
@@ -1474,6 +1476,72 @@ MonoBehaviour:
     m_InternalValue: 0
   _netTotemActive:
     m_InternalValue: 0
+--- !u!114 &7117549570035783718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3238553330213436442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fbba98a2c55af74bbde29a641152b92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _forageDrops: {fileID: 0}
+  _cardDropTable:
+    CardDrops: []
+  _uselessCardID: 9001
+  _uselessOddsDefault: 50
+  _uselessOddsDebuffModifier: 25
+  _dangerLevelDrawChances:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.1
+      inSlope: -0.0050203498
+      outSlope: -0.0050203498
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.1
+      value: 0.1
+      inSlope: -0.0027923887
+      outSlope: -0.0027923887
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.5
+      value: 0.2
+      inSlope: 0.39669415
+      outSlope: 0.39669415
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 1
+    - serializedVersion: 3
+      time: 1
+      value: 0.4
+      inSlope: 0.3981704
+      outSlope: 0.3981704
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _tierTwoHazardThreshold: 60
+  _tierThreeHazardThreshold: 90
+  _dangerIncrementNum: 0.8
+  _dangerPerPlayerScaleNum: 3
+  _dangerLevelBase: 10
+  _locationName: 0
 --- !u!1 &3723197791381264424
 GameObject:
   m_ObjectHideFlags: 0

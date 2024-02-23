@@ -203,7 +203,7 @@ public class EventManager : NetworkBehaviour
     [ServerRpc]
     private void InvokeGlobalNightEventServerRpc(int eventID)
     {
-        Debug.Log("<color=yellow>Server: </color>Invoking server event");
+        Debug.Log("<color=yellow>Server: </color>Invoking global event");
 
         // Invoke Night Event
         NightEvent nEvent = CardDatabase.Instance.GetEvent(eventID);

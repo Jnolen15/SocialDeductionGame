@@ -7,13 +7,10 @@ public class Forage : NetworkBehaviour, ICardPicker
 {
     // ============== Parameters / Refrences / Variables ==============
     #region P / R / V
-    [Header("Card Parameters")]
-    [SerializeField] private CardDropTable _cardDropTable = new CardDropTable();
-    [SerializeField] private int _uselessCardID;
+    [Header("Useless Parameters")]
     [SerializeField] private int _uselessOddsDefault;
     [SerializeField] private int _uselessOddsDebuffModifier;
     [Header("Danger Parameters")]
-    [SerializeField] private AnimationCurve _dangerLevelDrawChances;
     [SerializeField] private int _tierTwoHazardThreshold;
     [SerializeField] private int _tierThreeHazardThreshold;
     [SerializeField] private float _dangerIncrementNum;
@@ -24,10 +21,11 @@ public class Forage : NetworkBehaviour, ICardPicker
 
     [Header("Refrences")]
     [SerializeField]private ForageUI _forageUI;
+    [SerializeField] private GameObject _hazardCardPref;
+    private ForageDeck _forageDeck;
     private CardManager _cardManager;
     private GameObject _playerObj;
     private HandManager _playerHandMan;
-    [SerializeField] private GameObject _hazardCardPref;
 
     [Header("Variables")]
     [SerializeField] private NetworkVariable<float> _netCurrentDanger = new(writePerm: NetworkVariableWritePermission.Server);
@@ -45,11 +43,6 @@ public class Forage : NetworkBehaviour, ICardPicker
 
     // ============== Setup ==============
     #region Setup
-    void OnValidate()
-    {
-        _cardDropTable.ValidateTable();
-    }
-
     public override void OnNetworkSpawn()
     {
         _netCurrentDanger.OnValueChanged += UpdateDangerUI;
@@ -64,13 +57,14 @@ public class Forage : NetworkBehaviour, ICardPicker
             GameManager.OnStateEvening += ClearBuffs;
             Totem.OnLocationTotemEnable += SetLocationTotem;
             Totem.OnLocationTotemDisable += ClearLocationTotem;
+            CardManager.OnInjectCards += InjectCards;
         }
     }
 
     private void Awake()
     {
+        _forageDeck = this.GetComponent<ForageDeck>();
         _cardManager = GameObject.FindGameObjectWithTag("CardManager").GetComponent<CardManager>();
-        _cardDropTable.ValidateTable();
     }
 
     private void OnDisable()
@@ -87,6 +81,7 @@ public class Forage : NetworkBehaviour, ICardPicker
             GameManager.OnStateEvening -= ClearBuffs;
             Totem.OnLocationTotemEnable -= SetLocationTotem;
             Totem.OnLocationTotemDisable -= ClearLocationTotem;
+            CardManager.OnInjectCards -= InjectCards;
         }
     }
 
@@ -106,6 +101,22 @@ public class Forage : NetworkBehaviour, ICardPicker
     }
     #endregion
 
+    // ============== Inject Cards ==============
+    #region Inject Cards
+    private void InjectCards(LocationManager.LocationName locationName, int cardID, int num)
+    {
+        if (!IsServer)
+            return;
+
+        if (_locationName != locationName)
+            return;
+
+        //_injectedCards.Add(cardID, num);
+
+        Debug.Log($"{_locationName} had {num} card(s) with ID: {cardID} injected");
+    }
+    #endregion
+
     // ============== Choose and Deal ==============
     #region Choose and Deal
     public void DealCards()
@@ -118,25 +129,40 @@ public class Forage : NetworkBehaviour, ICardPicker
 
         Debug.Log(gameObject.name + " Dealing cards");
 
+        // Get Num to draw
         int numToDeal = 3;
         if (_netTotemActive.Value)
             numToDeal--;
-        // Add card draw bonus gear
-        numToDeal += _playerHandMan.CheckForForageGear(_locationName.ToString());
+        numToDeal += _playerHandMan.CheckForForageGear(_locationName.ToString()); // bonus from gear
 
+        // Calc useless odds
+        int uselessOdds = _uselessOddsDefault;
+        if (_netEventDebuffed.Value)
+            uselessOdds += _uselessOddsDebuffModifier;
+        else if (_netEventBuffed.Value)
+            uselessOdds -= _uselessOddsDebuffModifier;
+
+        // Get hazard teir
+        Hazard.DangerLevel dangerTier = Hazard.DangerLevel.Low;
+        if (_tierTwoHazardThreshold < _netCurrentDanger.Value && _netCurrentDanger.Value <= _tierThreeHazardThreshold)
+            dangerTier = Hazard.DangerLevel.Medium;
+        else if (_tierThreeHazardThreshold < _netCurrentDanger.Value)
+            dangerTier = Hazard.DangerLevel.High;
+
+        // Draw Cards
+        List<int> cardIDList = _forageDeck.DrawCards(numToDeal, uselessOdds, _netTotemActive.Value, _netCurrentDanger.Value, dangerTier);
         List<GameObject> cardObjList = new();
 
-        GameObject hazardCard = HazardTest();
-        if (!hazardCard)// If no hazard drawn
+        foreach (int cardID in cardIDList)
         {
-            for(int i = 0; i < numToDeal; i++)
-                cardObjList.Add(ChooseCard());
-        }
-        else// If hazard drawn
-        {
-            for (int i = 0; i < (numToDeal-1); i++)
-                cardObjList.Add(ChooseCard());
-            cardObjList.Insert(Random.Range(0, cardObjList.Count), hazardCard);
+            if(cardID < 1000) // hazard
+            {
+                cardObjList.Add(CreateHazard(cardID));
+            }
+            else // Normal Card
+            {
+                cardObjList.Add(CreateCard(cardID));
+            }
         }
 
         _forageUI.DealCardObjects(cardObjList);
@@ -145,90 +171,23 @@ public class Forage : NetworkBehaviour, ICardPicker
         IncrementDanger(_dangerIncrementNum);
     }
 
-    private GameObject HazardTest()
-    {
-        // Test for hazard
-        float dangerLevel = _netCurrentDanger.Value;
-
-        // Get hazard teir
-        Hazard.DangerLevel dangerTier = Hazard.DangerLevel.Low;
-        if (_tierTwoHazardThreshold < dangerLevel && dangerLevel <= _tierThreeHazardThreshold)
-            dangerTier = Hazard.DangerLevel.Medium;
-        else if (_tierThreeHazardThreshold < dangerLevel)
-            dangerTier = Hazard.DangerLevel.High;
-
-        // Roll Hazard chances
-        float hazardChance = _dangerLevelDrawChances.Evaluate(dangerLevel*0.01f);
-        Debug.Log($"<color=blue>CLIENT: </color> Player DL: {dangerLevel}, hazard chance: {hazardChance}, hazard level {dangerTier}. Rolling.");
-        float rand = (Random.Range(0, 100)*0.01f);
-
-        // Hazard
-        if (hazardChance >= rand)
-        {
-            Debug.Log($"<color=blue>CLIENT: </color> Rolled: {rand}, hazard encountered!");
-            return SpawnHazard(dangerTier);
-        }
-        // No Hazard
-        else
-        {
-            Debug.Log($"<color=blue>CLIENT: </color> Rolled: {rand}, no hazard!");
-            return null;
-        }
-    }
-
-    private GameObject SpawnHazard(Hazard.DangerLevel dangerLevel)
+    private GameObject CreateHazard(int hazardID)
     {
         if (!_playerObj)
             SetupPlayerConnections();
 
-        // Spawn in random hazard
-        int randHazardID = CardDatabase.Instance.GetRandHazard(dangerLevel);
+        // Spawn in hazard
         GameObject hazardCard = Instantiate(_hazardCardPref, transform);
         HazardCardVisual hazard = hazardCard.GetComponent<HazardCardVisual>();
-        
-        hazard.Setup(randHazardID);
+
+        hazard.Setup(hazardID);
         hazard.RunHazard(_playerHandMan);
 
         return hazardCard;
     }
 
-    private GameObject ChooseCard()
+    private GameObject CreateCard(int cardID)
     {
-        int cardID = -1;
-
-        // Test for useless card
-        int uselessOdds = _uselessOddsDefault;
-        if (_netEventDebuffed.Value)
-            uselessOdds += _uselessOddsDebuffModifier;
-        else if (_netEventBuffed.Value)
-            uselessOdds -= _uselessOddsDebuffModifier;
-        int rand = (Random.Range(0, 100));
-        Debug.Log($"Useless Odds are {uselessOdds}, rolled a {rand}");
-        if (uselessOdds >= rand) // Test for a useless card
-        {
-            cardID = _uselessCardID;
-            Debug.Log("Picked Useless Card " + cardID);
-        }
-        else if (_netTotemActive.Value) // If totem is active, chance to spawn key
-        {
-            int keyRand = Random.Range(0, 5);
-            Debug.Log($"Totem active, testing for key spawn. Rolled {keyRand}");
-            if (keyRand == 4)
-                cardID = 1005;
-        }
-
-        if(cardID == -1) // Pick and deal random foraged card if useless or key was not picked
-        {
-            cardID = _cardDropTable.PickCardDrop();
-            Debug.Log("Picked Card " + cardID);
-        }
-
-        if (!CardDatabase.Instance.VerifyCard(cardID))
-        {
-            Debug.Log("Card ID could not be verified. Picking new from drop table");
-            cardID = _cardDropTable.PickCardDrop();
-        }
-
         // Put card on screen
         GameObject cardObj = Instantiate(CardDatabase.Instance.GetCard(cardID), transform);
         cardObj.GetComponent<Card>().SetupSelectable();
