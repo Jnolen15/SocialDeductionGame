@@ -211,9 +211,9 @@ public class Forage : NetworkBehaviour, ICardPicker
         }
         else if (_netTotemActive.Value) // If totem is active, chance to spawn key
         {
-            int keyRand = Random.Range(0, 4);
+            int keyRand = Random.Range(0, 5);
             Debug.Log($"Totem active, testing for key spawn. Rolled {keyRand}");
-            if (keyRand == 3)
+            if (keyRand == 4)
                 cardID = 1005;
         }
 

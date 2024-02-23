@@ -46940,7 +46940,7 @@ MonoBehaviour:
   _exileVoteTimerMax: 15
   _netExileVoteTimer:
     m_InternalValue: 0
-  _trialVoteTimerMax: 20
+  _trialVoteTimerMax: 25
   _netTrialVoteTimer:
     m_InternalValue: 0
   _volcanoLocation: {fileID: 711707216}
@@ -59051,6 +59051,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3770474787945841588, guid: b694701fbdf76a74f80817686433f5db, type: 3}
+      propertyPath: _ltoList.Array.data[1].Lifetime
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3770474787945841588, guid: b694701fbdf76a74f80817686433f5db, type: 3}
       propertyPath: _ltoSpawnLocationList.Array.size
       value: 3
