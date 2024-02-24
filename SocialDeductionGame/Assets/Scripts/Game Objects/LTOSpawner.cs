@@ -140,7 +140,7 @@ public class LTOSpawner : NetworkBehaviour
         location.CurrentLTO = Instantiate(lto.LTOPrefab, location.SpawnPoint).GetComponent<LimitedTimeObject>();
         location.CurrentLTO.GetComponent<NetworkObject>().Spawn();
 
-        location.CurrentLTO.SetupLTO(lto.Lifetime+1);
+        location.CurrentLTO.SetupLTO(lto.Lifetime+1, location.LocationName);
 
         SendSpawnEventClientRpc(location.LocationName);
 

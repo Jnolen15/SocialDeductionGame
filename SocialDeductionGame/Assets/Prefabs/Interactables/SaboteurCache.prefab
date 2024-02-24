@@ -5462,6 +5462,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 709018a4cb03ec244a5af3a41e127bd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _location: 0
   _life: 0
   _openButton: {fileID: 2618733685610586717}
   _pickCards: {fileID: 2145901602555246894}
@@ -5476,24 +5477,32 @@ MonoBehaviour:
     - CardID: 3002
       CardName: Poultice
       ProbabilityWeight: 40
+      LimitedNumber: 0
+      NumberInDeck: 0
       ProbabilityPercent: 40
       ProbabilityRangeFrom: 0
       ProbabilityRangeTo: 40
     - CardID: 2010
       CardName: SweetNectar
       ProbabilityWeight: 40
+      LimitedNumber: 0
+      NumberInDeck: 0
       ProbabilityPercent: 40
       ProbabilityRangeFrom: 40
       ProbabilityRangeTo: 80
     - CardID: 5001
       CardName: SmallCreature
       ProbabilityWeight: 10
+      LimitedNumber: 0
+      NumberInDeck: 0
       ProbabilityPercent: 10
       ProbabilityRangeFrom: 80
       ProbabilityRangeTo: 90
     - CardID: 2011
       CardName: PoisonMushroom
       ProbabilityWeight: 10
+      LimitedNumber: 0
+      NumberInDeck: 0
       ProbabilityPercent: 10
       ProbabilityRangeFrom: 90
       ProbabilityRangeTo: 100
