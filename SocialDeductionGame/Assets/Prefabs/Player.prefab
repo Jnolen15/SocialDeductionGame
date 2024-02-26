@@ -1702,6 +1702,10 @@ MonoBehaviour:
     m_InternalValue: 0
   _netIsLiving:
     m_InternalValue: 0
+  _netHungerLossIncreased:
+    m_InternalValue: 0
+  _netHungerLossDiminished:
+    m_InternalValue: 0
 --- !u!114 &-531654323873241125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8194,11 +8198,12 @@ MonoBehaviour:
   _cardHighlight: {fileID: 8997608844069248576}
   _randomSound: {fileID: 1171383711833199932}
   _ragdollPref: {fileID: 773832566018443587, guid: 034ec3dcfc9f5bf4daf4f7aa70bdfc89, type: 3}
-  _cardTagsAccepted:
+  _ownerCardTagsAccepted:
   - {fileID: 11400000, guid: f05c3c047e5aecf4b94c16213f92b0f1, type: 2}
   - {fileID: 11400000, guid: a5ced97b2788927488950ea2b641c351, type: 2}
   - {fileID: 11400000, guid: 8de9f809fa6797b45bff5075b451562e, type: 2}
-  - {fileID: 11400000, guid: 7ba73c52ed6561e42a9edb36daab788e, type: 2}
+  _nonownerCardTagsAccepted:
+  - {fileID: 11400000, guid: a8e37cf0992dfc14c97c907ca59d5393, type: 2}
 --- !u!114 &8997608844069248576
 MonoBehaviour:
   m_ObjectHideFlags: 0

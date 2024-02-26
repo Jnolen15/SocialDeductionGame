@@ -30,7 +30,8 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     private int _localMatIndex;
 
     // ================== Variables ==================
-    [SerializeField] private List<CardTag> _cardTagsAccepted = new();
+    [SerializeField] private List<CardTag> _ownerCardTagsAccepted = new();
+    [SerializeField] private List<CardTag> _nonownerCardTagsAccepted = new();
     private NetworkVariable<int> _netCharacterIndex = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<int> _netCharacterMatIndex = new(writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<bool> _netTookFromFire = new(writePerm: NetworkVariableWritePermission.Owner);
@@ -57,7 +58,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
             Campfire.OnTookFromFire += ToggleCampfireIconActive;
         }
         else
-            Destroy(_cardHighlight); // A temp solution
+        {
+            _cardHighlight.UpdateCardTags(_nonownerCardTagsAccepted);
+        }
     }
 
     private void OnEnable()
@@ -155,11 +158,16 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     // ================== Interface ==================
     public bool CanPlayCardHere(Card cardToPlay)
     {
-        if (!IsOwner)
-            return false;
-
-        if (cardToPlay.HasAnyTag(_cardTagsAccepted))
-            return true;
+        if (IsOwner)
+        {
+            if (cardToPlay.HasAnyTag(_ownerCardTagsAccepted))
+                return true;
+        }
+        else
+        {
+            if (cardToPlay.HasAnyTag(_nonownerCardTagsAccepted))
+                return true;
+        }
 
         return false;
     }

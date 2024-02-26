@@ -33,6 +33,13 @@ public class CardHighlight : MonoBehaviour
         CardInteraction.OnCardUnhighlighted -= OnCardUnhighlighted;
     }
 
+    // ================== Changing ==================
+    public void UpdateCardTags(List<CardTag> newTags)
+    {
+        _playableTag.Clear();
+        _playableTag.AddRange(newTags);
+    }
+
     // ================== Function ==================
     private void OnCardHighlighted(Card cardHighlighted)
     {

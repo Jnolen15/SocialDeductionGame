@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2180218720445251677
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2180218720445251676}
+  - component: {fileID: 5648702706531164372}
+  m_Layer: 5
+  m_Name: T_Gun
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2180218720445251676
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2180218720445251677}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 420}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &5648702706531164372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2180218720445251677}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f91a74854ba05b49a5226299d513156, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cardID: 5003
+  _cardName: Gun
+  _cardDescription: <style="Health">-2</style> to targeted player.
+  _keywords: []
+  _cardArt: {fileID: 21300000, guid: f7b799f515cf3b9468ae9ddbf9ed60d0, type: 3}
+  _tags:
+  - {fileID: 11400000, guid: a8e37cf0992dfc14c97c907ca59d5393, type: 2}
+  _cardPlayablePrefab: {fileID: 7172186348430946835, guid: 703e675326ef9a847bc9edc529ae2c3e, type: 3}
+  _cardSelectablePrefab: {fileID: 3778964478271374572, guid: b2a1d53ab49ad8447a7f41ed5ca64a9d, type: 3}
+  _cardUIPrefab: {fileID: 5427489456640813847, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
+  _hpDamage: 2

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LockboxKey : Card
+public class LockboxKeyCard : Card
 {
     public override void OnPlay(GameObject playLocation)
     {

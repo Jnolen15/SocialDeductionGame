@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TotemKey : Card
+public class TotemKeyCard : Card
 {
     public override void OnPlay(GameObject playLocation)
     {
