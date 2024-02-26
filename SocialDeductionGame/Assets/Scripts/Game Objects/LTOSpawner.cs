@@ -18,9 +18,11 @@ public class LTOSpawner : NetworkBehaviour
         public int Lifetime;
         public int AvailableAfterDay;
         public float BaseSpawnChance;
+        public bool SpawnOnce;
         [Header("Dont set")]
         public float CurrentSpawnChance;
         public int DaysSinceLastSpawn;
+        public bool Spawned;
     }
 
     [System.Serializable]
@@ -74,7 +76,9 @@ public class LTOSpawner : NetworkBehaviour
     {
         foreach (LimitedTimeObjectEntry lto in _ltoList)
         {
-            if (lto.AvailableAfterDay <= GameManager.Instance.GetCurrentDay())
+            if (lto.SpawnOnce && lto.Spawned)
+                Debug.Log("LTO already Spawned");
+            else if (lto.AvailableAfterDay <= GameManager.Instance.GetCurrentDay())
             {
                 // The longer since a spawn, the more likely one is
                 int rand = Random.Range(0, 101);
@@ -85,6 +89,7 @@ public class LTOSpawner : NetworkBehaviour
                 if (rand <= (lto.BaseSpawnChance + (_spawnIncreaseMod * lto.DaysSinceLastSpawn)))
                 {
                     lto.DaysSinceLastSpawn = 0;
+                    lto.Spawned = true;
                     return lto;
                 }
                 else
@@ -113,19 +118,19 @@ public class LTOSpawner : NetworkBehaviour
         if (!IsServer)
             return;
 
-        // Check to see if any LTOs can be spawned
-        LimitedTimeObjectEntry ltoToSpawn = GetLTOObject();
-        if (ltoToSpawn == null)
-        {
-            Debug.Log("No LTO qualified to spawn");
-            return;
-        }
-
         // Check free locations to spawn it at
         LTOSpawnLocation locationToSpawn = GetOpenSpawnLocation();
         if (locationToSpawn == null)
         {
             Debug.Log("All LTO Locations full!");
+            return;
+        }
+
+        // Check to see if any LTOs can be spawned
+        LimitedTimeObjectEntry ltoToSpawn = GetLTOObject();
+        if (ltoToSpawn == null)
+        {
+            Debug.Log("No LTO qualified to spawn");
             return;
         }
 

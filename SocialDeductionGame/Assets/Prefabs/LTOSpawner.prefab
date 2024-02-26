@@ -65,17 +65,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ltoList:
+  - LTOPrefab: {fileID: 7860872056183619309, guid: 5075d546a250e7d46a1feee45ae75883, type: 3}
+    Lifetime: 4
+    AvailableAfterDay: 3
+    BaseSpawnChance: 100
+    SpawnOnce: 1
+    CurrentSpawnChance: 0
+    DaysSinceLastSpawn: 0
+    Spawned: 0
   - LTOPrefab: {fileID: 3426474134043927809, guid: 208a4a84bbd6bc646a9f340d2627ce5e, type: 3}
     Lifetime: 2
     AvailableAfterDay: 1
     BaseSpawnChance: 25
+    SpawnOnce: 0
     CurrentSpawnChance: 0
     DaysSinceLastSpawn: 0
-  - LTOPrefab: {fileID: 7860872056183619309, guid: 5075d546a250e7d46a1feee45ae75883, type: 3}
-    Lifetime: 4
-    AvailableAfterDay: 3
-    BaseSpawnChance: 80
-    CurrentSpawnChance: 0
-    DaysSinceLastSpawn: 0
+    Spawned: 0
   _ltoSpawnLocationList: []
   _spawnIncreaseMod: 10
