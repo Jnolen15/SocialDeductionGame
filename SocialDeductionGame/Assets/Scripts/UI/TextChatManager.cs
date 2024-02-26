@@ -18,7 +18,8 @@ public class TextChatManager : NetworkBehaviour
     [SerializeField] private Image _saboChatButtonImage;
     [SerializeField] private GameObject _saboChatIcon;
     [SerializeField] private GameObject _deathChatIcon;
-    [SerializeField] private GameObject _textMessagePref;
+    [SerializeField] private GameObject _msgNote;
+    [SerializeField] private GameObject _msgDigital;
     [SerializeField] private PlayRandomSound _randSound;
     private bool _chatOpen = false;
     private bool _inSaboChat;
@@ -174,9 +175,13 @@ public class TextChatManager : NetworkBehaviour
         }
     }
 
-    public void InstantiateMessage(ChatMessage msg)
+    public void InstantiateMessage(ChatMessage msg, int style = 0)
     {
-        TextChatMessage chatMsg = Instantiate(_textMessagePref, _messageContent).GetComponent<TextChatMessage>();
+        GameObject pref = _msgNote; // deafult 0
+        if (style == 1)
+            pref = _msgDigital; // Digital 1
+
+        TextChatMessage chatMsg = Instantiate(pref, _messageContent).GetComponent<TextChatMessage>();
 
         chatMsg.Setup(msg.MSG, msg.SenderName, msg.Channel);
 

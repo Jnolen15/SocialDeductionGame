@@ -42,6 +42,6 @@ public class NotificationManager : NetworkBehaviour
     [ClientRpc]
     private void RecieveNotificationClientRpc(TextChatManager.ChatMessage notif)
     {
-        _textChat.InstantiateMessage(notif);
+        _textChat.InstantiateMessage(notif, 1);
     }
 }
