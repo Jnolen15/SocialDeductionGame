@@ -1133,6 +1133,7 @@ GameObject:
   - component: {fileID: 7863973275326376095}
   - component: {fileID: 1287193314430246620}
   - component: {fileID: 1165214037251805654}
+  - component: {fileID: 6877501982165595909}
   - component: {fileID: 8877033677258499553}
   - component: {fileID: 8172329574783500211}
   - component: {fileID: 5700633407196985802}
@@ -1202,6 +1203,18 @@ MonoBehaviour:
   _deathChatIcon: {fileID: 3801433398327289777}
   _textMessagePref: {fileID: 7105044309813581823, guid: c64716bb5bb377e4f83b60659e18d460, type: 3}
   _randSound: {fileID: 8172329574783500211}
+--- !u!114 &6877501982165595909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5355260937308562439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f561c3966f79dc4b88446128c4afaa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8877033677258499553
 MonoBehaviour:
   m_ObjectHideFlags: 0

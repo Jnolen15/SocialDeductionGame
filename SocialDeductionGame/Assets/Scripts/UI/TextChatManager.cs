@@ -35,7 +35,8 @@ public class TextChatManager : NetworkBehaviour
         Forest,
         Plateau,
         Saboteur,
-        Dead
+        Dead,
+        Notification
     }
     private ChatChannel _currentLocationChannel;
 
@@ -79,6 +80,7 @@ public class TextChatManager : NetworkBehaviour
     }
 
     // =============== Setup ===============
+    #region Setup
     public override void OnNetworkSpawn()
     {
         _localPlayerID = PlayerConnectionManager.Instance.GetLocalPlayersID();
@@ -95,13 +97,75 @@ public class TextChatManager : NetworkBehaviour
         PlayerHealth.OnDeath -= EnterDeathChat;
         GameManager.OnStateIntro -= EnterSaboChat;
     }
+    #endregion
 
-    // =============== Function ===============
+    // =============== Channels ===============
+    #region Channels
+    private void UpdateLocation(LocationManager.LocationName location)
+    {
+        switch (location)
+        {
+            case LocationManager.LocationName.Camp:
+                _currentLocationChannel = ChatChannel.Camp;
+                break;
+            case LocationManager.LocationName.Beach:
+                _currentLocationChannel = ChatChannel.Beach;
+                break;
+            case LocationManager.LocationName.Forest:
+                _currentLocationChannel = ChatChannel.Forest;
+                break;
+            case LocationManager.LocationName.Plateau:
+                _currentLocationChannel = ChatChannel.Plateau;
+                break;
+            default:
+                _currentLocationChannel = ChatChannel.Camp;
+                break;
+        }
+    }
+
+    public void EnterSaboChat()
+    {
+        Debug.Log("entered saboteur chat");
+
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
+        {
+            _saboChatButton.SetActive(true);
+            _inSaboChat = true;
+        }
+    }
+
+    public void ToggleSaboChat()
+    {
+        if (_inDeadChat)
+            return;
+
+        _saboChatActive = !_saboChatActive;
+
+        _saboChatIcon.SetActive(_saboChatActive);
+
+        if (_saboChatActive)
+            _saboChatButtonImage.color = Color.grey;
+        else
+            _saboChatButtonImage.color = Color.white;
+    }
+
+    public void EnterDeathChat()
+    {
+        _inDeadChat = true;
+        _deathChatIcon.SetActive(true);
+
+        _saboChatButton.SetActive(false);
+        _saboChatIcon.SetActive(false);
+    }
+    #endregion
+
+    // =============== UI ===============
+    #region UI
     public void ToggleChatOpen()
     {
         _chatOpen = !_chatOpen;
 
-        if(!_chatOpen)
+        if (!_chatOpen)
             _chatArea.position = _inPos.position;
         else
         {
@@ -110,6 +174,24 @@ public class TextChatManager : NetworkBehaviour
         }
     }
 
+    public void InstantiateMessage(ChatMessage msg)
+    {
+        TextChatMessage chatMsg = Instantiate(_textMessagePref, _messageContent).GetComponent<TextChatMessage>();
+
+        chatMsg.Setup(msg.MSG, msg.SenderName, msg.Channel);
+
+        chatMsg.transform.SetAsFirstSibling();
+
+        _randSound.PlayRandom();
+
+        // Show notif if chat minimized
+        if (!_chatOpen)
+            _messageNotif.SetActive(true);
+    }
+    #endregion
+
+    // =============== Send / Recive ===============
+    #region Send Recive
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Return))
@@ -170,73 +252,7 @@ public class TextChatManager : NetworkBehaviour
             return;
         }
 
-        TextChatMessage chatMsg = Instantiate(_textMessagePref, _messageContent).GetComponent<TextChatMessage>();
-
-        chatMsg.Setup(msg.MSG, msg.SenderName, msg.Channel);
-
-        chatMsg.transform.SetAsFirstSibling();
-
-        _randSound.PlayRandom();
-
-        // Show notif if chat minimized
-        if (!_chatOpen)
-            _messageNotif.SetActive(true);
+        InstantiateMessage(msg);
     }
-
-    private void UpdateLocation(LocationManager.LocationName location)
-    {
-        switch (location)
-        {
-            case LocationManager.LocationName.Camp:
-                _currentLocationChannel = ChatChannel.Camp;
-                break;
-            case LocationManager.LocationName.Beach:
-                _currentLocationChannel = ChatChannel.Beach;
-                break;
-            case LocationManager.LocationName.Forest:
-                _currentLocationChannel = ChatChannel.Forest;
-                break;
-            case LocationManager.LocationName.Plateau:
-                _currentLocationChannel = ChatChannel.Plateau;
-                break;
-            default:
-                _currentLocationChannel = ChatChannel.Camp;
-                break;
-        }
-    }
-
-    public void EnterSaboChat()
-    {
-        Debug.Log("entered saboteur chat");
-
-        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
-        {
-            _saboChatButton.SetActive(true);
-            _inSaboChat = true;
-        }
-    }
-
-    public void ToggleSaboChat()
-    {
-        if (_inDeadChat)
-            return;
-
-        _saboChatActive = !_saboChatActive;
-
-        _saboChatIcon.SetActive(_saboChatActive);
-
-        if (_saboChatActive)
-            _saboChatButtonImage.color = Color.grey;
-        else
-            _saboChatButtonImage.color = Color.white;
-    }
-
-    public void EnterDeathChat()
-    {
-        _inDeadChat = true;
-        _deathChatIcon.SetActive(true);
-
-        _saboChatButton.SetActive(false);
-        _saboChatIcon.SetActive(false);
-    }
+    #endregion
 }
