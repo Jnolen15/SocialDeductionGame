@@ -158,6 +158,9 @@ public class PlayerObj : NetworkBehaviour, ICardPlayable
     // ================== Interface ==================
     public bool CanPlayCardHere(Card cardToPlay)
     {
+        if (!_playerHealth.IsLiving())
+            return false;
+
         if (IsOwner)
         {
             if (cardToPlay.HasAnyTag(_ownerCardTagsAccepted))
