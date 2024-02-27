@@ -48,7 +48,7 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     {
         if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
         {
-            _numCardsPannel.SetActive(true);
+            //_numCardsPannel.SetActive(true);
             _saboNotif.SetActive(true);
         }
     }

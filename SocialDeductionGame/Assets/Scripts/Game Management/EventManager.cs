@@ -8,7 +8,7 @@ public class EventManager : NetworkBehaviour
 {
     // ================== Refrences ==================
     [SerializeField] private NightEventPicker _nightEventPickerMenu;
-    [SerializeField] private NightEventResults _nightEventResults;
+    [SerializeField] private NightEventResults _stockpileRecap;
     [SerializeField] private NightEventRecapUI _nightEventRecap;
     [SerializeField] private Stockpile _stockpile;
 
@@ -34,6 +34,7 @@ public class EventManager : NetworkBehaviour
         PlayerData.OnTeamUpdated += AssignLocalTeam;
         GameManager.OnStateNight += ShowRecap;
         GameManager.OnStateNight += ShowNightEventPicker;
+        TabButtonUI.OnEventPressed += ShowStockpileRecap;
 
         if (IsServer)
         {
@@ -50,6 +51,7 @@ public class EventManager : NetworkBehaviour
         PlayerData.OnTeamUpdated -= AssignLocalTeam;
         GameManager.OnStateNight -= ShowRecap;
         GameManager.OnStateNight -= ShowNightEventPicker;
+        TabButtonUI.OnEventPressed -= ShowStockpileRecap;
 
         if (IsServer)
         {
@@ -83,8 +85,14 @@ public class EventManager : NetworkBehaviour
         _nightEventThumbnail.SetEventResults(passed);
 
         // Show results
-        _nightEventResults.gameObject.SetActive(true);
-        _nightEventResults.DisplayResults(goodCardIDs, badCardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, objectivePoints, bonusPoints);
+        ShowStockpileRecap();
+        _stockpileRecap.DisplayResults(goodCardIDs, badCardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, objectivePoints, bonusPoints);
+    }
+
+    private void ShowStockpileRecap()
+    {
+        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Evening)
+            _stockpileRecap.gameObject.SetActive(true);
     }
 
     public void UpdateNightEventPicker()
