@@ -14,12 +14,12 @@ public class PlayerHarmCard : Card
 
         if (playerHealth != null)
         {
-            playerHealth.ModifyHealth(-2, "Gunshot");
+            playerHealth.ModifyHealth(_hpDamage, "Gunshot");
 
             if(locMan == null)
-                NotificationManager.Instance.SendNotification("A gunshot was heard in the distance.", "Bang!");
+                NotificationManager.Instance.SendNotification("A gunshot was heard in the distance.", "Bang!", false);
             else
-                NotificationManager.Instance.SendNotification($"A gunshot was heard at the {locMan.GetCurrentLocalLocation()}.", "Bang!");
+                NotificationManager.Instance.SendNotification($"A gunshot was heard at the {locMan.GetCurrentLocalLocation()}.", "Bang!", false);
         }
         else
         {

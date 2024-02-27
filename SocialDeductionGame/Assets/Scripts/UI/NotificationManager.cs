@@ -27,20 +27,30 @@ public class NotificationManager : NetworkBehaviour
     }
 
     // ============== Function ==============
-    public void SendNotification(string message, string from)
+    public void SendNotification(string message, string from, bool onlyLocal)
     {
         TextChatManager.ChatMessage notification = new TextChatManager.ChatMessage(message, from, TextChatManager.ChatChannel.Notification);
-        SendNotificationServerRpc(notification);
+        SendNotificationServerRpc(notification, onlyLocal);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void SendNotificationServerRpc(TextChatManager.ChatMessage notif)
+    private void SendNotificationServerRpc(TextChatManager.ChatMessage notif, bool onlyLocal, ServerRpcParams serverRpcParams = default)
     {
-        RecieveNotificationClientRpc(notif);
+        var clientID = serverRpcParams.Receive.SenderClientId;
+        ClientRpcParams clientRpcParams = new ClientRpcParams 
+        { 
+            Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { clientID } }
+        };
+
+
+        if (onlyLocal)
+            RecieveNotificationClientRpc(notif, clientRpcParams);
+        else
+            RecieveNotificationClientRpc(notif);
     }
 
     [ClientRpc]
-    private void RecieveNotificationClientRpc(TextChatManager.ChatMessage notif)
+    private void RecieveNotificationClientRpc(TextChatManager.ChatMessage notif, ClientRpcParams clientRpcParams = default)
     {
         _textChat.InstantiateMessage(notif, 1);
     }
