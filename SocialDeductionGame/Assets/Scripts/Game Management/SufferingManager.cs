@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using TMPro;
-using DG.Tweening;
 
 public class SufferingManager : NetworkBehaviour
 {
@@ -21,17 +19,11 @@ public class SufferingManager : NetworkBehaviour
 
     // ================== Refrences / Variables ==================
     [Header("Suffering")]
-    [SerializeField] private GameObject _sufferingUI;
-    [SerializeField] private TextMeshProUGUI _sufferingNumTxt;
-    [SerializeField] private CanvasGroup _sufferingReason;
-    [SerializeField] private TextMeshProUGUI _sufferingReasonTxt;
-
     [SerializeField] private NetworkVariable<int> _netSufferning = new(writePerm: NetworkVariableWritePermission.Server);
 
     private bool _isSabo;
-    private Sequence _sufferingReasonSequence;
 
-    public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal);
+    public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
     public static event SufferingValueModified OnSufferingModified;
 
     // ================== Setup ==================
@@ -59,7 +51,6 @@ public class SufferingManager : NetworkBehaviour
         if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
         {
             _isSabo = true;
-            _sufferingUI.SetActive(true);
         }
     }
     #endregion
@@ -125,76 +116,14 @@ public class SufferingManager : NetworkBehaviour
 
         UpdateSufferingUIClientRpc(ammount, _netSufferning.Value, reasonCode);
     }
-    #endregion
 
-    // UI
-    #region UI
     [ClientRpc]
-    private void UpdateSufferingUIClientRpc(int changedVal, int newVal, int reasonCode)
+    private void UpdateSufferingUIClientRpc(int changedVal, int newTotal, int reasonCode)
     {
         if (!_isSabo)
             return;
 
-        _sufferingNumTxt.text = newVal.ToString();
-
-        // Pick Reason Text
-        string msg;
-        switch (reasonCode)
-        {
-            case 0:
-                msg = $"+{changedVal} Suffering, Test Reason";
-                break;
-            case 101:
-                msg = $"+{changedVal} Daily Suffering";
-                break;
-            case 102:
-                msg = $"+{changedVal} Stockpile Sabotage Attempt";
-                break;
-            case 103:
-                msg = $"+{changedVal} Successful Stockpile Sabotage";
-                break;
-            case 104:
-                msg = $"+{changedVal} Survivor Exiled";
-                break;
-            case 201:
-                msg = $"{changedVal} Totem Awoken";
-                break;
-            case 202:
-                msg = $"{changedVal} Night Event Re-Roll";
-                break;
-            case 203:
-                msg = $"{changedVal} Night Event Enhanced";
-                break;
-            case 204:
-                msg = $"{changedVal} Cache Opened";
-                break;
-            default:
-                msg = $"Suffering Incremented By {changedVal}";
-                break;
-        }
-
-        AnimateReason(msg);
-    }
-
-    private void AnimateReason(string msg)
-    {
-        _sufferingReason.gameObject.SetActive(true);
-        _sufferingReasonTxt.text = msg;
-        _sufferingReason.alpha = 1;
-
-        if (!_sufferingReasonSequence.IsActive())
-            CreateReasonAnimation();
-        else if (_sufferingReasonSequence.IsPlaying())
-            _sufferingReasonSequence.Restart();
-    }
-
-    private void CreateReasonAnimation()
-    {
-        _sufferingReasonSequence = DOTween.Sequence();
-        _sufferingReasonSequence.Append(_sufferingReason.transform.DOLocalJump(_sufferingReason.transform.localPosition, 10f, 1, 0.25f))
-          .AppendInterval(3)
-          .Append(_sufferingReason.DOFade(0, 0.2f))
-          .AppendCallback(() => _sufferingReason.gameObject.SetActive(false));
+        OnSufferingModified?.Invoke(changedVal, newTotal, reasonCode);
     }
     #endregion
 

@@ -342,7 +342,6 @@ public class EventManager : NetworkBehaviour
 
         // Suffering tracking
         bool attemptedSabotage = false;
-        bool successfulSabotage = false;
 
         // For pass to results screen
         List<int> primaryCards = new();
@@ -442,15 +441,8 @@ public class EventManager : NetworkBehaviour
             else
             {
                 Debug.Log("<color=yellow>SERVER: </color>Event sabotaged! Fail!");
-                successfulSabotage = true;
             }
         }
-
-        // Award suffering
-        if (successfulSabotage)
-            SufferingManager.Instance.ModifySuffering(2, 103, true);
-        else if (attemptedSabotage)
-            SufferingManager.Instance.ModifySuffering(1, 102, true);
 
         // Track Analytics
         AnalyticsTracker.Instance.TrackStockpileResult(_netPassedNightEvent.Value, _netEarnedBonusNightEvent.Value, attemptedSabotage);

@@ -23903,6 +23903,7 @@ GameObject:
   - component: {fileID: 670022388}
   - component: {fileID: 670022387}
   - component: {fileID: 670022386}
+  - component: {fileID: 670022389}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -23947,7 +23948,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 119
 --- !u!114 &670022387
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23992,6 +23993,22 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 14
   m_TargetDisplay: 0
+--- !u!114 &670022389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670022384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93801f67be80d454fa1e9d5f7cceb89b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _sufferingUI: {fileID: 202713834}
+  _sufferingNumTxt: {fileID: 2050596435}
+  _sufferingReason: {fileID: 1459041028}
+  _sufferingReasonTxt: {fileID: 829874574}
 --- !u!4 &676477367 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7514948760635023292, guid: 566ec7610322b4e4398c68befa8b1125, type: 3}
@@ -41723,10 +41740,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d894a6b55ea5e224597ca8dd41e235d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sufferingUI: {fileID: 202713834}
-  _sufferingNumTxt: {fileID: 2050596435}
-  _sufferingReason: {fileID: 1459041028}
-  _sufferingReasonTxt: {fileID: 829874574}
   _netSufferning:
     m_InternalValue: 0
 --- !u!114 &1133327024
