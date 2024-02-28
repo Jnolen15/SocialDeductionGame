@@ -19,12 +19,24 @@ public class SufferingManager : NetworkBehaviour
 
     // ================== Refrences / Variables ==================
     [Header("Suffering")]
+    [SerializeField] private NetworkVariable<int> _netShrineLevel = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netShrineMaxLevel = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netSufferning = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private ShrineLevels _selectedShrineLevels = new();
 
     private bool _isSabo;
 
     public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
     public static event SufferingValueModified OnSufferingModified;
+
+    [System.Serializable]
+    public class ShrineLevels
+    {
+        public int TeamDifference = new();
+        public List<int> LevelSuffering = new();
+    }
+    [SerializeField] private List<ShrineLevels> _teamDifferenceLevelList = new();
+
 
     // ================== Setup ==================
     #region Setup
@@ -32,8 +44,14 @@ public class SufferingManager : NetworkBehaviour
     {
         GameManager.OnStateIntro += Setup;
 
-        //if(IsServer)
-        //    GameManager.OnStateMorning += DailySuffering;
+        if (IsServer)
+        {
+            _netShrineLevel.Value = 1;
+
+            GameManager.OnStateMorning += DailySuffering;
+            GameManager.OnStateNight += LevelUpShrine;
+            PlayerConnectionManager.OnPlayerDied += ResetShrineLevel;
+        }
 
         InitializeSingleton();
     }
@@ -42,8 +60,12 @@ public class SufferingManager : NetworkBehaviour
     {
         GameManager.OnStateIntro -= Setup;
 
-        //if(IsServer)
-        //    GameManager.OnStateMorning -= DailySuffering;
+        if (IsServer)
+        {
+            GameManager.OnStateMorning -= DailySuffering;
+            GameManager.OnStateNight -= LevelUpShrine;
+            PlayerConnectionManager.OnPlayerDied -= ResetShrineLevel;
+        }
     }
 
     private void Setup()
@@ -52,6 +74,9 @@ public class SufferingManager : NetworkBehaviour
         {
             _isSabo = true;
         }
+
+        if (IsServer)
+            CalculateMaxShrineLevel();
     }
     #endregion
 
@@ -72,15 +97,72 @@ public class SufferingManager : NetworkBehaviour
         }
     }
 
-    // ================== Suffering ==================
-    // Suffering Increment / Decrement
-    #region Suffering
+    // ================== Helpers ==================
+    #region Helpers
     public int GetCurrentSufffering()
     {
         if (!_isSabo)
             return -1;
 
         return _netSufferning.Value;
+    }
+    #endregion
+
+    // ================== Shrine ==================
+    #region Shrine
+    private void CalculateMaxShrineLevel()
+    {
+        int numSurvivors = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors);
+        int numSaboteurs = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
+        int teamDiff = numSurvivors - numSaboteurs;
+
+        ShrineLevels selectedLevel = _teamDifferenceLevelList[0];
+        foreach (ShrineLevels shrinelevels in _teamDifferenceLevelList)
+        {
+            if (teamDiff >= shrinelevels.TeamDifference)
+                selectedLevel = shrinelevels;
+        }
+
+        _selectedShrineLevels = selectedLevel;
+        _netShrineMaxLevel.Value = selectedLevel.LevelSuffering.Count;
+
+        Debug.Log($"<color=yellow>SERVER: </color> Survivors: {numSurvivors}, Sabos: {numSaboteurs}, Difference: {teamDiff}. Max shrine level: {_netShrineMaxLevel.Value}");
+    }
+
+    private void LevelUpShrine()
+    {
+        if (!IsServer)
+            return;
+
+        _netShrineLevel.Value += 1;
+
+        if (_netShrineLevel.Value >= _netShrineMaxLevel.Value)
+            _netShrineLevel.Value = _netShrineMaxLevel.Value;
+
+        Debug.Log("<color=yellow>SERVER: </color>Shrine level up, now " + _netShrineLevel.Value);
+    }
+
+    private void ResetShrineLevel()
+    {
+        if (!IsServer)
+            return;
+
+        _netShrineLevel.Value = 1;
+
+        Debug.Log("<color=yellow>SERVER: </color>Player death, Shrine level reset! " + _netShrineLevel.Value);
+    }
+    #endregion
+
+    // ================== Suffering ==================
+    #region Suffering Increment / Decrement
+    private void DailySuffering()
+    {
+        if (!IsServer)
+            return;
+
+        int dailySuffering = _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1];
+
+        ModifySufferingServerRPC(dailySuffering, 101, false);
     }
 
     public void ModifySuffering(int ammount, int reasonCode, bool ServerOverride)
@@ -124,28 +206,6 @@ public class SufferingManager : NetworkBehaviour
             return;
 
         OnSufferingModified?.Invoke(changedVal, newTotal, reasonCode);
-    }
-    #endregion
-
-    // Misc
-    #region Misc
-    // Earn daily suffering per sabo
-    private void DailySuffering()
-    {
-        if (!IsServer)
-            return;
-
-        int daily;
-        int teamDiff = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors) - PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
-
-        if (teamDiff <= 1)
-            daily = 1;
-        else if (teamDiff > 1 && teamDiff <= 3)
-            daily = 2;
-        else
-            daily = 3;
-
-        ModifySuffering(daily, 101, true);
     }
     #endregion
 }

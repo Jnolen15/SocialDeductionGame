@@ -41740,8 +41740,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d894a6b55ea5e224597ca8dd41e235d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _netShrineLevel:
+    m_InternalValue: 0
+  _netShrineMaxLevel:
+    m_InternalValue: 0
   _netSufferning:
     m_InternalValue: 0
+  _selectedShrineLevels:
+    TeamDifference: 0
+    LevelSuffering: 
+  _teamDifferenceLevelList:
+  - TeamDifference: 1
+    LevelSuffering: 0100000001000000020000000200000003000000
+  - TeamDifference: 2
+    LevelSuffering: 01000000020000000200000003000000
+  - TeamDifference: 3
+    LevelSuffering: 010000000200000003000000
+  - TeamDifference: 4
+    LevelSuffering: 0200000003000000
 --- !u!114 &1133327024
 MonoBehaviour:
   m_ObjectHideFlags: 0
