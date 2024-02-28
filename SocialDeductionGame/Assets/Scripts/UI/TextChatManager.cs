@@ -16,10 +16,14 @@ public class TextChatManager : NetworkBehaviour
     [SerializeField] private Transform _messageContent;
     [SerializeField] private GameObject _saboChatButton;
     [SerializeField] private Image _saboChatButtonImage;
-    [SerializeField] private GameObject _saboChatIcon;
-    [SerializeField] private GameObject _deathChatIcon;
+    [SerializeField] private Image _inputAreaImage;
+    [SerializeField] private Sprite _paperNormal;
+    [SerializeField] private Sprite _paperSabo;
+    [SerializeField] private Sprite _paperDead;
     [SerializeField] private GameObject _msgNote;
     [SerializeField] private GameObject _msgDigital;
+    [SerializeField] private GameObject _msgBloodied;
+    [SerializeField] private GameObject _msgGhostly;
     [SerializeField] private PlayRandomSound _randSound;
     private bool _chatOpen = false;
     private bool _inSaboChat;
@@ -142,21 +146,24 @@ public class TextChatManager : NetworkBehaviour
 
         _saboChatActive = !_saboChatActive;
 
-        _saboChatIcon.SetActive(_saboChatActive);
-
         if (_saboChatActive)
+        {
+            _inputAreaImage.sprite = _paperSabo;
             _saboChatButtonImage.color = Color.grey;
+        }
         else
+        {
+            _inputAreaImage.sprite = _paperNormal;
             _saboChatButtonImage.color = Color.white;
+        }
     }
 
     public void EnterDeathChat()
     {
         _inDeadChat = true;
-        _deathChatIcon.SetActive(true);
+        _inputAreaImage.sprite = _paperDead;
 
         _saboChatButton.SetActive(false);
-        _saboChatIcon.SetActive(false);
     }
     #endregion
 
@@ -180,6 +187,10 @@ public class TextChatManager : NetworkBehaviour
         GameObject pref = _msgNote; // deafult 0
         if (style == 1)
             pref = _msgDigital; // Digital 1
+        else if (style == 2)
+            pref = _msgBloodied; // Bloodied 2
+        if (style == 3)
+            pref = _msgGhostly; // Ghostly 3
 
         TextChatMessage chatMsg = Instantiate(pref, _messageContent).GetComponent<TextChatMessage>();
 
@@ -235,8 +246,10 @@ public class TextChatManager : NetworkBehaviour
         //Debug.Log($"Message recieved from {msg.SenderName}, at {msg.Channel}: {msg.MSG}");
 
         // Determine if chat should be rejected
+        int msgStyle = 0;
         if (msg.Channel == ChatChannel.Dead)
         {
+            msgStyle = 3;
             if (!_inDeadChat)
             {
                 Debug.Log("Message rejected. Not dead");
@@ -245,7 +258,8 @@ public class TextChatManager : NetworkBehaviour
         }
         else if (msg.Channel == ChatChannel.Saboteur)
         {
-            if(!_inSaboChat)
+            msgStyle = 2;
+            if (!_inSaboChat)
             {
                 Debug.Log("Message rejected. Not Saboteur");
                 return;
@@ -257,7 +271,7 @@ public class TextChatManager : NetworkBehaviour
             return;
         }
 
-        InstantiateMessage(msg);
+        InstantiateMessage(msg, msgStyle);
     }
     #endregion
 }
