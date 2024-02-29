@@ -63,6 +63,12 @@ public class TransitionManager : MonoBehaviour
             case GameManager.GameState.Night:
                 TransitionOut();
                 break;
+            case GameManager.GameState.MidnightTransition:
+                TransitionIn();
+                break;
+            case GameManager.GameState.Midnight:
+                TransitionOut();
+                break;
             case GameManager.GameState.MorningTransition:
                 TransitionIn();
                 break;

@@ -157,7 +157,7 @@ public class WatchHUD : MonoBehaviour
 
     private void UpdateGameInfo()
     {
-        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Morning && !_updatedDay)
+        if (GameManager.Instance.IsCurrentState(GameManager.GameState.Morning) && !_updatedDay)
         {
             UpdateDayText();
             _updatedDay = true;
@@ -396,6 +396,10 @@ public class WatchHUD : MonoBehaviour
                 _nightIcon.SetActive(true);
                 _gameStateText.text = current.ToString();
                 break;
+            case GameManager.GameState.Midnight:
+                _nightIcon.SetActive(true);
+                _gameStateText.text = current.ToString();
+                break;
         }
     }
 
@@ -436,8 +440,9 @@ public class WatchHUD : MonoBehaviour
 
     public void OnStateChange(GameManager.GameState prev, GameManager.GameState cur)
     {
-        // Can't ready in transition
-        if (GameManager.Instance.InTransition() || GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Night)
+        // Can't ready in transition, Night, or Midnight
+        if (GameManager.Instance.InTransition() || GameManager.Instance.IsCurrentState(GameManager.GameState.Night)
+                || GameManager.Instance.IsCurrentState(GameManager.GameState.Midnight))
             _readyButton.transform.position = _readyInPos.position;
         else
             _readyButton.transform.position = _readyOutPos.position;

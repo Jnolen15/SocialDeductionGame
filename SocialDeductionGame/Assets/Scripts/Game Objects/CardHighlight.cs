@@ -54,7 +54,7 @@ public class CardHighlight : MonoBehaviour
         {
             foreach(GameManager.GameState state in _states)
             {
-                if(state == GameManager.Instance.GetCurrentGameState())
+                if(GameManager.Instance.IsCurrentState(state))
                 {
                     _highlight.SetActive(true);
                     break;

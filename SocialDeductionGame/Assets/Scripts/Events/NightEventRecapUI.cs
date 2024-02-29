@@ -43,7 +43,7 @@ public class NightEventRecapUI : MonoBehaviour
     #region Setup
     void OnEnable()
     {
-        GameManager.OnStateMorning += CloseRecap;
+        GameManager.OnStateMidnight += CloseRecap;
         GameManager.OnStateGameEnd += CloseRecap;
         PlayerHealth.OnHungerDrain += ShowHungerDrain;
         PlayerHealth.OnStarvation += ShowStarvation;
@@ -56,7 +56,7 @@ public class NightEventRecapUI : MonoBehaviour
 
     private void OnDisable()
     {
-        GameManager.OnStateMorning -= CloseRecap;
+        GameManager.OnStateMidnight -= CloseRecap;
         GameManager.OnStateGameEnd -= CloseRecap;
         PlayerHealth.OnHungerDrain -= ShowHungerDrain;
         PlayerHealth.OnStarvation -= ShowStarvation;
@@ -198,7 +198,7 @@ public class NightEventRecapUI : MonoBehaviour
 
     private void ShowDeath()
     {
-        if (GameManager.Instance.GetCurrentGameState() != GameManager.GameState.Night)
+        if (!GameManager.Instance.IsCurrentState(GameManager.GameState.Night))
             return;
 
         _death.SetActive(true);

@@ -30,12 +30,14 @@ public class GameManager : NetworkBehaviour
     private NetworkVariable<float> _afternoonTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<float> _eveningTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<float> _nightTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
+    private NetworkVariable<float> _midnightTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<float> _transitionTimerMax = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netIntroTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netMorningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netAfternoonTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netEveningTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netNightTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<float> _netMidnightTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<float> _netTransitionTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private NetworkVariable<float> _netPauseTimer = new(writePerm: NetworkVariableWritePermission.Server);
     private bool _gameOver;
@@ -57,6 +59,8 @@ public class GameManager : NetworkBehaviour
         Evening,    // Results of night event contribution, take food from fire, vote to exile
         NightTransition,
         Night,      // Summary of night event effects / effects happen, saboteur picks new night event
+        MidnightTransition,
+        Midnight,   // Saboture Shrine level up / player sacrificing
         MorningTransition,
         GameOver    // Game over state
     }
@@ -79,6 +83,7 @@ public class GameManager : NetworkBehaviour
     public static event ChangeStateToAction OnStateAfternoon;
     public static event ChangeStateToAction OnStateEvening;
     public static event ChangeStateToAction OnStateNight;
+    public static event ChangeStateToAction OnStateMidnight;
     public static event ChangeStateToAction OnStateGameEnd;
 
     public static event Action<bool> OnGameEnd;
@@ -114,6 +119,7 @@ public class GameManager : NetworkBehaviour
         _afternoonTimerMax.Value = _gameRules.AfternoonTimerMax;
         _eveningTimerMax.Value = _gameRules.EveningTimerMax;
         _nightTimerMax.Value = _gameRules.NightTimerMax;
+        _midnightTimerMax.Value = _gameRules.MidnightTimerMax;
         _transitionTimerMax.Value = _gameRules.TransitionTimerMax;
 
         if(_gameRules.TimerLength == GameRules.TimerLengths.Shorter)
@@ -192,6 +198,12 @@ public class GameManager : NetworkBehaviour
                 break;
             case GameState.Night:
                 RunTimer(_netNightTimer);
+                break;
+            case GameState.MidnightTransition:
+                RunTimer(_netTransitionTimer);
+                break;
+            case GameState.Midnight:
+                RunTimer(_netMidnightTimer);
                 break;
             case GameState.MorningTransition:
                 RunTimer(_netTransitionTimer);
@@ -344,6 +356,13 @@ public class GameManager : NetworkBehaviour
                 if (IsServer) _netNightTimer.Value = _nightTimerMax.Value;
                 OnStateNight?.Invoke();
                 break;
+            case GameState.MidnightTransition:
+                if (IsServer) _netTransitionTimer.Value = _transitionTimerMax.Value;
+                break;
+            case GameState.Midnight:
+                if (IsServer) _netMidnightTimer.Value = _midnightTimerMax.Value;
+                OnStateMidnight?.Invoke();
+                break;
             case GameState.MorningTransition:
                 if (IsServer) _netTransitionTimer.Value = _transitionTimerMax.Value;
                 break;
@@ -403,7 +422,7 @@ public class GameManager : NetworkBehaviour
         Debug.Log("<color=yellow>SERVER: </color> player died, testing win.");
 
         // Dont end game during night
-        if (_netCurrentGameState.Value == GameState.Night)
+        if (_netCurrentGameState.Value == GameState.Night || _netCurrentGameState.Value == GameState.Midnight)
             return;
 
         Debug.Log("<color=yellow>SERVER: </color> State is not night, continuing with win check");
@@ -469,7 +488,12 @@ public class GameManager : NetworkBehaviour
 
     // ====================== Helpers ======================
     #region Helpers
-    public GameManager.GameState GetCurrentGameState()
+    public bool IsCurrentState(GameState stateToCompare)
+    {
+        return (_netCurrentGameState.Value == stateToCompare);
+    }
+
+    public GameManager.GameState GetGameState()
     {
         return _netCurrentGameState.Value;
     }
@@ -503,6 +527,8 @@ public class GameManager : NetworkBehaviour
                 return 1 - (_netEveningTimer.Value / _eveningTimerMax.Value);
             case GameState.Night:
                 return 1 - (_netNightTimer.Value / _nightTimerMax.Value);
+            case GameState.Midnight:
+                return 1 - (_netMidnightTimer.Value / _midnightTimerMax.Value);
         }
 
         return 1;
@@ -527,6 +553,10 @@ public class GameManager : NetworkBehaviour
             case GameState.NightTransition:
                 return true;
             case GameState.Night:
+                return false;
+            case GameState.MidnightTransition:
+                return true;
+            case GameState.Midnight:
                 return false;
             case GameState.MorningTransition:
                 return true;

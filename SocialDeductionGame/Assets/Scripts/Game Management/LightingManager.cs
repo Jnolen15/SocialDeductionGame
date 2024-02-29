@@ -57,7 +57,8 @@ public class LightingManager : MonoBehaviour
         else if (current == GameManager.GameState.Afternoon || current == GameManager.GameState.EveningTransition)
             preset = _afternoonLightPreset;
         else if (current == GameManager.GameState.Evening || current == GameManager.GameState.NightTransition 
-                || current == GameManager.GameState.Night || current == GameManager.GameState.MorningTransition)
+                || current == GameManager.GameState.Night || current == GameManager.GameState.MidnightTransition
+                || current == GameManager.GameState.Midnight || current == GameManager.GameState.MorningTransition)
             preset = _nightLightPreset;
 
         //Set ambient and fog

@@ -85,13 +85,13 @@ public class EventManager : NetworkBehaviour
         _nightEventThumbnail.SetEventResults(passed);
 
         // Show results
-        ShowStockpileRecap();
+        _stockpileRecap.gameObject.SetActive(true);
         _stockpileRecap.DisplayResults(goodCardIDs, badCardIDs, contributorIDS, eventID, _netNumEventPlayers.Value, passed, bonus, objectivePoints, bonusPoints);
     }
 
     private void ShowStockpileRecap()
     {
-        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Evening)
+        if (GameManager.Instance.IsCurrentState(GameManager.GameState.Evening))
             _stockpileRecap.gameObject.SetActive(true);
     }
 
