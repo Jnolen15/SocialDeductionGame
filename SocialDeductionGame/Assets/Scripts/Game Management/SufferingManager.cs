@@ -22,12 +22,16 @@ public class SufferingManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netShrineLevel = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netShrineMaxLevel = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netSufferning = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netDeathReset = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private ShrineLevels _selectedShrineLevels = new();
 
     private bool _isSabo;
 
     public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
     public static event SufferingValueModified OnSufferingModified;
+
+    public delegate void ShrineLevelUp(int maxLevel, int newLevel, int numSuffering, bool deathReset);
+    public static event ShrineLevelUp OnShrineLevelUp;
 
     [System.Serializable]
     public class ShrineLevels
@@ -50,7 +54,7 @@ public class SufferingManager : NetworkBehaviour
 
             GameManager.OnStateMorning += DailySuffering;
             GameManager.OnStateMidnight += LevelUpShrine;
-            PlayerConnectionManager.OnPlayerDied += ResetShrineLevel;
+            PlayerConnectionManager.OnPlayerDied += OnPlayerDeath;
         }
 
         InitializeSingleton();
@@ -64,7 +68,7 @@ public class SufferingManager : NetworkBehaviour
         {
             GameManager.OnStateMorning -= DailySuffering;
             GameManager.OnStateMidnight -= LevelUpShrine;
-            PlayerConnectionManager.OnPlayerDied -= ResetShrineLevel;
+            PlayerConnectionManager.OnPlayerDied -= OnPlayerDeath;
         }
     }
 
@@ -134,22 +138,40 @@ public class SufferingManager : NetworkBehaviour
         if (!IsServer)
             return;
 
-        _netShrineLevel.Value += 1;
+        bool deathReset = _netDeathReset.Value;
+        if (_netDeathReset.Value)
+        {
+            _netDeathReset.Value = false;
+            _netShrineLevel.Value = 1;
 
-        if (_netShrineLevel.Value >= _netShrineMaxLevel.Value)
-            _netShrineLevel.Value = _netShrineMaxLevel.Value;
+            Debug.Log("<color=yellow>SERVER: </color>Player death, Shrine level reset! " + _netShrineLevel.Value);
+        }
+        else
+        {
+            _netShrineLevel.Value += 1;
+
+            if (_netShrineLevel.Value >= _netShrineMaxLevel.Value)
+                _netShrineLevel.Value = _netShrineMaxLevel.Value;
+        }
+
+        LevelUpShrineClientRpc(_netShrineMaxLevel.Value, _netShrineLevel.Value,
+            _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], deathReset);
 
         Debug.Log("<color=yellow>SERVER: </color>Shrine level up, now " + _netShrineLevel.Value);
     }
 
-    private void ResetShrineLevel()
+    [ClientRpc]
+    private void LevelUpShrineClientRpc(int maxLevel, int newLevel, int numSuffering, bool deathReset)
+    {
+        OnShrineLevelUp?.Invoke(maxLevel, newLevel, numSuffering, deathReset);
+    }
+
+    private void OnPlayerDeath()
     {
         if (!IsServer)
             return;
 
-        _netShrineLevel.Value = 1;
-
-        Debug.Log("<color=yellow>SERVER: </color>Player death, Shrine level reset! " + _netShrineLevel.Value);
+        _netDeathReset.Value = true;
     }
     #endregion
 
