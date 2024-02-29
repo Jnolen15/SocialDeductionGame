@@ -49,7 +49,7 @@ public class SufferingManager : NetworkBehaviour
             _netShrineLevel.Value = 1;
 
             GameManager.OnStateMorning += DailySuffering;
-            GameManager.OnStateNight += LevelUpShrine;
+            GameManager.OnStateMidnight += LevelUpShrine;
             PlayerConnectionManager.OnPlayerDied += ResetShrineLevel;
         }
 
@@ -63,7 +63,7 @@ public class SufferingManager : NetworkBehaviour
         if (IsServer)
         {
             GameManager.OnStateMorning -= DailySuffering;
-            GameManager.OnStateNight -= LevelUpShrine;
+            GameManager.OnStateMidnight -= LevelUpShrine;
             PlayerConnectionManager.OnPlayerDied -= ResetShrineLevel;
         }
     }
