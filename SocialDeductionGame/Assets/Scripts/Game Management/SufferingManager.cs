@@ -23,13 +23,13 @@ public class SufferingManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netShrineMaxLevel = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netSufferning = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netDeathReset = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netSacrificeAvailable = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private ShrineLevels _selectedShrineLevels = new();
 
     private bool _isSabo;
 
     public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
     public static event SufferingValueModified OnSufferingModified;
-
     public delegate void ShrineLevelUp(int maxLevel, int newLevel, int numSuffering, bool deathReset);
     public static event ShrineLevelUp OnShrineLevelUp;
 
@@ -139,25 +139,63 @@ public class SufferingManager : NetworkBehaviour
             return;
 
         bool deathReset = _netDeathReset.Value;
+        // Reset level if player died during the day
         if (_netDeathReset.Value)
         {
-            _netDeathReset.Value = false;
-            _netShrineLevel.Value = 1;
-
-            Debug.Log("<color=yellow>SERVER: </color>Player death, Shrine level reset! " + _netShrineLevel.Value);
+            ResetShrineLevel();
         }
+        // Do sacrifice
+        else if (_netSacrificeAvailable.Value)
+        {
+            DoSacrifice();
+        }
+        // Level up
         else
         {
             _netShrineLevel.Value += 1;
 
             if (_netShrineLevel.Value >= _netShrineMaxLevel.Value)
+            {
                 _netShrineLevel.Value = _netShrineMaxLevel.Value;
+                _netSacrificeAvailable.Value = true;
+            }
         }
 
         LevelUpShrineClientRpc(_netShrineMaxLevel.Value, _netShrineLevel.Value,
             _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], deathReset);
 
         Debug.Log("<color=yellow>SERVER: </color>Shrine level up, now " + _netShrineLevel.Value);
+    }
+
+    private void ResetShrineLevel()
+    {
+        _netDeathReset.Value = false;
+        _netSacrificeAvailable.Value = false;
+        _netShrineLevel.Value = 1;
+
+        Debug.Log("<color=yellow>SERVER: </color>Player death, Shrine level reset! " + _netShrineLevel.Value);
+    }
+
+    private void DoSacrifice()
+    {
+        _netSacrificeAvailable.Value = false;
+
+        // Get random player to execute
+        List<ulong> livingSurvivors = new();
+        foreach (ulong pID in PlayerConnectionManager.Instance.GetLivingPlayerIDs())
+        {
+            if (PlayerConnectionManager.Instance.GetPlayerTeamByID(pID) == PlayerData.Team.Survivors)
+                livingSurvivors.Add(pID);
+        }
+
+        if (livingSurvivors.Count <= 0)
+            return;
+
+        int rand = Random.Range(0, livingSurvivors.Count);
+        GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(livingSurvivors[rand]);
+        playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
+
+        ResetShrineLevel();
     }
 
     [ClientRpc]
@@ -185,6 +223,9 @@ public class SufferingManager : NetworkBehaviour
         int dailySuffering = _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1];
 
         ModifySufferingServerRPC(dailySuffering, 101, false);
+
+        // Set death reset to false each morning
+        _netDeathReset.Value = false;
     }
 
     public void ModifySuffering(int ammount, int reasonCode, bool ServerOverride)

@@ -17,7 +17,7 @@ public class GameRules
     public float AfternoonTimerMax  = 80;
     public float EveningTimerMax    = 120;
     public float NightTimerMax      = 15;
-    public float MidnightTimerMax   = 5;
+    public float MidnightTimerMax   = 7;
     public float TransitionTimerMax = 2;
 
     // ========== Creation ==========
