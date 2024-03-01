@@ -68,6 +68,9 @@ public class SufferingUI : MonoBehaviour
             case 204:
                 msg = $"{changedVal} Cache Opened";
                 break;
+            case 205:
+                msg = $"{changedVal} Waste Added to Stockpile";
+                break;
             default:
                 msg = $"Suffering Changed By {changedVal}";
                 break;

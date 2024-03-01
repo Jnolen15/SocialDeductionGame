@@ -9,24 +9,29 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     // ================== Refrences ==================
     [SerializeField] private GameObject _saboNotif;
     [SerializeField] private GameObject _numCardsPannel;
+    [SerializeField] private GameObject _addWasteButton;
     [SerializeField] private TextMeshProUGUI _numCards;
     [SerializeField] private ParticleSystem _dustFX;
     [SerializeField] private PlayRandomSound _randSound;
 
     // ================== Variables ==================
+    [SerializeField] private int _wasteCardID;
     [SerializeField] private bool _acceptingCards;
     [SerializeField] private List<int> _stockpileCardIDs = new();
     [SerializeField] private List<ulong> _contributorIDs = new();
     [SerializeField] private NetworkVariable<int> _netCardsInStockpile = new(writePerm: NetworkVariableWritePermission.Server);
+    private PlayerData.Team _localTeam;
 
     // ================== Setup ==================
+    #region Setup
     public override void OnNetworkSpawn()
     {
         _netCardsInStockpile.OnValueChanged += UpdateCardsText;
 
-        GameManager.OnStateIntro += SetNumVisible;
+        GameManager.OnStateIntro += SetSabotuersView;
         GameManager.OnStateMorning += ClearAll;
         GameManager.OnStateMorning += ToggleAcceptingCards;
+        GameManager.OnStateAfternoon += ShowAddWasteButton;
         GameManager.OnStateEvening += ToggleAcceptingCards;
     }
 
@@ -34,22 +39,26 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     {
         _netCardsInStockpile.OnValueChanged -= UpdateCardsText;
 
-        GameManager.OnStateIntro -= SetNumVisible;
+        GameManager.OnStateIntro -= SetSabotuersView;
         GameManager.OnStateMorning -= ClearAll;
         GameManager.OnStateMorning -= ToggleAcceptingCards;
+        GameManager.OnStateAfternoon -= ShowAddWasteButton;
         GameManager.OnStateEvening -= ToggleAcceptingCards;
 
         // Always invoked the base 
         base.OnDestroy();
     }
+    #endregion
 
-    // ================== Text ==================
-    private void SetNumVisible()
+    // ================== Card Count ==================
+    #region Card Count
+    private void SetSabotuersView()
     {
         if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
         {
             //_numCardsPannel.SetActive(true);
             _saboNotif.SetActive(true);
+            _localTeam = PlayerConnectionManager.Instance.GetLocalPlayerTeam();
         }
     }
 
@@ -62,14 +71,16 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     {
         _saboNotif.SetActive(false);
     }
+    #endregion
 
     // ================== Interface ==================
+    #region interface
     // Stockpile accepts any card types ATM
     public bool CanPlayCardHere(Card cardToPlay)
     {
         return _acceptingCards;
     }
-
+    #endregion
 
     // ================== Cards ==================
     #region Cards
@@ -77,6 +88,9 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
     private void ToggleAcceptingCards()
     {
         _acceptingCards = !_acceptingCards;
+
+        if (!_acceptingCards)
+            HideAddWasteButton();
     }
 
     private void ClearAll()
@@ -111,6 +125,32 @@ public class Stockpile : NetworkBehaviour, ICardPlayable
         _randSound.PlayRandom();
 
         _dustFX.Emit(10);
+    }
+    #endregion
+
+    // ================== Add Waste ==================
+    #region Add Waste
+    private void ShowAddWasteButton()
+    {
+        if (_localTeam == PlayerData.Team.Saboteurs)
+            _addWasteButton.SetActive(true);
+    }
+
+    private void HideAddWasteButton()
+    {
+        _addWasteButton.SetActive(false);
+    }
+
+    public void AddWaste()
+    {
+        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
+            return;
+
+        if (SufferingManager.Instance.GetCurrentSufffering() >= 1)
+        {
+            SufferingManager.Instance.ModifySuffering(-1, 205, false);
+            AddCard(_wasteCardID, PlayerConnectionManager.Instance.GetLocalPlayersID());
+        }
     }
     #endregion
 
