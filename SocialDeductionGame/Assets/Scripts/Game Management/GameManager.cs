@@ -332,6 +332,7 @@ public class GameManager : NetworkBehaviour
                     _netMorningTimer.Value = _morningTimerMax.Value;
                     IncrementDay();
                 }
+                ReturnPlayerToCamp();
                 OnStateMorning?.Invoke();
                 break;
             case GameState.AfternoonTransition:
