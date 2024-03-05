@@ -2,11 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using TMPro;
 
 public class ShrineLocation : NetworkBehaviour
 {
     // ============== Refrences / Variables ==============
     #region Refrences / Variables
+    [SerializeField] private GameObject _shrineUI;
+    [SerializeField] private TextMeshProUGUI _statusText;
+    [SerializeField] private TextMeshProUGUI _substatusText;
     [SerializeField] private Transform _camPosFar;
     [SerializeField] private Transform _camPosClose;
     [SerializeField] private List<Pedestal> _pedestals;
@@ -16,9 +20,11 @@ public class ShrineLocation : NetworkBehaviour
     #endregion
 
     // ============== Setup ==============
+    #region Setup
     public override void OnNetworkSpawn()
     {
         GameManager.OnStateMidnight += SetCamPos;
+        GameManager.OnStateMorning += HideStatusText;
         SufferingManager.OnShrineLevelUp += UpdateShrine;
 
         if (IsServer)
@@ -33,6 +39,7 @@ public class ShrineLocation : NetworkBehaviour
     private void OnDisable()
     {
         GameManager.OnStateMidnight -= SetCamPos;
+        GameManager.OnStateMorning -= HideStatusText;
         SufferingManager.OnShrineLevelUp -= UpdateShrine;
 
         if (IsServer)
@@ -58,8 +65,10 @@ public class ShrineLocation : NetworkBehaviour
             _pedestals[i].SetupPedestal(playerIDs[i], pName);
         }
     }
+    #endregion
 
     // ============== Function ==============
+    #region Shrine Visuals
     private void SetCamPos()
     {
         _mainCam.transform.position = _camPosClose.localToWorldMatrix.GetPosition();
@@ -78,6 +87,7 @@ public class ShrineLocation : NetworkBehaviour
 
     private void UpdateShrine(int maxLevel, int newLevel, int numSuffering, bool deathReset)
     {
+        // Setup candles
         if (!_candlesSetup)
             SetupShrineCandles(maxLevel);
 
@@ -91,8 +101,16 @@ public class ShrineLocation : NetworkBehaviour
             _candles[i].Light();
         }
 
-        if (!deathReset) return;
+        // Update status Text
+        if (deathReset)
+            UpdateStatusText("Death resets shrines power.", $"Shrine level 1 of {maxLevel}.");
+        else if (newLevel < maxLevel)
+            UpdateStatusText("The Saboteur's power grows.", $"Shrine level {newLevel} of {maxLevel}.");
+        else
+            UpdateStatusText("The island hungers, a sacrifice will be made next midnight.", $"Shrine has reached max level.");
 
+        // Update pedestals if there was a death
+        if (!deathReset) return;
         foreach (Pedestal pedestal in _pedestals)
         {
             if (!pedestal.GetSkullActive())
@@ -106,4 +124,22 @@ public class ShrineLocation : NetworkBehaviour
             }
         }
     }
+    #endregion
+
+    // ============== Status UI ==============
+    #region Status UI
+    private void UpdateStatusText(string statusText, string substatusText)
+    {
+        _shrineUI.SetActive(true);
+
+        _statusText.text = statusText;
+        _substatusText.text = substatusText;
+    }
+
+    private void HideStatusText()
+    {
+        _shrineUI.SetActive(false);
+    }
+
+    #endregion
 }
