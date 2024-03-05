@@ -38,7 +38,7 @@ public class SaboteurShrineUI : MonoBehaviour
     #region UI
     private void Show()
     {
-        _shrineUI.SetActive(true);
+        //_shrineUI.SetActive(true);
     }
 
     private void Hide()
