@@ -25,7 +25,6 @@ public class SufferingManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<bool> _netDeathReset = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netSacrificeAvailable = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private ShrineLevels _selectedShrineLevels = new();
-
     private bool _isSabo;
 
     public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
@@ -148,6 +147,7 @@ public class SufferingManager : NetworkBehaviour
         else if (_netSacrificeAvailable.Value)
         {
             DoSacrifice();
+            deathReset = true;
         }
         // Level up
         else
