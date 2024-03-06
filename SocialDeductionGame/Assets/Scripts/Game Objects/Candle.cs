@@ -8,19 +8,27 @@ public class Candle : MonoBehaviour
     [SerializeField] private ParticleSystem _flameFX;
     [SerializeField] private Material _purpleMat;
     [SerializeField] private Material _redMat;
-    private MeshRenderer _renderer;
+    [SerializeField] private MeshRenderer _renderer;
+    [SerializeField] private List<GameObject> _suffering;
+    [SerializeField] private GameObject _sacrifce;
 
     // ================= Function =================
-    public void SetupCandle(bool isFinal)
+    public void SetupCandle(int numSuffering, bool isFinal)
     {
         Show();
 
-        _renderer = this.GetComponent<MeshRenderer>();
-
         if (isFinal)
+        {
             _renderer.material = _redMat;
+            _sacrifce.SetActive(true);
+        }
         else
             _renderer.material = _purpleMat;
+
+        for (int i = 0; i < numSuffering; i++)
+        {
+            _suffering[i].SetActive(true);
+        }
 
         _flameFX.Stop();
     }

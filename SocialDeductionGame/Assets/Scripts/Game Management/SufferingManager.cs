@@ -29,7 +29,10 @@ public class SufferingManager : NetworkBehaviour
 
     public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
     public static event SufferingValueModified OnSufferingModified;
-    public delegate void ShrineLevelUp(int maxLevel, int newLevel, int numSuffering, bool deathReset);
+
+    public delegate void ShrineSetup(int maxLevel, int[] numSuffering);
+    public static event ShrineSetup OnShrineSetup;
+    public delegate void ShrineLevelUp(int newLevel, int numSuffering, bool deathReset);
     public static event ShrineLevelUp OnShrineLevelUp;
 
     [System.Serializable]
@@ -129,7 +132,16 @@ public class SufferingManager : NetworkBehaviour
         _selectedShrineLevels = selectedLevel;
         _netShrineMaxLevel.Value = selectedLevel.LevelSuffering.Count;
 
+
+        ShrineSetupClientRpc(selectedLevel.LevelSuffering.Count, selectedLevel.LevelSuffering.ToArray());
+
         Debug.Log($"<color=yellow>SERVER: </color> Survivors: {numSurvivors}, Sabos: {numSaboteurs}, Difference: {teamDiff}. Max shrine level: {_netShrineMaxLevel.Value}");
+    }
+
+    [ClientRpc]
+    private void ShrineSetupClientRpc(int maxLevel, int[] numSuffering)
+    {
+        OnShrineSetup?.Invoke(maxLevel, numSuffering);
     }
 
     private void LevelUpShrine()
@@ -161,8 +173,7 @@ public class SufferingManager : NetworkBehaviour
             }
         }
 
-        LevelUpShrineClientRpc(_netShrineMaxLevel.Value, _netShrineLevel.Value,
-            _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], deathReset);
+        LevelUpShrineClientRpc(_netShrineLevel.Value, _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], deathReset);
 
         Debug.Log("<color=yellow>SERVER: </color>Shrine level up, now " + _netShrineLevel.Value);
     }
@@ -199,9 +210,9 @@ public class SufferingManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void LevelUpShrineClientRpc(int maxLevel, int newLevel, int numSuffering, bool deathReset)
+    private void LevelUpShrineClientRpc(int newLevel, int numSuffering, bool deathReset)
     {
-        OnShrineLevelUp?.Invoke(maxLevel, newLevel, numSuffering, deathReset);
+        OnShrineLevelUp?.Invoke(newLevel, numSuffering, deathReset);
     }
 
     private void OnPlayerDeath()

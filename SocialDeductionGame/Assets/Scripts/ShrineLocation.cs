@@ -15,7 +15,7 @@ public class ShrineLocation : NetworkBehaviour
     [SerializeField] private Transform _camPosClose;
     [SerializeField] private List<Pedestal> _pedestals;
     [SerializeField] private List<Candle> _candles;
-    private bool _candlesSetup;
+    private int _maxLevel;
     private Camera _mainCam;
     #endregion
 
@@ -25,6 +25,7 @@ public class ShrineLocation : NetworkBehaviour
     {
         GameManager.OnStateMidnight += SetCamPos;
         GameManager.OnStateMorning += HideStatusText;
+        SufferingManager.OnShrineSetup += SetupShrineCandles;
         SufferingManager.OnShrineLevelUp += UpdateShrine;
 
         if (IsServer)
@@ -40,6 +41,7 @@ public class ShrineLocation : NetworkBehaviour
     {
         GameManager.OnStateMidnight -= SetCamPos;
         GameManager.OnStateMorning -= HideStatusText;
+        SufferingManager.OnShrineSetup -= SetupShrineCandles;
         SufferingManager.OnShrineLevelUp -= UpdateShrine;
 
         if (IsServer)
@@ -75,22 +77,18 @@ public class ShrineLocation : NetworkBehaviour
         _mainCam.transform.rotation = _camPosClose.localToWorldMatrix.rotation;
     }
 
-    private void SetupShrineCandles(int maxLevel)
+    private void SetupShrineCandles(int maxLevel, int[] numSuffering)
     {
+        _maxLevel = maxLevel;
+
         for (int i = 0; i < maxLevel; i++)
         {
-            _candles[i].SetupCandle(i == maxLevel-1);
+            _candles[i].SetupCandle(numSuffering[i], i == maxLevel - 1);
         }
-
-        _candlesSetup = true;
     }
 
-    private void UpdateShrine(int maxLevel, int newLevel, int numSuffering, bool deathReset)
+    private void UpdateShrine(int newLevel, int numSuffering, bool deathReset)
     {
-        // Setup candles
-        if (!_candlesSetup)
-            SetupShrineCandles(maxLevel);
-
         foreach(Candle candle in _candles)
         {
             candle.Extinguish();
@@ -103,9 +101,9 @@ public class ShrineLocation : NetworkBehaviour
 
         // Update status Text
         if (deathReset)
-            UpdateStatusText("Death resets shrines power.", $"Shrine level 1 of {maxLevel}.");
-        else if (newLevel < maxLevel)
-            UpdateStatusText("The Saboteur's power grows.", $"Shrine level {newLevel} of {maxLevel}.");
+            UpdateStatusText("Death resets shrines power.", $"Shrine level 1 of {_maxLevel}.");
+        else if (newLevel < _maxLevel)
+            UpdateStatusText("The Saboteur's power grows.", $"Shrine level {newLevel} of {_maxLevel}.");
         else
             UpdateStatusText("The island hungers, a sacrifice will be made next midnight.", $"Shrine has reached max level.");
 

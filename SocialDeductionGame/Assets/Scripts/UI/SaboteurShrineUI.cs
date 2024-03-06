@@ -23,14 +23,14 @@ public class SaboteurShrineUI : MonoBehaviour
     {
         GameManager.OnStateMidnight += Show;
         GameManager.OnStateMorning += Hide;
-        SufferingManager.OnShrineLevelUp += UpdateShrineUI;
+        //SufferingManager.OnShrineLevelUp += UpdateShrineUI;
     }
 
     private void OnDisable()
     {
         GameManager.OnStateMidnight -= Show;
         GameManager.OnStateMorning -= Hide;
-        SufferingManager.OnShrineLevelUp -= UpdateShrineUI;
+        //SufferingManager.OnShrineLevelUp -= UpdateShrineUI;
     }
     #endregion
 
