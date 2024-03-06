@@ -24,7 +24,10 @@ public class SufferingManager : NetworkBehaviour
     [SerializeField] private NetworkVariable<int> _netSufferning = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netDeathReset = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netSacrificeAvailable = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<float> _netSacrificeTimer = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private ShrineLevels _selectedShrineLevels = new();
+    private bool _sacrificeActive;
+    private ulong _playerToSacrifice;
     private bool _isSabo;
 
     public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
@@ -87,9 +90,23 @@ public class SufferingManager : NetworkBehaviour
     }
     #endregion
 
-    // FOR TESTING
     private void Update()
     {
+        if (!IsServer)
+            return;
+
+        // Trial timer
+        if (_sacrificeActive && _netSacrificeTimer.Value >= 0)
+        {
+            _netSacrificeTimer.Value -= Time.deltaTime;
+            if (_netSacrificeTimer.Value <= 0)
+            {
+                Debug.Log($"<color=yellow>SERVER: </color> {_netSacrificeTimer} Sacrifice timer up, Vote complete");
+                ExecuteSacrifice();
+            }
+        }
+
+        // FOR TESTING
         if (!LogViewer.Instance.GetDoCheats())
             return;
 
@@ -207,7 +224,22 @@ public class SufferingManager : NetworkBehaviour
     #region Sacrifice
     private void DoSacrifice()
     {
-        GameManager.Instance.PauseCurrentTimer(20f);
+        _sacrificeActive = true;
+        _netSacrificeTimer.Value = 15f; // Change max float in ShrineLocation also
+        GameManager.Instance.PauseCurrentTimer(16f);
+
+        // Get random survivor to execute (in case saboteurs don't vote in time)
+        List<ulong> livingSurvivors = new();
+        foreach (ulong pID in PlayerConnectionManager.Instance.GetLivingPlayerIDs())
+        {
+            if (PlayerConnectionManager.Instance.GetPlayerTeamByID(pID) == PlayerData.Team.Survivors)
+                livingSurvivors.Add(pID);
+        }
+
+        if (livingSurvivors.Count == 0) // This is only for testing solo. Should never happen in game
+            _playerToSacrifice = 0;
+        else
+            _playerToSacrifice = livingSurvivors[Random.Range(0, livingSurvivors.Count)];
 
         SacrificeStartedClientRpc();
     }
@@ -219,12 +251,12 @@ public class SufferingManager : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void ExecutePlayerServerRpc(ulong playerToSacrifce)
+    public void SetSacrificeVoteServerRpc(ulong playerToSacrifce)
     {
-        ExecuteSacrifice(playerToSacrifce);
+        _playerToSacrifice = playerToSacrifce;
     }
 
-    private void ExecuteSacrifice(ulong playerToSacrifce)
+    private void ExecuteSacrifice()
     {
         if (!IsServer)
             return;
@@ -232,29 +264,19 @@ public class SufferingManager : NetworkBehaviour
         if (!_netSacrificeAvailable.Value)
             return;
 
-        /*// Get random player to execute
-
-        List<ulong> livingSurvivors = new();
-
-        foreach (ulong pID in PlayerConnectionManager.Instance.GetLivingPlayerIDs())
-
-        {
-
-            if (PlayerConnectionManager.Instance.GetPlayerTeamByID(pID) == PlayerData.Team.Survivors)
-
-                livingSurvivors.Add(pID);
-
-        }*/
-
-        _netSacrificeAvailable.Value = false;
-
-        GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(playerToSacrifce);
+        GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(_playerToSacrifice);
         playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Sacrifice");
 
-        GameManager.Instance.UnpauseTimer();
+        _sacrificeActive = false;
+        _netSacrificeAvailable.Value = false;
 
         ResetShrineLevel();
         LevelUpShrineClientRpc(_netShrineLevel.Value, _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], true);
+    }
+
+    public float GetSacrificeTimer()
+    {
+        return _netSacrificeTimer.Value;
     }
     #endregion
 

@@ -9,18 +9,25 @@ public class Pedestal : MonoBehaviour
     [SerializeField] private TextMeshPro _playerName;
     [SerializeField] private GameObject _placedSkull;
     [SerializeField] private GameObject _hoveredSkull;
+    [SerializeField] private Transform _upPos;
+    [SerializeField] private Transform _downPos;
     private ulong _playerID;
     private bool _markedDead;
     private bool _interactable;
+    private bool _hasVote;
+    private bool _isLocalSabo;
     private ShrineLocation _shrineLocation;
 
-    // ================= Function =================
+    // ================= Setup =================
+    #region Setup and Helpers
     public void SetupPedestal(ulong playerID, string playerName)
     {
         _playerID = playerID;
         _playerName.text = playerName;
 
         _shrineLocation = this.GetComponentInParent<ShrineLocation>();
+
+        _isLocalSabo = (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs);
     }
 
     public void Show()
@@ -28,13 +35,7 @@ public class Pedestal : MonoBehaviour
         this.gameObject.SetActive(true);
     }
 
-    public void SetPlayerDead()
-    {
-        _markedDead = true;
-        _placedSkull.SetActive(true);
-    }
-
-    public bool GetSkullActive()
+    public bool GetMarkedDead()
     {
         return _markedDead;
     }
@@ -43,10 +44,23 @@ public class Pedestal : MonoBehaviour
     {
         return _playerID;
     }
+    #endregion
 
+    // ================= Death Skull Display =================
+    #region Death Skull Display
+    public void SetPlayerDead()
+    {
+        _markedDead = true;
+        _placedSkull.SetActive(true);
+        _hoveredSkull.SetActive(false);
+    }
+    #endregion
+
+    // ================= Vote Skull Display =================
+    #region Vote Skull Display
     public void SetInteractable(bool setTo)
     {
-        if (setTo && PlayerConnectionManager.Instance.GetLocalPlayerTeam() != PlayerData.Team.Saboteurs)
+        if (!_isLocalSabo)
             return;
 
         _interactable = setTo;
@@ -54,30 +68,60 @@ public class Pedestal : MonoBehaviour
 
     private void ChooseSacrifice()
     {
-        SetPlayerDead();
+        if (!_isLocalSabo)
+            return;
+
         _shrineLocation.ChooseSacrifice(_playerID);
     }
 
+    public void SetSacrificeVote()
+    {
+        if (!_isLocalSabo)
+            return;
+
+        _hasVote = true;
+        _hoveredSkull.SetActive(true);
+        _hoveredSkull.transform.position = _downPos.position;
+    }
+
+    public void ClearSacrificeVote()
+    {
+        if (!_isLocalSabo)
+            return;
+
+        _hasVote = false;
+        _hoveredSkull.SetActive(false);
+    }
+
+    // ~~~~~~~~~~~~ Mouse interaction ~~~~~~~~~~~~
     private void OnMouseDown()
     {
         if (!_interactable || _markedDead)
             return;
-
-        _hoveredSkull.SetActive(false);
 
         ChooseSacrifice();
     }
 
     private void OnMouseEnter()
     {
-        if (_interactable && !_markedDead)
+        Debug.Log("Hovered pedestal");
+
+        if (!_interactable || _markedDead)
             return;
 
         _hoveredSkull.SetActive(true);
+        _hoveredSkull.transform.position = _upPos.position;
     }
 
     private void OnMouseExit()
     {
-        _hoveredSkull.SetActive(false);
+        if (!_interactable || _markedDead)
+            return;
+
+        if (_hasVote)
+            _hoveredSkull.transform.position = _downPos.position;
+        else
+            _hoveredSkull.SetActive(false);
     }
+    #endregion
 }

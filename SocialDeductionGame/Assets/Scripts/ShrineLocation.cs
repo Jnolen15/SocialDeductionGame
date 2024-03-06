@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Unity.Netcode;
 using TMPro;
 
@@ -12,11 +13,14 @@ public class ShrineLocation : NetworkBehaviour
     [SerializeField] private GameObject _shrineUI;
     [SerializeField] private TextMeshProUGUI _statusText;
     [SerializeField] private TextMeshProUGUI _substatusText;
+    [SerializeField] private GameObject _sacrificeTimer;
+    [SerializeField] private Image _sacrificeTimerFill;
     [SerializeField] private Transform _camPosFar;
     [SerializeField] private Transform _camPosClose;
     [SerializeField] private List<Pedestal> _pedestals;
     [SerializeField] private List<Candle> _candles;
     private int _maxLevel;
+    private bool _sacrificeActive;
     private Camera _mainCam;
     #endregion
 
@@ -72,6 +76,14 @@ public class ShrineLocation : NetworkBehaviour
     }
     #endregion
 
+    private void Update()
+    {
+        if (_sacrificeActive)
+        {
+            _sacrificeTimerFill.fillAmount = (_sufferingManager.GetSacrificeTimer() / 15f);
+        }
+    }
+
     // ============== Function ==============
     #region Shrine Visuals
     private void SetCamPos()
@@ -115,12 +127,14 @@ public class ShrineLocation : NetworkBehaviour
         {
             pedestal.SetInteractable(false);
         }
+        _sacrificeActive = false;
+        _sacrificeTimer.SetActive(false);
 
         // Update pedestals if there was a death
         if (!deathReset) return;
         foreach (Pedestal pedestal in _pedestals)
         {
-            if (!pedestal.GetSkullActive())
+            if (!pedestal.GetMarkedDead())
             {
                 ulong id = pedestal.GetPlayerID();
 
@@ -134,11 +148,11 @@ public class ShrineLocation : NetworkBehaviour
 
     private void StartSacrifice()
     {
-        // Set pedestals interacion active
         if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
         {
             UpdateStatusText("Choose a sacrifice.", $"Place a skull upon its pedestal");
 
+            // Set pedestals interacion active
             foreach (Pedestal pedestal in _pedestals)
             {
                 pedestal.SetInteractable(true);
@@ -148,6 +162,9 @@ public class ShrineLocation : NetworkBehaviour
         {
             UpdateStatusText("A sacrifice is being chosen.", $"Could it be you?.");
         }
+
+        _sacrificeActive = true;
+        _sacrificeTimer.SetActive(true);
     }
 
     public void ChooseSacrifice(ulong playerID)
@@ -158,7 +175,21 @@ public class ShrineLocation : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void ChooseSacrificeServerRpc(ulong playerToSacrifce)
     {
-        _sufferingManager.ExecutePlayerServerRpc(playerToSacrifce);
+        _sufferingManager.SetSacrificeVoteServerRpc(playerToSacrifce);
+
+        ShowPotentialSacrificeClientRpc(playerToSacrifce);
+    }
+
+    [ClientRpc]
+    public void ShowPotentialSacrificeClientRpc(ulong playerToSacrifce)
+    {
+        foreach (Pedestal pedestal in _pedestals)
+        {
+            if (pedestal.GetPlayerID() == playerToSacrifce)
+                pedestal.SetSacrificeVote();
+            else
+                pedestal.ClearSacrificeVote();
+        }
     }
     #endregion
 
