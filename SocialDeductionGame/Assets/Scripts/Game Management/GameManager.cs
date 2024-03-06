@@ -261,6 +261,16 @@ public class GameManager : NetworkBehaviour
 
         _netPauseTimer.Value += time;
     }
+
+    public void UnpauseTimer()
+    {
+        if (!IsServer) return;
+
+        if (_netPauseTimer.Value <= 0)
+            return;
+
+        _netPauseTimer.Value = 0;
+    }
     #endregion
 
     // ====================== State Management ======================

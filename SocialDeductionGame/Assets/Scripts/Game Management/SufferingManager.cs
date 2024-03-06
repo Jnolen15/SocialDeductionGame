@@ -29,11 +29,13 @@ public class SufferingManager : NetworkBehaviour
 
     public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
     public static event SufferingValueModified OnSufferingModified;
-
     public delegate void ShrineSetup(int maxLevel, int[] numSuffering);
     public static event ShrineSetup OnShrineSetup;
     public delegate void ShrineLevelUp(int newLevel, int numSuffering, bool deathReset);
     public static event ShrineLevelUp OnShrineLevelUp;
+    public delegate void ShrineEvent();
+    public static event ShrineEvent OnSacrificeStarted;
+    public static event ShrineEvent OnSacrficeComplete;
 
     [System.Serializable]
     public class ShrineLevels
@@ -159,7 +161,7 @@ public class SufferingManager : NetworkBehaviour
         else if (_netSacrificeAvailable.Value)
         {
             DoSacrifice();
-            deathReset = true;
+            return;
         }
         // Level up
         else
@@ -187,28 +189,6 @@ public class SufferingManager : NetworkBehaviour
         Debug.Log("<color=yellow>SERVER: </color>Player death, Shrine level reset! " + _netShrineLevel.Value);
     }
 
-    private void DoSacrifice()
-    {
-        _netSacrificeAvailable.Value = false;
-
-        // Get random player to execute
-        List<ulong> livingSurvivors = new();
-        foreach (ulong pID in PlayerConnectionManager.Instance.GetLivingPlayerIDs())
-        {
-            if (PlayerConnectionManager.Instance.GetPlayerTeamByID(pID) == PlayerData.Team.Survivors)
-                livingSurvivors.Add(pID);
-        }
-
-        if (livingSurvivors.Count <= 0)
-            return;
-
-        int rand = Random.Range(0, livingSurvivors.Count);
-        GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(livingSurvivors[rand]);
-        playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Exile");
-
-        ResetShrineLevel();
-    }
-
     [ClientRpc]
     private void LevelUpShrineClientRpc(int newLevel, int numSuffering, bool deathReset)
     {
@@ -221,6 +201,63 @@ public class SufferingManager : NetworkBehaviour
             return;
 
         _netDeathReset.Value = true;
+    }
+    #endregion
+
+    // ================== Sacrifice ==================
+    #region Sacrifice
+    private void DoSacrifice()
+    {
+        _netSacrificeAvailable.Value = false;
+
+        GameManager.Instance.PauseCurrentTimer(20f);
+
+        SacrificeStartedClientRpc();
+    }
+
+    [ClientRpc]
+    private void SacrificeStartedClientRpc()
+    {
+        OnSacrificeStarted?.Invoke();
+    }
+
+    [ServerRpc]
+    public void ExecutePlayerServerRpc(ulong playerToSacrifce)
+    {
+        ExecuteSacrifice(playerToSacrifce);
+    }
+
+    private void ExecuteSacrifice(ulong playerToSacrifce)
+    {
+        if (!IsServer)
+            return;
+
+        /*// Get random player to execute
+
+        List<ulong> livingSurvivors = new();
+
+        foreach (ulong pID in PlayerConnectionManager.Instance.GetLivingPlayerIDs())
+
+        {
+
+            if (PlayerConnectionManager.Instance.GetPlayerTeamByID(pID) == PlayerData.Team.Survivors)
+
+                livingSurvivors.Add(pID);
+
+        }*/
+
+        GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(playerToSacrifce);
+        playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Sacrifice");
+
+        GameManager.Instance.UnpauseTimer();
+
+        ResetShrineLevel();
+        LevelUpShrineClientRpc(_netShrineLevel.Value, _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], true);
+    }
+
+    private void SacrificeComplete()
+    {
+        OnSacrficeComplete?.Invoke();
     }
     #endregion
 

@@ -8,6 +8,7 @@ public class ShrineLocation : NetworkBehaviour
 {
     // ============== Refrences / Variables ==============
     #region Refrences / Variables
+    [SerializeField] private SufferingManager _sufferingManager;
     [SerializeField] private GameObject _shrineUI;
     [SerializeField] private TextMeshProUGUI _statusText;
     [SerializeField] private TextMeshProUGUI _substatusText;
@@ -27,6 +28,7 @@ public class ShrineLocation : NetworkBehaviour
         GameManager.OnStateMorning += HideStatusText;
         SufferingManager.OnShrineSetup += SetupShrineCandles;
         SufferingManager.OnShrineLevelUp += UpdateShrine;
+        SufferingManager.OnSacrificeStarted += StartSacrifice;
 
         if (IsServer)
             GameManager.OnStateIntro += SetupShrine;
@@ -43,6 +45,7 @@ public class ShrineLocation : NetworkBehaviour
         GameManager.OnStateMorning -= HideStatusText;
         SufferingManager.OnShrineSetup -= SetupShrineCandles;
         SufferingManager.OnShrineLevelUp -= UpdateShrine;
+        SufferingManager.OnSacrificeStarted -= StartSacrifice;
 
         if (IsServer)
             GameManager.OnStateIntro -= SetupShrine;
@@ -121,6 +124,35 @@ public class ShrineLocation : NetworkBehaviour
                 }
             }
         }
+    }
+
+    private void StartSacrifice()
+    {
+        // Set pedestals interacion active
+        if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
+        {
+            UpdateStatusText("Choose a sacrifice.", $"Place a skull upon its pedestal");
+
+            foreach (Pedestal pedestal in _pedestals)
+            {
+                pedestal.SetInteractable(true);
+            }
+        }
+        else
+        {
+            UpdateStatusText("A sacrifice is being chosen.", $"Could it be you?.");
+        }
+    }
+
+    public void ChooseSacrifice(ulong playerID)
+    {
+        ChooseSacrificeServerRpc(playerID);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void ChooseSacrificeServerRpc(ulong playerToSacrifce)
+    {
+        _sufferingManager.ExecutePlayerServerRpc(playerToSacrifce);
     }
     #endregion
 
