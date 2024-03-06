@@ -35,7 +35,6 @@ public class SufferingManager : NetworkBehaviour
     public static event ShrineLevelUp OnShrineLevelUp;
     public delegate void ShrineEvent();
     public static event ShrineEvent OnSacrificeStarted;
-    public static event ShrineEvent OnSacrficeComplete;
 
     [System.Serializable]
     public class ShrineLevels
@@ -208,8 +207,6 @@ public class SufferingManager : NetworkBehaviour
     #region Sacrifice
     private void DoSacrifice()
     {
-        _netSacrificeAvailable.Value = false;
-
         GameManager.Instance.PauseCurrentTimer(20f);
 
         SacrificeStartedClientRpc();
@@ -232,6 +229,9 @@ public class SufferingManager : NetworkBehaviour
         if (!IsServer)
             return;
 
+        if (!_netSacrificeAvailable.Value)
+            return;
+
         /*// Get random player to execute
 
         List<ulong> livingSurvivors = new();
@@ -246,6 +246,8 @@ public class SufferingManager : NetworkBehaviour
 
         }*/
 
+        _netSacrificeAvailable.Value = false;
+
         GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(playerToSacrifce);
         playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Sacrifice");
 
@@ -253,11 +255,6 @@ public class SufferingManager : NetworkBehaviour
 
         ResetShrineLevel();
         LevelUpShrineClientRpc(_netShrineLevel.Value, _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], true);
-    }
-
-    private void SacrificeComplete()
-    {
-        OnSacrficeComplete?.Invoke();
     }
     #endregion
 

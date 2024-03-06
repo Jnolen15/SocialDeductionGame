@@ -110,6 +110,12 @@ public class ShrineLocation : NetworkBehaviour
         else
             UpdateStatusText("The island hungers, a sacrifice will be made next midnight.", $"Shrine has reached max level.");
 
+        // Set pedestals non-interactable (in case it was just a sacrifice)
+        foreach (Pedestal pedestal in _pedestals)
+        {
+            pedestal.SetInteractable(false);
+        }
+
         // Update pedestals if there was a death
         if (!deathReset) return;
         foreach (Pedestal pedestal in _pedestals)
