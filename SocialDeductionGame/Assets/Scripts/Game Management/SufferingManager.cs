@@ -38,6 +38,8 @@ public class SufferingManager : NetworkBehaviour
     public static event ShrineLevelUp OnShrineLevelUp;
     public delegate void ShrineEvent();
     public static event ShrineEvent OnSacrificeStarted;
+    public delegate void PlayerSacrificed(ulong pID);
+    public static event PlayerSacrificed OnPlayerSacrificed;
 
     [System.Serializable]
     public class ShrineLevels
@@ -271,7 +273,14 @@ public class SufferingManager : NetworkBehaviour
         _netSacrificeAvailable.Value = false;
 
         ResetShrineLevel();
+        SacrificeEndedClientRpc(_playerToSacrifice);
         LevelUpShrineClientRpc(_netShrineLevel.Value, _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], true);
+    }
+
+    [ClientRpc]
+    private void SacrificeEndedClientRpc(ulong pID)
+    {
+        OnPlayerSacrificed?.Invoke(pID);
     }
 
     public float GetSacrificeTimer()

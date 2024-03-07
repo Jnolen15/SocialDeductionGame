@@ -33,6 +33,7 @@ public class ShrineLocation : NetworkBehaviour
         SufferingManager.OnShrineSetup += SetupShrineCandles;
         SufferingManager.OnShrineLevelUp += UpdateShrine;
         SufferingManager.OnSacrificeStarted += StartSacrifice;
+        SufferingManager.OnPlayerSacrificed += PlayerSacrificed;
 
         if (IsServer)
             GameManager.OnStateIntro += SetupShrine;
@@ -50,6 +51,7 @@ public class ShrineLocation : NetworkBehaviour
         SufferingManager.OnShrineSetup -= SetupShrineCandles;
         SufferingManager.OnShrineLevelUp -= UpdateShrine;
         SufferingManager.OnSacrificeStarted -= StartSacrifice;
+        SufferingManager.OnPlayerSacrificed -= PlayerSacrificed;
 
         if (IsServer)
             GameManager.OnStateIntro -= SetupShrine;
@@ -146,11 +148,20 @@ public class ShrineLocation : NetworkBehaviour
         }
     }
 
+    private void PlayerSacrificed(ulong pId)
+    {
+        foreach (Pedestal pedestal in _pedestals)
+        {
+            if (pedestal.GetPlayerID() == pId)
+                pedestal.SetPlayerDead();
+        }
+    }
+
     private void StartSacrifice()
     {
         if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
         {
-            UpdateStatusText("Choose a sacrifice.", $"Place a skull upon its pedestal");
+            UpdateStatusText("Choose a sacrifice.", $"Place a skull upon its pedestal.");
 
             // Set pedestals interacion active
             foreach (Pedestal pedestal in _pedestals)
@@ -160,7 +171,7 @@ public class ShrineLocation : NetworkBehaviour
         }
         else
         {
-            UpdateStatusText("A sacrifice is being chosen.", $"Could it be you?.");
+            UpdateStatusText("A sacrifice is being chosen.", $"Could it be you?");
         }
 
         _sacrificeActive = true;
