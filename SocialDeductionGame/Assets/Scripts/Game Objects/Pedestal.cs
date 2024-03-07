@@ -104,8 +104,6 @@ public class Pedestal : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        Debug.Log("Hovered pedestal");
-
         if (!_interactable || _markedDead)
             return;
 

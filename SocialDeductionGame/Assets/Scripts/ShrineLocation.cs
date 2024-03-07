@@ -30,6 +30,7 @@ public class ShrineLocation : NetworkBehaviour
     {
         GameManager.OnStateMidnight += SetCamPos;
         GameManager.OnStateMorning += HideStatusText;
+        GameManager.OnStateGameEnd += HideStatusText;
         SufferingManager.OnShrineSetup += SetupShrineCandles;
         SufferingManager.OnShrineLevelUp += UpdateShrine;
         SufferingManager.OnSacrificeStarted += StartSacrifice;
@@ -48,6 +49,7 @@ public class ShrineLocation : NetworkBehaviour
     {
         GameManager.OnStateMidnight -= SetCamPos;
         GameManager.OnStateMorning -= HideStatusText;
+        GameManager.OnStateGameEnd -= HideStatusText;
         SufferingManager.OnShrineSetup -= SetupShrineCandles;
         SufferingManager.OnShrineLevelUp -= UpdateShrine;
         SufferingManager.OnSacrificeStarted -= StartSacrifice;
