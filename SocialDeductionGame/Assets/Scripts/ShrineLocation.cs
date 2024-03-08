@@ -120,7 +120,7 @@ public class ShrineLocation : NetworkBehaviour
 
         // Update status Text
         if (deathReset)
-            UpdateStatusText("Death resets shrines power.", $"Shrine level 1 of {_maxLevel}.");
+            UpdateStatusText("Death resets shrine's power.", $"Shrine level 1 of {_maxLevel}.");
         else if (newLevel < _maxLevel)
             UpdateStatusText("The Saboteur's power grows.", $"Shrine level {newLevel} of {_maxLevel}.");
         else

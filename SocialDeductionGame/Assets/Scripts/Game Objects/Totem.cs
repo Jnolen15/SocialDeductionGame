@@ -230,6 +230,9 @@ public class Totem : NetworkBehaviour, ICardPlayable
     // ================== Player interaction ==================
     public void AttemptActivateTotem()
     {
+        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
+            return;
+
         if (_netIsPrepped.Value)
         {
             Debug.LogWarning("Totem is already prepped!");

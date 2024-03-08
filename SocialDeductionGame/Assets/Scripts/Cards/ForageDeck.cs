@@ -95,7 +95,7 @@ public class ForageDeck : MonoBehaviour
         // If totem is active, chance to spawn key
         else if (totemActive)
         {
-            int keyRand = Random.Range(0, 5);
+            int keyRand = Random.Range(0, 8);
             Debug.Log($"Totem active, testing for key spawn. Rolled {keyRand}");
             if (keyRand == 4)
                 cardID = 1005;
