@@ -8,7 +8,8 @@ public class Candle : MonoBehaviour
     [SerializeField] private ParticleSystem _flameFX;
     [SerializeField] private Material _purpleMat;
     [SerializeField] private Material _redMat;
-    [SerializeField] private MeshRenderer _renderer;
+    [SerializeField] private List<MeshRenderer> _candleRenderers;
+    [SerializeField] private Transform _candle;
     [SerializeField] private List<GameObject> _suffering;
     [SerializeField] private GameObject _sacrifce;
 
@@ -17,20 +18,32 @@ public class Candle : MonoBehaviour
     {
         Show();
 
+        _candle.rotation = Quaternion.Euler(new Vector3(0, Random.Range(0, 360), 0));
+
         if (isFinal)
         {
-            _renderer.material = _redMat;
+            SetCandleMat(_redMat);
             _sacrifce.SetActive(true);
         }
         else
-            _renderer.material = _purpleMat;
-
-        for (int i = 0; i < numSuffering; i++)
         {
-            _suffering[i].SetActive(true);
+            SetCandleMat(_purpleMat);
+
+            for (int i = 0; i < numSuffering; i++)
+            {
+                _suffering[i].SetActive(true);
+            }
         }
 
         _flameFX.Stop();
+    }
+
+    private void SetCandleMat(Material mat)
+    {
+        foreach (MeshRenderer renderer in _candleRenderers)
+        {
+            renderer.material = mat;
+        }
     }
 
     public void Light()
