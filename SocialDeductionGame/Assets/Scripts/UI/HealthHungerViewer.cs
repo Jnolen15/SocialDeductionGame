@@ -33,14 +33,14 @@ public class HealthHungerViewer : MonoBehaviour
     private void DisplayHealthMessage(int ammount, string mesage)
     {
         float timeStamp = (GameManager.Instance.GetStateTimer() * 100);
-        string healthMesage = ($"{GameManager.Instance.GetCurrentGameState()} {timeStamp.ToString("F2")} {ammount} Health: {mesage}");
+        string healthMesage = ($"{GameManager.Instance.GetGameState()} {timeStamp.ToString("F2")} {ammount} Health: {mesage}");
         DisplayMessage(ammount, healthMesage);
     }
 
     private void DisplayHungerMessage(int ammount, string mesage)
     {
         float timeStamp = (GameManager.Instance.GetStateTimer() * 100);
-        string hungerMesage = ($"{GameManager.Instance.GetCurrentGameState()} {timeStamp.ToString("F2")} {ammount} Hunger: {mesage}");
+        string hungerMesage = ($"{GameManager.Instance.GetGameState()} {timeStamp.ToString("F2")} {ammount} Hunger: {mesage}");
         DisplayMessage(ammount, hungerMesage);
     }
 

@@ -39,7 +39,7 @@ public class NightEventPreview : MonoBehaviour
     // =================== UI ===================
     private void ToggleShow()
     {
-        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Evening)
+        if (GameManager.Instance.IsCurrentState(GameManager.GameState.Evening))
             return;
 
         _eventPreviewPage.SetActive(!_eventPreviewPage.activeSelf);

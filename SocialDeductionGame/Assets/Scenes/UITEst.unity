@@ -12567,12 +12567,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d894a6b55ea5e224597ca8dd41e235d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sufferingUI: {fileID: 2100489622}
-  _sufferingNumTxt: {fileID: 2104136459}
-  _sufferingReason: {fileID: 1414343186}
-  _sufferingReasonTxt: {fileID: 1148160299}
+  _netShrineLevel:
+    m_InternalValue: 0
+  _netShrineMaxLevel:
+    m_InternalValue: 0
   _netSufferning:
     m_InternalValue: 0
+  _selectedShrineLevels:
+    TeamDifference: 0
+    LevelSuffering: 
+  _teamDifferenceLevelList: []
 --- !u!114 &2102234304
 MonoBehaviour:
   m_ObjectHideFlags: 0

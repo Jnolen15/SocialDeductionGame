@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ public class TransitionManager : MonoBehaviour
     [SerializeField] private int _hiddenPos;
     [SerializeField] private int _upPos;
     [SerializeField] private PlayRandomSound _randSound;
+    private Camera _mainCam;
 
     // ================== Setup ==================
     private void OnEnable()
@@ -21,6 +23,11 @@ public class TransitionManager : MonoBehaviour
         GameManager.OnStateChange += Transition;
         //ExileManager.OnTrialVoteStarted += TransitionBlackFade;
         //ExileManager.OnTrialVoteEnded += TransitionBlackFade;
+    }
+
+    private void Start()
+    {
+        _mainCam = Camera.main;
     }
 
     private void OnDisable()
@@ -43,37 +50,43 @@ public class TransitionManager : MonoBehaviour
         switch (current)
         {
             case GameManager.GameState.Morning:
-                TransitionOut();
+                WaveTransitionOut();
                 break;
             case GameManager.GameState.AfternoonTransition:
-                TransitionIn();
+                WaveTransitionIn();
                 break;
             case GameManager.GameState.Afternoon:
-                TransitionOut();
+                WaveTransitionOut();
                 break;
             case GameManager.GameState.EveningTransition:
-                TransitionIn();
+                WaveTransitionIn();
                 break;
             case GameManager.GameState.Evening:
-                TransitionOut();
+                WaveTransitionOut();
                 break;
             case GameManager.GameState.NightTransition:
-                TransitionIn();
+                WaveTransitionIn();
                 break;
             case GameManager.GameState.Night:
-                TransitionOut();
+                WaveTransitionOut();
+                break;
+            case GameManager.GameState.MidnightTransition:
+                FadeTransitionIn();
+                break;
+            case GameManager.GameState.Midnight:
+                FadeTransitionOut();
                 break;
             case GameManager.GameState.MorningTransition:
-                TransitionIn();
+                WaveTransitionIn();
                 break;
             case GameManager.GameState.GameOver:
-                TransitionOut();
+                WaveTransitionOut();
                 break;
         }
     }
 
     [Button]
-    private void TransitionIn()
+    private void WaveTransitionIn()
     {
         _randSound.PlayRandom();
 
@@ -83,20 +96,36 @@ public class TransitionManager : MonoBehaviour
     }
 
     [Button]
-    private void TransitionOut()
+    private void WaveTransitionOut()
     {
         _transitionWave.DOLocalMoveY(_hiddenPos, 1).SetEase(Ease.InOutBack).OnComplete(() => { _transitionWave.gameObject.SetActive(false); });
     }
 
-    public void TransitionBlackFade()
+    public void FadeTransitionIn()
     {
         _transitionBlack.gameObject.SetActive(true);
 
-        _transitionBlack.DOFade(1, 0.5f).OnComplete(
-            () => _transitionBlack.DOFade(0, 1f).OnComplete(
-                () => { _transitionBlack.gameObject.SetActive(false); }
-                )
-            );
+        float yPos = _mainCam.transform.position.y - 1.5f;
+        _mainCam.transform.DOMoveY(yPos, 1f);
+        _transitionBlack.DOFade(1, 1f);
     }
+
+    public void FadeTransitionOut()
+    {
+        StartCoroutine(FadeTransitionWithFade());
+    }
+
+    private IEnumerator FadeTransitionWithFade()
+    {
+        _transitionBlack.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(0.1f);
+
+        float yPos = _mainCam.transform.position.y - 1.5f;
+        _mainCam.transform.DOMoveY(yPos, 1f);
+        _transitionBlack.DOFade(0, 1f).OnComplete(
+            () => { _transitionBlack.gameObject.SetActive(false); } );
+    }
+
     #endregion
 }

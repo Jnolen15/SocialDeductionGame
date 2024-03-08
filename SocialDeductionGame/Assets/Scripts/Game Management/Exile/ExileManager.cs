@@ -501,12 +501,7 @@ public class ExileManager : NetworkBehaviour
                 GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(_netOnTrialPlayerID.Value);
 
                 // Award Suffering if they were a survivor
-                bool wasSurvivor = false;
-                if (playerToExecute.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Survivors)
-                {
-                    wasSurvivor = true;
-                    SufferingManager.Instance.ModifySuffering(3, 104, true);
-                }
+                bool wasSurvivor = (playerToExecute.GetComponent<PlayerData>().GetPlayerTeam() == PlayerData.Team.Survivors);
 
                 // Track Analytics
                 int day = GameManager.Instance.GetCurrentDay();

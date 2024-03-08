@@ -678,7 +678,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         if (_playerDict.TryGetValue(id, out PlayerEntry entry))
             return entry;
 
-        Debug.LogError("<color=yellow>SERVER: </color>Unable to find player with ID: " + id);
+        Debug.LogWarning("<color=yellow>SERVER: </color>Unable to find player with ID: " + id);
         return null;
     }
 

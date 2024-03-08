@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using TMPro;
-using DG.Tweening;
 
 public class SufferingManager : NetworkBehaviour
 {
@@ -21,18 +19,36 @@ public class SufferingManager : NetworkBehaviour
 
     // ================== Refrences / Variables ==================
     [Header("Suffering")]
-    [SerializeField] private GameObject _sufferingUI;
-    [SerializeField] private TextMeshProUGUI _sufferingNumTxt;
-    [SerializeField] private CanvasGroup _sufferingReason;
-    [SerializeField] private TextMeshProUGUI _sufferingReasonTxt;
-
+    [SerializeField] private NetworkVariable<int> _netShrineLevel = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<int> _netShrineMaxLevel = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netSufferning = new(writePerm: NetworkVariableWritePermission.Server);
-
+    [SerializeField] private NetworkVariable<bool> _netDeathReset = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> _netSacrificeAvailable = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<float> _netSacrificeTimer = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private ShrineLevels _selectedShrineLevels = new();
+    private bool _sacrificeActive;
+    private ulong _playerToSacrifice;
     private bool _isSabo;
-    private Sequence _sufferingReasonSequence;
 
-    public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal);
+    public delegate void SufferingValueModified(int ModifiedAmmount, int newTotal, int reasonCode);
     public static event SufferingValueModified OnSufferingModified;
+    public delegate void ShrineSetup(int maxLevel, int[] numSuffering);
+    public static event ShrineSetup OnShrineSetup;
+    public delegate void ShrineLevelUp(int newLevel, int numSuffering, bool deathReset);
+    public static event ShrineLevelUp OnShrineLevelUp;
+    public delegate void ShrineEvent();
+    public static event ShrineEvent OnSacrificeStarted;
+    public delegate void PlayerSacrificed(ulong pID);
+    public static event PlayerSacrificed OnPlayerSacrificed;
+
+    [System.Serializable]
+    public class ShrineLevels
+    {
+        public int TeamDifference = new();
+        public List<int> LevelSuffering = new();
+    }
+    [SerializeField] private List<ShrineLevels> _teamDifferenceLevelList = new();
+
 
     // ================== Setup ==================
     #region Setup
@@ -40,8 +56,14 @@ public class SufferingManager : NetworkBehaviour
     {
         GameManager.OnStateIntro += Setup;
 
-        //if(IsServer)
-        //    GameManager.OnStateMorning += DailySuffering;
+        if (IsServer)
+        {
+            _netShrineLevel.Value = 1;
+
+            GameManager.OnStateMorning += DailySuffering;
+            GameManager.OnStateMidnight += LevelUpShrine;
+            PlayerConnectionManager.OnPlayerDied += OnPlayerDeath;
+        }
 
         InitializeSingleton();
     }
@@ -50,8 +72,12 @@ public class SufferingManager : NetworkBehaviour
     {
         GameManager.OnStateIntro -= Setup;
 
-        //if(IsServer)
-        //    GameManager.OnStateMorning -= DailySuffering;
+        if (IsServer)
+        {
+            GameManager.OnStateMorning -= DailySuffering;
+            GameManager.OnStateMidnight -= LevelUpShrine;
+            PlayerConnectionManager.OnPlayerDied -= OnPlayerDeath;
+        }
     }
 
     private void Setup()
@@ -59,14 +85,30 @@ public class SufferingManager : NetworkBehaviour
         if (PlayerConnectionManager.Instance.GetLocalPlayerTeam() == PlayerData.Team.Saboteurs)
         {
             _isSabo = true;
-            _sufferingUI.SetActive(true);
         }
+
+        if (IsServer)
+            CalculateMaxShrineLevel();
     }
     #endregion
 
-    // FOR TESTING
     private void Update()
     {
+        if (!IsServer)
+            return;
+
+        // Trial timer
+        if (_sacrificeActive && _netSacrificeTimer.Value >= 0)
+        {
+            _netSacrificeTimer.Value -= Time.deltaTime;
+            if (_netSacrificeTimer.Value <= 0)
+            {
+                Debug.Log($"<color=yellow>SERVER: </color> {_netSacrificeTimer} Sacrifice timer up, Vote complete");
+                ExecuteSacrifice();
+            }
+        }
+
+        // FOR TESTING
         if (!LogViewer.Instance.GetDoCheats())
             return;
 
@@ -81,15 +123,185 @@ public class SufferingManager : NetworkBehaviour
         }
     }
 
-    // ================== Suffering ==================
-    // Suffering Increment / Decrement
-    #region Suffering
+    // ================== Helpers ==================
+    #region Helpers
     public int GetCurrentSufffering()
     {
         if (!_isSabo)
             return -1;
 
         return _netSufferning.Value;
+    }
+    #endregion
+
+    // ================== Shrine ==================
+    #region Shrine
+    private void CalculateMaxShrineLevel()
+    {
+        int numSurvivors = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors);
+        int numSaboteurs = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
+        int teamDiff = numSurvivors - numSaboteurs;
+
+        ShrineLevels selectedLevel = _teamDifferenceLevelList[0];
+        foreach (ShrineLevels shrinelevels in _teamDifferenceLevelList)
+        {
+            if (teamDiff >= shrinelevels.TeamDifference)
+                selectedLevel = shrinelevels;
+        }
+
+        _selectedShrineLevels = selectedLevel;
+        _netShrineMaxLevel.Value = selectedLevel.LevelSuffering.Count;
+
+
+        ShrineSetupClientRpc(selectedLevel.LevelSuffering.Count, selectedLevel.LevelSuffering.ToArray());
+
+        Debug.Log($"<color=yellow>SERVER: </color> Survivors: {numSurvivors}, Sabos: {numSaboteurs}, Difference: {teamDiff}. Max shrine level: {_netShrineMaxLevel.Value}");
+    }
+
+    [ClientRpc]
+    private void ShrineSetupClientRpc(int maxLevel, int[] numSuffering)
+    {
+        OnShrineSetup?.Invoke(maxLevel, numSuffering);
+    }
+
+    private void LevelUpShrine()
+    {
+        if (!IsServer)
+            return;
+
+        bool deathReset = _netDeathReset.Value;
+        // Reset level if player died during the day
+        if (_netDeathReset.Value)
+        {
+            ResetShrineLevel();
+        }
+        // Do sacrifice
+        else if (_netSacrificeAvailable.Value)
+        {
+            DoSacrifice();
+            return;
+        }
+        // Level up
+        else
+        {
+            _netShrineLevel.Value += 1;
+
+            if (_netShrineLevel.Value >= _netShrineMaxLevel.Value)
+            {
+                _netShrineLevel.Value = _netShrineMaxLevel.Value;
+                _netSacrificeAvailable.Value = true;
+            }
+        }
+
+        LevelUpShrineClientRpc(_netShrineLevel.Value, _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], deathReset);
+
+        Debug.Log("<color=yellow>SERVER: </color>Shrine level up, now " + _netShrineLevel.Value);
+    }
+
+    private void ResetShrineLevel()
+    {
+        _netDeathReset.Value = false;
+        _netSacrificeAvailable.Value = false;
+        _netShrineLevel.Value = 1;
+
+        Debug.Log("<color=yellow>SERVER: </color>Player death, Shrine level reset! " + _netShrineLevel.Value);
+    }
+
+    [ClientRpc]
+    private void LevelUpShrineClientRpc(int newLevel, int numSuffering, bool deathReset)
+    {
+        OnShrineLevelUp?.Invoke(newLevel, numSuffering, deathReset);
+    }
+
+    private void OnPlayerDeath()
+    {
+        if (!IsServer)
+            return;
+
+        _netDeathReset.Value = true;
+    }
+    #endregion
+
+    // ================== Sacrifice ==================
+    #region Sacrifice
+    private void DoSacrifice()
+    {
+        _sacrificeActive = true;
+        _netSacrificeTimer.Value = 15f; // Change max float in ShrineLocation also
+        GameManager.Instance.PauseCurrentTimer(16f);
+
+        // Get random survivor to execute (in case saboteurs don't vote in time)
+        List<ulong> livingSurvivors = new();
+        foreach (ulong pID in PlayerConnectionManager.Instance.GetLivingPlayerIDs())
+        {
+            if (PlayerConnectionManager.Instance.GetPlayerTeamByID(pID) == PlayerData.Team.Survivors)
+                livingSurvivors.Add(pID);
+        }
+
+        if (livingSurvivors.Count == 0) // This is only for testing solo. Should never happen in game
+            _playerToSacrifice = 0;
+        else
+            _playerToSacrifice = livingSurvivors[Random.Range(0, livingSurvivors.Count)];
+
+        SacrificeStartedClientRpc();
+    }
+
+    [ClientRpc]
+    private void SacrificeStartedClientRpc()
+    {
+        OnSacrificeStarted?.Invoke();
+    }
+
+    [ServerRpc]
+    public void SetSacrificeVoteServerRpc(ulong playerToSacrifce)
+    {
+        _playerToSacrifice = playerToSacrifce;
+    }
+
+    private void ExecuteSacrifice()
+    {
+        if (!IsServer)
+            return;
+
+        if (!_netSacrificeAvailable.Value)
+            return;
+
+        GameObject playerToExecute = PlayerConnectionManager.Instance.GetPlayerObjectByID(_playerToSacrifice);
+        playerToExecute.GetComponent<PlayerHealth>().ModifyHealth(-99, "Sacrifice");
+
+        _sacrificeActive = false;
+        _netSacrificeAvailable.Value = false;
+
+        ResetShrineLevel();
+        SacrificeEndedClientRpc(_playerToSacrifice);
+        LevelUpShrineClientRpc(_netShrineLevel.Value, _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1], true);
+    }
+
+    [ClientRpc]
+    private void SacrificeEndedClientRpc(ulong pID)
+    {
+        OnPlayerSacrificed?.Invoke(pID);
+    }
+
+    public float GetSacrificeTimer()
+    {
+        return _netSacrificeTimer.Value;
+    }
+    #endregion
+
+    // ================== Suffering ==================
+    #region Suffering Increment / Decrement
+    private void DailySuffering()
+    {
+        if (!IsServer)
+            return;
+
+        int dailySuffering = _selectedShrineLevels.LevelSuffering[_netShrineLevel.Value - 1];
+
+        ModifySufferingServerRPC(dailySuffering, 101, false);
+
+        // Set death reset to false each morning
+        _netDeathReset.Value = false;
     }
 
     public void ModifySuffering(int ammount, int reasonCode, bool ServerOverride)
@@ -125,98 +337,14 @@ public class SufferingManager : NetworkBehaviour
 
         UpdateSufferingUIClientRpc(ammount, _netSufferning.Value, reasonCode);
     }
-    #endregion
 
-    // UI
-    #region UI
     [ClientRpc]
-    private void UpdateSufferingUIClientRpc(int changedVal, int newVal, int reasonCode)
+    private void UpdateSufferingUIClientRpc(int changedVal, int newTotal, int reasonCode)
     {
         if (!_isSabo)
             return;
 
-        _sufferingNumTxt.text = newVal.ToString();
-
-        // Pick Reason Text
-        string msg;
-        switch (reasonCode)
-        {
-            case 0:
-                msg = $"+{changedVal} Suffering, Test Reason";
-                break;
-            case 101:
-                msg = $"+{changedVal} Daily Suffering";
-                break;
-            case 102:
-                msg = $"+{changedVal} Stockpile Sabotage Attempt";
-                break;
-            case 103:
-                msg = $"+{changedVal} Successful Stockpile Sabotage";
-                break;
-            case 104:
-                msg = $"+{changedVal} Survivor Exiled";
-                break;
-            case 201:
-                msg = $"{changedVal} Totem Awoken";
-                break;
-            case 202:
-                msg = $"{changedVal} Night Event Re-Roll";
-                break;
-            case 203:
-                msg = $"{changedVal} Night Event Enhanced";
-                break;
-            case 204:
-                msg = $"{changedVal} Cache Opened";
-                break;
-            default:
-                msg = $"Suffering Incremented By {changedVal}";
-                break;
-        }
-
-        AnimateReason(msg);
-    }
-
-    private void AnimateReason(string msg)
-    {
-        _sufferingReason.gameObject.SetActive(true);
-        _sufferingReasonTxt.text = msg;
-        _sufferingReason.alpha = 1;
-
-        if (!_sufferingReasonSequence.IsActive())
-            CreateReasonAnimation();
-        else if (_sufferingReasonSequence.IsPlaying())
-            _sufferingReasonSequence.Restart();
-    }
-
-    private void CreateReasonAnimation()
-    {
-        _sufferingReasonSequence = DOTween.Sequence();
-        _sufferingReasonSequence.Append(_sufferingReason.transform.DOLocalJump(_sufferingReason.transform.localPosition, 10f, 1, 0.25f))
-          .AppendInterval(3)
-          .Append(_sufferingReason.DOFade(0, 0.2f))
-          .AppendCallback(() => _sufferingReason.gameObject.SetActive(false));
-    }
-    #endregion
-
-    // Misc
-    #region Misc
-    // Earn daily suffering per sabo
-    private void DailySuffering()
-    {
-        if (!IsServer)
-            return;
-
-        int daily;
-        int teamDiff = PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Survivors) - PlayerConnectionManager.Instance.GetNumLivingOnTeam(PlayerData.Team.Saboteurs);
-
-        if (teamDiff <= 1)
-            daily = 1;
-        else if (teamDiff > 1 && teamDiff <= 3)
-            daily = 2;
-        else
-            daily = 3;
-
-        ModifySuffering(daily, 101, true);
+        OnSufferingModified?.Invoke(changedVal, newTotal, reasonCode);
     }
     #endregion
 }

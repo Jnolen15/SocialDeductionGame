@@ -142,8 +142,9 @@ public class PlayerData : NetworkBehaviour
         if (GameManager.Instance.InTransition())
             return;
 
-        // Can't ready during night
-        if (GameManager.Instance.GetCurrentGameState() == GameManager.GameState.Night)
+        // Can't ready during night or midnight
+        if (GameManager.Instance.IsCurrentState(GameManager.GameState.Night)
+            || GameManager.Instance.IsCurrentState(GameManager.GameState.Midnight))
             return;
 
         // Can't ready during timer pause (trial vote)
