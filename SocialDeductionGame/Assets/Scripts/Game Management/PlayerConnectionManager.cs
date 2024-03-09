@@ -703,15 +703,9 @@ public class PlayerConnectionManager : NetworkBehaviour
         return _playerDict[playerID].PlayerObject;
     }
 
-    // Server only
+    // Server or Client
     public List<ulong> GetPlayerIDs()
     {
-        if (!IsServer)
-        {
-            Debug.LogError("Server only function not called by server");
-            return null;
-        }
-
         return _playerDict.Keys.ToList<ulong>();
     }
 
