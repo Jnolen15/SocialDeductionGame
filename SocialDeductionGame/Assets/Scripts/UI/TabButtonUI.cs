@@ -24,11 +24,13 @@ public class TabButtonUI : MonoBehaviour
     [SerializeField] private GameObject _craftingTab;
     [SerializeField] private GameObject _helpTab;
     [SerializeField] private GameObject _exileTab;
+    [SerializeField] private GameObject _notebookTab;
     private bool _eventTabHidden;
     private bool _mapTabHidden;
     private bool _craftingTabHidden;
     private bool _helpTabHidden;
     private bool _exileTabHidden;
+    private bool _notebookTabHidden;
 
     [Header("Sounds")]
     [SerializeField] private ButtonSounds _buttonSounds;
@@ -40,6 +42,7 @@ public class TabButtonUI : MonoBehaviour
     public static event TabPressedAction OnCraftingPressed;
     public static event TabPressedAction OnHelpPressed;
     public static event TabPressedAction OnExilePressed;
+    public static event TabPressedAction OnNotebookPressed;
     #endregion
 
     // ================== Setup ==================
@@ -66,6 +69,9 @@ public class TabButtonUI : MonoBehaviour
         GameManager.OnStateNight += HideExileButton;
         ExileManager.OnExileVoteComplete += HideExileButton;
         GameManager.OnStateGameEnd += HideExileButton;
+
+        GameManager.OnStateMorning += ShowNotebookButton;
+        GameManager.OnStateGameEnd += HideNotebookButton;
     }
 
     private void Start()
@@ -99,6 +105,9 @@ public class TabButtonUI : MonoBehaviour
         GameManager.OnStateNight -= HideExileButton;
         ExileManager.OnExileVoteComplete -= HideExileButton;
         GameManager.OnStateGameEnd -= HideExileButton;
+
+        GameManager.OnStateMorning -= ShowNotebookButton;
+        GameManager.OnStateGameEnd -= HideNotebookButton;
     }
     #endregion
 
@@ -173,6 +182,13 @@ public class TabButtonUI : MonoBehaviour
             else
                 ShowTab(_exileTab.transform);
         }
+        if (!_notebookTabHidden)
+        {
+            if (_notebookTab.transform == tab)
+                ExtendTab(_notebookTab.transform);
+            else
+                ShowTab(_notebookTab.transform);
+        }
     }
 
     private void MinimizeActiveTabs()
@@ -189,6 +205,8 @@ public class TabButtonUI : MonoBehaviour
             MinimizeTab(_helpTab.transform);
         if (!_exileTabHidden)
             MinimizeTab(_exileTab.transform);
+        if (!_notebookTabHidden)
+            MinimizeTab(_notebookTab.transform);
     }
 
     private void HideTab(Transform tab)
@@ -379,6 +397,42 @@ public class TabButtonUI : MonoBehaviour
 
         Debug.Log("Exile button pressed");
         OnExilePressed?.Invoke();
+
+        _bookSounds.PlayRandom();
+    }
+    #endregion
+
+    // ================== Notebook ==================
+    #region Notebook
+    private void ShowNotebookButton()
+    {
+        MinimizeTab(_notebookTab.transform);
+        _notebookTabHidden = false;
+    }
+
+    private void HideNotebookButton()
+    {
+        HideTab(_notebookTab.transform);
+        _notebookTabHidden = true;
+    }
+
+    public void NotebookHovered()
+    {
+        MouseEnter(_notebookTab.transform);
+
+        _buttonSounds.PlayRandomHover();
+    }
+
+    public void NotebookPressed()
+    {
+        if (_notebookTabHidden)
+            return;
+
+        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
+            return;
+
+        Debug.Log("Notebook button pressed");
+        OnNotebookPressed?.Invoke();
 
         _bookSounds.PlayRandom();
     }
