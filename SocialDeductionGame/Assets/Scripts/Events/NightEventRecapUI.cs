@@ -49,7 +49,7 @@ public class NightEventRecapUI : MonoBehaviour
         PlayerHealth.OnStarvation += ShowStarvation;
         PlayerHealth.OnDeath += ShowDeath;
         TalismanGear.OnGiveCard += ShowTalisman;
-        Totem.OnLocationTotemEnable += ShowTotem;
+        //Totem.OnLocationTotemEnable += ShowTotem;
         LTOSpawner.OnLTOSpawned += ShowLTOSpawn;
         LTOSpawner.OnLTODespawned += ShowLTODespawn;
     }
@@ -62,7 +62,7 @@ public class NightEventRecapUI : MonoBehaviour
         PlayerHealth.OnStarvation -= ShowStarvation;
         PlayerHealth.OnDeath -= ShowDeath;
         TalismanGear.OnGiveCard -= ShowTalisman;
-        Totem.OnLocationTotemEnable -= ShowTotem;
+        //Totem.OnLocationTotemEnable -= ShowTotem;
         LTOSpawner.OnLTOSpawned -= ShowLTOSpawn;
         LTOSpawner.OnLTODespawned -= ShowLTODespawn;
     }

@@ -8,7 +8,6 @@ using Unity.Services.Analytics;
 public class Totem : NetworkBehaviour, ICardPlayable
 {
     // ================== Refrences ==================
-    [SerializeField] private GameObject _preppedTotemEffects;
     [SerializeField] private GameObject _activeTotemEffects;
     [SerializeField] private GameObject _activateTotemButton;
     [SerializeField] private GameObject _totemStatus;
@@ -18,7 +17,6 @@ public class Totem : NetworkBehaviour, ICardPlayable
     // ================== Variables ==================
     [SerializeField] private LocationManager.LocationName _locationName;
     [SerializeField] private bool _isDormant = true;
-    [SerializeField] private NetworkVariable<bool> _netIsPrepped = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<bool> _netIsActive = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private NetworkVariable<int> _netCooldown = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private PlayerData.Team _localTeam = PlayerData.Team.Unassigned;
@@ -38,7 +36,6 @@ public class Totem : NetworkBehaviour, ICardPlayable
         if (IsServer)
         {
             GameManager.OnStateMorning += CheckCooldown;
-            GameManager.OnStateNight += ToggleActive;
         }
 
     }
@@ -57,7 +54,6 @@ public class Totem : NetworkBehaviour, ICardPlayable
         if (IsServer)
         {
             GameManager.OnStateMorning -= CheckCooldown;
-            GameManager.OnStateNight -= ToggleActive;
         }
 
         // Invoke the base when using networkobject
@@ -103,12 +99,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
     #endregion
 
     // ================== Helpers ==================
-    #region Helpers
-    public bool GetTotemPrepped()
-    {
-        return _netIsPrepped.Value;
-    }
-    
+    #region Helpers    
     public bool GetTotemActive()
     {
         return _netIsActive.Value;
@@ -162,10 +153,12 @@ public class Totem : NetworkBehaviour, ICardPlayable
         // Set totem active
         if (current)
         {
-            _preppedTotemEffects.SetActive(false);
+            if (_totemSounds)
+                _totemSounds.PlayPrepped();
             _activeTotemEffects.SetActive(true);
-            _activateTotemButton.SetActive(true);
             OnLocationTotemEnable?.Invoke(_locationName);
+
+            _isDormant = false;
 
             HideActivateButton();
             HideStatus();
@@ -213,29 +206,15 @@ public class Totem : NetworkBehaviour, ICardPlayable
             SetTotemDormant();
     }
 
-    // Call from server, sets active at night if prepped
-    private void ToggleActive()
-    {
-        if (!IsServer)
-            return;
-
-        if (_netIsPrepped.Value)
-        {
-            _isDormant = false;
-            _netIsPrepped.Value = false;
-            _netIsActive.Value = true;
-        }
-    }
-
     // ================== Player interaction ==================
     public void AttemptActivateTotem()
     {
         if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
             return;
 
-        if (_netIsPrepped.Value)
+        if (_netIsActive.Value)
         {
-            Debug.LogWarning("Totem is already prepped!");
+            Debug.LogWarning("Totem is already active!");
             return;
         }
 
@@ -250,19 +229,7 @@ public class Totem : NetworkBehaviour, ICardPlayable
     [ServerRpc(RequireOwnership = false)]
     private void ActivateTotemServerRpc()
     {
-        _netIsPrepped.Value = true;
-        ActivateTotemClientRpc();
-    }
-
-    [ClientRpc]
-    private void ActivateTotemClientRpc()
-    {
-        if (_totemSounds)
-            _totemSounds.PlayPrepped();
-
-        _preppedTotemEffects.SetActive(true);
-        HideActivateButton();
-        SetStatusText("Totem will activate in the night");
+        _netIsActive.Value = true;
     }
 
     public bool CanPlayCardHere(Card cardToPlay)
