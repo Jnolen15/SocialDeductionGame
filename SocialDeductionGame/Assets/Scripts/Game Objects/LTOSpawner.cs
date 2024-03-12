@@ -102,15 +102,23 @@ public class LTOSpawner : NetworkBehaviour
 
     private LTOSpawnLocation GetOpenSpawnLocation()
     {
+        List<LTOSpawnLocation> openLocations = new List<LTOSpawnLocation>();
+
         foreach (LTOSpawnLocation location in _ltoSpawnLocationList)
         {
             if (!location.HasLTO)
             {
-                return location;
+                openLocations.Add(location);
             }
         }
 
-        return null;
+        if (openLocations.Count > 0)
+        {
+            int rand = Random.Range(0, openLocations.Count);
+            return openLocations[rand];
+        }
+        else
+            return null;
     }
 
     private void TestSpawnLTO()

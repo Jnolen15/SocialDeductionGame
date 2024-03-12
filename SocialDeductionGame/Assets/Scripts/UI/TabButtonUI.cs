@@ -429,9 +429,6 @@ public class TabButtonUI : MonoBehaviour
         if (_notebookTabHidden)
             return;
 
-        if (!PlayerConnectionManager.Instance.GetLocalPlayerLiving())
-            return;
-
         Debug.Log("Notebook button pressed");
         OnNotebookPressed?.Invoke();
 
