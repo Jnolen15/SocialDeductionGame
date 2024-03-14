@@ -15,7 +15,7 @@ public class HandManager : NetworkBehaviour
     [SerializeField] private GameObject _cardSlotPref;
     [SerializeField] private List<CardSlot> _playerDeck = new();
     [SerializeField] private int numSlotsToDestroy;
-    [SerializeField] private Transform[] _gearSlots;
+    [SerializeField] private GearSlot[] _gearSlots;
     [SerializeField] private Gear[] _equipedGear;
     public class CardSlot
     {
@@ -296,10 +296,7 @@ public class HandManager : NetworkBehaviour
             return;
         }
 
-        GameObject newGear = Instantiate(CardDatabase.Instance.GetCard(cardID), _gearSlots[gearSlot-1]);
-        Gear newGearCard = newGear.GetComponent<Gear>();
-
-        newGearCard.SetupUI();
+        Gear newGearCard = _gearSlots[gearSlot - 1].EqipGearCard(cardID);
         EquipToSlot(gearSlot, newGearCard);
 
         Debug.Log($"Equiping a gear card {newGearCard.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
