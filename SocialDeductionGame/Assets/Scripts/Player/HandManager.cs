@@ -7,7 +7,7 @@ using TMPro;
 public class HandManager : NetworkBehaviour
 {
     // Tracks the local verisions of player cards
-    // A list of card's is controlled by the server in player data
+    // A list of card's is controlled by the server in player card manager
     // ================ Refrences / Variables ================
     private PlayerCardManager _pcm;
     private CraftingUI _craftingUI;
@@ -108,22 +108,20 @@ public class HandManager : NetworkBehaviour
         // Return list
         List<int> randomCards = new();
 
-        // If no cards
-        if (tempSlotList.Count == 0)
-            return randomCards;
-
         // Fill randomCards
         for (int i = 0; i < num; i++)
         {
-            if(tempSlotList.Count <= 0)
+            if(tempSlotList.Count > 0)
+            {
+                CardSlot randSlot = tempSlotList[Random.Range(0, tempSlotList.Count)];
+                randomCards.Add(randSlot.GetCard().GetCardID());
+                tempSlotList.Remove(randSlot);
+            }
+            else
             {
                 Debug.Log("Had less cards than the random ammount given");
                 break;
             }
-
-            CardSlot randSlot = tempSlotList[Random.Range(0, tempSlotList.Count)];
-            randomCards.Add(randSlot.GetCard().GetCardID());
-            tempSlotList.Remove(randSlot);
         }
 
         return randomCards;
@@ -379,6 +377,7 @@ public class HandManager : NetworkBehaviour
         return 0;
     }
 
+    // This one is stackable, upodate CheckGearTagsFor to be stackable
     public int CheckForForageGear(string location)
     {
         Debug.Log("Looking for equipped gear with " + location + " tag");
@@ -422,6 +421,7 @@ public class HandManager : NetworkBehaviour
     #endregion
 
     // ================ Crafting ================
+    #region Crafting
     public void TryCraft(List<CardTag> requiredTags)
     {
         List<CardTag> tempTagList = requiredTags;
@@ -469,4 +469,5 @@ public class HandManager : NetworkBehaviour
         Debug.Log("<color=blue>CLIENT: </color>Crafted = " + crafted);
         _craftingUI.Craft(crafted);
     }
+    #endregion
 }

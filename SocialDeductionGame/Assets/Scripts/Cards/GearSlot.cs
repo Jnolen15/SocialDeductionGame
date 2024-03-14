@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ICardUIPlayable
 {
     [SerializeField] private int _gearSlot;
     [SerializeField] private GameObject _pocketClosed;
@@ -19,12 +19,12 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        _pcm.HoveringGearSlot(_gearSlot);
+        //_pcm.HoveringGearSlot(_gearSlot);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        _pcm.EndHoveringGearSlot();
+        //_pcm.EndHoveringGearSlot();
     }
 
     public Gear EqipGearCard(int gearID)
@@ -58,5 +58,24 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         _pocketClosed.SetActive(true);
         _pocketOpenBack.SetActive(false);
         _pocketOpenFront.SetActive(false);
+    }
+
+    // ============== ICardUIPlayable ==============
+    public bool CanPlayCardHere(Card cardToPlay)
+    {
+        if (cardToPlay.HasTag("Gear"))
+        {
+            return true;
+        }
+        else
+        {
+            Debug.Log("Card is not gear, can't equip");
+            return false;
+        }
+    }
+
+    public void PlayCardHere(int cardID)
+    {
+        _pcm.EquipGear(_gearSlot, cardID);
     }
 }

@@ -19,7 +19,6 @@ public class PlayerCardManager : NetworkBehaviour
     [SerializeField] private List<int> _playerDeckIDs = new();
     [SerializeField] private bool _discardMode;
     [SerializeField] private int[] _playerGear;
-    private int _gearSlotHovered;
 
     // ================ Setup ================
     #region Setup
@@ -84,7 +83,6 @@ public class PlayerCardManager : NetworkBehaviour
     }
     #endregion
 
-    // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= PLAYER DECK =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
     // ================ Card Add ================
     #region Card Add
     // ~~~~~~~~~~~ Local ~~~~~~~~~~~
@@ -274,8 +272,8 @@ public class PlayerCardManager : NetworkBehaviour
     }
     #endregion
 
-    // ================ Card Play / Validate ================
-    #region Card Play / Validate
+    // ================ Play card to Object ================
+    #region Card to Object
     // ~~~~~~~~~~~ Local ~~~~~~~~~~~
     // Tests if card is played onto a card playable object then calls player data server RPC to play the card
     public void TryCardPlay(Card playedCard)
@@ -285,13 +283,6 @@ public class PlayerCardManager : NetworkBehaviour
         {
             int[] toDiscard = new int[] { playedCard.GetCardID() };
             DiscardCardsServerRPC(toDiscard, true);
-            return;
-        }
-
-        // If over gear slot
-        if (_gearSlotHovered != 0)
-        {
-            EquipGear(_gearSlotHovered, playedCard);
             return;
         }
 
@@ -319,28 +310,6 @@ public class PlayerCardManager : NetworkBehaviour
         }
         else
             Debug.Log("Card not played on playable object");
-    }
-
-    public void TryCardPlayToUI(Card playedCard, GameObject UIObject)
-    {
-        // Verify object has script with correct interface
-        ICardUIPlayable cardPlayable = UIObject.GetComponent<ICardUIPlayable>();
-        if (cardPlayable != null)
-        {
-            // Verify this card can be played here
-            if (cardPlayable.CanPlayCardHere(playedCard))
-            {
-                _cardPlayLocation = UIObject;
-
-                // Try to play the card
-                PlayCardUIServerRPC(playedCard.GetCardID());
-                return;
-            }
-            else
-                Debug.Log("Card cannot be played here");
-        }
-        else
-            Debug.LogError("Card Played on object on playable layer without ICardPlayable implementation");
     }
 
     // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
@@ -391,7 +360,34 @@ public class PlayerCardManager : NetworkBehaviour
             playedCard.OnPlay(_cardPlayLocation);
         }
     }
+    #endregion
 
+    // ================ Play card to UI ================
+    #region Card to UI
+    // ~~~~~~~~~~~ Local ~~~~~~~~~~~
+    public void TryCardPlayToUI(Card playedCard, GameObject UIObject)
+    {
+        // Verify object has script with correct interface
+        ICardUIPlayable cardPlayable = UIObject.GetComponentInParent<ICardUIPlayable>();
+        if (cardPlayable != null)
+        {
+            // Verify this card can be played here
+            if (cardPlayable.CanPlayCardHere(playedCard))
+            {
+                _cardPlayLocation = UIObject;
+
+                // Try to play the card
+                PlayCardUIServerRPC(playedCard.GetCardID());
+                return;
+            }
+            else
+                Debug.Log("Card cannot be played here");
+        }
+        else
+            Debug.LogError("Card Played on object on playable layer without ICardPlayable implementation");
+    }
+
+    // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
     [ServerRpc]
     public void PlayCardUIServerRPC(int cardID, ServerRpcParams serverRpcParams = default)
     {
@@ -422,16 +418,22 @@ public class PlayerCardManager : NetworkBehaviour
     [ClientRpc]
     public void ExecutePlayedUICardClientRpc(int cardID, ClientRpcParams clientRpcParams = default)
     {
-        Debug.Log($"Card {cardID} played on UI {_cardPlayLocation.name}");
-
         //Play Card
-        ICardUIPlayable cardUI = _cardPlayLocation.GetComponent<ICardUIPlayable>();
-        if(cardUI != null)
+        ICardUIPlayable cardUI = _cardPlayLocation.GetComponentInParent<ICardUIPlayable>();
+        if (cardUI != null)
         {
+            Debug.Log($"Card {cardID} played on UI {_cardPlayLocation.name}");
             cardUI.PlayCardHere(cardID);
         }
+        else
+        {
+            Debug.LogWarning($"Card {cardID} could not be played on UI {_cardPlayLocation.name}, no ICardUIPlayable found");
+        }
     }
+    #endregion
 
+    // ================ Crafting ================
+    #region Crafting
     [ServerRpc]
     public void ValidateAndDiscardCardsServerRpc(int[] cardIds, ServerRpcParams serverRpcParams = default)
     {
@@ -494,37 +496,19 @@ public class PlayerCardManager : NetworkBehaviour
     [ServerRpc]
     public void IncrementPlayerHandSizeServerRpc(int num, ServerRpcParams serverRpcParams = default)
     {
-        // Get client data
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        ClientRpcParams clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] { clientId }
-            }
-        };
-
         _netHandSize.Value += num;
-        Debug.Log($"<color=yellow>SERVER: </color> Incremented player {clientId}'s hand size");
+        Debug.Log($"<color=yellow>SERVER: </color> Incremented player {serverRpcParams.Receive.SenderClientId}'s hand size");
     }
     #endregion
 
     // ================ Gear ================
     #region Gear
     // ~~~~~~~~~~~ Local ~~~~~~~~~~~
-    public void HoveringGearSlot(int gearNum)
+    public void EquipGear(int gearSlot, int cardID)
     {
-        _gearSlotHovered = gearNum;
-    }
+        Card gearCard = CardDatabase.Instance.GetCard(cardID).GetComponent<Card>();
 
-    public void EndHoveringGearSlot()
-    {
-        _gearSlotHovered = 0;
-    }
-
-    public void EquipGear(int gearSlot, Card card)
-    {
-        if (!card.HasTag("Gear"))
+        if (!gearCard.HasTag("Gear"))
         {
             Debug.Log("Card is not gear, can't equip");
             return;
@@ -533,7 +517,7 @@ public class PlayerCardManager : NetworkBehaviour
         Debug.Log("Attempting to equip gear!");
 
         if (gearSlot == 1 || gearSlot == 2)
-            EquipGearServerRPC(gearSlot, card.GetCardID());
+            EquipGearServerRPC(gearSlot, gearCard.GetCardID());
         else
             Debug.Log("Attempting to equip to non-existant gear slot");
     }
@@ -589,23 +573,13 @@ public class PlayerCardManager : NetworkBehaviour
             swap = true;
         }
 
-        // Test if networked deck contains the card that is being played
-        if (_playerDeckIDs.Contains(cardID))
-        {
-            // Discard the card
-            int[] toDiscard = new int[] { cardID };
-            DiscardCardsOnServer(toDiscard, true, clientRpcParams);
+        // Equip Card
+        _playerGear[gearSlot - 1] = cardID;
 
-            // Equip Card
-            _playerGear[gearSlot - 1] = cardID;
-
-            if(!swap)
-                EquipGearClientRpc(gearSlot, cardID, clientRpcParams);
-            else
-                SwapGearClientRpc(gearSlot, cardID, clientRpcParams);
-        }
+        if (!swap)
+            EquipGearClientRpc(gearSlot, cardID, clientRpcParams);
         else
-            Debug.LogError($"{cardID} not found in player's networked deck!");
+            SwapGearClientRpc(gearSlot, cardID, clientRpcParams);
     }
 
     [ClientRpc]
