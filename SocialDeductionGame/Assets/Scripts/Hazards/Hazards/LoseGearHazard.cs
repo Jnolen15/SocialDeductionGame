@@ -19,7 +19,7 @@ public class LoseGearHazard : Hazard
             // Loose gear
             for(int i = 0; i < _gearSlots.Length; i++)
             {
-                playerObj.GetComponent<PlayerCardManager>().LoseGear(_gearSlots[i]);
+                playerObj.GetComponent<PlayerCardManager>().UnequipGear(_gearSlots[i], 9999);
             }
 
             // Loose cards

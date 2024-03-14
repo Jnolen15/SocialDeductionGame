@@ -10,6 +10,7 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [SerializeField] private GameObject _pocketOpenFront;
     [SerializeField] private GameObject _pocketOpenBack;
     [SerializeField] private Transform _cardZone;
+    [SerializeField] private Gear _currentGearCard;
     private PlayerCardManager _pcm;
 
     private void Start()
@@ -27,22 +28,27 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         //_pcm.EndHoveringGearSlot();
     }
 
-    public Gear EqipGearCard(int gearID)
+    public Gear EquipGearCard(int gearID)
     {
         OpenPocketVisuals();
 
         GameObject newGear = Instantiate(CardDatabase.Instance.GetCard(gearID), _cardZone);
-        Gear newGearCard = newGear.GetComponent<Gear>();
+        _currentGearCard = newGear.GetComponent<Gear>();
 
-        newGearCard.SetupUI();
+        _currentGearCard.SetupUI();
 
-        return newGearCard;
+        return _currentGearCard;
     }
 
-    public void Unequip(int gearID)
+    public void UnequipGearCard()
     {
         ClosedPocketVisuals();
 
+        Destroy(_currentGearCard);
+    }
+
+    public void GearBreak(int gearID)
+    {
         _pcm.UnequipGear(_gearSlot, gearID);
     }
 

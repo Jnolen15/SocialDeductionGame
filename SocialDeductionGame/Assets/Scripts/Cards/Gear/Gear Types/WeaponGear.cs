@@ -14,7 +14,7 @@ public class WeaponGear : Gear
         if (rand == 1)
         {
             Debug.Log($"Gear {_cardName} has broken!");
-            GetComponentInParent<GearSlot>().Unequip(_cardID);
+            GetComponentInParent<GearSlot>().GearBreak(_cardID);
         }
     }
 }

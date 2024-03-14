@@ -286,30 +286,26 @@ public class HandManager : NetworkBehaviour
 
     // ================ Gear Management ================
     #region Gear Management
-    public void AddGearCard(int cardID, int gearSlot)
+    private bool VerifyGearSlot(int gearSlot)
     {
-        if(gearSlot != 1 && gearSlot != 2)
+        if (gearSlot != 1 && gearSlot != 2)
         {
             Debug.LogError($"Given gear slot {gearSlot} out of bounds");
-            return;
+            return false;
         }
 
-        Gear newGearCard = _gearSlots[gearSlot - 1].EqipGearCard(cardID);
+        return true;
+    }
+
+    public void AddGearCard(int cardID, int gearSlot)
+    {
+        if (!VerifyGearSlot(gearSlot))
+            return;
+
+        Gear newGearCard = _gearSlots[gearSlot - 1].EquipGearCard(cardID);
         EquipToSlot(gearSlot, newGearCard);
 
         Debug.Log($"Equiping a gear card {newGearCard.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
-    }
-    
-    public void UpdateGearCard(int cardID, int gearSlot)
-    {
-        if(gearSlot != 1 && gearSlot != 2)
-        {
-            Debug.LogError($"Given gear slot {gearSlot} out of bounds");
-            return;
-        }
-
-        RemoveGearCard(gearSlot);
-        AddGearCard(cardID, gearSlot);
     }
 
     private void EquipToSlot(int gearSlot, Gear gear)
@@ -321,11 +317,8 @@ public class HandManager : NetworkBehaviour
 
     public void RemoveGearCard(int gearSlot)
     {
-        if (gearSlot != 1 && gearSlot != 2)
-        {
-            Debug.LogError($"Given gear slot {gearSlot} out of bounds");
+        if (!VerifyGearSlot(gearSlot))
             return;
-        }
 
         Gear gearToRemove = _equipedGear[gearSlot - 1];
 
@@ -336,15 +329,17 @@ public class HandManager : NetworkBehaviour
         }
 
         gearToRemove.OnUnequip();
-
         _equipedGear[gearSlot - 1] = null;
-        Destroy(gearToRemove.gameObject);
+
+        _gearSlots[gearSlot - 1].UnequipGearCard();
 
         Debug.Log($"Unequipping a gear card from slot {gearSlot}");
     }
 
     public int CheckGearTagsFor(string tag)
     {
+        // Returns gear ID so it can be used
+
         Debug.Log("Checking gear for tag " + tag);
 
         foreach (Gear gear in _equipedGear)
@@ -360,26 +355,10 @@ public class HandManager : NetworkBehaviour
         return 0;
     }
 
-    public int CheckForHazardPreventionGear()
-    {
-        Debug.Log("Looking for equipped gear with 'Weapon' tag");
-
-        foreach (Gear gear in _equipedGear)
-        {
-            if (gear != null && gear.HasTag("Weapon"))
-            {
-                Debug.Log("Found matching gear " + gear.GetCardName());
-                return gear.GetCardID();
-            }
-        }
-
-        Debug.Log("Did not find mathcing gear in either slot");
-        return 0;
-    }
-
-    // This one is stackable, upodate CheckGearTagsFor to be stackable
     public int CheckForForageGear(string location)
     {
+        // Returns number of gear cards with that tag
+
         Debug.Log("Looking for equipped gear with " + location + " tag");
 
         int matchingGear = 0;
@@ -399,7 +378,6 @@ public class HandManager : NetworkBehaviour
 
     public void UseGear(int gearID)
     {
-        // Find gear
         Gear gearUsed = null;
         foreach (Gear gear in _equipedGear)
         {

@@ -83,7 +83,7 @@ public abstract class Hazard : ScriptableObject
         int gearID = 0;
         if (_preventable)
         {
-            gearID = handMan.CheckForHazardPreventionGear();
+            gearID = handMan.CheckGearTagsFor("Weapon");
             if (gearID != 0)
             {
                 handMan.UseGear(gearID);

@@ -524,24 +524,12 @@ public class PlayerCardManager : NetworkBehaviour
 
     public void UnequipGear(int gearSlot, int gearID)
     {
-        Debug.Log("Attempting to Unequip gear!");
+        Debug.Log($"Attempting to Unequip gear {gearID} in slot {gearSlot}!");
 
         if (gearSlot == 1 || gearSlot == 2)
             UnequipGearServerRPC(gearSlot, gearID);
         else
             Debug.Log("Attempting to equip to non-existant gear slot");
-    }
-
-    public void LoseGear(int gearSlot)
-    {
-        Debug.Log("Discarding gear in slot " + gearSlot);
-
-        if (gearSlot == 1 || gearSlot == 2)
-        {
-            UnequipGearServerRPC(gearSlot, 9999);
-        }
-        else
-            Debug.Log("Attempting to unequip to non-existant gear slot");
     }
 
     // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
@@ -585,15 +573,14 @@ public class PlayerCardManager : NetworkBehaviour
     [ClientRpc]
     public void EquipGearClientRpc(int gearSlot, int cardID, ClientRpcParams clientRpcParams = default)
     {
-        // re-instantiate card
         _handManager.AddGearCard(cardID, gearSlot);
     }
 
     [ClientRpc]
     public void SwapGearClientRpc(int gearSlot, int cardID, ClientRpcParams clientRpcParams = default)
     {
-        // re-instantiate card
-        _handManager.UpdateGearCard(cardID, gearSlot);
+        _handManager.RemoveGearCard(gearSlot);
+        _handManager.AddGearCard(cardID, gearSlot);
     }
 
     [ServerRpc]
@@ -618,7 +605,7 @@ public class PlayerCardManager : NetworkBehaviour
         // Test if gear slot contains the card that is being discarded (or 9999 for discard whatever)
         if (_playerGear[gearSlot - 1] == cardID || cardID == 9999)
         {
-            Debug.Log("<color=yellow>SERVER: </color>Unequiping gear from slot 1");
+            Debug.Log("<color=yellow>SERVER: </color>Unequiping gear from slot " + gearSlot);
             _playerGear[gearSlot - 1] = 0;
 
             UnequipGearClientRpc(gearSlot, clientRpcParams);
