@@ -4,14 +4,20 @@ using UnityEngine;
 
 public class TestCardSetup : MonoBehaviour
 {
-    [SerializeField] private List<Card> _cards;
+    [SerializeField] private List<Card> _cardsUI;
+    [SerializeField] private List<Card> _cardsPlayable;
     [SerializeField] private List<HazardCardVisual> _hazards;
 
     void Start()
     {
-        foreach (Card card in _cards)
+        foreach (Card card in _cardsUI)
         {
             card.SetupUI();
+        }
+
+        foreach (Card card in _cardsPlayable)
+        {
+            card.SetupPlayable();
         }
 
         int hazardID = 1001;
