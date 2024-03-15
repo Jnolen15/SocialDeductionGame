@@ -1644,7 +1644,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2616458227628307453}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -2055,6 +2055,7 @@ MonoBehaviour:
   _cardCount: {fileID: 8138912117664607006}
   _cardMax: {fileID: 2748491026169265921}
   _cardSlotPref: {fileID: 8678071956619403002, guid: d5a823d4e6a00a849b077c416274a018, type: 3}
+  _playerDeck: []
   _gearSlots:
   - {fileID: 782830003453503218}
   - {fileID: 8865106686247790584}
@@ -2234,7 +2235,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 499.66, y: 0}
+  m_AnchoredPosition: {x: -415, y: 10}
   m_SizeDelta: {x: 200, y: 84}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &4634109795421127790
@@ -3370,7 +3371,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 3
+  m_text: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 744dcfa55d665fb428a454337938185f, type: 2}
   m_sharedMaterial: {fileID: -5811233463216366101, guid: 744dcfa55d665fb428a454337938185f, type: 2}
@@ -4276,10 +4277,10 @@ MonoBehaviour:
   _rightMost: {fileID: 474318339835713330}
   _tilt: -4
   _height: -4
+  _cardsHeld: 0
   left: 0
   right: 0
   distance: 0
-  numCards: 0
   spacing: 0
   offset: 0
   _hand: {fileID: 4308190431970439896}
@@ -4341,7 +4342,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6470061205287865729}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 

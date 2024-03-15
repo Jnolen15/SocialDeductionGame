@@ -14,12 +14,12 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     [SerializeField] private Transform _rightMost;
     [SerializeField] private float _tilt;
     [SerializeField] private float _height;
+    [SerializeField] private int _cardsHeld;
 
-    // just here for testing
+    // just here for testing can be local
     [SerializeField] private float left;
     [SerializeField] private float right;
     [SerializeField] private float distance;
-    [SerializeField] private int numCards;
     [SerializeField] private float spacing;
     [SerializeField] private float offset;
 
@@ -40,23 +40,32 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         _minimizedHeight = _cards.position.y;
     }
 
+    // =================== Update ===================
+    private void Update()
+    {
+        RunMinimizeTimer();
+
+        if (_cardsHeld != _cards.childCount)
+        {
+            SetCardPositions();
+        }
+    }
+
     // =================== Card Positioning ===================
     #region Card Positioning
-    [Button]
     private void SetCardPositions()
-    {
-        Debug.Log($"Leftmost X: {_leftMost.localPosition.x}, Rightmost X: {_rightMost.localPosition.x}");
+    {        
+        _cardsHeld = _cards.childCount;
 
         left = _leftMost.localPosition.x;
         right = _rightMost.localPosition.x;
         distance = (Mathf.Abs(left) + right);
-        numCards = _cards.childCount;
         offset = (Mathf.Abs(left));
 
-        if (numCards == 0)
+        if (_cardsHeld == 0)
             return;
 
-        spacing = (distance / (numCards+1));
+        spacing = (distance / (_cardsHeld + 1));
 
         // Spacing
         int cardNum = 1;
@@ -70,7 +79,7 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             cardNum++;
         }
 
-        if (numCards < 3)
+        if (_cardsHeld < 3)
         {
             foreach (Transform slot in _cards)
             {
@@ -83,14 +92,14 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         }
 
         // Tilt
-        cardNum = 0 - (numCards / 2);
+        cardNum = 0 - (_cardsHeld / 2);
         foreach (Transform slot in _cards)
         {
             Transform card = slot.GetChild(0);
 
             float tiltAmmount = (_tilt * cardNum);
 
-            if (numCards%2 == 0 && tiltAmmount == 0)
+            if (_cardsHeld % 2 == 0 && tiltAmmount == 0)
             {
                 cardNum++;
                 tiltAmmount = (_tilt * cardNum);
@@ -106,7 +115,7 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     // =================== Minimizing ===================
     #region Minimizing
-    private void Update()
+    private void RunMinimizeTimer()
     {
         if (_hovering)
             return;

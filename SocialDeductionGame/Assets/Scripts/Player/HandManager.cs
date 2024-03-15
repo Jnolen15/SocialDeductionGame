@@ -13,53 +13,11 @@ public class HandManager : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI _cardCount;
     [SerializeField] private TextMeshProUGUI _cardMax;
     [SerializeField] private GameObject _cardSlotPref;
-    [SerializeField] private List<CardSlot> _playerDeck = new();
+    [SerializeField] private List<CardSlotUI> _playerDeck = new();
     [SerializeField] private GearSlot[] _gearSlots;
     [SerializeField] private Gear[] _equipedGear;
     private PlayerCardManager _pcm;
     private CraftingUI _craftingUI;
-
-    public class CardSlot
-    {
-        public Transform Slot;
-        public Card HeldCard;
-
-        // Constructor
-        public CardSlot(Transform slot, Card newCard = null)
-        {
-            Slot = slot;
-            HeldCard = newCard;
-        }
-
-        // Methods
-        public Transform GetSlot()
-        {
-            return Slot;
-        }
-
-        public Card GetCard()
-        {
-            return HeldCard;
-        }
-
-        public bool HasCard()
-        {
-            if (HeldCard)
-                return true;
-
-            return false;
-        }
-
-        public void SlotCard(Card newCard)
-        {
-            HeldCard = newCard;
-        }
-
-        public void RemoveCard()
-        {
-            HeldCard = null;
-        }
-    }
 
     // ================ Setup ================
     #region Setup
@@ -75,7 +33,6 @@ public class HandManager : NetworkBehaviour
 
         // Initialize gear and hand
         _equipedGear = new Gear[2];
-        SetupHand(_pcm.GetHandSize());
     }
     #endregion
 
@@ -84,7 +41,7 @@ public class HandManager : NetworkBehaviour
     public int GetNumCardsHeld()
     {
         int numCards = 0;
-        foreach (CardSlot slot in _playerDeck)
+        foreach (CardSlotUI slot in _playerDeck)
         {
             if (slot.HasCard())
                 numCards++;
@@ -94,30 +51,24 @@ public class HandManager : NetworkBehaviour
 
     public List<int> GetRandomHeldCards(int num)
     {
-        // Make a temp list of only slots with cards
-        List<CardSlot> tempSlotList = new();
-        foreach (CardSlot slot in _playerDeck)
-        {
-            if (slot.HasCard())
-                tempSlotList.Add(slot);
-        }
-
         // Return list
         List<int> randomCards = new();
-
-        // Fill randomCards
-        for (int i = 0; i < num; i++)
+        foreach (CardSlotUI slot in _playerDeck)
         {
-            if(tempSlotList.Count > 0)
+            if (slot.HasCard())
             {
-                CardSlot randSlot = tempSlotList[Random.Range(0, tempSlotList.Count)];
-                randomCards.Add(randSlot.GetCard().GetCardID());
-                tempSlotList.Remove(randSlot);
+                randomCards.Add(slot.GetCard().GetCardID());
             }
-            else
+        }
+
+        int numToRemove = randomCards.Count - num;
+
+        if (numToRemove >= 1)
+        {
+            for (int i = 0; i < numToRemove; i++)
             {
-                Debug.Log("Had less cards than the random ammount given");
-                break;
+                int randSlot = randomCards[Random.Range(0, randomCards.Count)];
+                randomCards.Remove(randSlot);
             }
         }
 
@@ -130,12 +81,14 @@ public class HandManager : NetworkBehaviour
     private void UpdateHandMaxNum(int handLimit)
     {
         _cardMax.text = handLimit.ToString();
+
+        UpdateHandCountNum();
     }
 
     private void UpdateHandCountNum()
     {
         int count = 0;
-        foreach (CardSlot slot in _playerDeck)
+        foreach (CardSlotUI slot in _playerDeck)
         {
             if (slot.HasCard())
                 count++;
@@ -147,155 +100,99 @@ public class HandManager : NetworkBehaviour
 
     //================ Card Slots ================
     #region Card Slots
-    private void SetupHand(int handLimit)
+    private CardSlotUI CreateNewCardSlot()
     {
-        for (int i = 0; i < handLimit; i++)
-        {
-            CreateNewCardSlot();
-        }
-    }
-
-    private CardSlot CreateNewCardSlot()
-    {
-        Transform newSlotPref = Instantiate(_cardSlotPref, _handZone).transform;
-        CardSlot newSlot = new CardSlot(newSlotPref);
+        CardSlotUI newSlot = Instantiate(_cardSlotPref, _handZone).GetComponent<CardSlotUI>();
         _playerDeck.Add(newSlot);
         return newSlot;
     }
 
-    private void RemoveCardSlot()
+    private void RemoveCardSlot(CardSlotUI cardToRemove)
+    {
+        Debug.Log("Destroying a slot");
+        cardToRemove.RemoveCard();
+        _playerDeck.Remove(cardToRemove);
+    }
+
+    // Adds or removes card slots
+    public void UpdateHandSize(int newSlotCount)
     {
         // Note, its possible that this function could cause desync with lag
         // Since it removes a card locally before confirming with the server it was removed
         // But for now it works, but keep an eye on it for future
 
-        // Remove the first slot with no card
-        CardSlot slotToRemove = null;
-        foreach (CardSlot slot in _playerDeck)
-        {
-            if (!slot.HasCard())
-            {
-                slotToRemove = slot;
-                break;
-            }
-        }
-        // Remove last card slot if all slots have cards
-        if (slotToRemove == null)
-        {
-            slotToRemove = _playerDeck[_playerDeck.Count - 1];
-        }
-
-        // Remove card
-        if (slotToRemove.HasCard())
-        {
-            Debug.Log("Removing a slot with a card id " + slotToRemove.GetCard().GetCardID());
-            int[] toDiscard = new int[] { slotToRemove.GetCard().GetCardID() };
-            _pcm.DiscardCardsServerRPC(toDiscard, false);
-        }
-
-        // Remove slot
-        Debug.Log("Destroying a slot");
-        Destroy(slotToRemove.Slot.gameObject);
-        _playerDeck.Remove(slotToRemove);
-        slotToRemove = null;
-    }
-
-    // Adds or removes card slots
-    public void UpdateHandSlots(int newSlotCount)
-    {
         UpdateHandMaxNum(newSlotCount);
 
         int difference = (newSlotCount - _playerDeck.Count);
 
-        // Increment
-        if (difference >= 1)
-        {
-            Debug.Log("Adding hand slot(s)");
-
-            for (int i = 0; i < difference; i++)
-            {
-                CreateNewCardSlot();
-            }
-        }
-        // Decrement
-        else if (difference <= -1)
+        // Remove cards if hand gets smaller
+        if (difference <= -1)
         {
             Debug.Log("Removing hand slot(s)");
             for (int i = 0; i < difference*-1; i++)
             {
-                RemoveCardSlot();
+                // Remove last card slot
+                CardSlotUI slotToRemove = _playerDeck[_playerDeck.Count - 1];
+
+                // Remove card
+                if (slotToRemove.HasCard())
+                {
+                    Debug.Log("Removing a slot with a card id " + slotToRemove.GetCard().GetCardID());
+                    int[] toDiscard = new int[] { slotToRemove.GetCard().GetCardID() };
+                    _pcm.DiscardCardsServerRPC(toDiscard, false);
+
+                    RemoveCardSlot(slotToRemove);
+                }
+                else
+                {
+                    Debug.LogError("slot to be remvoed does not have a card");
+                }
             }
         }
-        // The same
-        else if (difference == 0)
-        {
-            Debug.Log("UpdateHandSlots was called but slot count already the given number");
-        }
-    }
-
-    private void AdjustSlots(CardSlot slot, bool bringFront)
-    {
-        UpdateHandCountNum();
-
-        if (bringFront)
-            slot.GetSlot().SetAsFirstSibling();
-        else
-            slot.GetSlot().SetAsLastSibling();
     }
     #endregion
 
     // ================ Deck Management ================
     #region Deck Management
-    private CardSlot GetFirstEmptySlot()
-    {
-        foreach (CardSlot slot in _playerDeck)
-        {
-            if (!slot.HasCard())
-                return slot;
-        }
-
-        return null;
-    }
-
     public void AddCard(int cardID)
     {
-        CardSlot slot = GetFirstEmptySlot();
-
-        if(slot == null)
+        if (GetNumCardsHeld() >= _pcm.GetMaxHandSize())
         {
-            Debug.LogError("Attempting to add a card with no empty slots left!");
+            Debug.LogError("Attempting to add a card with no space left!");
             return;
         }
 
-        Card newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), slot.GetSlot()).GetComponent<Card>();
+        CardSlotUI slot = CreateNewCardSlot();
+
+        Card newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), slot.transform).GetComponent<Card>();
         newCard.SetupPlayable();
         slot.SlotCard(newCard);
 
         Debug.Log($"Adding a card {newCard.GetCardName()} to client {NetworkManager.Singleton.LocalClientId}");
 
-        AdjustSlots(slot, true);
+        UpdateHandCountNum();
     }
 
     public void RemoveCard(int cardID)
     {
         Debug.Log($"Removing card with ID {cardID} from client {NetworkManager.Singleton.LocalClientId}");
 
-        CardSlot cardToRemove = GetCardInDeck(cardID);
+        CardSlotUI cardToRemove = GetCardInDeck(cardID);
 
         if (cardToRemove != null)
         {
-            Destroy(cardToRemove.GetCard().gameObject);
-            cardToRemove.RemoveCard();
-            AdjustSlots(cardToRemove, false);
+            RemoveCardSlot(cardToRemove);
+
+            UpdateHandCountNum();
         }
         else
             Debug.Log($"{cardID} not found in player's local hand!");
 
     }
 
-    public CardSlot GetCardInDeck(int cardID)
+    public CardSlotUI GetCardInDeck(int cardID)
     {
-        foreach (CardSlot slot in _playerDeck)
+        foreach (CardSlotUI slot in _playerDeck)
         {
             if (slot.HasCard() && slot.GetCard().GetCardID() == cardID)
                 return slot;
@@ -430,7 +327,7 @@ public class HandManager : NetworkBehaviour
         Debug.Log("<color=blue>CLIENT: </color>Attempting to craft, searching local deck for required tags");
 
         // Look for them in local hand, then verify them in server
-        foreach (CardSlot slot in _playerDeck)
+        foreach (CardSlotUI slot in _playerDeck)
         {
             if (slot.HasCard() && tempTagList.Count != 0)
             {

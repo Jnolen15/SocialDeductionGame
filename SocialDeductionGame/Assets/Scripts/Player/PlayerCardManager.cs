@@ -480,6 +480,11 @@ public class PlayerCardManager : NetworkBehaviour
     // ================ Player Hand Size ================
     #region Player Hand Size
     // ~~~~~~~~~~~ Local ~~~~~~~~~~~
+    public int GetMaxHandSize()
+    {
+        return _netHandSize.Value;
+    }
+
     public void IncrementPlayerHandSize(int num)
     {
         IncrementPlayerHandSizeServerRpc(num);
@@ -489,7 +494,7 @@ public class PlayerCardManager : NetworkBehaviour
     {
         Debug.Log($"<color=blue>CLIENT: </color> Adjusted player hand size. Was {prev}, now {cur}");
 
-        _handManager.UpdateHandSlots(cur);
+        _handManager.UpdateHandSize(cur);
     }
 
     // ~~~~~~~~~~~ RPCS ~~~~~~~~~~~
