@@ -9,26 +9,22 @@ public class HandManager : NetworkBehaviour
     // Tracks the local verisions of player cards
     // A list of card's is controlled by the server in player card manager
     // ================ Refrences / Variables ================
-    private PlayerCardManager _pcm;
-    private CraftingUI _craftingUI;
     [SerializeField] private Transform _handZone;
+    [SerializeField] private TextMeshProUGUI _cardCount;
+    [SerializeField] private TextMeshProUGUI _cardMax;
     [SerializeField] private GameObject _cardSlotPref;
     [SerializeField] private List<CardSlot> _playerDeck = new();
-    [SerializeField] private int numSlotsToDestroy;
     [SerializeField] private GearSlot[] _gearSlots;
     [SerializeField] private Gear[] _equipedGear;
+    private PlayerCardManager _pcm;
+    private CraftingUI _craftingUI;
+
     public class CardSlot
     {
         public Transform Slot;
         public Card HeldCard;
 
-        // Constructors
-        public CardSlot()
-        {
-            Slot = null;
-            HeldCard = null;
-        }
-
+        // Constructor
         public CardSlot(Transform slot, Card newCard = null)
         {
             Slot = slot;
@@ -40,6 +36,7 @@ public class HandManager : NetworkBehaviour
         {
             return Slot;
         }
+
         public Card GetCard()
         {
             return HeldCard;
@@ -128,6 +125,26 @@ public class HandManager : NetworkBehaviour
     }
     #endregion
 
+    //================ Other UI ================
+    #region Other UI
+    private void UpdateHandMaxNum(int handLimit)
+    {
+        _cardMax.text = handLimit.ToString();
+    }
+
+    private void UpdateHandCountNum()
+    {
+        int count = 0;
+        foreach (CardSlot slot in _playerDeck)
+        {
+            if (slot.HasCard())
+                count++;
+        }
+
+        _cardCount.text = count.ToString();
+    }
+    #endregion
+
     //================ Card Slots ================
     #region Card Slots
     private void SetupHand(int handLimit)
@@ -186,6 +203,8 @@ public class HandManager : NetworkBehaviour
     // Adds or removes card slots
     public void UpdateHandSlots(int newSlotCount)
     {
+        UpdateHandMaxNum(newSlotCount);
+
         int difference = (newSlotCount - _playerDeck.Count);
 
         // Increment
@@ -216,7 +235,9 @@ public class HandManager : NetworkBehaviour
 
     private void AdjustSlots(CardSlot slot, bool bringFront)
     {
-        if(bringFront)
+        UpdateHandCountNum();
+
+        if (bringFront)
             slot.GetSlot().SetAsFirstSibling();
         else
             slot.GetSlot().SetAsLastSibling();
