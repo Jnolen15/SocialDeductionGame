@@ -169,7 +169,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2081569279403326153
 RectTransform:
   m_ObjectHideFlags: 0
@@ -349,9 +349,6 @@ MonoBehaviour:
   _maximizedPocketHeight: 160
   _maximizedCardHeight: 460
   _bufferTimerMax: 1.5
-  _bufferTimer: 0
-  _minimized: 1
-  _hovering: 0
   _gearSlot: 1
   _currentGearCard: {fileID: 0}
 --- !u!1 &8409232262563825396

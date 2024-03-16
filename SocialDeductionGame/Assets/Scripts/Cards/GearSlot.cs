@@ -146,8 +146,6 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         _cardZone.DOKill();
         _rect.DOKill();
 
-        _equipMessage.gameObject.SetActive(true);
-
         if (HasGear())
         {
             Minimize(true);
@@ -170,7 +168,6 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         _hovering = false;
         Minimize(false);
-        _equipMessage.gameObject.SetActive(false);
     }
 
     private void Maximize(bool hasGear)

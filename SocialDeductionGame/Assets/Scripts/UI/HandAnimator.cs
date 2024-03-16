@@ -77,9 +77,8 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         {
             foreach (Transform slot in _cards)
             {
-                Transform card = slot.GetChild(0);
-                card.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
-                card.localPosition = new Vector3(0, 0, 0);
+                CardSlotUI slotUI = slot.GetComponent<CardSlotUI>();
+                slotUI.SetCardHandPosition(0, 0);
             }
 
             return;

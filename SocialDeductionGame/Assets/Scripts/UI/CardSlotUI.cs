@@ -31,6 +31,7 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void RemoveCard()
     {
+        _cardTransform.DOKill();
         Destroy(HeldCard.gameObject);
         Destroy(gameObject);
     }
