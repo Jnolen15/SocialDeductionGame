@@ -165,6 +165,9 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     private void OnCardUnhighlighted(Card cardHighlighted)
     {
+        if (!cardHighlighted.HasTag("Gear"))
+            return;
+
         _hovering = false;
         Minimize(false);
         _equipMessage.gameObject.SetActive(false);

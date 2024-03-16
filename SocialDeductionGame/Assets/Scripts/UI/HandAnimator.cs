@@ -14,14 +14,8 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     [SerializeField] private Transform _rightMost;
     [SerializeField] private float _tilt;
     [SerializeField] private float _height;
-    [SerializeField] private int _cardsHeld;
-
-    // just here for testing can be local
-    [SerializeField] private float left;
-    [SerializeField] private float right;
-    [SerializeField] private float distance;
-    [SerializeField] private float spacing;
-    [SerializeField] private float offset;
+    private int _cardsHeld;
+     private int _highlightedCardChildCount;
 
     [Header("Minimizing")]
     [SerializeField] private Transform _hand;
@@ -57,15 +51,15 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {        
         _cardsHeld = _cards.childCount;
 
-        left = _leftMost.localPosition.x;
-        right = _rightMost.localPosition.x;
-        distance = (Mathf.Abs(left) + right);
-        offset = (Mathf.Abs(left));
+        float left = _leftMost.localPosition.x;
+        float right = _rightMost.localPosition.x;
+        float distance = (Mathf.Abs(left) + right);
+        float offset = (Mathf.Abs(left));
 
         if (_cardsHeld == 0)
             return;
 
-        spacing = (distance / (_cardsHeld + 1));
+        float spacing = (distance / (_cardsHeld + 1));
 
         // Spacing
         int cardNum = 1;
@@ -95,7 +89,7 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         cardNum = 0 - (_cardsHeld / 2);
         foreach (Transform slot in _cards)
         {
-            Transform card = slot.GetChild(0);
+            CardSlotUI slotUI = slot.GetComponent<CardSlotUI>();
 
             float tiltAmmount = (_tilt * cardNum);
 
@@ -105,11 +99,22 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
                 tiltAmmount = (_tilt * cardNum);
             }
 
-            card.rotation = Quaternion.Euler(new Vector3(0, 0, tiltAmmount));
-            card.localPosition = new Vector3(0, Mathf.Abs(tiltAmmount) * _height, 0);
+            slotUI.SetCardHandPosition((Mathf.Abs(tiltAmmount) * _height), tiltAmmount);
 
             cardNum++;
         }
+    }
+
+    public void HighlightMe(Transform cardSlot)
+    {
+        _highlightedCardChildCount = cardSlot.GetSiblingIndex();
+
+        cardSlot.SetAsLastSibling();
+    }
+
+    public void UnhighlightMe(Transform cardSlot)
+    {
+        cardSlot.SetSiblingIndex(_highlightedCardChildCount);
     }
     #endregion
 

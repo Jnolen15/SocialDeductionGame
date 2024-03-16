@@ -4278,6 +4278,7 @@ MonoBehaviour:
   _tilt: -4
   _height: -4
   _cardsHeld: 0
+  _highlightedCardChildCount: 0
   left: 0
   right: 0
   distance: 0
@@ -4287,7 +4288,7 @@ MonoBehaviour:
   _maximizedCardHeight: 240
   _minimized: 0
   _hovering: 0
-  _bufferTimerMax: 2
+  _bufferTimerMax: 1
   _bufferTimer: 0
 --- !u!1 &6470061205287865729
 GameObject:
