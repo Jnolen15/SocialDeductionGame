@@ -709,6 +709,7 @@ MonoBehaviour:
   _hazards: []
   _cardSlotPref: {fileID: 8678071956619403002, guid: d5a823d4e6a00a849b077c416274a018, type: 3}
   _handZone: {fileID: 6318366}
+  _cardList: []
 --- !u!1001 &53209788
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11348,17 +11349,11 @@ MonoBehaviour:
   _rightMost: {fileID: 712495478}
   _tilt: -4
   _height: -4
-  _cardsHeld: 0
-  left: 0
-  right: 0
-  distance: 0
-  spacing: 0
-  offset: 0
   _hand: {fileID: 6318366}
   _maximizedCardHeight: 240
   _minimized: 0
   _hovering: 0
-  _bufferTimerMax: 2
+  _bufferTimerMax: 1
   _bufferTimer: 0
 --- !u!1001 &1913883343
 PrefabInstance:

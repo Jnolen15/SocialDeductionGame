@@ -15,7 +15,8 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     [SerializeField] private float _tilt;
     [SerializeField] private float _height;
     private int _cardsHeld;
-     private int _highlightedCardChildCount;
+    private int _highlightedCardChildCount;
+    private Transform _highlightedCard;
 
     [Header("Minimizing")]
     [SerializeField] private Transform _hand;
@@ -48,7 +49,16 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     // =================== Card Positioning ===================
     #region Card Positioning
     private void SetCardPositions()
-    {        
+    {
+        if(_highlightedCard)
+            UnhighlightMe(_highlightedCard);
+
+        List<CardSlotUI> _cardSlots = new List<CardSlotUI>();
+        foreach (Transform slot in _cards)
+        {
+            _cardSlots.Add(slot.GetComponent<CardSlotUI>());
+        }
+
         _cardsHeld = _cards.childCount;
 
         float left = _leftMost.localPosition.x;
@@ -63,22 +73,22 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
         // Spacing
         int cardNum = 1;
-        foreach (Transform slot in _cards)
+        foreach (CardSlotUI slot in _cardSlots)
         {
             float xPos = (spacing * cardNum) - offset;
-            slot.localPosition = new Vector3(xPos, 0, 0);
+            slot.SetSlotPosition(new Vector2(xPos, 0));
 
-            Debug.Log($"Placed card {cardNum} at {slot.localPosition.x}");
+            //Debug.Log($"Placed card {cardNum} at {xPos}");
 
             cardNum++;
         }
 
+        // Reset Tilt if less than 3 cards
         if (_cardsHeld < 3)
         {
-            foreach (Transform slot in _cards)
+            foreach (CardSlotUI slot in _cardSlots)
             {
-                CardSlotUI slotUI = slot.GetComponent<CardSlotUI>();
-                slotUI.SetCardHandPosition(0, 0);
+                slot.SetCardHandPosition(0, 0);
             }
 
             return;
@@ -86,10 +96,8 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
         // Tilt
         cardNum = 0 - (_cardsHeld / 2);
-        foreach (Transform slot in _cards)
+        foreach (CardSlotUI slot in _cardSlots)
         {
-            CardSlotUI slotUI = slot.GetComponent<CardSlotUI>();
-
             float tiltAmmount = (_tilt * cardNum);
 
             if (_cardsHeld % 2 == 0 && tiltAmmount == 0)
@@ -98,7 +106,7 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
                 tiltAmmount = (_tilt * cardNum);
             }
 
-            slotUI.SetCardHandPosition((Mathf.Abs(tiltAmmount) * _height), tiltAmmount);
+            slot.SetCardHandPosition((Mathf.Abs(tiltAmmount) * _height), tiltAmmount);
 
             cardNum++;
         }
@@ -106,6 +114,7 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     public void HighlightMe(Transform cardSlot)
     {
+        _highlightedCard = cardSlot;
         _highlightedCardChildCount = cardSlot.GetSiblingIndex();
 
         cardSlot.SetAsLastSibling();
@@ -113,7 +122,12 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     public void UnhighlightMe(Transform cardSlot)
     {
+        if (!_highlightedCard)
+            return;
+
         cardSlot.SetSiblingIndex(_highlightedCardChildCount);
+
+        _highlightedCard = null;
     }
 
     public void UnparentMe(Transform cardSlot)

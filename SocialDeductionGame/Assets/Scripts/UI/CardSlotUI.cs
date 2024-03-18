@@ -14,6 +14,7 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     private RectTransform _cardTransform;
     private bool _minimized = true;
     private HandAnimator _handAnimator;
+    private bool isMoving;
 
     private void Start()
     {
@@ -36,6 +37,7 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     IEnumerator RemoveCardCoroutine()
     {
+        transform.DOKill();
         _cardTransform.DOKill();
         _handAnimator.UnparentMe(transform);
         _cardTransform.rotation = Quaternion.Euler(Vector3.zero);
@@ -49,6 +51,8 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         yield return new WaitForSeconds(0.2f);
 
+        transform.DOKill();
+        _cardTransform.DOKill();
         Destroy(HeldCard.gameObject);
         Destroy(gameObject);
     }
@@ -72,17 +76,27 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     //================ Animating ================
     #region Animating
+    public void SetSlotPosition(Vector2 newPos)
+    {
+        transform.DOLocalMove(newPos, 0.2f).SetEase(Ease.OutSine);
+    }
+
     public void SetCardHandPosition(float horizontal, float tilt)
     {
         _minimizedHeight = horizontal;
         _tiltRotation = tilt;
 
-        _cardTransform.rotation = Quaternion.Euler(new Vector3(0, 0, tilt));
-        _cardTransform.localPosition = new Vector3(0, horizontal, 0);
+        isMoving = true;
+
+        _cardTransform.DORotate(new Vector3(0, 0, tilt), 0.1f);
+        _cardTransform.DOLocalMove(new Vector3(0, horizontal, 0), 0.1f).OnComplete(() => { isMoving = false; });
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (isMoving)
+            return;
+
         Maximize();
     }
 
