@@ -4277,18 +4277,11 @@ MonoBehaviour:
   _rightMost: {fileID: 474318339835713330}
   _tilt: -4
   _height: -4
-  _cardsHeld: 0
-  _highlightedCardChildCount: 0
-  left: 0
-  right: 0
-  distance: 0
-  spacing: 0
-  offset: 0
   _hand: {fileID: 4308190431970439896}
   _maximizedCardHeight: 240
   _minimized: 0
   _hovering: 0
-  _bufferTimerMax: 1
+  _bufferTimerMax: 0.5
   _bufferTimer: 0
 --- !u!1 &6470061205287865729
 GameObject:
@@ -10259,6 +10252,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7694443257646629510}
     m_Modifications:
+    - target: {fileID: 2878495817922453041, guid: b9e268f9cf7c3f049a01443d79cc5970, type: 3}
+      propertyPath: _bufferTimerMax
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6701142300899054418, guid: b9e268f9cf7c3f049a01443d79cc5970, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -10383,6 +10380,10 @@ PrefabInstance:
     - target: {fileID: 2878495817922453041, guid: b9e268f9cf7c3f049a01443d79cc5970, type: 3}
       propertyPath: _gearSlot
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2878495817922453041, guid: b9e268f9cf7c3f049a01443d79cc5970, type: 3}
+      propertyPath: _bufferTimerMax
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6701142300899054418, guid: b9e268f9cf7c3f049a01443d79cc5970, type: 3}
       propertyPath: m_Pivot.x

@@ -115,6 +115,13 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         cardSlot.SetSiblingIndex(_highlightedCardChildCount);
     }
+
+    public void UnparentMe(Transform cardSlot)
+    {
+        UnhighlightMe(cardSlot);
+
+        cardSlot.SetParent(transform);
+    }
     #endregion
 
     // =================== Minimizing ===================

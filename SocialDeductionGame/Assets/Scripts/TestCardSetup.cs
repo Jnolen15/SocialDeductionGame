@@ -9,6 +9,7 @@ public class TestCardSetup : MonoBehaviour
     [SerializeField] private List<HazardCardVisual> _hazards;
     [SerializeField] private GameObject _cardSlotPref;
     [SerializeField] private Transform _handZone;
+    [SerializeField] private List<CardSlotUI> _cardList;
 
     void Start()
     {
@@ -38,6 +39,9 @@ public class TestCardSetup : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.G))
             MakeCard(4001);
+        
+        if (Input.GetKeyDown(KeyCode.H))
+            DiscardCard();
     }
 
     private void MakeCard(int cardID)
@@ -47,6 +51,16 @@ public class TestCardSetup : MonoBehaviour
         Card newCard = Instantiate(CardDatabase.Instance.GetCard(cardID), slot.transform).GetComponent<Card>();
         newCard.SetupPlayable();
         slot.SlotCard(newCard);
+
+        _cardList.Add(slot);
+    }
+
+    private void DiscardCard()
+    {
+        CardSlotUI cardToRemove = _cardList[0];
+
+        _cardList.Remove(cardToRemove);
+        cardToRemove.RemoveCard();
     }
 
     private CardSlotUI CreateNewCardSlot()

@@ -109,9 +109,9 @@ public class HandManager : NetworkBehaviour
 
     private void RemoveCardSlot(CardSlotUI cardToRemove)
     {
-        Debug.Log("Destroying a slot");
-        cardToRemove.RemoveCard();
+        Debug.Log("Removing a card");
         _playerDeck.Remove(cardToRemove);
+        cardToRemove.RemoveCard();
     }
 
     // Adds or removes card slots
@@ -233,7 +233,7 @@ public class HandManager : NetworkBehaviour
         _equipedGear[gearSlot - 1].OnEquip();
     }
 
-    public void RemoveGearCard(int gearSlot)
+    public void RemoveGearCard(int gearSlot, bool swapped)
     {
         if (!VerifyGearSlot(gearSlot))
             return;
@@ -249,7 +249,7 @@ public class HandManager : NetworkBehaviour
         gearToRemove.OnUnequip();
         _equipedGear[gearSlot - 1] = null;
 
-        _gearSlots[gearSlot - 1].UnequipGearCard();
+        _gearSlots[gearSlot - 1].UnequipGearCard(swapped);
 
         Debug.Log($"Unequipping a gear card from slot {gearSlot}");
     }

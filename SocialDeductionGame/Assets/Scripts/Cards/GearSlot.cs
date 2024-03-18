@@ -58,19 +58,27 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         OpenPocketVisuals();
         _hovering = false;
         Minimize(false);
+        Slot();
 
         return _currentGearCard;
     }
 
-    public void UnequipGearCard()
+    public void UnequipGearCard(bool swapped)
     {
-        ClosedPocketVisuals();
+        Minimize(false);
         _cardZone.DOKill();
         _rect.DOKill();
-        Minimize(false);
 
+        if (!swapped)
+            StartCoroutine(DiscardGearAnimation());
+        else
+            ClearGearSlot();
+    }
+
+    private void ClearGearSlot()
+    {
+        ClosedPocketVisuals();
         Destroy(_currentGearCard.gameObject);
-
         _currentGearCard = null;
     }
 
@@ -202,6 +210,27 @@ public class GearSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             _rect.DOAnchorPosY(_minimizedHeight, 0.3f).SetEase(Ease.InOutSine);
         }
+    }
+
+    private void Slot()
+    {
+        _cardZone.anchoredPosition = new Vector2(0, _maximizedCardHeight);
+        _cardZone.DOAnchorPosY(_minimizedHeight, 0.3f).SetEase(Ease.InBack, 3);
+    }
+
+    IEnumerator DiscardGearAnimation()
+    {
+        _cardZone.DOShakeAnchorPos(0.1f, 20, 3);
+        _cardZone.DOAnchorPosY(_maximizedCardHeight * 1.5f, 0.4f).SetEase(Ease.InOutSine);
+
+        yield return new WaitForSeconds(0.3f);
+
+        _currentGearCard.GetComponentInChildren<CanvasGroup>().DOFade(0f, 0.3f);
+
+        yield return new WaitForSeconds(0.32f);
+
+        _cardZone.anchoredPosition = new Vector2(0, _minimizedHeight);
+        ClearGearSlot();
     }
 
     private void OpenPocketVisuals()

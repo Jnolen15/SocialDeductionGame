@@ -584,7 +584,7 @@ public class PlayerCardManager : NetworkBehaviour
     [ClientRpc]
     public void SwapGearClientRpc(int gearSlot, int cardID, ClientRpcParams clientRpcParams = default)
     {
-        _handManager.RemoveGearCard(gearSlot);
+        _handManager.RemoveGearCard(gearSlot, true);
         _handManager.AddGearCard(cardID, gearSlot);
     }
 
@@ -622,7 +622,7 @@ public class PlayerCardManager : NetworkBehaviour
     [ClientRpc]
     public void UnequipGearClientRpc(int gearSlot, ClientRpcParams clientRpcParams = default)
     {
-        _handManager.RemoveGearCard(gearSlot);
+        _handManager.RemoveGearCard(gearSlot, false);
     }
     #endregion
 }

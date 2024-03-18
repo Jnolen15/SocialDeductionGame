@@ -31,7 +31,24 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void RemoveCard()
     {
+        StartCoroutine(RemoveCardCoroutine());
+    }
+
+    IEnumerator RemoveCardCoroutine()
+    {
         _cardTransform.DOKill();
+        _handAnimator.UnparentMe(transform);
+        _cardTransform.rotation = Quaternion.Euler(Vector3.zero);
+
+        _cardTransform.DOAnchorPosY(_cardMaximizedHeight * 3, 0.25f).SetEase(Ease.InOutSine);
+
+        yield return new WaitForSeconds(0.2f);
+
+        HeldCard.GetComponentInChildren<CanvasGroup>().DOFade(0f, 0.15f);
+        _cardTransform.DOShakeAnchorPos(0.1f, 10, 2);
+
+        yield return new WaitForSeconds(0.2f);
+
         Destroy(HeldCard.gameObject);
         Destroy(gameObject);
     }
@@ -54,6 +71,7 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     #endregion
 
     //================ Animating ================
+    #region Animating
     public void SetCardHandPosition(float horizontal, float tilt)
     {
         _minimizedHeight = horizontal;
@@ -98,4 +116,5 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         _cardTransform.DORotate(new Vector3(0, 0, _tiltRotation), 0.3f).SetEase(Ease.InOutSine);
         _cardTransform.DOScale(new Vector3(1f, 1f, 1f), 0.3f).SetEase(Ease.InOutSine);
     }
+    #endregion
 }
