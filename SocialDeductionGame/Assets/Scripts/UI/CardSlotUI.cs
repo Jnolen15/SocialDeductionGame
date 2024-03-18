@@ -42,12 +42,13 @@ public class CardSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         _handAnimator.UnparentMe(transform);
         _cardTransform.rotation = Quaternion.Euler(Vector3.zero);
 
+        _cardTransform.DOShakeAnchorPos(0.1f, 20, 3);
         _cardTransform.DOAnchorPosY(_cardMaximizedHeight * 3, 0.25f).SetEase(Ease.InOutSine);
 
         yield return new WaitForSeconds(0.2f);
 
         HeldCard.GetComponentInChildren<CanvasGroup>().DOFade(0f, 0.15f);
-        _cardTransform.DOShakeAnchorPos(0.1f, 10, 2);
+        //_cardTransform.DOShakeAnchorPos(0.1f, 20, 3);
 
         yield return new WaitForSeconds(0.2f);
 

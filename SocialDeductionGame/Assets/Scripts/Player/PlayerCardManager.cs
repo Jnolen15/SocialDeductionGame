@@ -17,7 +17,6 @@ public class PlayerCardManager : NetworkBehaviour
     [SerializeField] private int _defaultHandSize;
     [SerializeField] private NetworkVariable<int> _netHandSize = new(writePerm: NetworkVariableWritePermission.Server);
     [SerializeField] private List<int> _playerDeckIDs = new();
-    [SerializeField] private bool _discardMode;
     [SerializeField] private int[] _playerGear;
 
     // ================ Setup ================
@@ -169,16 +168,6 @@ public class PlayerCardManager : NetworkBehaviour
     // ================ Card Remove ================
     #region Card Remove
     // ~~~~~~~~~~~ Local ~~~~~~~~~~~
-    public void EnableDiscard()
-    {
-        _discardMode = true;
-    }
-
-    public void DisableDiscard()
-    {
-        _discardMode = false;
-    }
-
     public void DiscardRandom(int numToDiscard)
     {
         Debug.Log($"Discarding {numToDiscard} random cards");
@@ -278,14 +267,6 @@ public class PlayerCardManager : NetworkBehaviour
     // Tests if card is played onto a card playable object then calls player data server RPC to play the card
     public void TryCardPlay(Card playedCard)
     {
-        // If over discard zone
-        if (_discardMode)
-        {
-            int[] toDiscard = new int[] { playedCard.GetCardID() };
-            DiscardCardsServerRPC(toDiscard, true);
-            return;
-        }
-
         // Raycast test if card is played on playable object
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 999f, _cardPlayableLayerMask))

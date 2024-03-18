@@ -19,8 +19,9 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     private Transform _highlightedCard;
 
     [Header("Minimizing")]
-    [SerializeField] private Transform _hand;
+    [SerializeField] private RectTransform _info;
     [SerializeField] private float _maximizedCardHeight;
+    [SerializeField] private float _maximizedInfoHeight;
     private float _minimizedHeight;
     [SerializeField] private bool _minimized;
     [SerializeField] private bool _hovering;
@@ -175,6 +176,7 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         _minimized = false;
 
         _cards.DOAnchorPosY(_maximizedCardHeight, 0.1f);
+        _info.DOAnchorPosY(_maximizedInfoHeight, 0.1f);
     }
 
     private void Minimize()
@@ -182,6 +184,7 @@ public class HandAnimator : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         _minimized = true;
 
         _cards.DOAnchorPosY(_minimizedHeight, 0.3f).SetEase(Ease.InOutSine);
+        _info.DOAnchorPosY(0, 0.3f).SetEase(Ease.InOutSine);
     }
     #endregion
 }
