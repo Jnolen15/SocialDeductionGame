@@ -7,6 +7,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4208523989927011731, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5427489456640813846, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -93,10 +97,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5427489456640813847, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
       propertyPath: m_Name
-      value: PlayableCardVisual
+      value: PlayableCardVisual Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
+--- !u!1 &1350314461087284375 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4208523989927011731, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
+  m_PrefabInstance: {fileID: 2943922164616730884}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7172186348430946835 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5427489456640813847, guid: 303cfdf2474d1b94db5855d25daeb42e, type: 3}
@@ -115,6 +124,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dragIcon: {fileID: 5970690865552985188, guid: 1cc95a6083bee8440b054ce34ab629af, type: 3}
+  _cardOutline: {fileID: 1350314461087284375}
   _card: {fileID: 0}
   _handManager: {fileID: 0}
-  _playerController: {fileID: 0}
+  _playerCardManager: {fileID: 0}

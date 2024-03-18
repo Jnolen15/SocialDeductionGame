@@ -12,6 +12,7 @@ public class CardInteraction : MonoBehaviour,
 {
     // ================== Events / Refrences ==================
     [SerializeField] private GameObject _dragIcon;
+    [SerializeField] private GameObject _cardOutline;
     [SerializeField] private Card _card;
     [SerializeField] private HandManager _handManager;
     [SerializeField] private PlayerCardManager _playerCardManager;
@@ -76,6 +77,9 @@ public class CardInteraction : MonoBehaviour,
         _indicator = Instantiate(_dragIcon, parentCanvas.transform);
         _dragging = true;
 
+        if(_cardOutline)
+            _cardOutline.SetActive(true);
+
         if (_randSound)
             _randSound.PlayRandom();
     }
@@ -115,6 +119,8 @@ public class CardInteraction : MonoBehaviour,
 
     private void LetGo()
     {
+        if (_cardOutline)
+            _cardOutline.SetActive(false);
         Destroy(_indicator);
         _indicator = null;
         _dragging = false;
