@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Sirenix.OdinInspector;
 
 public class TestCardSetup : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class TestCardSetup : MonoBehaviour
     [SerializeField] private List<HazardCardVisual> _hazards;
     [SerializeField] private GameObject _cardSlotPref;
     [SerializeField] private Transform _handZone;
+    [SerializeField] private TextChatManager _chat;
     [SerializeField] private List<CardSlotUI> _cardList;
 
     void Start()
@@ -42,6 +44,9 @@ public class TestCardSetup : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.H))
             DiscardCard();
+
+        if (Input.GetKeyDown(KeyCode.C))
+            ShowMessageNotif();
     }
 
     private void MakeCard(int cardID)
@@ -67,5 +72,11 @@ public class TestCardSetup : MonoBehaviour
     {
         CardSlotUI newSlot = Instantiate(_cardSlotPref, _handZone).GetComponent<CardSlotUI>();
         return newSlot;
+    }
+
+    [Button]
+    private void ShowMessageNotif()
+    {
+        //_chat.ShowNotification();
     }
 }

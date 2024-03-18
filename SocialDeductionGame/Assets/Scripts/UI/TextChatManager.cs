@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class TextChatManager : NetworkBehaviour
 {
@@ -11,6 +12,7 @@ public class TextChatManager : NetworkBehaviour
     [SerializeField] private Transform _chatArea;
     [SerializeField] private Transform _outPos;
     [SerializeField] private Transform _inPos;
+    [SerializeField] private RectTransform _messageOpenBubble;
     [SerializeField] private GameObject _messageNotif;
     [SerializeField] private TMP_InputField _messageInputField;
     [SerializeField] private Transform _messageContent;
@@ -202,7 +204,16 @@ public class TextChatManager : NetworkBehaviour
 
         // Show notif if chat minimized
         if (!_chatOpen)
-            _messageNotif.SetActive(true);
+            ShowNotification();
+    }
+
+    private void ShowNotification()
+    {
+        _messageNotif.SetActive(true);
+
+        Vector2 punchPos = new Vector2(0, 80);
+
+        _messageOpenBubble.DOPunchAnchorPos(punchPos, 1f, 4, 0.4f);
     }
     #endregion
 
