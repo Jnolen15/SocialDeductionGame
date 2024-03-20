@@ -48,10 +48,10 @@ public class WatchHUD : MonoBehaviour
     //[SerializeField] private Image _hungerWarning;
     [SerializeField] private Image _hungerFlash;
     [Header("Ready")]
-    [SerializeField] private GameObject _readyButton;
+    [SerializeField] private Sprite _readyButtonOut;
+    [SerializeField] private Sprite _readyButtonIn;
+    [SerializeField] private Image _readyButton;
     [SerializeField] private GameObject _readyButtonIcon;
-    [SerializeField] private Transform _readyOutPos;
-    [SerializeField] private Transform _readyInPos;
     [Header("Sounds")]
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private AudioClip _beepSFX;
@@ -101,7 +101,6 @@ public class WatchHUD : MonoBehaviour
         PlayerHealth.OnHungerModified += UpdateHunger;
         PlayerHealth.OnDeath += OnDeath;
         GameManager.OnStateChange += UpdateStateUI;
-        GameManager.OnStateChange += EnableReadyButton;
         GameManager.OnStateChange += OnStateChange;
         GameManager.OnGameEnd += OnGameEnd;
         PlayerConnectionManager.OnPlayerReady += Ready;
@@ -125,7 +124,6 @@ public class WatchHUD : MonoBehaviour
         PlayerHealth.OnHungerModified -= UpdateHunger;
         PlayerHealth.OnDeath -= OnDeath;
         GameManager.OnStateChange -= UpdateStateUI;
-        GameManager.OnStateChange -= EnableReadyButton;
         GameManager.OnStateChange -= OnStateChange;
         GameManager.OnGameEnd -= OnGameEnd;
         PlayerConnectionManager.OnPlayerReady -= Ready;
@@ -439,30 +437,21 @@ public class WatchHUD : MonoBehaviour
 
     // ================== Ready ==================
     #region Ready
-    private void EnableReadyButton(GameManager.GameState prev, GameManager.GameState current)
-    {
-        if (!_playerHealth.IsLiving())
-            return;
-
-        //_readyButtonIcon.SetActive(true);
-    }
-
     public void DisableReadyButton()
     {
-        _readyButton.SetActive(false);
+        _readyButton.gameObject.SetActive(false);
     }
 
     public void Ready()
     {
         _audioSource.PlayOneShot(_readySFX);
 
-        _readyButton.transform.position = _readyInPos.position;
+        _readyButton.sprite = _readyButtonIn;
         _readyButtonIcon.SetActive(true);
     }
 
     public void Unready()
     {
-        //_readyButton.transform.position = _readyOutPos.position;
         _readyButtonIcon.SetActive(false);
     }
 
@@ -471,9 +460,9 @@ public class WatchHUD : MonoBehaviour
         // Can't ready in transition, Night, or Midnight
         if (GameManager.Instance.InTransition() || GameManager.Instance.IsCurrentState(GameManager.GameState.Night)
                 || GameManager.Instance.IsCurrentState(GameManager.GameState.Midnight))
-            _readyButton.transform.position = _readyInPos.position;
+            _readyButton.sprite = _readyButtonIn;
         else
-            _readyButton.transform.position = _readyOutPos.position;
+            _readyButton.sprite = _readyButtonOut;
     }
     #endregion
 
