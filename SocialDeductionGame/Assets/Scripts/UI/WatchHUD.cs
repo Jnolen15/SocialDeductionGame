@@ -37,12 +37,16 @@ public class WatchHUD : MonoBehaviour
     [SerializeField] private GameObject _nightIcon;
     private bool _updatedDay;
     [Header("Player Stats")]
-    [SerializeField] private GameObject _playerStats;
-    [SerializeField] private GameObject _playerDead;
+    //[SerializeField] private GameObject _playerStats;
+    //[SerializeField] private GameObject _playerDead;
+    [SerializeField] private Color _redFlash;
+    [SerializeField] private Color _greenFlash;
     [SerializeField] private List<Image> _healthSegments;
-    [SerializeField] private Image _healthWarning;
+    //[SerializeField] private Image _healthWarning;
+    [SerializeField] private Image _healthFlash;
     [SerializeField] private List<Image> _hungerSegments;
-    [SerializeField] private Image _hungerWarning;
+    //[SerializeField] private Image _hungerWarning;
+    [SerializeField] private Image _hungerFlash;
     [Header("Ready")]
     [SerializeField] private GameObject _readyButton;
     [SerializeField] private GameObject _readyButtonIcon;
@@ -172,8 +176,8 @@ public class WatchHUD : MonoBehaviour
     }
     #endregion
 
-    // ================== Helpers ==================
-    #region Helpers
+    // ================== Flashing ==================
+    #region Flashing
     private void SetFlashActive(bool flashActive)
     {
         if (_flashActive == flashActive)
@@ -275,13 +279,19 @@ public class WatchHUD : MonoBehaviour
         //    UpdateFlashObj(_healthWarning.name, _healthWarning, 3);
 
         // Warning if health low
-        if (newTotal <= 1)
+        /*if (newTotal <= 1)
         {
             _healthWarning.gameObject.SetActive(true);
             UpdateFlashObj(_healthWarning.name, _healthWarning, 6);
         }
         else
-            _healthWarning.gameObject.SetActive(false);
+            _healthWarning.gameObject.SetActive(false);*/
+
+        // Flash warning light
+        if (ModifiedAmmount < 0)
+            FlashWarningLight(_healthFlash, _redFlash);
+        else
+            FlashWarningLight(_healthFlash, _greenFlash);
 
         // Update segments
         int place = 0;
@@ -315,14 +325,20 @@ public class WatchHUD : MonoBehaviour
         //if (ModifiedAmmount < 0) // Hunger Down
         //    UpdateFlashObj(_hungerWarning.name, _hungerWarning, 3);
 
-        // Warning if hunger low
+        /*// Warning if hunger low
         if (newTotal <= 1)
         {
             _hungerWarning.gameObject.SetActive(true);
             UpdateFlashObj(_hungerWarning.name, _hungerWarning, 6);
         }
         else
-            _hungerWarning.gameObject.SetActive(false);
+            _hungerWarning.gameObject.SetActive(false);*/
+
+        // Flash warning light
+        if (ModifiedAmmount < 0)
+            FlashWarningLight(_hungerFlash, _redFlash);
+        else
+            FlashWarningLight(_hungerFlash, _greenFlash);
 
         // Update segments
         int place = 0;
@@ -348,12 +364,24 @@ public class WatchHUD : MonoBehaviour
             _audioSource.PlayOneShot(_beepSFX);
     }
 
+    private void FlashWarningLight(Image flashImg, Color flashColor)
+    {
+        flashImg.DOKill();
+        flashImg.gameObject.SetActive(true);
+        flashImg.color = flashColor;
+        flashImg.DOFade(1f, 2f).SetEase(Ease.InFlash, 7, -1f).OnComplete
+            (() => {
+                flashImg.DOFade(0, 2f).OnComplete(
+               () => { flashImg.gameObject.SetActive(false); }
+               );
+            });
+    }
     private void OnDeath()
     {
         DisableReadyButton();
 
-        _playerStats.SetActive(false);
-        _playerDead.SetActive(true);
+        //_playerStats.SetActive(false);
+        //_playerDead.SetActive(true);
 
         // Play SFX
         _audioSource.PlayOneShot(_flatlineSFX);
