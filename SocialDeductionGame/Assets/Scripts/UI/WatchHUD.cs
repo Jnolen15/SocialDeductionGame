@@ -37,16 +37,18 @@ public class WatchHUD : MonoBehaviour
     [SerializeField] private GameObject _nightIcon;
     private bool _updatedDay;
     [Header("Player Stats")]
-    //[SerializeField] private GameObject _playerStats;
-    //[SerializeField] private GameObject _playerDead;
     [SerializeField] private Color _redFlash;
     [SerializeField] private Color _greenFlash;
     [SerializeField] private List<Image> _healthSegments;
     //[SerializeField] private Image _healthWarning;
     [SerializeField] private Image _healthFlash;
+    [SerializeField] private GameObject _healthStats;
+    [SerializeField] private GameObject _healthDead;
     [SerializeField] private List<Image> _hungerSegments;
     //[SerializeField] private Image _hungerWarning;
     [SerializeField] private Image _hungerFlash;
+    [SerializeField] private GameObject _hungerStats;
+    [SerializeField] private GameObject _hungerDead;
     [Header("Ready")]
     [SerializeField] private Sprite _readyButtonOut;
     [SerializeField] private Sprite _readyButtonIn;
@@ -378,8 +380,10 @@ public class WatchHUD : MonoBehaviour
     {
         DisableReadyButton();
 
-        //_playerStats.SetActive(false);
-        //_playerDead.SetActive(true);
+        _healthStats.SetActive(false);
+        _healthDead.SetActive(true);
+        _hungerStats.SetActive(false);
+        _hungerDead.SetActive(true);
 
         // Play SFX
         _audioSource.PlayOneShot(_flatlineSFX);
