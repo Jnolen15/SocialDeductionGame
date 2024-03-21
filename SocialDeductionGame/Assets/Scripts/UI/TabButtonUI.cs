@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 
 public class TabButtonUI : MonoBehaviour
 {
     // ================== Variables / Refrences ==================
     #region Variables / Refrences
     [Header("Tab Positions")]
-    [SerializeField] private float _hiddenPos;
-    [SerializeField] private float _minimizedPos;
-    [SerializeField] private float _shownPos;
-    [SerializeField] private float _extendedPos;
+    [SerializeField] private Transform _hiddenPos;
+    [SerializeField] private Transform _minimizedPos;
+    [SerializeField] private Transform _shownPos;
+    [SerializeField] private Transform _extendedPos;
     [Header("Hover Timer")]
     [SerializeField] private float _bufferTimerMax;
     private float _bufferTimer;
@@ -213,25 +214,25 @@ public class TabButtonUI : MonoBehaviour
     private void HideTab(Transform tab)
     {
         tab.DOKill();
-        tab.DOLocalMoveX(_hiddenPos, 0.4f).SetEase(Ease.OutSine);
+        tab.DOMoveX(_hiddenPos.position.x, 0.4f).SetEase(Ease.OutSine);
     }
 
     private void MinimizeTab(Transform tab)
     {
         tab.DOKill();
-        tab.DOLocalMoveX(_minimizedPos, 0.4f).SetEase(Ease.OutSine);
+        tab.DOMoveX(_minimizedPos.position.x, 0.4f).SetEase(Ease.OutSine);
     }
 
     private void ShowTab(Transform tab)
     {
         tab.DOKill();
-        tab.DOLocalMoveX(_shownPos, 0.1f).SetEase(Ease.OutSine);
+        tab.DOMoveX(_shownPos.position.x, 0.1f).SetEase(Ease.OutSine);
     }
 
     private void ExtendTab(Transform tab)
     {
         tab.DOKill();
-        tab.DOLocalMoveX(_extendedPos, 0.1f).SetEase(Ease.OutSine);
+        tab.DOMoveX(_extendedPos.position.x, 0.1f).SetEase(Ease.OutSine);
     }
     #endregion
 
