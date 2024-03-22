@@ -41,16 +41,22 @@ public class VivoxManager : MonoBehaviour
         Lobby,
         World,
         Death,
-        Sabo
+        Sabo,
+        Unknown // Not a real channel used when channel not found
     }
 
     public delegate void VivoxAction();
     public static event VivoxAction OnLoginSuccess;
     public static event VivoxAction OnLoginFailure;
     public static event VivoxAction OnDeathChannelJoined;
+
+    public delegate void SpeakingAction(string displayName, VivoxManager.ChannelSeshName channelName);
+    public static event SpeakingAction OnVoiceInputStarted;
+    public static event SpeakingAction OnVoiceInputEnded;
     #endregion
 
     // ============== Setup ==============
+    #region Setup
     private void Awake()
     {
         InitializeSingleton();
@@ -64,6 +70,7 @@ public class VivoxManager : MonoBehaviour
         //LeaveWorldChannel();
         //LeaveDeathChannel();
     }
+    #endregion
 
     // ============== Login ==============
     #region Login
@@ -77,7 +84,11 @@ public class VivoxManager : MonoBehaviour
 
         VivoxService.Instance.Initialize();
 
-        Account account = new Account(AuthenticationService.Instance.PlayerId);
+        string playerName = PlayerPrefs.GetString(PlayerNamer.KEY_PLAYERNAME);
+        if (playerName == null)
+            playerName = "Player";
+
+        Account account = new Account(playerName);
 
         _client = VivoxService.Instance.Client;
         LoginSession = _client.GetLoginSession(account);
@@ -193,10 +204,12 @@ public class VivoxManager : MonoBehaviour
                 {
                     _deathChannelSession = channelSession;
                     OnDeathChannelJoined?.Invoke();
+                    _deathChannelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
                 }
                 else if (channelSessionName == ChannelSeshName.Sabo)
                 {
                     _saboChannelSession = channelSession;
+                    _saboChannelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
                 }
 
                 Debug.Log("<color=green>VIVOX: </color>Joined Vivox channel " + channel.Name);
@@ -212,15 +225,6 @@ public class VivoxManager : MonoBehaviour
 
     // ============== Leave ==============
     #region Leave
-    public void LeaveWorldChannel()
-    {
-        Debug.Log("<color=green>VIVOX: </color>Leaving Vivox world channel!");
-
-        _worldChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
-
-        LeaveChannel(_worldChannelSession);
-    }
-
     public void LeaveLobbyChannel()
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox lobby channel!");
@@ -228,9 +232,22 @@ public class VivoxManager : MonoBehaviour
         LeaveChannel(_lobbyChannelSession);
     }
 
+    public void LeaveWorldChannel()
+    {
+        Debug.Log("<color=green>VIVOX: </color>Leaving Vivox world channel!");
+
+        if (_worldChannelSession != null)
+            _worldChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
+
+        LeaveChannel(_worldChannelSession);
+    }
+
     public void LeaveDeathChannel()
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox death channel!");
+
+        if (_deathChannelSession != null)
+            _deathChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
 
         LeaveChannel(_deathChannelSession);
     }
@@ -239,15 +256,18 @@ public class VivoxManager : MonoBehaviour
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox sabo channel!");
 
+        if (_saboChannelSession != null)
+            _saboChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
+
         LeaveChannel(_saboChannelSession);
     }
 
     public void LeaveAll()
     {
-        LeaveChannel(_lobbyChannelSession);
-        LeaveChannel(_deathChannelSession);
-        LeaveChannel(_worldChannelSession);
-        LeaveChannel(_saboChannelSession);
+        LeaveLobbyChannel();
+        LeaveWorldChannel();
+        LeaveDeathChannel();
+        LeaveSaboChannel();
     }
 
     public void LeaveChannel(IChannelSession channelSession)
@@ -366,6 +386,62 @@ public class VivoxManager : MonoBehaviour
     {
         return _client;
     }
+
+    private void OnParticipantValueUpdated(object sender, ValueEventArg<string, IParticipant> valueEventArg)
+    {
+        ValidateArgs(new object[] { sender, valueEventArg }); //see code from earlier in post
+
+        var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;
+        var participant = source[valueEventArg.Key];
+
+        string username = valueEventArg.Value.Account.Name;
+        string displayName = valueEventArg.Value.Account.DisplayName;
+        ChannelId channel = valueEventArg.Value.ParentChannelSession.Key;
+        string property = valueEventArg.PropertyName;
+
+        //Debug.Log("<color=green>VIVOX: </color> OnParticipantValueUpdated " + property);
+
+        switch (property)
+        {
+            case "SpeechDetected":
+                {
+                    if (participant.SpeechDetected)
+                    {
+                        //Debug.Log($"<color=green>VIVOX: </color>Detecting player {displayName} speach in {channel.Name}!");
+                        OnVoiceInputStarted?.Invoke(displayName, GetChannelSeshName(channel.Name));
+                    }
+                    else
+                    {
+                        //Debug.Log($"<color=green>VIVOX: </color>Player {displayName} speach in {channel.Name} ended!");
+                        OnVoiceInputEnded?.Invoke(displayName, GetChannelSeshName(channel.Name));
+                    }
+                    break;
+                }
+            default:
+                break;
+        }
+    }
+
+    private ChannelSeshName GetChannelSeshName(string channelName)
+    {
+        if (_worldChannelSession != null && channelName == _worldChannelSession.Channel.Name)
+        {
+            return ChannelSeshName.World;
+        }
+        else if (_saboChannelSession != null && channelName == _saboChannelSession.Channel.Name)
+        {
+            return ChannelSeshName.Sabo;
+        }
+        else if (_deathChannelSession != null && channelName == _deathChannelSession.Channel.Name)
+        {
+            return ChannelSeshName.Death;
+        }
+        else
+        {
+            Debug.LogWarning("GetChannelSeshName did not find matching channel, returning unknown");
+            return ChannelSeshName.Unknown;
+        }
+    }
     #endregion
 
     // ============== Settings ==============
@@ -426,38 +502,6 @@ public class VivoxManager : MonoBehaviour
     public ConnectionState GetChannelState(IChannelSession channelSession)
     {
         return channelSession.ChannelState;
-    }
-
-    private void OnParticipantValueUpdated(object sender, ValueEventArg<string, IParticipant> valueEventArg)
-    {
-        ValidateArgs(new object[] { sender, valueEventArg }); //see code from earlier in post
-
-        var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;
-        var participant = source[valueEventArg.Key];
-
-        string username = valueEventArg.Value.Account.Name;
-        ChannelId channel = valueEventArg.Value.ParentChannelSession.Key;
-        string property = valueEventArg.PropertyName;
-
-        switch (property)
-        {
-            case "LocalMute":
-                {
-                    /*if (username != accountId.Name) //can't local mute yourself, so don't check for it
-                    {
-                        //update their muted image
-                    }*/
-                    break;
-                }
-            case "SpeechDetected":
-                {
-                    //update speaking indicator image
-                    //Debug.Log($"<color=green>VIVOX: </color>Detecting player {PlayerConnectionManager.Instance.GetLocalPlayersID()} speach");
-                    break;
-                }
-            default:
-                break;
-        }
     }
 
     private static void ValidateArgs(object[] objs)

@@ -2898,6 +2898,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1919166814772352869}
   - component: {fileID: 4132327076885753719}
+  - component: {fileID: 6513094356751463584}
   m_Layer: 5
   m_Name: VoiceIndicators
   m_TagString: Untagged
@@ -2936,6 +2937,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4160494800307920920}
   m_CullTransparentMesh: 1
+--- !u!114 &6513094356751463584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4160494800307920920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 669a38ee6c91b9d458d9f0d873ecd7c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _worldSpeakingIndicator: {fileID: 3131777029351708385}
+  _saboSpeakingIndicator: {fileID: 158475497900018804}
+  _worldVoiceHint: {fileID: 6799001214442024249}
+  _worldVoiceHintIcon: {fileID: 2091089259399631513}
+  _saboVoiceHint: {fileID: 6143498640788240957}
+  _playerSpeakingPref: {fileID: 5341339636667290787, guid: c41cd26129dabb44c950c4462af1c3e6, type: 3}
+  _playerSpeakingZone: {fileID: 6942401193720303421}
 --- !u!1 &4326615238152357098
 GameObject:
   m_ObjectHideFlags: 0
@@ -4500,7 +4520,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7305289608110074720
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10076,11 +10096,6 @@ MonoBehaviour:
   _introRole: {fileID: 5564698014450364399}
   _introRoleSaboIcon: {fileID: 5713795933725366800}
   _introRoleSurvivorIcon: {fileID: 97898372322054880}
-  _worldSpeakingIndicator: {fileID: 3131777029351708385}
-  _saboSpeakingIndicator: {fileID: 158475497900018804}
-  _worldVoiceHint: {fileID: 6799001214442024249}
-  _worldVoiceHintIcon: {fileID: 2091089259399631513}
-  _saboVoiceHint: {fileID: 6143498640788240957}
 --- !u!1 &8967889240937708437
 GameObject:
   m_ObjectHideFlags: 0
