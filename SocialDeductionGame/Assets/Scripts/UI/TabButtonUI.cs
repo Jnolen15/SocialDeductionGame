@@ -143,51 +143,6 @@ public class TabButtonUI : MonoBehaviour
     }
     #endregion
 
-    // FOR TESTING
-    [Button]
-    private void MinimizeTabs()
-    {
-        MinimizeTab(_eventTab.transform);
-        MinimizeTab(_mapTab.transform);
-        MinimizeTab(_craftingTab.transform);
-        MinimizeTab(_helpTab.transform);
-        MinimizeTab(_exileTab.transform);
-        MinimizeTab(_notebookTab.transform);
-    }
-
-    [Button]
-    private void HideTabs()
-    {
-        HideTab(_eventTab.transform);
-        HideTab(_mapTab.transform);
-        HideTab(_craftingTab.transform);
-        HideTab(_helpTab.transform);
-        HideTab(_exileTab.transform);
-        HideTab(_notebookTab.transform);
-    }
-
-    [Button]
-    private void ShowTabs()
-    {
-        ShowTab(_eventTab.transform);
-        ShowTab(_mapTab.transform);
-        ShowTab(_craftingTab.transform);
-        ShowTab(_helpTab.transform);
-        ShowTab(_exileTab.transform);
-        ShowTab(_notebookTab.transform);
-    }
-
-    [Button]
-    private void ExtendTabs()
-    {
-        ExtendTab(_eventTab.transform);
-        ExtendTab(_mapTab.transform);
-        ExtendTab(_craftingTab.transform);
-        ExtendTab(_helpTab.transform);
-        ExtendTab(_exileTab.transform);
-        ExtendTab(_notebookTab.transform);
-    }
-
     // ================== Tab Positions ==================
     #region Tab Positions
     private void MaximizeActiveTabs(Transform tab)
