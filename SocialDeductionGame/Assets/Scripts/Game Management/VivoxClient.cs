@@ -27,7 +27,7 @@ public class VivoxClient : NetworkBehaviour
             //VivoxManager.Instance.LeaveLobbyChannel();
 
             PlayerHealth.OnDeath += TransitionDeathSpeak;
-            VivoxManager.OnDeathChannelJoined += JoinedDeathChannel;
+            VivoxManager.OnChannelConnected += OnChannelJoined;
             GameManager.OnStateIntro += OnIntro;
             GameManager.OnGameEnd += OnGameEnd;
         }
@@ -49,7 +49,7 @@ public class VivoxClient : NetworkBehaviour
         if (!IsOwner) return;
 
         PlayerHealth.OnDeath -= TransitionDeathSpeak;
-        VivoxManager.OnDeathChannelJoined -= JoinedDeathChannel;
+        VivoxManager.OnChannelConnected -= OnChannelJoined;
         GameManager.OnStateIntro -= OnIntro;
         GameManager.OnGameEnd -= OnGameEnd;
     }
@@ -154,6 +154,27 @@ public class VivoxClient : NetworkBehaviour
 
         _deathChannel = true;
         Debug.Log("<color=green>VIVOX: </color>Now speaking in death channel");
+    }
+
+    public void ReJoinVoiceServers()
+    {
+        Debug.Log("<color=green>VIVOX: </color>Re-Joining voice servers");
+
+        VivoxManager.Instance.ReJoinWorldChannel();
+
+        if (_saboChannel)
+            VivoxManager.Instance.ReJoinSaboChannel();
+
+        if(_deathChannel)
+            VivoxManager.Instance.ReJoinDeathChannel();
+    }
+
+    private void OnChannelJoined(VivoxManager.ChannelSeshName channelName)
+    {
+        if (channelName == VivoxManager.ChannelSeshName.World) // Update position on world re-join
+            Update3DPosition(this.transform);
+        else if (channelName == VivoxManager.ChannelSeshName.Death)
+            JoinedDeathChannel();
     }
     #endregion
 }

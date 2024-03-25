@@ -6,7 +6,6 @@ using Unity.Services.Vivox;
 using VivoxUnity;
 using System.Threading.Tasks;
 using System;
-using Sirenix.OdinInspector;
 
 public class VivoxManager : MonoBehaviour
 {
@@ -49,9 +48,10 @@ public class VivoxManager : MonoBehaviour
     public delegate void VivoxAction();
     public static event VivoxAction OnLoginSuccess;
     public static event VivoxAction OnLoginFailure;
-    public static event VivoxAction OnDeathChannelJoined;
 
     public delegate void ChannelAction(VivoxManager.ChannelSeshName channelName);
+    public static event ChannelAction OnChannelConnected;
+    // NOTE: this will always send Unkown as the channel refrences will be set to null by them
     public static event ChannelAction OnChannelDisconnected;
 
     public delegate void SpeakingAction(string displayName, VivoxManager.ChannelSeshName channelName);
@@ -207,7 +207,6 @@ public class VivoxManager : MonoBehaviour
                 else if (channelSessionName == ChannelSeshName.Death)
                 {
                     _deathChannelSession = channelSession;
-                    OnDeathChannelJoined?.Invoke();
                     BindChannelSessionHandlers(true, _deathChannelSession);
                 }
                 else if (channelSessionName == ChannelSeshName.Sabo)
@@ -225,6 +224,45 @@ public class VivoxManager : MonoBehaviour
             }
         });
     }
+
+    public void ReJoinWorldChannel()
+    {
+        if(_worldChannelSession != null)
+        {
+            Debug.Log("<color=green>VIVOX: </color> Can't rejoin World channel, session not null");
+            return;
+        }
+
+        if (_lobbyID != null)
+            JoinWorldChannel(_lobbyID);
+        else
+        {
+            Debug.LogWarning("<color=green>VIVOX: </color> Lobby ID is Null!");
+            return;
+        }
+    }
+
+    public void ReJoinSaboChannel()
+    {
+        if (_saboChannelSession != null)
+        {
+            Debug.Log("<color=green>VIVOX: </color> Can't rejoin Sabo channel, session not null");
+            return;
+        }
+
+        JoinSaboChannel();
+    }
+
+    public void ReJoinDeathChannel()
+    {
+        if (_deathChannelSession != null)
+        {
+            Debug.Log("<color=green>VIVOX: </color> Can't rejoin Death channel, session not null");
+            return;
+        } 
+
+        JoinDeathChannel();
+    }
     #endregion
 
     // ============== Leave ==============
@@ -236,7 +274,6 @@ public class VivoxManager : MonoBehaviour
         LeaveChannel(_lobbyChannelSession, ChannelSeshName.Lobby);
     }
 
-    [Button]
     public void LeaveWorldChannel()
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox world channel!");
@@ -411,7 +448,11 @@ public class VivoxManager : MonoBehaviour
         //Debug.Log($"<color=green>VIVOX: </color> Participant {displayName} Added too Vivox channel {channelSession.Channel.Name}");
 
         if (participant.IsSelf)
+        {
+            OnChannelConnected?.Invoke(GetChannelSeshName(channel.Name));
+
             Debug.Log($"<color=green>VIVOX: </color> You have been Added too Vivox channel {channelSession.Channel.Name}");
+        }
     }
 
     private void OnParticipantRemoved(object sender, KeyEventArg<string> keyEventArg)
@@ -429,7 +470,8 @@ public class VivoxManager : MonoBehaviour
 
         if (participant.IsSelf)
         {
-            OnChannelDisconnected?.Invoke(GetChannelSeshName(channel.Name));
+            // No use using GetChannelSeshName here as refrences will be null since disconnected
+            OnChannelDisconnected?.Invoke(ChannelSeshName.Unknown);
 
             Debug.Log($"<color=green>VIVOX: </color> You have been Removed from Vivox channel {channelSession.Channel.Name}");
             BindChannelSessionHandlers(false, channelSession); //Unsubscribe from events here
@@ -494,7 +536,7 @@ public class VivoxManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Tried to set world channel position but was not yet connected to world channel, state: " + _worldChannelSession.AudioState);
+            Debug.LogWarning("<color=green>VIVOX: </color>Tried to set world channel position but was not yet connected to world channel, state: " + _worldChannelSession.AudioState);
         }
     }
 

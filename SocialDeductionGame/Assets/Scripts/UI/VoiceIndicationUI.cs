@@ -30,6 +30,7 @@ public class VoiceIndicationUI : MonoBehaviour
         VivoxManager.OnVoiceInputStarted += VoiceInputStarted;
         VivoxManager.OnVoiceInputEnded += VoiceInputEnded;
         VivoxManager.OnChannelDisconnected += ShowDisconnectNotif;
+        VivoxManager.OnChannelConnected += HideDisconnectNotif;
     }
 
     private void OnDisable()
@@ -43,6 +44,7 @@ public class VoiceIndicationUI : MonoBehaviour
         VivoxManager.OnVoiceInputStarted -= VoiceInputStarted;
         VivoxManager.OnVoiceInputEnded -= VoiceInputEnded;
         VivoxManager.OnChannelDisconnected -= ShowDisconnectNotif;
+        VivoxManager.OnChannelConnected -= HideDisconnectNotif;
     }
 
     private void Setup()
@@ -128,10 +130,18 @@ public class VoiceIndicationUI : MonoBehaviour
         _worldVoiceHint.color = Color.cyan;
         _worldVoiceHintIcon.color = Color.cyan;
     }
+    #endregion
 
+    // ================== Disconnect and Rejoin ==================
+    #region Disconnect and Rejoin
     private void ShowDisconnectNotif(VivoxManager.ChannelSeshName channel)
     {
         _disconnectNotif.SetActive(true);
+    }
+
+    private void HideDisconnectNotif(VivoxManager.ChannelSeshName channel)
+    {
+        _disconnectNotif.SetActive(false);
     }
     #endregion
 }
