@@ -15,6 +15,7 @@ public class VoiceIndicationUI : MonoBehaviour
     [SerializeField] private GameObject _saboVoiceHint;
     [SerializeField] private GameObject _playerSpeakingPref;
     [SerializeField] private Transform _playerSpeakingZone;
+    [SerializeField] private GameObject _disconnectNotif;
     private List<PlayerSpeakingUI> _PlayerSpeakingIndicatorList = new List<PlayerSpeakingUI>();
     #endregion
 
@@ -28,16 +29,20 @@ public class VoiceIndicationUI : MonoBehaviour
         VivoxClient.OnEndSpeaking += SpeakingIndicatorOff;
         VivoxManager.OnVoiceInputStarted += VoiceInputStarted;
         VivoxManager.OnVoiceInputEnded += VoiceInputEnded;
+        VivoxManager.OnChannelDisconnected += ShowDisconnectNotif;
     }
 
     private void OnDisable()
     {
+        Debug.Log("Disabling VoiceIndicationUI");
+
         GameManager.OnStateIntro -= Setup;
         PlayerHealth.OnDeath -= SwapVoiceIndicator;
         VivoxClient.OnBeginSpeaking -= SpeakingIndicatorOn;
         VivoxClient.OnEndSpeaking -= SpeakingIndicatorOff;
         VivoxManager.OnVoiceInputStarted -= VoiceInputStarted;
         VivoxManager.OnVoiceInputEnded -= VoiceInputEnded;
+        VivoxManager.OnChannelDisconnected -= ShowDisconnectNotif;
     }
 
     private void Setup()
@@ -122,6 +127,11 @@ public class VoiceIndicationUI : MonoBehaviour
         _worldVoiceHint.text = "Death [C]";
         _worldVoiceHint.color = Color.cyan;
         _worldVoiceHintIcon.color = Color.cyan;
+    }
+
+    private void ShowDisconnectNotif(VivoxManager.ChannelSeshName channel)
+    {
+        _disconnectNotif.SetActive(true);
     }
     #endregion
 }

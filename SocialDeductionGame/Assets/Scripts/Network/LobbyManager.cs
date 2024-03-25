@@ -615,7 +615,7 @@ public class LobbyManager : MonoBehaviour
         if (_joinedLobby == null)
             return null;
 
-        PrintPlayers(_joinedLobby);
+        //PrintPlayers(_joinedLobby);
 
         try
         {

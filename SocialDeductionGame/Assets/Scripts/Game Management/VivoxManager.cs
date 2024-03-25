@@ -6,6 +6,7 @@ using Unity.Services.Vivox;
 using VivoxUnity;
 using System.Threading.Tasks;
 using System;
+using Sirenix.OdinInspector;
 
 public class VivoxManager : MonoBehaviour
 {
@@ -49,6 +50,9 @@ public class VivoxManager : MonoBehaviour
     public static event VivoxAction OnLoginSuccess;
     public static event VivoxAction OnLoginFailure;
     public static event VivoxAction OnDeathChannelJoined;
+
+    public delegate void ChannelAction(VivoxManager.ChannelSeshName channelName);
+    public static event ChannelAction OnChannelDisconnected;
 
     public delegate void SpeakingAction(string displayName, VivoxManager.ChannelSeshName channelName);
     public static event SpeakingAction OnVoiceInputStarted;
@@ -187,7 +191,7 @@ public class VivoxManager : MonoBehaviour
                     channelSession.ChannelState == ConnectionState.Disconnected)
                 {
                     Debug.LogWarning("<color=green>VIVOX: </color>Vivox channel is already disconnecting. Terminating the channel connect sequence.");
-                    HandleEarlyDisconnect(channelSession);
+                    HandleEarlyDisconnect(channelSession, channelSessionName);
                     return;
                 }
 
@@ -198,18 +202,18 @@ public class VivoxManager : MonoBehaviour
                 else if (channelSessionName == ChannelSeshName.World)
                 {
                     _worldChannelSession = channelSession;
-                    _worldChannelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
+                    BindChannelSessionHandlers(true, _worldChannelSession);
                 }
                 else if (channelSessionName == ChannelSeshName.Death)
                 {
                     _deathChannelSession = channelSession;
                     OnDeathChannelJoined?.Invoke();
-                    _deathChannelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
+                    BindChannelSessionHandlers(true, _deathChannelSession);
                 }
                 else if (channelSessionName == ChannelSeshName.Sabo)
                 {
                     _saboChannelSession = channelSession;
-                    _saboChannelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
+                    BindChannelSessionHandlers(true, _saboChannelSession);
                 }
 
                 Debug.Log("<color=green>VIVOX: </color>Joined Vivox channel " + channel.Name);
@@ -229,37 +233,35 @@ public class VivoxManager : MonoBehaviour
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox lobby channel!");
 
-        LeaveChannel(_lobbyChannelSession);
+        LeaveChannel(_lobbyChannelSession, ChannelSeshName.Lobby);
     }
 
+    [Button]
     public void LeaveWorldChannel()
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox world channel!");
 
-        if (_worldChannelSession != null)
-            _worldChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
+        //BindChannelSessionHandlers(false, _worldChannelSession);
 
-        LeaveChannel(_worldChannelSession);
+        LeaveChannel(_worldChannelSession, ChannelSeshName.World);
     }
 
     public void LeaveDeathChannel()
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox death channel!");
 
-        if (_deathChannelSession != null)
-            _deathChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
+        //BindChannelSessionHandlers(false, _saboChannelSession);
 
-        LeaveChannel(_deathChannelSession);
+        LeaveChannel(_deathChannelSession, ChannelSeshName.Death);
     }
 
     public void LeaveSaboChannel()
     {
         Debug.Log("<color=green>VIVOX: </color>Leaving Vivox sabo channel!");
 
-        if (_saboChannelSession != null)
-            _saboChannelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
+        //BindChannelSessionHandlers(false, _saboChannelSession);
 
-        LeaveChannel(_saboChannelSession);
+        LeaveChannel(_saboChannelSession, ChannelSeshName.Sabo);
     }
 
     public void LeaveAll()
@@ -270,16 +272,24 @@ public class VivoxManager : MonoBehaviour
         LeaveSaboChannel();
     }
 
-    public void LeaveChannel(IChannelSession channelSession)
+    public void LeaveChannel(IChannelSession channelSession, ChannelSeshName channelSessionName)
     {
-        Debug.Log("<color=green>VIVOX: </color>Attempting to leaving channel " + channelSession);
-
         if (channelSession != null)
         {
+            Debug.Log("<color=green>VIVOX: </color>Leaving channel " + channelSession.Channel.Name);
+
             // Disconnect from channel
             channelSession.Disconnect();
+            LoginSession.DeleteChannelSession(channelSession.Channel);
 
-            Debug.Log("<color=green>VIVOX: </color>Leaving channel " + channelSession);
+            if (channelSessionName == ChannelSeshName.Lobby)
+                _lobbyChannelSession = null;
+            else if (channelSessionName == ChannelSeshName.World)
+                _worldChannelSession = null;
+            else if (channelSessionName == ChannelSeshName.Death)
+                _deathChannelSession = null;
+            else if (channelSessionName == ChannelSeshName.Sabo)
+                _saboChannelSession = null;
         }
 
         /*if (channelSession != null)
@@ -304,12 +314,12 @@ public class VivoxManager : MonoBehaviour
         }*/
     }
 
-    private void HandleEarlyDisconnect(IChannelSession channelSession)
+    private void HandleEarlyDisconnect(IChannelSession channelSession, ChannelSeshName channelSessionName)
     {
-        DisconnectOnceConnected(channelSession);
+        DisconnectOnceConnected(channelSession, channelSessionName);
     }
 
-    async void DisconnectOnceConnected(IChannelSession channelSession)
+    async void DisconnectOnceConnected(IChannelSession channelSession, ChannelSeshName channelSessionName)
     {
         while (channelSession?.ChannelState == ConnectionState.Connecting)
         {
@@ -317,7 +327,113 @@ public class VivoxManager : MonoBehaviour
             return;
         }
 
-        LeaveChannel(channelSession);
+        LeaveChannel(channelSession, channelSessionName);
+    }
+    #endregion
+
+    // ============== Events ==============
+    #region Events
+    private void BindChannelSessionHandlers(bool doBind, IChannelSession channelSession)
+    {
+        if(channelSession == null)
+        {
+            Debug.LogWarning("<color=green>VIVOX: </color> BindChannelSessionHandlers called on a null IChannelSession");
+            return;
+        }
+
+        //Subscribing to the events
+        if (doBind)
+        {
+            Debug.Log("<color=green>VIVOX: </color> Subscribing to Channel Session Events " + channelSession.Channel.Name);
+
+            channelSession.Participants.AfterKeyAdded += OnParticipantAdded;
+            channelSession.Participants.BeforeKeyRemoved += OnParticipantRemoved;
+            channelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
+        }
+
+        //Unsubscribing to the events
+        else
+        {
+            Debug.Log("<color=green>VIVOX: </color> Unsubscribing to Channel Session Events " + channelSession.Channel.Name);
+
+            channelSession.Participants.AfterKeyAdded -= OnParticipantAdded;
+            channelSession.Participants.BeforeKeyRemoved -= OnParticipantRemoved;
+            channelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
+        }
+    }
+
+    private void OnParticipantValueUpdated(object sender, ValueEventArg<string, IParticipant> valueEventArg)
+    {
+        ValidateArgs(new object[] { sender, valueEventArg });
+
+        var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;
+        var participant = source[valueEventArg.Key];
+
+        string username = valueEventArg.Value.Account.Name;
+        string displayName = valueEventArg.Value.Account.DisplayName;
+        ChannelId channel = valueEventArg.Value.ParentChannelSession.Key;
+        string property = valueEventArg.PropertyName;
+
+        //Debug.Log("<color=green>VIVOX: </color> OnParticipantValueUpdated " + property);
+
+        switch (property)
+        {
+            case "SpeechDetected":
+                {
+                    if (participant.SpeechDetected)
+                    {
+                        //Debug.Log($"<color=green>VIVOX: </color>Detecting player {displayName} speach in {channel.Name}!");
+                        OnVoiceInputStarted?.Invoke(displayName, GetChannelSeshName(channel.Name));
+                    }
+                    else
+                    {
+                        //Debug.Log($"<color=green>VIVOX: </color>Player {displayName} speach in {channel.Name} ended!");
+                        OnVoiceInputEnded?.Invoke(displayName, GetChannelSeshName(channel.Name));
+                    }
+                    break;
+                }
+            default:
+                break;
+        }
+    }
+
+    private void OnParticipantAdded(object sender, KeyEventArg<string> keyEventArg)
+    {
+        ValidateArgs(new object[] { sender, keyEventArg });
+
+        var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;
+        var participant = source[keyEventArg.Key];
+        var username = participant.Account.Name;
+        string displayName = participant.Account.DisplayName;
+        var channel = participant.ParentChannelSession.Key;
+        var channelSession = participant.ParentChannelSession;
+
+        //Debug.Log($"<color=green>VIVOX: </color> Participant {displayName} Added too Vivox channel {channelSession.Channel.Name}");
+
+        if (participant.IsSelf)
+            Debug.Log($"<color=green>VIVOX: </color> You have been Added too Vivox channel {channelSession.Channel.Name}");
+    }
+
+    private void OnParticipantRemoved(object sender, KeyEventArg<string> keyEventArg)
+    {
+        ValidateArgs(new object[] { sender, keyEventArg });
+
+        var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;
+        var participant = source[keyEventArg.Key];
+        var username = participant.Account.Name;
+        string displayName = participant.Account.DisplayName;
+        var channel = participant.ParentChannelSession.Key;
+        var channelSession = participant.ParentChannelSession;
+
+        //Debug.Log($"<color=green>VIVOX: </color> Participant {displayName} Removed from Vivox channel {channelSession.Channel.Name}");
+
+        if (participant.IsSelf)
+        {
+            OnChannelDisconnected?.Invoke(GetChannelSeshName(channel.Name));
+
+            Debug.Log($"<color=green>VIVOX: </color> You have been Removed from Vivox channel {channelSession.Channel.Name}");
+            BindChannelSessionHandlers(false, channelSession); //Unsubscribe from events here
+        }
     }
     #endregion
 
@@ -337,19 +453,19 @@ public class VivoxManager : MonoBehaviour
     public void SetTransmissionChannel(ChannelSeshName channelName)
     {
         //Debug.Log("<color=green>VIVOX: </color>Setting Transimison mode to single " + channelName);
-        if(channelName == ChannelSeshName.World)
+        if(channelName == ChannelSeshName.World && _worldChannelSession != null)
         {
             LoginSession.SetTransmissionMode(TransmissionMode.Single, _worldChannelSession.Channel);
         }
-        else if (channelName == ChannelSeshName.Lobby)
+        else if (channelName == ChannelSeshName.Lobby && _lobbyChannelSession != null)
         {
             LoginSession.SetTransmissionMode(TransmissionMode.Single, _lobbyChannelSession.Channel);
         }
-        else if (channelName == ChannelSeshName.Death)
+        else if (channelName == ChannelSeshName.Death && _deathChannelSession != null)
         {
             LoginSession.SetTransmissionMode(TransmissionMode.Single, _deathChannelSession.Channel);
         }
-        else if (channelName == ChannelSeshName.Sabo)
+        else if (channelName == ChannelSeshName.Sabo && _saboChannelSession != null)
         {
             LoginSession.SetTransmissionMode(TransmissionMode.Single, _saboChannelSession.Channel);
         }
@@ -385,41 +501,6 @@ public class VivoxManager : MonoBehaviour
     public Client GetClientData()
     {
         return _client;
-    }
-
-    private void OnParticipantValueUpdated(object sender, ValueEventArg<string, IParticipant> valueEventArg)
-    {
-        ValidateArgs(new object[] { sender, valueEventArg }); //see code from earlier in post
-
-        var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;
-        var participant = source[valueEventArg.Key];
-
-        string username = valueEventArg.Value.Account.Name;
-        string displayName = valueEventArg.Value.Account.DisplayName;
-        ChannelId channel = valueEventArg.Value.ParentChannelSession.Key;
-        string property = valueEventArg.PropertyName;
-
-        //Debug.Log("<color=green>VIVOX: </color> OnParticipantValueUpdated " + property);
-
-        switch (property)
-        {
-            case "SpeechDetected":
-                {
-                    if (participant.SpeechDetected)
-                    {
-                        //Debug.Log($"<color=green>VIVOX: </color>Detecting player {displayName} speach in {channel.Name}!");
-                        OnVoiceInputStarted?.Invoke(displayName, GetChannelSeshName(channel.Name));
-                    }
-                    else
-                    {
-                        //Debug.Log($"<color=green>VIVOX: </color>Player {displayName} speach in {channel.Name} ended!");
-                        OnVoiceInputEnded?.Invoke(displayName, GetChannelSeshName(channel.Name));
-                    }
-                    break;
-                }
-            default:
-                break;
-        }
     }
 
     private ChannelSeshName GetChannelSeshName(string channelName)
