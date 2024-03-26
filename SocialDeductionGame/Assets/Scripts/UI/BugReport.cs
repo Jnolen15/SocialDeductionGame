@@ -53,8 +53,8 @@ public class BugReport : MonoBehaviour
         // Response
         form.AddField("entry.1058178460", str);
 
-        // Log File        
-        form.AddField("entry.1238921461", ReadPlayerLogFile());
+        // Log File (this was removed as it was often too long)
+        //form.AddField("entry.1238921461", ReadPlayerLogFile());
 
         UnityWebRequest www = UnityWebRequest.Post(_url, form);
 

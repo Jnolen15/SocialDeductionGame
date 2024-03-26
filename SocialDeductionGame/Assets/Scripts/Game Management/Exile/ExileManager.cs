@@ -225,11 +225,11 @@ public class ExileManager : NetworkBehaviour
     {
         if (_exileVoteStarted)
         {
-            Debug.Log("<color=yellow>SERVER: </color> Exile vote already complete");
+            Debug.Log("<color=yellow>SERVER: </color> Exile vote already started");
             return;
         }
 
-        Debug.Log("<color=yellow>SERVER: </color> Starting Exile Vote");
+        Debug.Log("<color=yellow>SERVER: </color> Starting Exile Vote, called by " + calledByID);
 
         // Clear old stuff
         _netPlayersVoted.Value = 0;
@@ -260,7 +260,11 @@ public class ExileManager : NetworkBehaviour
             return;
         }
 
-        _exileUI.UpdateExileUI(PlayerConnectionManager.Instance.GetPlayerNameByID(calledByID));
+        string calledByName = PlayerConnectionManager.Instance.GetPlayerNameByID(calledByID);
+
+        Debug.Log($"Exile called by {calledByID}, {calledByName}");
+
+        _exileUI.UpdateExileUI(calledByName);
     }
 
     public void SubmitVote(ulong playerID, ulong VotedID)

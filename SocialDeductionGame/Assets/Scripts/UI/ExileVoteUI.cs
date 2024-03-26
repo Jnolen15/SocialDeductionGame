@@ -67,6 +67,8 @@ public class ExileVoteUI : MonoBehaviour
 
         _calledByNameText.text = calledByName;
 
+        Debug.Log("Updating Exile UI, called by: " + calledByName);
+
         // Reset vote objects
         foreach (Transform exilevote in _voteArea)
         {

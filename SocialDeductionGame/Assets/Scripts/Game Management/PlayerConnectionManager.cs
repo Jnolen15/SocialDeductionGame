@@ -688,6 +688,7 @@ public class PlayerConnectionManager : NetworkBehaviour
         if (_playerDict.TryGetValue(id, out PlayerEntry entry))
             return entry.PlayerName;
 
+        Debug.LogWarning("Player name not found in GetPlayerNameByID ID:" + id);
         return null;
     }
 
