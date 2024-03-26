@@ -16,8 +16,9 @@ public class TextChatManager : NetworkBehaviour
     [SerializeField] private GameObject _messageNotif;
     [SerializeField] private TMP_InputField _messageInputField;
     [SerializeField] private Transform _messageContent;
+    [SerializeField] private TextMeshProUGUI _currentChannelText;
     [SerializeField] private GameObject _saboChatButton;
-    [SerializeField] private Image _saboChatButtonImage;
+    [SerializeField] private TextMeshProUGUI _saboChatButtonText;
     [SerializeField] private Image _inputAreaImage;
     [SerializeField] private Sprite _paperNormal;
     [SerializeField] private Sprite _paperSabo;
@@ -128,6 +129,8 @@ public class TextChatManager : NetworkBehaviour
                 _currentLocationChannel = ChatChannel.Camp;
                 break;
         }
+
+        UpdateChannelText();
     }
 
     public void EnterSaboChat()
@@ -151,20 +154,22 @@ public class TextChatManager : NetworkBehaviour
         if (_saboChatActive)
         {
             _inputAreaImage.sprite = _paperSabo;
-            _saboChatButtonImage.color = Color.grey;
+            _saboChatButtonText.text = "Saboteur Chat: ON";
         }
         else
         {
             _inputAreaImage.sprite = _paperNormal;
-            _saboChatButtonImage.color = Color.white;
+            _saboChatButtonText.text = "Saboteur Chat: OFF";
         }
+
+        UpdateChannelText();
     }
 
     public void EnterDeathChat()
     {
         _inDeadChat = true;
         _inputAreaImage.sprite = _paperDead;
-
+        UpdateChannelText();
         _saboChatButton.SetActive(false);
     }
     #endregion
@@ -181,12 +186,25 @@ public class TextChatManager : NetworkBehaviour
         {
             _messageNotif.SetActive(false);
             _chatArea.position = _outPos.position;
+            UpdateChannelText();
         }
+    }
+
+    private void UpdateChannelText()
+    {
+        _currentChannelText.text = "Channel: ";
+        
+        if(_inDeadChat)
+            _currentChannelText.text += "Dead";
+        else if(_saboChatActive)
+            _currentChannelText.text += "Saboteur";
+        else
+            _currentChannelText.text += _currentLocationChannel.ToString();
     }
 
     public void InstantiateMessage(ChatMessage msg, int style = 0)
     {
-        GameObject pref = _msgNote; // deafult 0
+        GameObject pref = _msgNote; // Deafult 0
         if (style == 1)
             pref = _msgDigital; // Digital 1
         else if (style == 2)
@@ -197,8 +215,6 @@ public class TextChatManager : NetworkBehaviour
         TextChatMessage chatMsg = Instantiate(pref, _messageContent).GetComponent<TextChatMessage>();
 
         chatMsg.Setup(msg.MSG, msg.SenderName, msg.Channel);
-
-        chatMsg.transform.SetAsFirstSibling();
 
         _randSound.PlayRandom();
 

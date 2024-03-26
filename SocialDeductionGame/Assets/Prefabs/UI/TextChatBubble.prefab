@@ -105,7 +105,7 @@ MonoBehaviour:
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_lineSpacing: -20
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
@@ -237,9 +237,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _messageText: {fileID: 1588275851119517823}
-  _channleNameText: {fileID: 4750205210123013104}
-  _saboColor: {r: 0.6886792, g: 0.24363652, b: 0.24363652, a: 1}
-  _deadColor: {r: 0.14684944, g: 0.25313455, b: 0.5660378, a: 1}
 --- !u!1 &8406860115054304084
 GameObject:
   m_ObjectHideFlags: 0
@@ -362,7 +359,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7597635918932066461
 RectTransform:
   m_ObjectHideFlags: 0
@@ -378,10 +375,10 @@ RectTransform:
   m_Father: {fileID: 3801476135488759272}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 330, y: -48.004997}
+  m_SizeDelta: {x: 610, y: 46.01}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5520925098124015123
 CanvasRenderer:

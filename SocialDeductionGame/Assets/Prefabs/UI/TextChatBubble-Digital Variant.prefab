@@ -8,8 +8,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1588275851119517823, guid: c64716bb5bb377e4f83b60659e18d460, type: 3}
+      propertyPath: m_text
+      value: Text Goes Here
+      objectReference: {fileID: 0}
+    - target: {fileID: 1588275851119517823, guid: c64716bb5bb377e4f83b60659e18d460, type: 3}
       propertyPath: m_fontSize
-      value: 56
+      value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 1588275851119517823, guid: c64716bb5bb377e4f83b60659e18d460, type: 3}
       propertyPath: m_fontAsset
@@ -28,8 +32,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1588275851119517823, guid: c64716bb5bb377e4f83b60659e18d460, type: 3}
+      propertyPath: m_lineSpacing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1588275851119517823, guid: c64716bb5bb377e4f83b60659e18d460, type: 3}
       propertyPath: m_fontSizeBase
-      value: 56
+      value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 1588275851119517823, guid: c64716bb5bb377e4f83b60659e18d460, type: 3}
       propertyPath: m_sharedMaterial
