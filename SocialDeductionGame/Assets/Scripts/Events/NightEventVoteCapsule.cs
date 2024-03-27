@@ -73,7 +73,7 @@ public class NightEventVoteCapsule : MonoBehaviour
         {
             _eventSelected = true;
             _eventPicker.SelectEvent(_heldEventID);
-            transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+            transform.localScale = new Vector3(1.05f, 1.05f, 1.05f);
 
             if (_randSound)
                 _randSound.PlayRandom();
