@@ -6,7 +6,6 @@ public class LocationInfoUI : MonoBehaviour
 {
     // ============== Variables / Refrences ==============
     [SerializeField] private LocationManager.LocationName _location;
-    [SerializeField] private GameObject _travelButton;
     [SerializeField] private GameObject _currentLocationMsg;
     [SerializeField] private GameObject _buffIcon;
     [SerializeField] private GameObject _debuffIcon;
@@ -40,12 +39,10 @@ public class LocationInfoUI : MonoBehaviour
     {
         if (_location == location)
         {
-            _travelButton.SetActive(false);
             _currentLocationMsg.SetActive(true);
         }
         else
         {
-            _travelButton.SetActive(true);
             _currentLocationMsg.SetActive(false);
         }
     }

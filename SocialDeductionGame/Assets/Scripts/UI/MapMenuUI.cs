@@ -17,13 +17,12 @@ public class MapMenuUI : MonoBehaviour
     [SerializeField] private GameObject _book;
     [SerializeField] private GameObject _gps;
     [SerializeField] private Transform _map;
-    [SerializeField] private TextMeshProUGUI _locationName;
     [SerializeField] private GameObject _movePointsDisplay;
     [SerializeField] private CanvasGroup _movePointsWarning;
     [SerializeField] private List<Image> _movePointList;
-
     [SerializeField] private List<LocationInfoEntry> _locationInfoList;
     private int _locationListIndex;
+    private PlayerData _pData;
 
     [System.Serializable]
     public class LocationInfoEntry
@@ -57,7 +56,7 @@ public class MapMenuUI : MonoBehaviour
         PlayerData.OnNoMoreMovePoints += ShowNoMPWarning;
     }
 
-    private void Awake()
+    private void Start()
     {
         int colorIndex = PlayerPrefs.GetInt("WatchColor");
         if (colorIndex < _gpsColorList.Count)
@@ -67,6 +66,8 @@ public class MapMenuUI : MonoBehaviour
 
         MoveSpecific(0);
         Hide();
+
+        _pData = this.GetComponentInParent<PlayerData>();
     }
 
     private void OnDisable()
@@ -143,13 +144,23 @@ public class MapMenuUI : MonoBehaviour
         UpdateLocation();
     }
 
+    public void TravelToLocation()
+    {
+        Debug.Log("GPS Travel button pressed attempting to move to " + _locationInfoList[_locationListIndex].Location.ToString());
+
+        if (_pData != null)
+            _pData.MoveLocation(_locationInfoList[_locationListIndex].Location.ToString());
+        else
+            Debug.LogError("No Player Data refrence in MapMenuUI");
+    }
+
     private void UpdateLocation()
     {
         for (int i = 0; i < _locationInfoList.Count; i++)
         {
             if (i == _locationListIndex)
             {
-                UpdateGPS(_locationInfoList[i].SetEnabled(), _locationInfoList[i].Location.ToString());
+                UpdateGPS(_locationInfoList[i].SetEnabled());
             }
             else
             {
@@ -158,14 +169,12 @@ public class MapMenuUI : MonoBehaviour
         }
     }
 
-    private void UpdateGPS(Vector3 pos, string locationName)
+    private void UpdateGPS(Vector3 pos)
     {
         _map.DOKill();
 
         _map.DOLocalMove(new Vector2(pos.x, pos.y), 0.5f).SetEase(Ease.OutSine);
         _map.localScale = new Vector2(pos.z, pos.z);
-
-        _locationName.text = locationName;
     }
 
     private void UpdateMovePoints(int ModifiedAmmount, int newTotal)
