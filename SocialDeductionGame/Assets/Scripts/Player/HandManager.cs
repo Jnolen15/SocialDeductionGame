@@ -318,6 +318,39 @@ public class HandManager : NetworkBehaviour
 
     // ================ Crafting ================
     #region Crafting
+    public bool CheckLocalCanCraft(List<CardTag> requiredTags)
+    {
+        List<CardTag> tempTagList = requiredTags;
+
+        // Look for resources in local hand
+        foreach (CardSlotUI slot in _playerDeck)
+        {
+            if (slot.HasCard() && tempTagList.Count != 0)
+            {
+                foreach (CardTag tag in tempTagList)
+                {
+                    if (slot.GetCard().HasTag(tag))
+                    {
+                        tempTagList.Remove(tag);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Found all tags
+        if (tempTagList.Count == 0)
+        {
+            Debug.Log($"<color=blue>CLIENT: </color>CheckLocalCanCraft Found all needed cards!");
+            return true;
+        }
+        else
+        {
+            Debug.Log($"<color=blue>CLIENT: </color>CheckLocalCanCraft did not find all needed cards");
+            return false;
+        }
+    }
+
     public void TryCraft(List<CardTag> requiredTags)
     {
         List<CardTag> tempTagList = requiredTags;

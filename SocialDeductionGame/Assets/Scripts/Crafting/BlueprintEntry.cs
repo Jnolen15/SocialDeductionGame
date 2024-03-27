@@ -10,6 +10,7 @@ public class BlueprintEntry : MonoBehaviour
     [SerializeField] private Image _background;
     [SerializeField] private TextMeshProUGUI _cardNameText;
     [SerializeField] private Transform _componentTagZone;
+    [SerializeField] private GameObject _canCraftNotif;
     [SerializeField] private GameObject _tagIconPref;
     [SerializeField] private Color _defaultColor;
     [SerializeField] private Color _selectedColor;
@@ -60,5 +61,15 @@ public class BlueprintEntry : MonoBehaviour
     {
         transform.localScale = Vector3.one;
         _background.color = _defaultColor;
+    }
+
+    public BlueprintSO GetBlueprint()
+    {
+        return _blueprint;
+    }
+
+    public void Highlight(bool canCraft)
+    {
+        _canCraftNotif.SetActive(canCraft);
     }
 }

@@ -15,6 +15,7 @@ public class CraftingUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _description;
     [SerializeField] private GameObject _cantCraftMessage;
     [SerializeField] private List<BlueprintSO> _blueprints;
+    [SerializeField] private List<BlueprintEntry> _blueprintEntries;
     private HandManager _handMan;
     private CardManager _cardManager;
 
@@ -22,6 +23,7 @@ public class CraftingUI : MonoBehaviour
     private BlueprintSO _currentBlueprint;
 
     // =============== Setup ===============
+    #region Setup
     private void Start()
     {
         _handMan = GetComponentInParent<HandManager>();
@@ -42,13 +44,34 @@ public class CraftingUI : MonoBehaviour
         {
             BlueprintEntry blueprintEntry = Instantiate(_blueprintEntryPref, _blueprintZone).GetComponent<BlueprintEntry>();
             blueprintEntry.Setup(blueprint, this);
+            _blueprintEntries.Add(blueprintEntry);
         }
 
         // Select first blueprint by default
         _blueprintZone.transform.GetChild(0).gameObject.GetComponent<BlueprintEntry>().Select();
     }
+    #endregion
+
+    // =============== UI ===============
+    #region UI
+    private void OnEnable()
+    {
+        MarkBlueprintsCraftable();
+    }
+
+    private void MarkBlueprintsCraftable()
+    {
+        foreach (BlueprintEntry entry in _blueprintEntries)
+        {
+            bool craftable = _handMan.CheckLocalCanCraft(entry.GetBlueprint().GetCardComponents());
+            entry.Highlight(craftable);
+        }
+    }
+
+    #endregion
 
     // =============== Functions ===============
+    #region Functions
     public void SelectBlueprint(BlueprintSO blueprint)
     {
         if(_cardZone.childCount > 0)
@@ -110,5 +133,8 @@ public class CraftingUI : MonoBehaviour
             _cantCraftMessage.gameObject.SetActive(true);
             _cantCraftMessage.transform.DOShakePosition(1f).OnComplete( () => _cantCraftMessage.gameObject.SetActive(false));
         }
+
+        MarkBlueprintsCraftable();
     }
+    #endregion
 }
